@@ -1,0 +1,19 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; load personalized ellipses
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-to-list 'load-path "~/.emacs.d/local")
+(require 'local-setting)
+(require 'local-package)
+(require 'local-color-thema)
+(require 'local-powerline)
+(require 'local-cua-mode)
+(require 'local-anything)
+(require 'local-auto-complete)
+(require 'local-yasnippet)
+(require 'local-haskell-mode)
+(require 'local-scala-mode)
+(require 'local-yaml-mode)
+(require 'local-php-mode)
+(require 'local-sf)
+(require 'local-ecb)
+(put 'upcase-region 'disabled nil)
