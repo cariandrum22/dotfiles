@@ -2,6 +2,7 @@
 ;; load personalized ellipses
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (add-to-list 'load-path "~/.emacs.d/local")
+(require 'local-cl)
 (require 'local-setting)
 (require 'local-package)
 (require 'local-color-thema)
