@@ -82,14 +82,6 @@ local.properties
 *.class
 *.log
 
-# sbt specific
-dist/*
-target/
-lib_managed/
-src_managed/
-project/boot/
-project/plugins/project/
-
 # Scala-IDE specific
 .scala_dependencies
 
@@ -127,3 +119,27 @@ web/bundles/*
 # Configuration files
 app/config/parameters.ini
 app/config/parameters.yml
+
+################################################################################
+## IntelliJ IDEA
+################################################################################
+
+.idea
+.idea_modules
+
+################################################################################
+## Typesafe Activator
+################################################################################
+
+activator*
+
+################################################################################
+## Simple Build Tool
+################################################################################
+
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/

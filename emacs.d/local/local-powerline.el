@@ -3,4 +3,4 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (provide 'local-powerline)
 (require 'powerline)
-(powerline-default)
+(powerline-default-theme)
