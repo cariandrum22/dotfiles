@@ -12,6 +12,7 @@
 (require 'local-auto-complete)
 (require 'local-yasnippet)
 (require 'local-haskell-mode)
+(require 'local-elixir-mode)
 (require 'local-scala-mode2)
 (require 'local-slime)
 (require 'local-yaml-mode)
