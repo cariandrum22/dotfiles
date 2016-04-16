@@ -128,12 +128,8 @@ project/boot/
 project/plugins/project/
 
 ################################################################################
-## AWS Elastic Beanstalk
+## rbenv
 ################################################################################
-.elasticbeanstalk
-#.ebextensions
-
-public/assets
 .ruby-version
 
 ################################################################################
@@ -142,3 +138,5 @@ public/assets
 _builds
 _projects
 _steps
+
+bin/*
