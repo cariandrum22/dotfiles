@@ -1,6 +1,5 @@
 # import functions
 
-. ${HOME}/.zsh_functions/random_cowsay.zsh
 . ${HOME}/.zsh_functions/aws_credential_exporter.zsh
 
 # environments
@@ -29,6 +28,7 @@ eval "$(rbenv init - zsh)"
 
 # nodebrew
 export PATH=${HOME}/.nodebrew/current/bin:${PATH}
+export NODE_PATH=~/.nodebrew/current/lib/node_modules
 
 ## python
 export PYTHONSTARTUP=${HOME}/.pythonstartup
@@ -42,6 +42,12 @@ export JAVA_HOME=/usr
 ## Terraform
 export PATH="${HOME}/Applications/HashiCorp/Terraform/current/bin:${PATH}"
 
+## Ansible
+export ANSIBLE_COW_SELECTION=random
+
+## AWS
+export AWS_DEFAULT_REGION=ap-northeast-1
+
 # alias
 
 ## Generic
@@ -54,6 +60,7 @@ alias la="ls -lha"
 alias ghr="cd ~/Repositories/github"
 
 ## Haskell
+. ${HOME}/.nix-profile/etc/profile.d/nix.sh
 alias ghc="stack ghc"
 alias ghci="stack ghci"
 alias runghc="stack runghc"
