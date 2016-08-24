@@ -83,12 +83,16 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-if [ ~/.zshrc -nt ~/.zshrc.zwc ]; then
-   zcompile ~/.zshrc
+if [ -e ~/.zshrc ]; then
+  if [ ! -e ~/.zshrc.zwc ] || [ $(readlink ~/.zshrc) -nt ~/.zshrc.zwc ]; then
+    zcompile ~/.zshrc
+  fi
 fi
 
-if [ ~/.zshrc.personal -nt ~/.zshrc.personal.zwc ]; then
-   zcompile ~/.zshrc.personal
+if [ -e ~/.zshrc.personal ]; then
+  if [ ! -e ~/.zshrc.personal.zwc ] || [ $(readlink ~/.zshrc.personal) -nt ~/.zshrc.personal.zwc ]; then
+    zcompile ~/.zshrc.personal
+  fi
 fi
 
 if [ -f ~/.zshrc.personal ]; then

@@ -5,6 +5,7 @@ EXECUTE_DIR=$(cd $(dirname $0); pwd)
 DOT_FILES=(
   zshrc
   zshrc.personal
+  zlogin
   zsh_functions
   gitignore
   emacs.el
@@ -13,10 +14,11 @@ DOT_FILES=(
   pythonstartup
   gemrc
   bundle
+  rubocop.yml
   )
 
 # execution
 for file in ${DOT_FILES[@]}
 do
-    ln -sf $EXECUTE_DIR/$file $HOME/.$file
+    ln -sfn $EXECUTE_DIR/$file $HOME/.$file
 done
