@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# configuration
-EXECUTE_DIR=$(cd $(dirname $0); pwd)
+## Get absolute path of this script
+ABS_PATH=$(cd $(dirname $0); pwd)
 DOT_FILES=(
   zshrc
   zshrc.personal
@@ -15,10 +15,12 @@ DOT_FILES=(
   gemrc
   bundle
   rubocop.yml
+  config/fish/config.fish
+  config/fish/fishfile
   )
 
-# execution
-for file in ${DOT_FILES[@]}
+## deploy dot files to $HOME
+for dot_file in ${DOT_FILES[@]}
 do
-    ln -sfn $EXECUTE_DIR/$file $HOME/.$file
+    ln -sfn $ABS_PATH/$dot_file $HOME/.$dot_file
 done
