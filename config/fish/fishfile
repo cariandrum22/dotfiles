@@ -1,9 +1,15 @@
+fisherman/await
 edc/bass
 fisherman/debug
 fisherman/fishkit
+fisherman/fzf
 fisherman/get
 fisherman/getopts
+decors/fish-ghq
+fisherman/last_job_id
 fisherman/menu
+oh-my-fish/theme-scorphish
 fisherman/segment
 fisherman/spin
 cariandrum22/thunnus
+fisherman/z
