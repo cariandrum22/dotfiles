@@ -37,7 +37,7 @@ plenv init - | source
 
 # nodebrew
 set_path "$HOME/.nodebrew/current/bin"
-set -x NODE_PATH "$HOME/.nodebrew/current/lib/node_modules/"
+set -x NODE_PATH "$HOME/.nodebrew/current/lib/node_modules"
 
 # Stack
 set_path "$HOME/.local/bin"
@@ -46,7 +46,7 @@ set_path "$HOME/.local/bin"
 set_path "$HOME/.cargo/bin"
 
 # go
-set -x GOPATH "$HOME/.go"
+set -x GOPATH "$HOME/go"
 set_path "$GOPATH/bin"
 
 # java
@@ -56,13 +56,10 @@ set -x JAVA_HOME (/usr/libexec/java_home -v 1.8)
 set -x PYTHONSTARTUP "$HOME/.pythonstartup"
 
 # Terraform
-#set_path "$HOME/Applications/HashiCorp/Terraform/current/bin"
+set_path "$HOME/Applications/HashiCorp/Terraform/current/bin"
 
 # Ansible
 set -x ANSIBLE_COW_SELECTION "random"
-
-# TeX
-set_path '/Library/TeX/Distributions/.DefaultTeX/Contents/Programs/texbin'
 
 # Nand2tetris Software Suite
 set_path "$HOME/Applications/nand2tetris/tools"
@@ -84,3 +81,6 @@ alias runhaskell="stack runghc"
 
 # OPAM configuration
 source $HOME/.opam/opam-init/init.fish > /dev/null 2> /dev/null or true
+
+# normalize path(trim tail slash)
+normalize_path $PATH
