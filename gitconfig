@@ -1,0 +1,18 @@
+[user]
+	name = Takafumi Asano
+	email = cariandrum22@gmail.com
+[alias]
+	co = checkout
+	br = branch
+	cl = clone
+	pl = pull
+	fc = fetch
+	st = stash
+[core]
+	editor = code -w
+	excludesfile = ~/.gitignore
+[color]
+	ui = true
+[ghq]
+	root = ~/Codex
+	root = ~/go/src
