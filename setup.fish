@@ -23,6 +23,7 @@ set dot_files \
       bundle \
       rubocop.yml \
       config/fish/config.fish \
-      config/fish/fishfile
+      config/fish/fishfile \
+      config/iTerm2/com.googlecode.iterm2.plist
 
 deploy $dot_files $HOME

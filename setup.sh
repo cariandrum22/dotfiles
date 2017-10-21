@@ -17,7 +17,8 @@ DOT_FILES=(
   rubocop.yml
   config/fish/config.fish
   config/fish/fishfile
-  )
+  config/iTerm2/com.googlecode.iterm2.plist
+)
 
 ## deploy dot files to $HOME
 for dot_file in ${DOT_FILES[@]}
