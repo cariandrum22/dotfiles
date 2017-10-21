@@ -129,14 +129,16 @@
 ;;-----------------------------------------------------------------------------
 ;; others
 ;;-----------------------------------------------------------------------------
-(setq vc-follow-symlinks t)
-
-(global-whitespace-mode 1)
 (setq-default tab-width 2 indent-tabs-mode nil)
 
 (setq eol-mnemonic-dos "(CRLF)")
 (setq eol-mnemonic-mac "(CR)")
 (setq eol-mnemonic-unix "(LF)")
+
+(setq vc-follow-symlinks t)
+
+(show-paren-mode)
+(display-time)
 
 ;; Local Variables:
 ;; coding: utf-8
