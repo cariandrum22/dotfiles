@@ -1,14 +1,18 @@
-# initialize
+# Initialize
 thunnus.init
 
-# environment variables
+# Basic configuration
 set -x LC_ALL en_US.UTF-8
 set -x LANG en_US.UTF-8
 set -x PATH "/usr/local/sbin" $PATH
-set -x EDITOR (which atom)
-set -x VISUAL (which atom)
+set -x EDITOR (which emacs)
+set -x VISUAL (which code)
 
-# export default aws credentials
+# Compiler and linker flag configuration
+set -x CFLAGS "-I"(brew --prefix openssl)"/include"
+set -x LDFLAGS "-L"(brew --prefix openssl)"/lib"
+
+# Export default aws credentials
 aws_credential_selector codetakt:cariandrum22 tf
 
 # AWS
@@ -25,32 +29,25 @@ if [ -f $HOME/Applications/Google/google-cloud-sdk/completion.zsh.inc ]
   bass source "$HOME/Applications/Google/google-cloud-sdk/completion.bash.inc"
 end
 
-# rbenv
-rbenv init - | source
+# Initialize the *env such as rbenv, ndenv, etc.
+arbenv "rbenv" "nodenv" "goenv" "pyenv" "plenv"
 
-# pyenv
-pyenv init - | source
+# pyenv-virtualenv
 pyenv virtualenv-init - | source
 
-# plenv
-plenv init - | source
-
-# nodebrew
-set_path "$HOME/.nodebrew/current/bin"
-set -x NODE_PATH "$HOME/.nodebrew/current/lib/node_modules"
+# Go
+set -x GOPATH "$HOME/go"
+set_path "$GOPATH/bin"
 
 # Stack
 set_path "$HOME/.local/bin"
 
 # rustup
 set_path "$HOME/.cargo/bin"
-
-# go
-set -x GOPATH "$HOME/go"
-set_path "$GOPATH/bin"
+rustup completions fish | source
 
 # java
-set -x JAVA_HOME (/usr/libexec/java_home -v 1.8)
+set -x JAVA_HOME (/usr/libexec/java_home)
 
 # python
 set -x PYTHONSTARTUP "$HOME/.pythonstartup"
@@ -65,7 +62,6 @@ set -x ANSIBLE_COW_SELECTION "random"
 set_path "$HOME/Applications/nand2tetris/tools"
 
 # alias
-
 ## Generic
 alias where="command -v"
 alias j="jobs -l"
@@ -82,5 +78,5 @@ alias runhaskell="stack runghc"
 # OPAM configuration
 source $HOME/.opam/opam-init/init.fish > /dev/null 2> /dev/null or true
 
-# normalize path(trim tail slash)
+# Normalize path(trim tail slash)
 normalize_path $PATH
