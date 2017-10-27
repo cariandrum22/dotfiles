@@ -92,6 +92,7 @@
         company-ghc
         rust-mode
         go-mode
+        dockerfile-mode
         color-theme-zenburn
         (:name hindent :type elpa)
         (:name wrap-region :pkgname "rejeep/wrap-region" :type github)
@@ -106,6 +107,7 @@
 (require 'init-flycheck)
 (require 'init-emacs-lisp)
 (require 'init-haskell)
+(require 'init-docker)
 
 ;;-----------------------------------------------------------------------------
 ;; theme
