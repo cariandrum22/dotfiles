@@ -93,6 +93,11 @@
         rust-mode
         go-mode
         dockerfile-mode
+        yaml-mode
+        web-mode
+        js2-mode
+        elm-mode
+        ddskk
         color-theme-zenburn
         (:name hindent :type elpa)
         (:name wrap-region :pkgname "rejeep/wrap-region" :type github)
@@ -108,6 +113,9 @@
 (require 'init-emacs-lisp)
 (require 'init-haskell)
 (require 'init-docker)
+(require 'init-web)
+(require 'init-js2)
+(require 'init-elm)
 
 ;;-----------------------------------------------------------------------------
 ;; theme
