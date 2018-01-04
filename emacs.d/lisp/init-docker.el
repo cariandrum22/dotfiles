@@ -1,4 +1,5 @@
 (use-package dockerfile-mode
-  :mode "Dockerfile\\'")
+  :mode
+  "Dockerfile\\'")
 
 (provide 'init-docker)

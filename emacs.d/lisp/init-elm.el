@@ -1,5 +1,6 @@
 (use-package elm-mode
-  :mode "\\.elm\\'"
+  :mode
+  "\\.elm\\'"
   :config
   )
 
