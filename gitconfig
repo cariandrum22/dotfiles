@@ -9,7 +9,7 @@
 	fc = fetch
 	st = stash
 [core]
-	editor = code -w
+	editor = emacs
 	excludesfile = ~/.gitignore
 [color]
 	ui = true

@@ -3,13 +3,6 @@
 ;;-----------------------------------------------------------------------------
 ;; system
 ;;-----------------------------------------------------------------------------
-
-;; Added by Package.el.  This must come before configurations of
-;; installed packages.  Don't delete this line.  If you don't want it,
-;; just comment it out by adding a semicolon to the start of the line.
-;; You may delete these explanatory comments.
-(package-initialize)
-
 (setq inhibit-startup-message t)
 
 (defvar run-unix
@@ -84,12 +77,21 @@
 
 ;; install packages
 (setq el-get-sources
-      '(counsel-projectile
+      '(swiper
+        projectile
+        counsel-projectile
         use-package
         flycheck
         company-mode
         haskell-mode
         company-ghc
+        ruby-mode
+        ruby-end
+        inf-ruby
+        rspec-mode
+        robe-mode
+        rbenv
+        projectile-rails
         rust-mode
         go-mode
         dockerfile-mode
@@ -97,21 +99,27 @@
         web-mode
         js2-mode
         elm-mode
+        font-lock+
         ddskk
+        ov
+        powerline
         color-theme-zenburn
         (:name hindent :type elpa)
+        (:name sidebar :pkgname "sebastiencs/sidebar.el" :type github)
         (:name wrap-region :pkgname "rejeep/wrap-region" :type github)
-        (:name telephone-line :pkgname "dbordak/telephone-line" :type github)
         ))
 (require 'init-el-get)
+(package-initialize)
 
 ;; activate packages
 (require 'use-package)
-(require 'init-telephone-line)
-(require 'init-global)
+(require 'init-powerline)
+(require 'init-ivy)
 (require 'init-flycheck)
+(require 'init-sidebar)
 (require 'init-emacs-lisp)
 (require 'init-haskell)
+(require 'init-ruby)
 (require 'init-docker)
 (require 'init-web)
 (require 'init-js2)
@@ -121,6 +129,7 @@
 ;; theme
 ;;-----------------------------------------------------------------------------
 (load-theme 'zenburn t)
+(add-to-list 'default-frame-alist '(background-color . "unspecified-bg"))
 
 ;;-----------------------------------------------------------------------------
 ;; auto-save and backup
@@ -146,9 +155,37 @@
 (setq eol-mnemonic-unix "(LF)")
 
 (setq vc-follow-symlinks t)
+(setq auto-revert-check-vc-info t)
 
 (show-paren-mode)
+
 (display-time)
+
+(electric-pair-mode t)
+
+;; linum-mode
+(add-hook 'find-file-hook 'linum-mode)
+(setq linum-format " %3d ")
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages (quote (flycheck hindent)))
+ '(sidebar-icon-header-end (quote (powerline_left_hard_divider 1)))
+ '(sidebar-icon-powerline (quote (powerline_left_hard_divider 0 -0.05 1.0)))
+ '(sidebar-icons-modeline
+   (quote
+    (powerline_left_hard_divider powerline_right_hard_divider 0))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(linum ((t (:background "#4c4c4c" :foreground "#9fc59f"))))
+ '(sidebar-primary-color ((t (:background "#3f3f3f" :foreground "#7f9f7f"))))
+ '(web-mode-html-tag-bracket-face ((t (:foreground "#999999")))))
 
 ;; Local Variables:
 ;; coding: utf-8
