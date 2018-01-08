@@ -15,6 +15,9 @@ set -x LDFLAGS "-L"(brew --prefix openssl)"/lib"
 # Export default aws credentials
 aws_credential_selector codetakt:cariandrum22 tf
 
+# fzf
+set -U FZF_LEGACY_KEYBINDINGS 0
+
 # AWS
 set -x AWS_DEFAULT_REGION "ap-northeast-1"
 
@@ -36,7 +39,7 @@ arbenv "rbenv" "nodenv" "goenv" "pyenv" "plenv"
 pyenv virtualenv-init - | source
 
 # Go
-set -x GOPATH "$HOME/go"
+set -x GOPATH "$HOME/Go"
 set_path "$GOPATH/bin"
 
 # Stack
@@ -58,8 +61,14 @@ set_path "$HOME/Applications/HashiCorp/Terraform/current/bin"
 # Ansible
 set -x ANSIBLE_COW_SELECTION "random"
 
+# Texinfo
+set_path "/usr/local/opt/texinfo/bin"
+
 # Nand2tetris Software Suite
 set_path "$HOME/Applications/nand2tetris/tools"
+
+# CoreOS tools
+set_path "$HOME/Applications/CoreOS/bin"
 
 # alias
 ## Generic
