@@ -99,6 +99,7 @@
         web-mode
         js2-mode
         elm-mode
+        emacs-fish
         font-lock+
         ddskk
         ov
@@ -120,6 +121,7 @@
 (require 'init-emacs-lisp)
 (require 'init-haskell)
 (require 'init-ruby)
+(require 'init-shell)
 (require 'init-docker)
 (require 'init-web)
 (require 'init-js2)
