@@ -83,6 +83,7 @@
         use-package
         flycheck
         company-mode
+        mmm-mode
         haskell-mode
         company-ghc
         ruby-mode
@@ -96,6 +97,7 @@
         go-mode
         dockerfile-mode
         yaml-mode
+        jinja2-mode
         web-mode
         js2-mode
         elm-mode
@@ -118,6 +120,7 @@
 (require 'init-ivy)
 (require 'init-flycheck)
 (require 'init-sidebar)
+(require 'init-mmm)
 (require 'init-emacs-lisp)
 (require 'init-haskell)
 (require 'init-ruby)
@@ -126,6 +129,7 @@
 (require 'init-web)
 (require 'init-js2)
 (require 'init-elm)
+(require 'init-yaml)
 
 ;;-----------------------------------------------------------------------------
 ;; theme
