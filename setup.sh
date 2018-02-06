@@ -43,6 +43,7 @@ function main () {
     config/fish/config.fish
     config/fish/fishfile
     config/iTerm2/com.googlecode.iterm2.plist
+    config/karabiner/karabiner.json
   )
 
   # List of arbitrary environment (e.g. rbenv, nodenv, pyenv, etc.)
@@ -67,6 +68,11 @@ function main () {
   
   # Deploy dot files to ${HOME}
   deploy_dot_files "${DOT_FILES[@]}"
+
+  # Deploy configuration files into ~/Library/Application Support
+  # TODO: Functionalize so that multiple files can be deployed
+  cp -f "${ABS_PATH}/Library/Application Support/AquaSKK/keymap.conf" \
+     "${HOME}/Library/Application Support/AquaSKK/keymap.conf"
   
   # Install arbitrary environment
   install_arbitrary_envs "${ARBENV_DEFINITIONS[@]}"
@@ -222,8 +228,13 @@ function deploy_launchd_agents () {
   # For User Agents
   if [[ ! -e "${HOME}/Library/LaunchAgents/local.chroe.brew.plist" ]]; then
     cp -f "${ABS_PATH}/launchd/user/agents/local.chroe.brew.plist" "${HOME}/Library/LaunchAgents/local.chroe.brew.plist"
-    launchctl load /Library/LaunchAgents/local.chroe.locate.updatedb.plist
+    launchctl load "${HOME}/Library/LaunchAgents/local.chroe.brew.plist"
   fi
+  if [[ ! -e "${HOME}/Library/LaunchAgents/local.chroe.google-ime-skk.plist" ]]; then
+    cp -f "${ABS_PATH}/launchd/user/agents/local.chroe.google-ime-skk.plist" "${HOME}/Library/LaunchAgents/local.chroe.google-ime-skk.plist"
+    launchctl load "${HOME}/Library/LaunchAgents/local.chroe.google-ime-skk.plist"
+  fi
+
   # For Global Agents
   if [[ ! -e /Library/LaunchAgents/local.chroe.locate.updatedb.plist ]]; then
     echo "Install laundhd Global Agent."

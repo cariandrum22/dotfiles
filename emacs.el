@@ -27,7 +27,7 @@
 ;;-----------------------------------------------------------------------------
 ;; language and encode setting
 ;;-----------------------------------------------------------------------------
-(set-language-environment 'Japanese)
+(set-language-environment 'English)
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 (set-buffer-file-coding-system 'utf-8)
@@ -120,6 +120,7 @@
 (require 'init-ivy)
 (require 'init-flycheck)
 (require 'init-sidebar)
+(require 'init-skk)
 (require 'init-mmm)
 (require 'init-emacs-lisp)
 (require 'init-haskell)
@@ -178,6 +179,9 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" default)))
  '(package-selected-packages (quote (flycheck hindent)))
  '(sidebar-icon-header-end (quote (powerline_left_hard_divider 1)))
  '(sidebar-icon-powerline (quote (powerline_left_hard_divider 0 -0.05 1.0)))
