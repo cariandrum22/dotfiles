@@ -103,6 +103,8 @@
         elm-mode
         emacs-fish
         font-lock+
+        magit
+        git-gutter+
         ddskk
         ov
         powerline
@@ -131,6 +133,7 @@
 (require 'init-js2)
 (require 'init-elm)
 (require 'init-yaml)
+(require 'init-git)
 
 ;;-----------------------------------------------------------------------------
 ;; theme
@@ -171,8 +174,9 @@
 (electric-pair-mode t)
 
 ;; linum-mode
-(add-hook 'find-file-hook 'linum-mode)
-(setq linum-format " %3d ")
+;; comment out because it collides with git-gutter
+; (add-hook 'find-file-hook 'linum-mode)
+; (setq linum-format " %3d ")
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
