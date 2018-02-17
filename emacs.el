@@ -128,6 +128,7 @@
 (require 'init-haskell)
 (require 'init-ruby)
 (require 'init-shell)
+(require 'init-fish)
 (require 'init-docker)
 (require 'init-web)
 (require 'init-js2)
