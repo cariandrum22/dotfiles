@@ -9,11 +9,11 @@ set -x EDITOR (which emacs)
 set -x VISUAL (which code)
 
 # Compiler and linker flag configuration
-set -x CFLAGS "-I"(brew --prefix openssl)"/include"
-set -x LDFLAGS "-L"(brew --prefix openssl)"/lib"
+set -x CPPFLAGS "-I"(brew --prefix llvm)"/include" "-I"(brew --prefix openssl)"/include"
+set -x LDFLAGS "-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib" "-L"(brew --prefix openssl)"/lib"
 
 # Export default aws credentials
-aws_credential_selector codetakt:cariandrum22 tf
+thunnus.aws.credential_selector codetakt:cariandrum22 tf
 
 # fzf
 set -U FZF_LEGACY_KEYBINDINGS 0
@@ -37,6 +37,9 @@ arbenv "rbenv" "nodenv" "goenv" "pyenv" "plenv"
 
 # pyenv-virtualenv
 pyenv virtualenv-init - | source
+
+# LLVM
+set_path (brew --prefix llvm)"/bin"
 
 # Go
 set -x GOPATH "$HOME/Go"
@@ -88,4 +91,6 @@ alias runhaskell="stack runghc"
 source $HOME/.opam/opam-init/init.fish > /dev/null 2> /dev/null or true
 
 # Normalize path(trim tail slash)
-normalize_path $PATH
+thunnus.path.normalize $PATH
+
+# Set
