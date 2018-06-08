@@ -35,6 +35,9 @@ end
 # Initialize the *env such as rbenv, ndenv, etc.
 arbenv "rbenv" "nodenv" "goenv" "pyenv" "plenv"
 
+# direnv
+eval (direnv hook fish)
+
 # pyenv-virtualenv
 pyenv virtualenv-init - | source
 
