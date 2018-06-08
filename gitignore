@@ -203,3 +203,6 @@ _steps
 ## wercker
 
 .wercker
+
+## dirnev
+.envrc
