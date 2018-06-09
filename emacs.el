@@ -95,6 +95,11 @@
         projectile-rails
         rust-mode
         go-mode
+        irony-mode
+        company-irony
+        rtags
+        cmake-mode
+        cmake-ide
         dockerfile-mode
         yaml-mode
         jinja2-mode
@@ -120,6 +125,7 @@
 (require 'use-package)
 (require 'init-powerline)
 (require 'init-ivy)
+(require 'init-company)
 (require 'init-flycheck)
 (require 'init-sidebar)
 (require 'init-skk)
@@ -130,6 +136,10 @@
 (require 'init-shell)
 (require 'init-fish)
 (require 'init-docker)
+(require 'init-cmake)
+(require 'init-cmake-ide)
+(require 'init-rtags)
+(require 'init-irony)
 (require 'init-web)
 (require 'init-js2)
 (require 'init-elm)

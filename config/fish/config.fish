@@ -87,6 +87,9 @@ alias ghci="stack ghci"
 alias runghc="stack runghc"
 alias runhaskell="stack runghc"
 
+## C++
+alias g++="g++ -std=c++1z -O2 -Wall -W -Wformat=2 -Wcast-qual -Wcast-align -Wwrite-strings -Wconversion -Wfloat-equal -Wpointer-arith"
+
 # OPAM configuration
 source $HOME/.opam/opam-init/init.fish > /dev/null 2> /dev/null or true
 
