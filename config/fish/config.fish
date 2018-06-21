@@ -9,8 +9,8 @@ set -x EDITOR (which emacs)
 set -x VISUAL (which code)
 
 # Compiler and linker flag configuration
-set -x CPPFLAGS "-I"(brew --prefix llvm)"/include" "-I"(brew --prefix openssl)"/include"
-set -x LDFLAGS "-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib" "-L"(brew --prefix openssl)"/lib"
+set -x CPPFLAGS "-I/usr/local/opt/llvm/include" "-I/usr/local/opt/openssl/include"
+set -x LDFLAGS "-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib" "-L/usr/local/opt/openssl/lib"
 
 # Export default aws credentials
 thunnus.aws.credential_selector codetakt:cariandrum22 tf
@@ -42,7 +42,7 @@ eval (direnv hook fish)
 pyenv virtualenv-init - | source
 
 # LLVM
-set_path (brew --prefix llvm)"/bin"
+set_path "/usr/local/opt/llvm/bin"
 
 # Go
 set -x GOPATH "$HOME/Go"
@@ -95,5 +95,3 @@ source $HOME/.opam/opam-init/init.fish > /dev/null 2> /dev/null or true
 
 # Normalize path(trim tail slash)
 thunnus.path.normalize $PATH
-
-# Set
