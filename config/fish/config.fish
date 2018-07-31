@@ -45,8 +45,11 @@ pyenv virtualenv-init - | source
 set_path "/usr/local/opt/llvm/bin"
 
 # Go
+set -x GOENV_ROOT "$HOME/.goenv"
 set -x GOPATH "$HOME/Go"
+set_path "$GOENV_ROOT/bin"
 set_path "$GOPATH/bin"
+goenv init - | source
 
 # Stack
 set_path "$HOME/.local/bin"
