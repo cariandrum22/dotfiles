@@ -88,10 +88,10 @@ alias la="ls -lha"
 
 ## Haskell
 #. $HOME/.nix-profile/etc/profile.d/nix.sh
-alias ghc="stack ghc"
+alias ghc="stack ghc --"
 alias ghci="stack ghci"
-alias runghc="stack runghc"
-alias runhaskell="stack runghc"
+alias runghc="stack runghc --"
+alias runhaskell="stack runghc --"
 
 # OPAM configuration
 source $HOME/.opam/opam-init/init.fish > /dev/null 2> /dev/null or true
