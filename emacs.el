@@ -109,6 +109,7 @@
         ov
         powerline
         color-theme-zenburn
+        (:name frame-local :type elpa)
         (:name hindent :type elpa)
         (:name sidebar :pkgname "sebastiencs/sidebar.el" :type github)
         (:name wrap-region :pkgname "rejeep/wrap-region" :type github)
@@ -187,6 +188,7 @@
  '(custom-safe-themes
    (quote
     ("84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" default)))
+ '(fish-indent-offset 2)
  '(package-selected-packages (quote (flycheck hindent)))
  '(sidebar-icon-header-end (quote (powerline_left_hard_divider 1)))
  '(sidebar-icon-powerline (quote (powerline_left_hard_divider 0 -0.05 1.0)))
