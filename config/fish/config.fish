@@ -23,13 +23,13 @@ set -x AWS_DEFAULT_REGION "ap-northeast-1"
 
 # Google Computing Platform
 ## The next line updates PATH for the Google Cloud SDK.
-if [ -f $HOME/Applications/Google/google-cloud-sdk/path.zsh.inc ]
-  bass source "$HOME/Applications/Google/google-cloud-sdk/path.bash.inc"
+if [ -f $HOME/Applications/Google/google-cloud-sdk/path.fish.inc ]
+  source "$HOME/Applications/Google/google-cloud-sdk/path.fish.inc"
 end
 
 ## The next line enables shell command completion for gcloud.
-if [ -f $HOME/Applications/Google/google-cloud-sdk/completion.zsh.inc ]
-  bass source "$HOME/Applications/Google/google-cloud-sdk/completion.bash.inc"
+if [ -f $HOME/Applications/Google/google-cloud-sdk/completion.fish.inc ]
+  source "$HOME/Applications/Google/google-cloud-sdk/completion.fish.inc"
 end
 
 # Initialize the *env such as rbenv, ndenv, etc.
