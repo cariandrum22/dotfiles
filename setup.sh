@@ -26,7 +26,7 @@ function main () {
   
   # List of files to deploy
   # TODO: remove zsh related files 
-  declare -ar DOT_FILES=(
+  declare -a BASE_DOT_FILES=(
     # zshrc
     # zshrc.personal
     # zlogin
@@ -42,8 +42,6 @@ function main () {
     rubocop.yml
     config/fish/config.fish
     config/fish/fishfile
-    config/iTerm2/com.googlecode.iterm2.plist
-    config/karabiner/karabiner.json
   )
 
   # List of arbitrary environment (e.g. rbenv, nodenv, pyenv, etc.)
@@ -63,17 +61,23 @@ function main () {
   if [ "$(uname)" == 'Darwin' ]; then
     install_homebrew
     deploy_launchd_agents
+
+    declare -ar OS_SPECIFIC_DOT_FILES=(
+      config/iTerm2/com.googlecode.iterm2.plist
+      config/karabiner/karabiner.json
+    )
+
+    # Deploy configuration files into ~/Library/Application Support
+    # TODO: Functionalize so that multiple files can be deployed
+    cp -f "${ABS_PATH}/Library/Application Support/AquaSKK/keymap.conf" \
+          "${HOME}/Library/Application Support/AquaSKK/keymap.conf"
   fi
   # TODO: Implement the function to install Homebrew
-  
+
   # Deploy dot files to ${HOME}
+  declare -ar DOT_FILES=( "${BASE_DOT_FILES[@]}" "${OS_SPECIFIC_DOT_FILES[@]}")
   deploy_dot_files "${DOT_FILES[@]}"
 
-  # Deploy configuration files into ~/Library/Application Support
-  # TODO: Functionalize so that multiple files can be deployed
-  cp -f "${ABS_PATH}/Library/Application Support/AquaSKK/keymap.conf" \
-     "${HOME}/Library/Application Support/AquaSKK/keymap.conf"
-  
   # Install arbitrary environment
   install_arbitrary_envs "${ARBENV_DEFINITIONS[@]}"
   
