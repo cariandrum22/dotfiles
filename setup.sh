@@ -195,7 +195,7 @@ function install_rustup () {
   declare -ir EXISTS="${?}"
   set -e
   if [[ "${EXISTS}" -ne 0 ]]; then
-    curl https://sh.rustup.rs -sSf | sh
+    curl https://sh.rustup.rs -sSf | sh -s -- -y
   fi
 }
 
