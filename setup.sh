@@ -74,6 +74,9 @@ function main () {
   fi
   # TODO: Implement the function to install Homebrew
 
+  # Install fisher
+  install_fisher
+
   # Deploy dot files to ${HOME}
   declare -ar DOT_FILES=( "${BASE_DOT_FILES[@]}" "${OS_SPECIFIC_DOT_FILES[@]}")
   deploy_dot_files "${DOT_FILES[@]}"
@@ -196,6 +199,22 @@ function install_rustup () {
   set -e
   if [[ "${EXISTS}" -ne 0 ]]; then
     curl https://sh.rustup.rs -sSf | sh -s -- -y
+  fi
+}
+
+#######################################
+# Install Fisher
+# Globals:
+#   None
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+function install_fisher () {
+  declare -r INSTALL_PATH="${HOME}"/.config/fish/functions/fisher.fish
+  if [[ ! -d "${INSTALL_PATH}" ]]; then
+    curl https://git.io/fisher --create-dirs -sLo "${INSTALL_PATH}"
   fi
 }
 
