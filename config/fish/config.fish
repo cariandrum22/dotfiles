@@ -59,7 +59,11 @@ set_path "$HOME/.cargo/bin"
 rustup completions fish | source
 
 # java
-set -x JAVA_HOME (/usr/libexec/java_home)
+if [ (thunnus.os.platform.detect) = macOS ]
+  set -x JAVA_HOME (/usr/libexec/java_home)
+else
+  set -x JAVA_HOME (type -p javac|xargs readlink -f|xargs dirname|xargs dirname)
+end
 
 # python
 set -x PYTHONSTARTUP "$HOME/.pythonstartup"
