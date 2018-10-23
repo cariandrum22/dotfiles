@@ -9,11 +9,15 @@ set -x EDITOR (which emacs)
 set -x VISUAL (which code)
 
 # Compiler and linker flag configuration
-set -x CPPFLAGS "-I/usr/local/opt/llvm/include" "-I/usr/local/opt/openssl/include"
-set -x LDFLAGS "-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib" "-L/usr/local/opt/openssl/lib"
+if [ (thunnus.os.platform.detect) = macOS ]
+  set -x CPPFLAGS "-I/usr/local/opt/llvm/include" "-I/usr/local/opt/openssl/include"
+  set -x LDFLAGS "-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib" "-L/usr/local/opt/openssl/lib"
+end
 
 # Export default aws credentials
-thunnus.aws.credential_selector codetakt:cariandrum22 tf
+if [ -f "$HOME/.aws/credentials" ]
+  thunnus.aws.credential_selector codetakt:cariandrum22 tf
+end
 
 # fzf
 set -U FZF_LEGACY_KEYBINDINGS 0
