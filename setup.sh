@@ -182,6 +182,26 @@ function install_arbitrary_envs () {
 }
 
 #######################################
+# Install stack
+# Globals:
+#   HOME
+#   PATH
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+function install_stack () {
+  set +e
+  type stack 1>/dev/null
+  declare -ir EXISTS="${?}"
+  set -e
+  if [[ "${EXISTS}" -ne 0 ]]; then
+    curl -sSL https://get.haskellstack.org/ | sh
+  fi
+}
+
+#######################################
 # Install rustup
 # Globals:
 #   HOME
