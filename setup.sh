@@ -83,6 +83,9 @@ function main () {
 
   # Install arbitrary environment
   install_arbitrary_envs "${ARBENV_DEFINITIONS[@]}"
+
+  # Install stack
+  install_stack
   
   # Install rustup
   install_rustup
