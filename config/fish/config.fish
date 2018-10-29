@@ -16,7 +16,7 @@ end
 
 # Export default aws credentials
 if [ -f "$HOME/.aws/credentials" ]
-  thunnus.aws.credential_selector codetakt:cariandrum22 tf
+  thunnus.aws.credential_selector codetakt_cariandrum22 tf
 end
 
 # fzf
