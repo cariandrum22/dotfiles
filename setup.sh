@@ -23,9 +23,9 @@ declare -r ABS_PATH
 #######################################
 function main () {
   # Local variables
-  
+
   # List of files to deploy
-  # TODO: remove zsh related files 
+  # TODO: remove zsh related files
   declare -a BASE_DOT_FILES=(
     # zshrc
     # zshrc.personal
@@ -56,7 +56,7 @@ function main () {
     "tokuhirom/plenv|false|tokuhirom/Perl-Build"
     "syndbg/goenv|false|"
   )
-  
+
   # Run for macOS only
   if [ "$(uname)" == 'Darwin' ]; then
     install_homebrew
@@ -86,7 +86,7 @@ function main () {
 
   # Install stack
   install_stack
-  
+
   # Install rustup
   install_rustup
 }
@@ -113,8 +113,8 @@ function deploy_dot_files () {
       fi
     done
   }
-  
-  prepare_sub_dir "${DOT_FILES[@]}"  
+
+  prepare_sub_dir "${DOT_FILES[@]}"
 
   for file in "${DOT_FILES[@]}"; do
     ln -sfn "${ABS_PATH}"/"${file}" "${HOME}"/."${file}"
@@ -147,10 +147,10 @@ function install_arbitrary_envs () {
     fi
 
     declare -r INSTALL_PATH="${HOME}"/."${ENV_BASENAME}"
-    
+
     if [[ ! -d "${INSTALL_PATH}" ]]; then
       git clone https://github.com/"${ENV}".git "${INSTALL_PATH}"
-      
+
       if "${MAKE_IT}"; then
         cd "${INSTALL_PATH}" && src/configure && make -C src
       fi
@@ -164,7 +164,7 @@ function install_arbitrary_envs () {
       declare -r ENV_ROOT_DIR=${env_root_dir}
       plugin_basename=$(basename "${PLUGIN}")
       declare -r PLUGIN_INSTALL_PATH="${ENV_ROOT_DIR}"/plugins/"${plugin_basename}"
-        
+
       if [[ ! -d "${PLUGIN_INSTALL_PATH}" ]]; then
         git clone https://github.com/"${PLUGIN}".git "${PLUGIN_INSTALL_PATH}"
       fi
@@ -172,13 +172,13 @@ function install_arbitrary_envs () {
 
     if [[ -n ${PLUGINS-} ]]; then
       declare -ar SPLITED_PLUGINS=($(echo "${PLUGINS}" | tr -s ':' ' '))
-      
+
       for plugin in "${SPLITED_PLUGINS[@]}"; do
         install_plugin "${plugin}"
       done
     fi
   }
-  
+
   for arbenv_definition in "${ARBENV_DEFINITIONS[@]}"; do
     install_env "${arbenv_definition}"
   done
