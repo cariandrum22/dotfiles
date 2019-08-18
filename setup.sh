@@ -64,7 +64,7 @@ main() {
 
   # Run for macOS only
   if [ "$(uname)" == 'Darwin' ]; then
-    install_homebrew
+    install::homebrew
     deploy_launchd_agents
 
     local -ar os_specific_dot_files=(
