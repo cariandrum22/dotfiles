@@ -22,6 +22,10 @@ source ./function/install/fisher.sh
 # shellcheck disable=SC1091
 source ./function/install/docker.sh
 # shellcheck disable=SC1091
+source ./function/install/ghq.sh
+# shellcheck disable=SC1091
+source ./function/install/direnv.sh
+# shellcheck disable=SC1091
 source ./function/install/arbitrary_envs.sh
 # shellcheck disable=SC1091
 source ./function/install/stack.sh
@@ -98,6 +102,12 @@ main() {
 
   # Install Docker
   install::docker
+
+  # Install ghq
+  install::ghq
+
+  # Install direnv
+  install::direnv
 
   # Deploy dot files to ${HOME}
   local -ar dot_files=( "${base_dot_files[@]}" "${os_specific_dot_files[@]}")
