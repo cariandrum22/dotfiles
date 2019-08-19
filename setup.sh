@@ -20,6 +20,8 @@ source ./function/install/homebrew.sh
 # shellcheck disable=SC1091
 source ./function/install/fisher.sh
 # shellcheck disable=SC1091
+source ./function/install/docker.sh
+# shellcheck disable=SC1091
 source ./function/install/arbitrary_envs.sh
 # shellcheck disable=SC1091
 source ./function/install/stack.sh
@@ -93,6 +95,9 @@ main() {
 
   # Install fisher
   install::fisher
+
+  # Install Docker
+  install::docker
 
   # Deploy dot files to ${HOME}
   local -ar dot_files=( "${base_dot_files[@]}" "${os_specific_dot_files[@]}")
