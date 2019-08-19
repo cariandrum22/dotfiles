@@ -81,8 +81,10 @@ main() {
 
     # Deploy configuration files into ~/Library/Application Support
     # TODO: Functionalize so that multiple files can be deployed
-    cp -f "${abs_path}/Library/Application Support/AquaSKK/keymap.conf" \
-          "${HOME}/Library/Application Support/AquaSKK/keymap.conf"
+    if [[ -d "${HOME}/Library/Application Support/AquaSKK" ]]; then
+      cp -f "${abs_path}/Library/Application Support/AquaSKK/keymap.conf" \
+        "${HOME}/Library/Application Support/AquaSKK/keymap.conf"
+    fi
   fi
   # TODO: Implement the function to install Homebrew
 
@@ -146,17 +148,20 @@ deploy_dot_files() {
 #######################################
  deploy_launchd_agents() {
   # For User Agents
-  if [[ ! -e "${HOME}/Library/LaunchAgents/local.chroe.brew.plist" ]]; then
+  if [[ ! -f "${HOME}/Library/LaunchAgents/local.chroe.brew.plist" ]]; then
+    if [[ ! -d "${HOME}/Library/LaunchAgents" ]]; then
+      mkdir -m 700 "${HOME}/Library/LaunchAgents"
+    fi
     cp -f "${abs_path}/launchd/user/agents/local.chroe.brew.plist" "${HOME}/Library/LaunchAgents/local.chroe.brew.plist"
     launchctl load "${HOME}/Library/LaunchAgents/local.chroe.brew.plist"
   fi
-  if [[ ! -e "${HOME}/Library/LaunchAgents/local.chroe.google-ime-skk.plist" ]]; then
+  if [[ ! -f "${HOME}/Library/LaunchAgents/local.chroe.google-ime-skk.plist" ]]; then
     cp -f "${abs_path}/launchd/user/agents/local.chroe.google-ime-skk.plist" "${HOME}/Library/LaunchAgents/local.chroe.google-ime-skk.plist"
     launchctl load "${HOME}/Library/LaunchAgents/local.chroe.google-ime-skk.plist"
   fi
 
   # For Global Agents
-  if [[ ! -e /Library/LaunchAgents/local.chroe.locate.updatedb.plist ]]; then
+  if [[ ! -f /Library/LaunchAgents/local.chroe.locate.updatedb.plist ]]; then
     echo "Install laundhd Global Agent."
     echo "Please input sudo password."
     sudo cp -f "${abs_path}/launchd/global/agents/local.chroe.locate.updatedb.plist" /Library/LaunchAgents/local.chroe.locate.updatedb.plist
