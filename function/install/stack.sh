@@ -10,9 +10,9 @@
 function install::stack () {
   set +e
   type -t stack
-  local -r EXISTS="${?}"
+  local -r exists="${?}"
   set -e
-  if [[ "${EXISTS}" -ne 0 ]]; then
+  if [[ "${exists}" -ne 0 ]]; then
     curl -sSL https://get.haskellstack.org/ | sh
   fi
 }

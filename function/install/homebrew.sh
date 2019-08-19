@@ -1,6 +1,7 @@
 #######################################
 # Install Homebrew
 # Globals:
+#   BASH_SOURCE
 #   OSTYPE
 # Arguments:
 #   None
@@ -8,7 +9,8 @@
 #   None
 #######################################
 install::homebrew() {
-  source ../error.sh
+  # shellcheck source=/dev/null
+  source "$(dirname "${BASH_SOURCE[0]}")/../error.sh"
 
   if [[ "${OSTYPE}" != "darwin"* ]]; then
     error "This Platform is not supported."
@@ -17,9 +19,9 @@ install::homebrew() {
   # Check if Homebrew installed
   set +e
   type -t brew
-  local -r EXISTS="${?}"
+  local -r exists="${?}"
   set -e
-  if [[ "${EXISTS}" -ne 0 ]]; then
+  if [[ "${exists}" -ne 0 ]]; then
     /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   else
     error "Homebrew are currenty installed."

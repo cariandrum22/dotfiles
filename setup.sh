@@ -9,7 +9,7 @@ set -u
 # Exit immediately if returns a non-zero status
 set -e
 # Get absolute path of this script
-readonly -r abs_path="$(cd "$(dirname "${0}")"; pwd)"
+readonly abs_path="$(cd "$(dirname "${0}")"; pwd)"
 
 # Import functions
 source ./function/install/homebrew.sh
@@ -110,7 +110,7 @@ deploy_dot_files() {
   local -ar dot_files=("${@}")
 
   prepare_sub_dir() {
-    delocalclare -ar DOT_FILES=("${@}")
+    local -ar dot_files=("${@}")
 
     for file in "${dot_files[@]}"; do
       if [[ "${file}" =~ [:word:]*/[:word:]* ]]; then

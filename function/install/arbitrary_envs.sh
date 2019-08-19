@@ -4,7 +4,7 @@
 #   HOME
 #   PATH
 # Arguments:
-#   arbenv_definitions::Array
+#   arbenv definitions::Array
 # Returns:
 #   None
 #######################################

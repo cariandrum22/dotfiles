@@ -8,8 +8,8 @@
 #   None
 #######################################
 install::fisher() {
-  local -r INSTALL_PATH="${HOME}"/.config/fish/functions/fisher.fish
-  if [[ ! -d "${INSTALL_PATH}" ]]; then
-    curl https://git.io/fisher --create-dirs -sLo "${INSTALL_PATH}"
+  local -r install_path="${HOME}"/.config/fish/functions/fisher.fish
+  if [[ ! -d "${install_path}" ]]; then
+    curl https://git.io/fisher --create-dirs -sLo "${install_path}"
   fi
 }
