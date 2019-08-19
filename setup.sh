@@ -9,8 +9,20 @@ set -u
 # Exit immediately if returns a non-zero status
 set -e
 # Get absolute path of this script
-ABS_PATH="$(cd "$(dirname "${0}")"; pwd)"
-declare -r ABS_PATH
+readonly abs_path="$(cd "$(dirname "${0}")"; pwd)"
+
+# Import functions
+
+# shellcheck disable=SC1091
+source ./function/install/homebrew.sh
+# shellcheck disable=SC1091
+source ./function/install/fisher.sh
+# shellcheck disable=SC1091
+source ./function/install/arbitrary_envs.sh
+# shellcheck disable=SC1091
+source ./function/install/stack.sh
+# shellcheck disable=SC1091
+source ./function/install/rustup.sh
 
 #######################################
 # Entry point
@@ -21,12 +33,12 @@ declare -r ABS_PATH
 # Returns:
 #   None
 #######################################
-function main () {
+main() {
   # Local variables
-  
+
   # List of files to deploy
-  # TODO: remove zsh related files 
-  declare -a BASE_DOT_FILES=(
+  # TODO: remove zsh related files
+  local -a base_dot_files=(
     # zshrc
     # zshrc.personal
     # zlogin
@@ -49,46 +61,48 @@ function main () {
   #     Env(Enter the path of GitHub) | Make it?(Boolean) | Plugins(Enter the path of GitHub as colon separated value)
   #   Example:
   #     rbenv|true|rbenv/ruby-build:rkh/rbenv-update:jf/-rbenv-gemset
-  declare -ar ARBENV_DEFINITIONS=(
+  local -ar arbenv_definitions=(
     "rbenv/rbenv|true|rbenv/ruby-build"
     "nodenv/nodenv|true|nodenv/node-build"
     "pyenv/pyenv|true|pyenv/pyenv-virtualenv"
     "tokuhirom/plenv|false|tokuhirom/Perl-Build"
     "syndbg/goenv|false|"
   )
-  
+
   # Run for macOS only
   if [ "$(uname)" == 'Darwin' ]; then
-    install_homebrew
+    install::homebrew
     deploy_launchd_agents
 
-    declare -ar OS_SPECIFIC_DOT_FILES=(
+    local -ar os_specific_dot_files=(
       config/iTerm2/com.googlecode.iterm2.plist
       config/karabiner/karabiner.json
     )
 
     # Deploy configuration files into ~/Library/Application Support
     # TODO: Functionalize so that multiple files can be deployed
-    cp -f "${ABS_PATH}/Library/Application Support/AquaSKK/keymap.conf" \
-          "${HOME}/Library/Application Support/AquaSKK/keymap.conf"
+    if [[ -d "${HOME}/Library/Application Support/AquaSKK" ]]; then
+      cp -f "${abs_path}/Library/Application Support/AquaSKK/keymap.conf" \
+        "${HOME}/Library/Application Support/AquaSKK/keymap.conf"
+    fi
   fi
   # TODO: Implement the function to install Homebrew
 
   # Install fisher
-  install_fisher
+  install::fisher
 
   # Deploy dot files to ${HOME}
-  declare -ar DOT_FILES=( "${BASE_DOT_FILES[@]}" "${OS_SPECIFIC_DOT_FILES[@]}")
-  deploy_dot_files "${DOT_FILES[@]}"
+  local -ar dot_files=( "${base_dot_files[@]}" "${os_specific_dot_files[@]}")
+  deploy_dot_files "${dot_files[@]}"
 
   # Install arbitrary environment
-  install_arbitrary_envs "${ARBENV_DEFINITIONS[@]}"
+  install::arbitrary_envs "${arbenv_definitions[@]}"
 
   # Install stack
-  install_stack
-  
+  install::stack
+
   # Install rustup
-  install_rustup
+  install::rustup
 }
 
 #######################################
@@ -96,168 +110,29 @@ function main () {
 # Globals:
 #   HOME
 # Arguments:
-#   DOT_FILES::Array
+#   dot_files::Array
 # Returns:
 #   None
 #######################################
-function deploy_dot_files () {
+deploy_dot_files() {
   # TODO: Implement error handling related to arguments and dependencies
-  declare -ar DOT_FILES=("${@}")
+  local -ar dot_files=("${@}")
 
-  function prepare_sub_dir () {
-    declare -ar DOT_FILES=("${@}")
+  prepare_sub_dir() {
+    local -ar dot_files=("${@}")
 
-    for file in "${DOT_FILES[@]}"; do
+    for file in "${dot_files[@]}"; do
       if [[ "${file}" =~ [:word:]*/[:word:]* ]]; then
         mkdir -p "${HOME}/.$(dirname "${file}")"
       fi
     done
   }
-  
-  prepare_sub_dir "${DOT_FILES[@]}"  
 
-  for file in "${DOT_FILES[@]}"; do
-    ln -sfn "${ABS_PATH}"/"${file}" "${HOME}"/."${file}"
+  prepare_sub_dir "${dot_files[@]}"
+
+  for file in "${dot_files[@]}"; do
+    ln -sfn "${abs_path}"/"${file}" "${HOME}"/."${file}"
   done
-}
-
-#######################################
-# Deploy dot files to ${HOME}
-# Globals:
-#   HOME
-#   PATH
-# Arguments:
-#   ARBENV_DEFINITIONS::Array
-# Returns:
-#   None
-#######################################
-function install_arbitrary_envs () {
-  # TODO: Implement error handling related to arguments and dependencies
-  declare -ar ARBENV_DEFINITIONS=("${@}")
-
-  function install_env () {
-    declare -ar ARBENV_DEFINITION=($(echo "${arbenv_definition}" | tr -s '|' ' '))
-
-    declare -r ENV="${ARBENV_DEFINITION[0]}"
-    env_basename="$(basename "${ENV}")"
-    declare -r ENV_BASENAME=${env_basename}
-    declare -r MAKE_IT="${ARBENV_DEFINITION[1]}"
-    if [[ ${#ARBENV_DEFINITION[*]} -gt 2 ]]; then
-      declare -r PLUGINS="${ARBENV_DEFINITION[2]}"
-    fi
-
-    declare -r INSTALL_PATH="${HOME}"/."${ENV_BASENAME}"
-    
-    if [[ ! -d "${INSTALL_PATH}" ]]; then
-      git clone https://github.com/"${ENV}".git "${INSTALL_PATH}"
-      
-      if "${MAKE_IT}"; then
-        cd "${INSTALL_PATH}" && src/configure && make -C src
-      fi
-    fi
-
-    declare -x PATH="${INSTALL_PATH}/bin:${PATH}"
-
-    function install_plugin () {
-      declare -r PLUGIN="${1}"
-      env_root_dir=$("${ENV_BASENAME}" root)
-      declare -r ENV_ROOT_DIR=${env_root_dir}
-      plugin_basename=$(basename "${PLUGIN}")
-      declare -r PLUGIN_INSTALL_PATH="${ENV_ROOT_DIR}"/plugins/"${plugin_basename}"
-        
-      if [[ ! -d "${PLUGIN_INSTALL_PATH}" ]]; then
-        git clone https://github.com/"${PLUGIN}".git "${PLUGIN_INSTALL_PATH}"
-      fi
-    }
-
-    if [[ -n ${PLUGINS-} ]]; then
-      declare -ar SPLITED_PLUGINS=($(echo "${PLUGINS}" | tr -s ':' ' '))
-      
-      for plugin in "${SPLITED_PLUGINS[@]}"; do
-        install_plugin "${plugin}"
-      done
-    fi
-  }
-  
-  for arbenv_definition in "${ARBENV_DEFINITIONS[@]}"; do
-    install_env "${arbenv_definition}"
-  done
-}
-
-#######################################
-# Install stack
-# Globals:
-#   HOME
-#   PATH
-# Arguments:
-#   None
-# Returns:
-#   None
-#######################################
-function install_stack () {
-  set +e
-  type stack 1>/dev/null
-  declare -ir EXISTS="${?}"
-  set -e
-  if [[ "${EXISTS}" -ne 0 ]]; then
-    curl -sSL https://get.haskellstack.org/ | sh
-  fi
-}
-
-#######################################
-# Install rustup
-# Globals:
-#   HOME
-#   PATH
-# Arguments:
-#   None
-# Returns:
-#   None
-#######################################
-function install_rustup () {
-  declare -x PATH="${HOME}/.cargo/bin:${PATH}"
-  set +e
-  type rustup 1>/dev/null
-  declare -ir EXISTS="${?}"
-  set -e
-  if [[ "${EXISTS}" -ne 0 ]]; then
-    curl https://sh.rustup.rs -sSf | sh -s -- -y
-  fi
-}
-
-#######################################
-# Install Fisher
-# Globals:
-#   None
-# Arguments:
-#   None
-# Returns:
-#   None
-#######################################
-function install_fisher () {
-  declare -r INSTALL_PATH="${HOME}"/.config/fish/functions/fisher.fish
-  if [[ ! -d "${INSTALL_PATH}" ]]; then
-    curl https://git.io/fisher --create-dirs -sLo "${INSTALL_PATH}"
-  fi
-}
-
-#######################################
-# Install Homebrew
-# Globals:
-#   None
-# Arguments:
-#   None
-# Returns:
-#   None
-#######################################
-function install_homebrew () {
-  set +e
-  type brew 1>/dev/null
-  declare -ir EXISTS="${?}"
-  set -e
-  if [[ "${EXISTS}" -ne 0 ]]; then
-    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-  fi
 }
 
 #######################################
@@ -265,27 +140,31 @@ function install_homebrew () {
 # Globals:
 #   HOME
 #   PATH
+#   abs_path
 # Arguments:
 #   None
 # Returns:
 #   None
 #######################################
-function deploy_launchd_agents () {
+ deploy_launchd_agents() {
   # For User Agents
-  if [[ ! -e "${HOME}/Library/LaunchAgents/local.chroe.brew.plist" ]]; then
-    cp -f "${ABS_PATH}/launchd/user/agents/local.chroe.brew.plist" "${HOME}/Library/LaunchAgents/local.chroe.brew.plist"
+  if [[ ! -f "${HOME}/Library/LaunchAgents/local.chroe.brew.plist" ]]; then
+    if [[ ! -d "${HOME}/Library/LaunchAgents" ]]; then
+      mkdir -m 700 "${HOME}/Library/LaunchAgents"
+    fi
+    cp -f "${abs_path}/launchd/user/agents/local.chroe.brew.plist" "${HOME}/Library/LaunchAgents/local.chroe.brew.plist"
     launchctl load "${HOME}/Library/LaunchAgents/local.chroe.brew.plist"
   fi
-  if [[ ! -e "${HOME}/Library/LaunchAgents/local.chroe.google-ime-skk.plist" ]]; then
-    cp -f "${ABS_PATH}/launchd/user/agents/local.chroe.google-ime-skk.plist" "${HOME}/Library/LaunchAgents/local.chroe.google-ime-skk.plist"
+  if [[ ! -f "${HOME}/Library/LaunchAgents/local.chroe.google-ime-skk.plist" ]]; then
+    cp -f "${abs_path}/launchd/user/agents/local.chroe.google-ime-skk.plist" "${HOME}/Library/LaunchAgents/local.chroe.google-ime-skk.plist"
     launchctl load "${HOME}/Library/LaunchAgents/local.chroe.google-ime-skk.plist"
   fi
 
   # For Global Agents
-  if [[ ! -e /Library/LaunchAgents/local.chroe.locate.updatedb.plist ]]; then
+  if [[ ! -f /Library/LaunchAgents/local.chroe.locate.updatedb.plist ]]; then
     echo "Install laundhd Global Agent."
     echo "Please input sudo password."
-    sudo cp -f "${ABS_PATH}/launchd/global/agents/local.chroe.locate.updatedb.plist" /Library/LaunchAgents/local.chroe.locate.updatedb.plist
+    sudo cp -f "${abs_path}/launchd/global/agents/local.chroe.locate.updatedb.plist" /Library/LaunchAgents/local.chroe.locate.updatedb.plist
     sudo launchctl load /Library/LaunchAgents/local.chroe.locate.updatedb.plist
   fi
 }
