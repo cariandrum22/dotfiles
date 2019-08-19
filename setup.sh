@@ -14,9 +14,19 @@ readonly abs_path="$(cd "$(dirname "${0}")"; pwd)"
 # Import functions
 
 # shellcheck disable=SC1091
+source ./function/install/xcode_command_line_tools.sh
+# shellcheck disable=SC1091
 source ./function/install/homebrew.sh
 # shellcheck disable=SC1091
+source ./function/install/git.sh
+# shellcheck disable=SC1091
 source ./function/install/fisher.sh
+# shellcheck disable=SC1091
+source ./function/install/docker.sh
+# shellcheck disable=SC1091
+source ./function/install/ghq.sh
+# shellcheck disable=SC1091
+source ./function/install/direnv.sh
 # shellcheck disable=SC1091
 source ./function/install/arbitrary_envs.sh
 # shellcheck disable=SC1091
@@ -71,6 +81,7 @@ main() {
 
   # Run for macOS only
   if [ "$(uname)" == 'Darwin' ]; then
+    install::xcode_command_line_tools
     install::homebrew
     deploy_launchd_agents
 
@@ -88,8 +99,20 @@ main() {
   fi
   # TODO: Implement the function to install Homebrew
 
+  # Install Git
+  install::git
+
   # Install fisher
   install::fisher
+
+  # Install Docker
+  install::docker
+
+  # Install ghq
+  install::ghq
+
+  # Install direnv
+  install::direnv
 
   # Deploy dot files to ${HOME}
   local -ar dot_files=( "${base_dot_files[@]}" "${os_specific_dot_files[@]}")
