@@ -14,6 +14,8 @@ readonly abs_path="$(cd "$(dirname "${0}")"; pwd)"
 # Import functions
 
 # shellcheck disable=SC1091
+source ./function/install/xcode_command_line_tools.sh
+# shellcheck disable=SC1091
 source ./function/install/homebrew.sh
 # shellcheck disable=SC1091
 source ./function/install/fisher.sh
@@ -71,6 +73,7 @@ main() {
 
   # Run for macOS only
   if [ "$(uname)" == 'Darwin' ]; then
+    install::xcode_command_line_tools
     install::homebrew
     deploy_launchd_agents
 
