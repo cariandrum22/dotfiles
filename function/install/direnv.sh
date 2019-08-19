@@ -5,7 +5,7 @@
 # Arguments:
 #   None
 # Returns:
-#   None
+#   Nonez
 #######################################
 install::direnv() {
   # shellcheck source=/dev/null
@@ -13,7 +13,7 @@ install::direnv() {
 
   # Check direnv installed
   set +e
-  type -t ghq
+  type -t direnv
   local -r exists="${?}"
   set -e
   if [[ "${exists}" -ne 0 ]]; then
