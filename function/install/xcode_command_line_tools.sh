@@ -30,7 +30,5 @@ install::xcode_command_line_tools() {
         | sed -e 's/^[[:blank:]]*//' -e 's/[[:blank:]]*$//')
     softwareupdate -i "${command_line_tools}" --verbose
     rm /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-  else
-    error "Xcode Command Line Tools are currenty installed."
   fi
 }

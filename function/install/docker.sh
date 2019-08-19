@@ -8,11 +8,11 @@
 # Returns:
 #   None
 #######################################
-install::install_docker() {
+install::docker() {
   # shellcheck source=/dev/null
   source "$(dirname "${BASH_SOURCE[0]}")/../error.sh"
   # shellcheck source=/dev/null
-  source "$(dirname "${BASH_SOURCE[0]}")/checked_gatekeeper_quarantine_flag.sh"
+  source "$(dirname "${BASH_SOURCE[0]}")/../checked_gatekeeper_quarantine_flag.sh"
 
   # Check docker installed
   set +e
