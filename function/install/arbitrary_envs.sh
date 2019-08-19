@@ -26,7 +26,7 @@ install::arbitrary_envs() {
     local -r install_path="${HOME}"/."${env_basename}"
 
     if [[ ! -d "${install_path}" ]]; then
-      git clone https://github.com/"${ENV}".git "${install_path}"
+      git clone https://github.com/"${env}".git "${install_path}"
 
       if "${make_it}"; then
         cd "${install_path}" && src/configure && make -C src

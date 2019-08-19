@@ -7,7 +7,7 @@
 # Returns:
 #   None
 #######################################
-function install::stack () {
+install::stack() {
   set +e
   type -t stack
   local -r exists="${?}"

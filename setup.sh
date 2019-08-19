@@ -12,9 +12,16 @@ set -e
 readonly abs_path="$(cd "$(dirname "${0}")"; pwd)"
 
 # Import functions
+
+# shellcheck disable=SC1091
 source ./function/install/homebrew.sh
+# shellcheck disable=SC1091
 source ./function/install/fisher.sh
+# shellcheck disable=SC1091
+source ./function/install/arbitrary_envs.sh
+# shellcheck disable=SC1091
 source ./function/install/stack.sh
+# shellcheck disable=SC1091
 source ./function/install/rustup.sh
 
 #######################################
