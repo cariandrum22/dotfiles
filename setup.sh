@@ -18,6 +18,8 @@ source ./function/install/xcode_command_line_tools.sh
 # shellcheck disable=SC1091
 source ./function/install/homebrew.sh
 # shellcheck disable=SC1091
+source ./function/install/git.sh
+# shellcheck disable=SC1091
 source ./function/install/fisher.sh
 # shellcheck disable=SC1091
 source ./function/install/docker.sh
@@ -96,6 +98,9 @@ main() {
     fi
   fi
   # TODO: Implement the function to install Homebrew
+
+  # Install Git
+  install::git
 
   # Install fisher
   install::fisher
