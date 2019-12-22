@@ -1,18 +1,22 @@
 #######################################
-# Install Stack
+# go resolver
 # Globals:
-#   None
+#   BASH_SOURCE
+#   GOPATH
+#   HOME
 # Arguments:
 #   None
 # Returns:
 #   None
 #######################################
-install::stack() {
+go_resolver() {
+  # Check go installed
   set +e
-  type -t stack > /dev/null 2>&1
+  type -t go > /dev/null 2>&1
   local -r exists="${?}"
   set -e
   if [[ "${exists}" -ne 0 ]]; then
-    curl -sSL https://get.haskellstack.org/ | sh
+    # shellcheck source=/dev/null
+    source "$(dirname "${BASH_SOURCE[0]}")/go.sh"
   fi
 }

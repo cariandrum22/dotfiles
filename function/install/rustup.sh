@@ -11,7 +11,7 @@
 install::rustup() {
   declare -x PATH="${HOME}/.cargo/bin:${PATH}"
   set +e
-  type -t rustup
+  type -t rustup > /dev/null 2>&1
   local -r exists="${?}"
   set -e
   if [[ "${exists}" -ne 0 ]]; then
