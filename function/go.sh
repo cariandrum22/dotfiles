@@ -21,6 +21,6 @@ go() {
   if [[ "${exists}" -ne 0 ]]; then
     error "docker command not found."
   else
-    docker run --rm -v "${GOPATH:-${HOME}/Go}":/go -e GOOS="$(uname -s | awk '{print tolower}')" -e GOARCH=amd64 golang:stretch go "${@}"
+    docker run --rm -v "${GOPATH:-${HOME}/Go}":/go -e GO111MODULE="on" -e GOOS="$(uname -s | awk '{print tolower($0)}')" -e GOARCH=amd64 golang:stretch go "${@}"
   fi
 }
