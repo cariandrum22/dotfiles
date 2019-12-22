@@ -36,7 +36,7 @@ source ./function/install/rustup.sh
 
 # Set temporary PATH for installation
 if [[ -z "${GOBIN:+UNDEF}" ]]; then
-  readonly gobin="${GOPATH:-${HOME}/Go}/bin/$(uname -s | awk '{print tolower}')_amd64"
+  readonly gobin="${GOPATH:-${HOME}/Go}/bin/$(uname -s | awk '{print tolower($0)}')_amd64"
   declare -x GOBIN="${gobin}"
   declare -x PATH="${GOBIN}:${PATH}"
 fi

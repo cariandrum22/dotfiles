@@ -18,7 +18,7 @@ install::homebrew() {
 
   # Check if Homebrew installed
   set +e
-  type -t brew
+  type -t brew > /dev/null 2>&1
   local -r exists="${?}"
   set -e
   if [[ "${exists}" -ne 0 ]]; then

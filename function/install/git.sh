@@ -14,7 +14,7 @@ install::git() {
 
   # Check Git installed
   set +e
-  type -t git
+  type -t git > /dev/null 2>&1
   local -r exists="${?}"
   set -e
   if [[ "${exists}" -ne 0 ]]; then

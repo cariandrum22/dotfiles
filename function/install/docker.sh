@@ -16,7 +16,7 @@ install::docker() {
 
   # Check docker installed
   set +e
-  type -t docker
+  type -t docker > /dev/null 2>&1
   local -r exists="${?}"
   set -e
   if [[ "${exists}" -ne 0 ]]; then
