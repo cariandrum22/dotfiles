@@ -39,6 +39,13 @@ end
 # Initialize the *env such as rbenv, ndenv, etc.
 arbenv "rbenv" "nodenv" "goenv" "pyenv" "plenv"
 
+# Go
+set -x GOENV_ROOT "$HOME/.goenv"
+set -x GOPATH "$HOME/Go"
+set_path "$GOENV_ROOT/bin"
+set_path "$GOPATH/bin"
+goenv init - | source
+
 # direnv
 eval (direnv hook fish)
 
@@ -47,13 +54,6 @@ pyenv virtualenv-init - | source
 
 # LLVM
 set_path "/usr/local/opt/llvm/bin"
-
-# Go
-set -x GOENV_ROOT "$HOME/.goenv"
-set -x GOPATH "$HOME/Go"
-set_path "$GOENV_ROOT/bin"
-set_path "$GOPATH/bin"
-goenv init - | source
 
 # Stack
 set_path "$HOME/.local/bin"
