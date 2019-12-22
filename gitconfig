@@ -1,6 +1,7 @@
 [user]
 	name = Takafumi Asano
 	email = cariandrum22@gmail.com
+	signingkey = 48F302B631525FA4D5A40106AC7AA4174AC64BA5
 [alias]
 	co = checkout
 	br = branch
@@ -16,3 +17,5 @@
 [ghq]
 	root = ~/Codex
 	root = ~/go/src
+[commit]
+	gpgsign = true
