@@ -33,6 +33,8 @@ source ./function/install/arbitrary_envs.sh
 source ./function/install/stack.sh
 # shellcheck disable=SC1091
 source ./function/install/rustup.sh
+# shellcheck disable=SC1091
+source ./function/install/nix.sh
 
 # Set temporary PATH for installation
 if [[ -z "${GOBIN:+UNDEF}" ]]; then
@@ -133,6 +135,9 @@ main() {
 
   # Install rustup
   install::rustup
+
+  # Install Nix
+  install::nix
 }
 
 #######################################
