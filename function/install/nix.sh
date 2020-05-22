@@ -10,7 +10,7 @@
 #######################################
 install::nix() {
   # shellcheck source=/dev/null
-  #source "$(dirname "${BASH_SOURCE[0]}")/../error.sh"
+  source "$(dirname "${BASH_SOURCE[0]}")/../error.sh"
 
   if [[ ("${OSTYPE}" != "darwin"* && "${OSTYPE}" != "linux-gnu"*) ]]; then
     error "This Platform is not supported."
@@ -50,8 +50,7 @@ install::nix() {
     curl -o "/tmp/install-nix-${1}" "https://releases.nixos.org/nix/nix-${1}/install"
     curl -o "/tmp/install-nix-${1}.asc" "https://releases.nixos.org/nix/nix-${1}/install.asc"
     gpg --keyserver hkp://keys.gnupg.net --recv-keys B541D55301270E0BCF15CA5D8170B4726D7198DE
-    gpg --verify "/tmp/install-nix-${1}.asc"
-    sudo mount -uw / && sudo ln -s /System/Volumes/Data/nix /nix
+    gpg --verify "/tmp/install-nix-${1}.asc"ix
     sh "/tmp/install-nix-${1}"
   fi
 }
