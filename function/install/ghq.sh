@@ -18,6 +18,6 @@ install::ghq() {
   local -r exists="${?}"
   set -e
   if [[ "${exists}" -ne 0 ]]; then
-    go get -u github.com/motemen/ghq
+    go get -u github.com/x-motemen/ghq
   fi
 }
