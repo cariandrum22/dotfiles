@@ -35,6 +35,8 @@ source ./function/install/stack.sh
 source ./function/install/rustup.sh
 # shellcheck disable=SC1091
 source ./function/install/nix.sh
+# shellcheck disable=SC1091
+source ./function/install/asdf_vm.sh
 
 # Set temporary PATH for installation
 if [[ -z "${GOBIN:+UNDEF}" ]]; then
@@ -75,18 +77,19 @@ main() {
     config/fish/fishfile
   )
 
-  # List of arbitrary environment (e.g. rbenv, nodenv, pyenv, etc.)
-  #   Variable Format:
-  #     Env(Enter the path of GitHub) | Make it?(Boolean) | Plugins(Enter the path of GitHub as colon separated value)
-  #   Example:
-  #     rbenv|true|rbenv/ruby-build:rkh/rbenv-update:jf/-rbenv-gemset
-  local -ar arbenv_definitions=(
-    "rbenv/rbenv|true|rbenv/ruby-build"
-    "nodenv/nodenv|true|nodenv/node-build"
-    "pyenv/pyenv|true|pyenv/pyenv-virtualenv"
-    "tokuhirom/plenv|false|tokuhirom/Perl-Build"
-    "syndbg/goenv|false|"
-  )
+  # TODO: arbitrary_envs is deprecated
+  ## List of arbitrary environment (e.g. rbenv, nodenv, pyenv, etc.)
+  ##   Variable Format:
+  ##     Env(Enter the path of GitHub) | Make it?(Boolean) | Plugins(Enter the path of GitHub as colon separated value)
+  ##   Example:
+  ##     rbenv|true|rbenv/ruby-build:rkh/rbenv-update:jf/-rbenv-gemset
+  #local -ar arbenv_definitions=(
+  #  "rbenv/rbenv|true|rbenv/ruby-build"
+  #  "nodenv/nodenv|true|nodenv/node-build"
+  #  "pyenv/pyenv|true|pyenv/pyenv-virtualenv"
+  #  "tokuhirom/plenv|false|tokuhirom/Perl-Build"
+  #  "syndbg/goenv|false|"
+  #)
 
   # Run for macOS only
   if [ "$(uname)" == 'Darwin' ]; then
@@ -127,14 +130,15 @@ main() {
   local -ar dot_files=( "${base_dot_files[@]}" "${os_specific_dot_files[@]}")
   deploy_dot_files "${dot_files[@]}"
 
-  # Install arbitrary environment
-  install::arbitrary_envs "${arbenv_definitions[@]}"
+  # TODO: arbitrary_envs is deprecated
+  ## Install arbitrary environment
+  #install::arbitrary_envs "${arbenv_definitions[@]}"
+
+  # Install asdf-vm
+  install::asdf_vm v0.8.0-rc1
 
   # Install stack
   install::stack
-
-  # Install rustup
-  install::rustup
 
   # Install Nix
   install::nix
