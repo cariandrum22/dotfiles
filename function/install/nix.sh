@@ -50,7 +50,7 @@ install::nix() {
     curl -o "/tmp/install-nix-${1}" "https://releases.nixos.org/nix/nix-${1}/install"
     curl -o "/tmp/install-nix-${1}.asc" "https://releases.nixos.org/nix/nix-${1}/install.asc"
     gpg --keyserver hkp://keys.gnupg.net --recv-keys B541D55301270E0BCF15CA5D8170B4726D7198DE
-    gpg --verify "/tmp/install-nix-${1}.asc"ix
+    gpg --verify "/tmp/install-nix-${1}.asc"
     sh "/tmp/install-nix-${1}"
   fi
 }
