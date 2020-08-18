@@ -22,6 +22,11 @@ end
 # fzf
 set -U FZF_LEGACY_KEYBINDINGS 0
 
+# asdf-vm
+if type -q asdf
+  source ~/.asdf/asdf.fish
+end
+
 # AWS
 set -x AWS_DEFAULT_REGION "ap-northeast-1"
 
@@ -36,8 +41,8 @@ if [ -f $HOME/Applications/Google/google-cloud-sdk/completion.fish.inc ]
   source "$HOME/Applications/Google/google-cloud-sdk/completion.fish.inc"
 end
 
-# Initialize the *env such as rbenv, ndenv, etc.
-arbenv "rbenv" "nodenv" "goenv" "pyenv" "plenv"
+## Initialize the *env such as rbenv, ndenv, etc.
+#arbenv "rbenv" "nodenv" "goenv" "pyenv" "plenv"
 
 # Go
 set -x GOENV_ROOT "$HOME/.goenv"
