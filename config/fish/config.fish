@@ -23,7 +23,7 @@ end
 set -U FZF_LEGACY_KEYBINDINGS 0
 
 # asdf-vm
-if type -q asdf
+if [ -f "$HOME/.asdf/asdf.fish" ]
   source ~/.asdf/asdf.fish
 end
 
