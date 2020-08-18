@@ -32,6 +32,13 @@ if type -q bass
   end
 end
 
+# Configure GOPATH
+if [ -d "$HOME/Go" ]
+  set -x GOPATH "$HOME/Go"
+  set_path "$GOPATH/bin"
+  set_path "$GOPATH/bin/"(uname -s | awk '{print tolower($0)}')"_amd64"
+end
+
 # Configuring the compiler and linker for macOS
 if [ (thunnus.os.platform.detect) = macOS ]
   if [ -f "/usr/local/opt/llvm/bin" ]
@@ -71,14 +78,6 @@ end
 ## The next line enables shell command completion for gcloud.
 if [ -f $HOME/Applications/Google/google-cloud-sdk/completion.fish.inc ]
   source "$HOME/Applications/Google/google-cloud-sdk/completion.fish.inc"
-end
-
-# Configure the Go Programming Language
-if type -q go
-  set -x GOENV_ROOT "$HOME/.goenv"
-  set -x GOPATH "$HOME/Go"
-  set_path "$GOENV_ROOT/bin"
-  set_path "$GOPATH/bin/"(uname -s | awk '{print tolower}')"_amd64"
 end
 
 # Configure rustup
