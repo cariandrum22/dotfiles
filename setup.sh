@@ -141,7 +141,7 @@ main() {
   install::stack
 
   # Install Nix
-  install::nix
+  install::nix 2.3.7
 }
 
 #######################################
