@@ -13,21 +13,12 @@ in {
       # nix-shell
       any-nix-shell
 
-      # Haskell
-      ghc
-      cabal-install
-      stack
-
-      # Haskell Project Management for Nix
-      cabal2nix
-      nix-prefetch-git
-
       # Deep Learning
       cudatoolkit
       cudnn
 
       # GUI Applications
-      polybar
+      polybarFull
       dmenu
       rofi
       feh
@@ -39,6 +30,7 @@ in {
       remmina
       libreoffice
       google-chrome
+      firefox
       keybase
       ark
       partition-manager
@@ -48,6 +40,7 @@ in {
       _1password-gui
       steam
       wireshark
+      spotify
 
       # Utility
       ghq
@@ -71,11 +64,11 @@ in {
       azure-cli
       azure-storage-azcopy
       certbot
-      awscli
+      awscli2
       eksctl
       saml2aws
 
-      # DevTools
+      # Development Environment
       gitAndTools.delta
       heroku
       unstable.vscode
@@ -91,7 +84,7 @@ in {
       ruby_2_6
       rubocop
       python3
-      nodejs_latest
+      nodejs-12_x
 
       # Database Clients
       mysql-client
@@ -99,4 +92,9 @@ in {
       postgresql_10
     ];
   };
+
+  imports = [
+    ./nix-thunk.nix
+    ./haskell.nix
+  ];
 }

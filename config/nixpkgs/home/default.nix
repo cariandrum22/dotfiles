@@ -1,6 +1,6 @@
 {
   imports = [
     ./file.nix
-    ./packages.nix
+    ./packages/default.nix
   ];
 }

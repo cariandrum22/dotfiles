@@ -8,6 +8,10 @@
     ".config/fish/fishfile" = {
       source = ../../fish/fishfile;
     };
+    ".config/polybar" = {
+      source = ../../polybar;
+      recursive = true;
+    };
     ".themes/Nordic" = {
       source = builtins.fetchGit {
         url = "https://github.com/EliverLara/Nordic";
