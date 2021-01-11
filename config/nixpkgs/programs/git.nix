@@ -64,57 +64,6 @@ let
     # Windows shortcuts
     "*.lnk"
   ];
-  Emacs = [
-    # -*- mode: gitignore; -*-
-    "*~"
-    "\#*\#"
-    "/.emacs.desktop"
-    "/.emacs.desktop.lock"
-    "*.elc"
-    "auto-save-list"
-    "tramp"
-    ".\#*"
-
-    # Org-mode
-    ".org-id-locations"
-    "*_archive"
-
-    # flymake-mode
-    "*_flymake.*"
-
-    # eshell files
-    "/eshell/history"
-    "/eshell/lastdir"
-
-    # elpa packages
-    "/elpa/"
-
-    # reftex files
-    "*.rel"
-
-    # AUCTeX auto folder
-    "/auto/"
-
-    # cask packages
-    ".cask/"
-    "dist/"
-
-    # Flycheck
-    "flycheck_*.el"
-
-    # server auth directory
-    "/server/"
-
-    # projectiles files
-    ".projectile"
-
-    # directory configuration
-    ".dir-locals.el"
-
-    # network security
-    "/network-security.data"
-  ];
-
 
 in {
   programs.git = {
@@ -156,6 +105,6 @@ in {
         #root = "~/go/src";
       };
     };
-    ignores = builtins.concatLists [Linux macOS Windows Emacs];
+    ignores = builtins.concatLists [Linux macOS Windows];
   };
 }
