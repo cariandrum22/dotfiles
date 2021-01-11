@@ -17,5 +17,7 @@ let
 
 in
 {
-  nixops = (self.callPackage "${nixopsSrc}/release.nix" { p = nixopsPlugins; }).build.x86_64-linux;
+  nixops = if builtins.currentSystem == "x86_64-linux"
+             then (self.callPackage "${nixopsSrc}/release.nix" { p = nixopsPlugins; }).build.x86_64-linux
+             else super.nixops;
 }

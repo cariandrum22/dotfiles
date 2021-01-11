@@ -1,6 +1,10 @@
 { pkgs, ... }:
 
-{
+let
+  pinentry-program = if builtins.currentSystem == "x86_64-darwin"
+               then "${pkgs.pinentry_mac}/bin/pinentry-mac"
+               else "${pkgs.pinentry_gnome}/bin/pinentry-gnome3";
+in {
   home.file = {
     ".config/fish/config.fish" = {
       source = ../../fish/config.fish;
@@ -46,7 +50,7 @@
     };
     ".gnupg/gpg-agent.conf" = {
       text = ''
-        pinentry-program ${pkgs.pinentry_gnome}/bin/pinentry-gnome3
+        pinentry-program ${pinentry-program}
       '';
     };
     ".netrc.gpg" = {

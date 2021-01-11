@@ -1,16 +1,24 @@
-{
+# TODO: This implementation is naive, so make it more elegant.
+
+let
+  base = [
+    ./home/default.nix
+    ./programs/default.nix
+  ];
+  linux = [
+    ./xsession.nix
+    ./home/default.nix
+    ./programs/linux-desktop.nix
+    ./services/picom.nix
+  ];
+
+in {
   programs.home-manager = {
     enable = true;
     path = "https://github.com/rycee/home-manager/archive/release-20.09.tar.gz";
   };
 
-  #manual.manpages.enable = false;
-
-  imports = [
-    ./home/default.nix
-    ./programs/default.nix
-    ./services/picom.nix
-  ];
+  imports = if builtins.currentSystem == "x86_64-darwin" then base else base ++ linux;
 
   xresources.properties = {
     "urxvt*foreground" = "#d3d3d3";
@@ -31,35 +39,5 @@
     "urxvt*color13" = "#e686e6";
     "urxvt*color14" = "#66e6e6";
     "urxvt*color15" = "#e6e6e6";
-  };
-
-  xsession = {
-    enable = true;
-    windowManager = {
-      xmonad = {
-        enable = true;
-        extraPackages = haskellPackages: [
-          haskellPackages.dbus
-          haskellPackages.xmonad-contrib
-          haskellPackages.xmonad-extras
-          haskellPackages.xmonad
-        ];
-        enableContribAndExtras = true;
-        config = ../../xmonad/xmonad.hs;
-      };
-    };
-    initExtra = ''
-      eval $(gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)
-      export SSH_AUTH_SOCK
-
-      export XMODIFIERS="@im=fcitx"
-      export XMODIFIER="@im=fcitx"
-      export GTK_IM_MODULE="fcitx"
-      export QT_IM_MODULE="fcitx"
-      fcitx
-
-      xrdb -merge .Xresources
-      feh --bg-scale ~/Pictures/Wallpaper/756745.jpg
-    '';
   };
 }

@@ -13,42 +13,11 @@ in {
       # nix-shell
       any-nix-shell
 
-      # Deep Learning
-      cudatoolkit
-      cudnn
-
-      # GUI Applications
-      polybarFull
-      dmenu
-      rofi
-      feh
-      pavucontrol
-      elementary-planner
-      xmind
-      ledger-live-desktop
-      yubikey-manager-qt
-      remmina
-      libreoffice
-      google-chrome
-      firefox
-      keybase
-      ark
-      partition-manager
-      slack
-      robo3t
-      teams
-      _1password-gui
-      steam
-      wireshark
-      spotify
-
       # Utility
       ghq
       direnv
       fzf
       ag
-      google-drive-ocamlfuse
-      yubikey-manager
       nkf
       jq
 
@@ -71,14 +40,11 @@ in {
       # Development Environment
       gitAndTools.delta
       heroku
-      unstable.vscode
-      jetbrains.datagrip
       unstable.cachix
       sqlite
 
       # Compiler and Runtime
       rustup
-      jdk
       go
       dotnet-sdk
       ruby_2_6

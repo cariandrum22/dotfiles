@@ -29,7 +29,7 @@ in {
         ver = "0.1.0.1";
 		  	sha256 = "1kcr33w8kkyyynml0i20zdia792jprbg4av7f5dajvy4a2l2vmgj";
       } {};
-      unliftio-core = super.unliftio-core_0_2_0_1;
+      unliftio-core = super.unliftio-core;
     })).nix-thunk
   ];
 }
