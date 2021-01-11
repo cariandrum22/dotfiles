@@ -10,6 +10,8 @@
     ormolu
   ];
 
+  home.file.".ghci".source = ../../../../ghci;
+
   programs.git.ignores = [
     "dist"
     "dist-*"
