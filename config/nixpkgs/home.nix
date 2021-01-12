@@ -1,14 +1,11 @@
 # TODO: This implementation is naive, so make it more elegant.
 
 let
-  base = [
-    ./home/default.nix
-    ./programs/default.nix
-  ];
+  base = [ ./home/default.nix ./programs/default.nix ];
   linux = [
     ./xsession.nix
     ./home/default.nix
-    ./programs/linux-desktop.nix
+    ./home/packages/linux-desktop.nix
     ./services/picom.nix
   ];
 
@@ -18,7 +15,8 @@ in {
     path = "https://github.com/rycee/home-manager/archive/release-20.09.tar.gz";
   };
 
-  imports = if builtins.currentSystem == "x86_64-darwin" then base else base ++ linux;
+  imports =
+    if builtins.currentSystem == "x86_64-darwin" then base else base ++ linux;
 
   xresources.properties = {
     "urxvt*foreground" = "#d3d3d3";

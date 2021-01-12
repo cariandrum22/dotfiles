@@ -28,8 +28,6 @@
   };
 
   home.file.".tmux/plugins/tpm" = {
-    source = builtins.fetchGit {
-      url = "https://github.com/tmux-plugins/tpm";
-    };
+    source = builtins.fetchGit { url = "https://github.com/tmux-plugins/tpm"; };
   };
 }

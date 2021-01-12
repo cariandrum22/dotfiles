@@ -6,7 +6,8 @@ let
     sha256 = "0g2ag4mhgrxws3h4q8cvfh4ks1chgpjm018ayqd48lagyvi32l8m";
     rev = "1c29f6c716dad9ad58aa863ebc9575422459bf95";
   };
-  nixopsLibvirtdPlugin = self.callPackage "${nixopsLibvirtdSrc}/release.nix" {};
+  nixopsLibvirtdPlugin =
+    self.callPackage "${nixopsLibvirtdSrc}/release.nix" { };
   nixopsSrc = self.fetchFromGitHub {
     owner = "NixOS";
     repo = "nixops";
@@ -15,9 +16,11 @@ let
   };
   nixopsPlugins = _: [ nixopsLibvirtdPlugin ];
 
-in
-{
-  nixops = if builtins.currentSystem == "x86_64-linux"
-             then (self.callPackage "${nixopsSrc}/release.nix" { p = nixopsPlugins; }).build.x86_64-linux
-             else super.nixops;
+in {
+  nixops = if builtins.currentSystem == "x86_64-linux" then
+    (self.callPackage "${nixopsSrc}/release.nix" {
+      p = nixopsPlugins;
+    }).build.x86_64-linux
+  else
+    super.nixops;
 }

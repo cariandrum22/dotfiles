@@ -1,12 +1,7 @@
-{ pkgs, ... }:
-
 let
-  pkgs = import <nixpkgs> {
-    config.allowUnfree = true;
-  };
-  unstable = import <unstable> {
-    config.allowUnfree = true;
-  };
+  pkgs = import <nixpkgs> { config.allowUnfree = true; };
+  unstable = import <unstable> { config.allowUnfree = true; };
+  base = [ ./nix-thunk.nix ./haskell.nix ];
 in {
   home = {
     packages = with pkgs; [
@@ -59,8 +54,8 @@ in {
     ];
   };
 
-  imports = [
-    ./nix-thunk.nix
-    ./haskell.nix
-  ];
+  imports = if builtins.currentSystem == "x86_64-darwin" then
+    base
+  else
+    base ++ [ ./linux-desktop.nix ];
 }

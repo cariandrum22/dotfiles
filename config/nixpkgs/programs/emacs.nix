@@ -1,9 +1,10 @@
-{pkgs, ...}:
+{ pkgs, ... }:
 
 {
   nixpkgs.overlays = [
     (import (builtins.fetchTarball {
-      url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
+      url =
+        "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
     }))
   ];
 
@@ -47,14 +48,11 @@
         frame-local
         dired-sidebar
         wrap-region
-      ])
-    );
+      ]));
   };
 
   home.file = {
-    ".emacs.el" = {
-      source = ../../../emacs.el;
-    };
+    ".emacs.el" = { source = ../../../emacs.el; };
     ".emacs.d" = {
       source = ../../../emacs.d;
       recursive = true;
@@ -64,13 +62,13 @@
   programs.git.ignores = [
     # -*- mode: gitignore; -*-
     "*~"
-    "\#*\#"
+    "#*#"
     "/.emacs.desktop"
     "/.emacs.desktop.lock"
     "*.elc"
     "auto-save-list"
     "tramp"
-    ".\#*"
+    ".#*"
 
     # Org-mode
     ".org-id-locations"

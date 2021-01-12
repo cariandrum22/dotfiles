@@ -1,8 +1,1 @@
-{
-  imports = [
-    ./git.nix
-    ./kitty.nix
-    ./tmux.nix
-    ./emacs.nix
-  ];
-}
+{ imports = [ ./git.nix ./kitty.nix ./tmux.nix ./emacs.nix ]; }

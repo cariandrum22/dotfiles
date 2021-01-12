@@ -1,6 +1,8 @@
-{ pkgs, ... }:
+let
+  pkgs = import <nixpkgs> { config.allowUnfree = true; };
+  unstable = import <unstable> { config.allowUnfree = true; };
 
-{
+in {
   home = {
     packages = with pkgs; [
       # Deep Learning

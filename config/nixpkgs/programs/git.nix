@@ -87,12 +87,8 @@ in {
         editor = "emacs";
         excludesfile = "~/.gitignore";
       };
-      credential = {
-        helper = "netrc -f ~/.netrc.gpg -v";
-      };
-      color = {
-        ui = true;
-      };
+      credential = { helper = "netrc -f ~/.netrc.gpg -v"; };
+      color = { ui = true; };
 
       ghq = {
         root = "~/Codex";
@@ -105,6 +101,6 @@ in {
         #root = "~/go/src";
       };
     };
-    ignores = builtins.concatLists [Linux macOS Windows];
+    ignores = builtins.concatLists [ Linux macOS Windows ];
   };
 }

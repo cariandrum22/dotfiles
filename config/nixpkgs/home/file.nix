@@ -1,17 +1,14 @@
 { pkgs, ... }:
 
 let
-  pinentry-program = if builtins.currentSystem == "x86_64-darwin"
-               then "${pkgs.pinentry_mac}/bin/pinentry-mac"
-               else "${pkgs.pinentry_gnome}/bin/pinentry-gnome3";
+  pinentry-program = if builtins.currentSystem == "x86_64-darwin" then
+    "${pkgs.pinentry_mac}/bin/pinentry-mac"
+  else
+    "${pkgs.pinentry_gnome}/bin/pinentry-gnome3";
 in {
   home.file = {
-    ".config/fish/config.fish" = {
-      source = ../../fish/config.fish;
-    };
-    ".config/fish/fishfile" = {
-      source = ../../fish/fishfile;
-    };
+    ".config/fish/config.fish" = { source = ../../fish/config.fish; };
+    ".config/fish/fishfile" = { source = ../../fish/fishfile; };
     ".config/polybar" = {
       source = ../../polybar;
       recursive = true;
@@ -53,11 +50,7 @@ in {
         pinentry-program ${pinentry-program}
       '';
     };
-    ".netrc.gpg" = {
-      source = ../../../netrc.gpg;
-    };
-    ".pythonstartup" = {
-      source = ../../../pythonstartup;
-    };
+    ".netrc.gpg" = { source = ../../../netrc.gpg; };
+    ".pythonstartup" = { source = ../../../pythonstartup; };
   };
 }
