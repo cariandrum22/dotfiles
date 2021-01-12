@@ -58,23 +58,8 @@ main() {
   # Local variables
 
   # List of files to deploy
-  # TODO: remove zsh related files
   local -a base_dot_files=(
-    # zshrc
-    # zshrc.personal
-    # zlogin
-    # zsh_functions
-    gitignore
-    gitconfig
-    emacs.el
-    emacs.d
-    Xresources
-    pythonstartup
-    gemrc
-    bundle
-    rubocop.yml
-    config/fish/config.fish
-    config/fish/fishfile
+    config/nixpkgs
   )
 
   # TODO: arbitrary_envs is deprecated

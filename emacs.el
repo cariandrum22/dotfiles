@@ -75,54 +75,11 @@
 ;;-----------------------------------------------------------------------------
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
-;; install packages
-(setq el-get-sources
-      '(swiper
-        projectile
-        counsel-projectile
-        use-package
-        flycheck
-        company-mode
-        mmm-mode
-        haskell-mode
-        company-ghc
-        ruby-mode
-        ruby-end
-        inf-ruby
-        rspec-mode
-        robe-mode
-        rbenv
-        projectile-rails
-        rust-mode
-        go-mode
-        dockerfile-mode
-        yaml-mode
-        jinja2-mode
-        web-mode
-        js2-mode
-        elm-mode
-        emacs-fish
-        font-lock+
-        magit
-        git-gutter+
-        ddskk
-        ov
-        powerline
-        color-theme-zenburn
-        (:name frame-local :type elpa)
-        (:name hindent :type elpa)
-        (:name sidebar :pkgname "sebastiencs/sidebar.el" :type github)
-        (:name wrap-region :pkgname "rejeep/wrap-region" :type github)
-        ))
-(require 'init-el-get)
-(package-initialize)
-
 ;; activate packages
 (require 'use-package)
 (require 'init-powerline)
 (require 'init-ivy)
 (require 'init-flycheck)
-(require 'init-sidebar)
 (require 'init-skk)
 (require 'init-mmm)
 (require 'init-emacs-lisp)
