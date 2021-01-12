@@ -25,11 +25,11 @@ in {
           ver = "0.1.0.1";
           sha256 = "1kcr33w8kkyyynml0i20zdia792jprbg4av7f5dajvy4a2l2vmgj";
         } { };
-        unliftio-core = self.callHackageDirect {
+        unliftio-core = haskell.lib.doJailbreak ( self.callHackageDirect {
           pkg = "unliftio-core";
           ver = "0.2.0.1";
           sha256 = "06cbv2yx5a6qj4p1w91q299r0yxv96ms72xmjvkpm9ic06ikvzzq";
-        } { };
+        } { });
       })).nix-thunk
     ];
 }
