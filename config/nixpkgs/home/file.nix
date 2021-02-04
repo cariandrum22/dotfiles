@@ -2,7 +2,7 @@
 
 let
   pinentry-program = if builtins.currentSystem == "x86_64-darwin" then
-    "${pkgs.pinentry_mac}/bin/pinentry-mac"
+    "${pkgs.pinentry_mac}/Applications/pinentry-mac.app/Contents/MacOS/pinentry-mac"
   else
     "${pkgs.pinentry_gnome}/bin/pinentry-gnome3";
 in {
