@@ -7,6 +7,7 @@ let
     ./home/default.nix
     ./home/packages/linux-desktop.nix
     ./services/picom.nix
+    ./services/keybase.nix
   ];
 
 in {
