@@ -15,16 +15,29 @@ in {
       ag
       nkf
       jq
+      nix-prefetch-git
+      unstable.dep2nix
+      unstable.vgo2nix
+      bat
+      lsd
+      dust
+      duf
+      tldr
+      glances
+      gtop
+      hyperfine
+      gping
+      procs
+      httpie
+      curlie
 
       # DevOps
-      nixops
+      unstable.nixops
       docker-compose
       etcdctl
       kubectl
       kubernetes-helm
       vagrant
-      vault
-      terraform
       azure-cli
       azure-storage-azcopy
       certbot
@@ -45,7 +58,8 @@ in {
       ruby_2_6
       rubocop
       python3
-      nodejs-12_x
+      nodejs-14_x
+      jdk
 
       # Database Clients
       mysql-client

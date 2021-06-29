@@ -33,20 +33,16 @@ in {
       steam
       wireshark
       spotify
+      keybase-gui
+      zoom-us
 
       # Utility
       google-drive-ocamlfuse
       yubikey-manager
 
-      # DevOps
-      nixops
-
       # Development Environment
       unstable.vscode
       jetbrains.datagrip
-
-      # Compiler and Runtime
-      jdk
     ];
   };
 }

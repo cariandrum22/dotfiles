@@ -14,12 +14,6 @@ if type -q code
   set -x VISUAL (which code)
 end
 
-if type -q gpg
-  set -x GPG_TTY (tty)
-  set -x SSH_AUTH_SOCK (gpgconf --list-dirs agent-ssh-socket)
-  gpgconf --launch gpg-agent
-end
-
 # Load OneLogin's API Credential
 if [ -f "$HOME/.onelogin/credential.fish" ]
   source "$HOME/.onelogin/credential.fish"
@@ -30,6 +24,16 @@ if type -q bass
   if [ -f "$HOME/.nix-profile/etc/profile.d/nix.sh" ]
     bass source "$HOME/.nix-profile/etc/profile.d/nix.sh"
   end
+end
+
+# Configure any-nix-shell
+if type -q any-nix-shell
+  any-nix-shell fish --info-right | source
+end
+
+# If cabal exists, add the path to the binary
+if type -q cabal
+  set_path "$HOME/.cabal/bin"
 end
 
 # Configure GOPATH
@@ -118,14 +122,6 @@ alias where="command -v"
 alias j="jobs -l"
 alias ll="ls -lh"
 alias la="ls -lha"
-
-## for The Haskell Tool Stack
-if type -q stack
-  alias ghc="stack ghc --"
-  alias ghci="stack ghci"
-  alias runghc="stack runghc --"
-  alias runhaskell="stack runghc --"
-end
 
 # Normalize path(trim tail slash)
 thunnus.path.normalize $PATH

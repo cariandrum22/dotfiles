@@ -20,8 +20,9 @@
         flycheck
         company
         mmm-mode
-        haskell-mode
-        company-ghc
+        lsp-mode
+        lsp-ui
+        lsp-haskell
         enh-ruby-mode
         ruby-end
         inf-ruby

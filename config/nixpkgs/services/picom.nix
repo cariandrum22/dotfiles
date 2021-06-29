@@ -18,6 +18,10 @@
       "100:class_g = 'Google-chrome' && !focused"
       "100:class_g = 'Evince' && focused"
       "100:class_g = 'Evince' && !focused"
+      "100:class_g = 'Code' && focused"
+      "100:class_g = 'Code' && !focused"
+      "100:class_g = 'Slack' && focused"
+      "100:class_g = 'Slack' && !focused"
     ];
     extraOptions = ''
       # For using rofi
