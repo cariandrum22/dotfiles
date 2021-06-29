@@ -272,10 +272,10 @@ showKeybindings x = addName "Show Keybindings" $
     return ()
 
 myKeys :: XConfig l -> [((KeyMask, KeySym), NamedAction)]
-myKeys conf@XConfig {XMonad.modMask = modm} =
+myKeys XConfig {XMonad.modMask = modm} =
   keySet
     "Launchers"
-    [ key "Open Terminal" (modm .|. shiftMask, xK_Return) $ spawn (XMonad.terminal conf),
+    [ key "Open Terminal" (modm .|. shiftMask, xK_Return) $ spawn $ myTerminal <> " tmux",
       key "Open rofi" (modm, xK_p) $ spawn myLauncher,
       key "Lock screen" (modm .|. controlMask, xK_l) $ spawn myScreenLocker,
       key "Sleep" (modm .|. controlMask, xK_l) $ spawn "systemctl suspend"
