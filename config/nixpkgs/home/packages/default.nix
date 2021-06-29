@@ -17,7 +17,7 @@ in {
       jq
 
       # DevOps
-      nixops
+      unstable.nixops
       docker-compose
       etcdctl
       kubectl

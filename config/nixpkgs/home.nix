@@ -12,7 +12,7 @@ let
 in {
   programs.home-manager = {
     enable = true;
-    path = "https://github.com/rycee/home-manager/archive/release-20.09.tar.gz";
+    path = "https://github.com/rycee/home-manager/archive/release-21.05.tar.gz";
   };
 
   imports =
