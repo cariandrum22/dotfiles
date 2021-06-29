@@ -32,6 +32,16 @@ if type -q bass
   end
 end
 
+# Configure any-nix-shell
+if type -q any-nix-shell
+  any-nix-shell fish --info-right | source
+end
+
+# If cabal exists, add the path to the binary
+if type -q cabal
+  set_path "$HOME/.cabal/bin"
+end
+
 # Configure GOPATH
 if [ -d "$HOME/Go" ]
   set -x GOPATH "$HOME/Go"
@@ -118,14 +128,6 @@ alias where="command -v"
 alias j="jobs -l"
 alias ll="ls -lh"
 alias la="ls -lha"
-
-## for The Haskell Tool Stack
-if type -q stack
-  alias ghc="stack ghc --"
-  alias ghci="stack ghci"
-  alias runghc="stack runghc --"
-  alias runhaskell="stack runghc --"
-end
 
 # Normalize path(trim tail slash)
 thunnus.path.normalize $PATH
