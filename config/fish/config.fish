@@ -14,12 +14,6 @@ if type -q code
   set -x VISUAL (which code)
 end
 
-if type -q gpg
-  set -x GPG_TTY (tty)
-  set -x SSH_AUTH_SOCK (gpgconf --list-dirs agent-ssh-socket)
-  gpgconf --launch gpg-agent
-end
-
 # Load OneLogin's API Credential
 if [ -f "$HOME/.onelogin/credential.fish" ]
   source "$HOME/.onelogin/credential.fish"
