@@ -6,6 +6,10 @@ set -x LC_ALL en_US.UTF-8
 set -x LANG en_US.UTF-8
 set -x PATH /usr/local/sbin "$HOME/.local/bin" $PATH
 
+if type -q tmux
+    set -x TMUX_TMPDIR "/run/user/"(id -u)
+end
+
 if type -q emacs
     set -x EDITOR (which emacs)
 end
