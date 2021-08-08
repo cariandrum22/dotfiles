@@ -46,6 +46,7 @@ in {
       saml2aws
 
       # Development Environment
+      cmake
       gitAndTools.delta
       heroku
       unstable.cachix
