@@ -91,14 +91,7 @@ in {
       color = { ui = true; };
 
       ghq = {
-        root = "~/Codex";
-        # TODO: Add ghq support to the home-manager git module
-        # NOTE: ghq can specify multiple search paths, but the keys are
-        #       duplicated.
-        #       This is not handled by the nix set type, so you need to
-        #       consider taking it as a list and reflecting it in gitconfig
-        #       or something like that.
-        #root = "~/go/src";
+        root = ["~/Codex" "~/go/src"];
       };
     };
     ignores = builtins.concatLists [ Linux macOS Windows ];
