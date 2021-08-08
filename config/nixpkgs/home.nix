@@ -8,6 +8,7 @@ let
     ./home/packages/linux-desktop.nix
     ./services/picom.nix
     ./services/keybase.nix
+    ./services/vscode-server.nix
   ];
 
 in {
