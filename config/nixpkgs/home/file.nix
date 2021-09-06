@@ -52,5 +52,6 @@ in {
     };
     ".netrc.gpg" = { source = ../../../netrc.gpg; };
     ".pythonstartup" = { source = ../../../pythonstartup; };
+    ".npmrc" = { source = ../../../npmrc; };
   };
 }
