@@ -1,7 +1,7 @@
 let
   pkgs = import <nixpkgs> { config.allowUnfree = true; };
   unstable = import <unstable> { config.allowUnfree = true; };
-  base = [ ./nix-thunk.nix ./haskell.nix ];
+  base = [ ./haskell.nix ];
 in {
   home = {
     packages = with pkgs; [
