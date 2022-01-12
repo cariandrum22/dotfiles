@@ -32,7 +32,7 @@ in {
       curlie
 
       # DevOps
-      unstable.nixops
+      nixops
       docker-compose
       etcdctl
       kubectl
