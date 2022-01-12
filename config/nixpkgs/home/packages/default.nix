@@ -1,7 +1,7 @@
 let
   pkgs = import <nixpkgs> { config.allowUnfree = true; };
   unstable = import <unstable> { config.allowUnfree = true; };
-  base = [ ./nix-thunk.nix ./haskell.nix ];
+  base = [ ./haskell.nix ];
 in {
   home = {
     packages = with pkgs; [
@@ -32,7 +32,7 @@ in {
       curlie
 
       # DevOps
-      unstable.nixops
+      nixops
       docker-compose
       etcdctl
       kubectl
@@ -56,7 +56,7 @@ in {
       rustup
       go
       dotnet-sdk
-      ruby_2_6
+      ruby_3_0
       rubocop
       python3
       nodejs-14_x

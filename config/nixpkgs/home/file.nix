@@ -16,7 +16,7 @@ in {
     ".themes/Nordic" = {
       source = builtins.fetchGit {
         url = "https://github.com/EliverLara/Nordic";
-        ref = "v1.9.0";
+        ref = "refs/tags/v2.1.0";
       };
     };
     ".icons/candy-icons" = {
