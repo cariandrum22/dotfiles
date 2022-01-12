@@ -56,7 +56,7 @@ in {
       rustup
       go
       dotnet-sdk
-      ruby_2_6
+      ruby_3_0
       rubocop
       python3
       nodejs-14_x
