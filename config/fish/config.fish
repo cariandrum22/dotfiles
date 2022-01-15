@@ -18,6 +18,11 @@ if type -q code
     set -x VISUAL (which code)
 end
 
+#
+if not type -q nixos-version
+    set -x NIX_PATH "$HOME/.nix-defexpr/channels"
+end
+
 # Load OneLogin's API Credential
 if [ -f "$HOME/.onelogin/credential.fish" ]
     source "$HOME/.onelogin/credential.fish"
