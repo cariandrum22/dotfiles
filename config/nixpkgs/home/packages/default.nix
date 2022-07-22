@@ -2,14 +2,13 @@ let
   pkgs = import <nixpkgs> { config.allowUnfree = true; };
   unstable = import <unstable> { config.allowUnfree = true; };
   base = [ ./haskell.nix ];
-in
-{
+in {
   home = {
     packages = with pkgs; [
       # Nix related
       any-nix-shell
       rnix-lsp
-      nixpkgs-fmt
+      nixfmt
       nix-prefetch-git
       dep2nix
       vgo2nix
@@ -70,9 +69,8 @@ in
     ];
   };
 
-  imports =
-    if builtins.currentSystem == "x86_64-darwin" then
-      base ++ [ ./darwin.nix ]
-    else
-      base ++ [ ./linux-desktop.nix ];
+  imports = if builtins.currentSystem == "x86_64-darwin" then
+    base ++ [ ./darwin.nix ]
+  else
+    base ++ [ ./linux-desktop.nix ];
 }
