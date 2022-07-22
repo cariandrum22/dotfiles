@@ -12,9 +12,10 @@ let
   ];
 
 in {
-  programs.home-manager = {
-    enable = true;
-    path = "https://github.com/nix-community/home-manager/archive/release-21.11.tar.gz";
+  home = {
+    username = "claude";
+    homeDirectory = "/home/claude";
+    stateVersion = "22.05";
   };
 
   imports =
