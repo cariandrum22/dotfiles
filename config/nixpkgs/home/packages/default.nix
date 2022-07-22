@@ -12,15 +12,15 @@ in {
       ghq
       direnv
       fzf
-      ag
+      silver-searcher
       nkf
       jq
       nix-prefetch-git
-      unstable.dep2nix
-      unstable.vgo2nix
+      dep2nix
+      vgo2nix
       bat
       lsd
-      dust
+      du-dust
       duf
       tldr
       glances
@@ -32,9 +32,8 @@ in {
       curlie
 
       # DevOps
-      nixops
       docker-compose
-      etcdctl
+      etcd
       kubectl
       kubernetes-helm
       vagrant

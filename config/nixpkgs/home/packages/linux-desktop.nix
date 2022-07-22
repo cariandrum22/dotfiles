@@ -7,7 +7,7 @@ in {
     packages = with pkgs; [
       # Deep Learning
       cudatoolkit
-      cudnn
+      cudaPackages.cudnn
 
       # GUI Applications
       polybarFull
@@ -16,7 +16,6 @@ in {
       feh
       pavucontrol
       elementary-planner
-      xmind
       ledger-live-desktop
       yubikey-manager-qt
       remmina
