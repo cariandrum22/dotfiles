@@ -90,9 +90,7 @@ in {
       credential = { helper = "netrc -f ~/.netrc.gpg -v"; };
       color = { ui = true; };
 
-      ghq = {
-        root = ["~/Codex" "~/go/src"];
-      };
+      ghq = { root = [ "~/Codex" "~/go/src" ]; };
     };
     ignores = builtins.concatLists [ Linux macOS Windows ];
   };

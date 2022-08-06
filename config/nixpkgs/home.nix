@@ -1,25 +1,26 @@
-# TODO: This implementation is naive, so make it more elegant.
-
 let
+  isDarwin = if builtins.currentSystem == "x86_64-darwin" then true else false;
+  username = "claude";
+  homeDirectory =
+    if isDarwin then "/Users/${username}" else "/home/${username}";
   base = [ ./home/default.nix ./programs/default.nix ];
-  linux = [
+  linux = base ++ [
     ./xsession.nix
-    ./home/default.nix
     ./home/packages/linux-desktop.nix
     ./services/picom.nix
     ./services/keybase.nix
     ./services/vscode-server.nix
   ];
+  configurations = if isDarwin then base else linux;
 
 in {
   home = {
-    username = "claude";
-    homeDirectory = "/home/claude";
+    username = username;
+    homeDirectory = homeDirectory;
     stateVersion = "22.05";
   };
 
-  imports =
-    if builtins.currentSystem == "x86_64-darwin" then base else base ++ linux;
+  imports = configurations;
 
   xresources.properties = {
     "urxvt*foreground" = "#d3d3d3";
