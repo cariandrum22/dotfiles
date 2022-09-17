@@ -18,20 +18,14 @@ if type -q code
     set -x VISUAL (which code)
 end
 
-#
+# Configure Nix
 if not type -q nixos-version
     set -x NIX_PATH "$HOME/.nix-defexpr/channels"
 end
 
-# Load OneLogin's API Credential
-if [ -f "$HOME/.onelogin/credential.fish" ]
-    source "$HOME/.onelogin/credential.fish"
-end
-
-# Configure nix-shell
 if type -q bass
-    if [ -f "$HOME/.nix-profile/etc/profile.d/nix.sh" ]
-        bass source "$HOME/.nix-profile/etc/profile.d/nix.sh"
+    if [ -f "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]
+        bass source "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
     end
 end
 
@@ -40,25 +34,15 @@ if type -q any-nix-shell
     any-nix-shell fish --info-right | source
 end
 
-# If cabal exists, add the path to the binary
-if type -q cabal
-    set_path "$HOME/.cabal/bin"
+# Configure Homebrew
+if [ -f /opt/homebrew/bin/brew ]
+    eval $(/opt/homebrew/bin/brew shellenv)
 end
 
-# Configure GOPATH
+# Configure Go
 if [ -d "$HOME/Go" ]
     set -x GOPATH "$HOME/Go"
     set_path "$GOPATH/bin"
-    set_path "$GOPATH/bin/"(uname -s | awk '{print tolower($0)}')"_amd64"
-end
-
-# Configuring the compiler and linker for macOS
-if [ (thunnus.os.platform.detect) = macOS ]
-    if [ -f /usr/local/opt/llvm/bin ]
-        set -x CPPFLAGS -I/usr/local/opt/llvm/include -I/usr/local/opt/openssl/include
-        set -x LDFLAGS "-L/usr/local/opt/llvm/lib -Wl,-rpath,/usr/local/opt/llvm/lib" -L/usr/local/opt/openssl/lib
-        set_path /usr/local/opt/llvm/bin
-    end
 end
 
 # Configure fzf
@@ -71,26 +55,9 @@ if type -q direnv
     eval (direnv hook fish)
 end
 
-# Configure asdf-vm
-if [ -f "$HOME/.asdf/asdf.fish" ]
-    source ~/.asdf/asdf.fish
-end
-
-# Configuration for aws cli and related tools
-## Export default aws credentials
-#if [ -f "$HOME/.aws/credentials" ]
-#  thunnus.aws.credential_selector saml tf
-#end
-set -x AWS_DEFAULT_REGION ap-northeast-1
-
-# Configure the Google Cloud SDK
-## The next line updates PATH for the Google Cloud SDK.
-if [ -f $HOME/Applications/Google/google-cloud-sdk/path.fish.inc ]
-    source "$HOME/Applications/Google/google-cloud-sdk/path.fish.inc"
-end
-## The next line enables shell command completion for gcloud.
-if [ -f $HOME/Applications/Google/google-cloud-sdk/completion.fish.inc ]
-    source "$HOME/Applications/Google/google-cloud-sdk/completion.fish.inc"
+# Configure Google Cloud SDK
+if [ -f $HOME/.nix-profile/google-cloud-sdk/path.fish.inc ]
+    source "$HOME/.nix-profile/google-cloud-sdk/path.fish.inc"
 end
 
 # Configure rustup
@@ -113,11 +80,6 @@ if type -q python
     set -x PYTHONSTARTUP "$HOME/.pythonstartup"
 end
 
-# Configure nsible
-if type -q ansible
-    set -x ANSIBLE_COW_SELECTION random
-end
-
 # Configure Texinfo
 if [ (thunnus.os.platform.detect) = macOS ]
     if [ -d /usr/local/opt/texinfo/bin ]
@@ -125,8 +87,7 @@ if [ (thunnus.os.platform.detect) = macOS ]
     end
 end
 
-# Configure aliases
-## Generic
+# Aliases
 alias where="command -v"
 alias j="jobs -l"
 alias ll="ls -lh"

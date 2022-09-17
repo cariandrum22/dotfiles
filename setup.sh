@@ -1,49 +1,60 @@
-#!/bin/bash
-#
-# Perform initial setup of the environment.
+#!/usr/bin/env bash
 
-# Initialize
+readonly NIXPKGS_VERSION="22.05"
+
+# Environment Setup Script.
+echo "Start setup."
+echo
 
 # Treat unset variables
 set -u
-# Exit immediately if returns a non-zero status
+# Immediately exit if it returns a non-zero status.
 set -e
+
 # Get absolute path of this script
-readonly abs_path="$(cd "$(dirname "${0}")"; pwd)"
+abs_path="$(
+  cd "$(dirname "${0}")"
+  pwd
+)"
+readonly abs_path
 
 # Import functions
-
-# shellcheck disable=SC1091
 source ./function/install/xcode_command_line_tools.sh
-# shellcheck disable=SC1091
 source ./function/install/homebrew.sh
-# shellcheck disable=SC1091
-source ./function/install/git.sh
-# shellcheck disable=SC1091
-source ./function/install/fisher.sh
-# shellcheck disable=SC1091
-source ./function/install/docker.sh
-# shellcheck disable=SC1091
-source ./function/install/ghq.sh
-# shellcheck disable=SC1091
-source ./function/install/direnv.sh
-# shellcheck disable=SC1091
-source ./function/install/arbitrary_envs.sh
-# shellcheck disable=SC1091
-source ./function/install/stack.sh
-# shellcheck disable=SC1091
-source ./function/install/rustup.sh
-# shellcheck disable=SC1091
 source ./function/install/nix.sh
-# shellcheck disable=SC1091
-source ./function/install/asdf_vm.sh
+source ./function/install/home_manager.sh
+source ./function/install/fisher.sh
+source ./function/add_nix_channels.sh
 
-# Set temporary PATH for installation
-if [[ -z "${GOBIN:+UNDEF}" ]]; then
-  readonly gobin="${GOPATH:-${HOME}/Go}/bin/$(uname -s | awk '{print tolower($0)}')_amd64"
-  declare -x GOBIN="${gobin}"
-  declare -x PATH="${GOBIN}:${PATH}"
-fi
+#######################################
+# Deploy dot files to ${HOME}
+# Globals:
+#   HOME
+# Arguments:
+#   dotfiles::Array
+# Returns:
+#   None
+#######################################
+deploy_dotfiles() {
+  # TODO: Implement error handling related to arguments and dependencies
+  local -ra dotfiles=("${@}")
+
+  prepare_sub_dir() {
+    local -ra dotfiles=("${@}")
+
+    for file in "${dotfiles[@]}"; do
+      if [[ "${file}" =~ [:word:]*/[:word:]* ]]; then
+        mkdir -p "${HOME}/.$(dirname "${file}")"
+      fi
+    done
+  }
+
+  prepare_sub_dir "${dotfiles[@]}"
+
+  for dotfile in "${dotfiles[@]}"; do
+    ln -sfn "${abs_path}"/"${dotfile}" "${HOME}"/."${dotfile}"
+  done
+}
 
 #######################################
 # Entry point
@@ -55,143 +66,59 @@ fi
 #   None
 #######################################
 main() {
-  # Local variables
-
-  # List of files to deploy
-  local -a base_dot_files=(
+  # List of dotfiles to deploy
+  local -a dotfiles=(
     config/nixpkgs
+    config/fish/fish_plugins
   )
 
-  # TODO: arbitrary_envs is deprecated
-  ## List of arbitrary environment (e.g. rbenv, nodenv, pyenv, etc.)
-  ##   Variable Format:
-  ##     Env(Enter the path of GitHub) | Make it?(Boolean) | Plugins(Enter the path of GitHub as colon separated value)
-  ##   Example:
-  ##     rbenv|true|rbenv/ruby-build:rkh/rbenv-update:jf/-rbenv-gemset
-  #local -ar arbenv_definitions=(
-  #  "rbenv/rbenv|true|rbenv/ruby-build"
-  #  "nodenv/nodenv|true|nodenv/node-build"
-  #  "pyenv/pyenv|true|pyenv/pyenv-virtualenv"
-  #  "tokuhirom/plenv|false|tokuhirom/Perl-Build"
-  #  "syndbg/goenv|false|"
-  #)
+  # List of nix-channels to add
+  local -a nix_channels=()
 
-  # Run for macOS only
+  # Run only on macOS
   if [ "$(uname)" == 'Darwin' ]; then
     install::xcode_command_line_tools
     install::homebrew
-    deploy_launchd_agents
 
-    local -ar os_specific_dot_files=(
-      config/iTerm2/com.googlecode.iterm2.plist
-      config/karabiner/karabiner.json
+    nix_channels+=(
+      "nixpkgs=https://nixos.org/channels/nixpkgs-${NIXPKGS_VERSION}-darwin"
+      "unstable=https://nixos.org/channels/nixpkgs-unstable"
     )
 
-    # Deploy configuration files into ~/Library/Application Support
-    # TODO: Functionalize so that multiple files can be deployed
-    if [[ -d "${HOME}/Library/Application Support/AquaSKK" ]]; then
-      cp -f "${abs_path}/Library/Application Support/AquaSKK/keymap.conf" \
-        "${HOME}/Library/Application Support/AquaSKK/keymap.conf"
-    fi
+    echo "Install a package under homebrew management."
+    echo
+    # Install Rosetta 2 in advance because the application installed by brew requires it
+    sudo softwareupdate --install-rosetta --agree-to-license
+    brew bundle --file="${abs_path}"/Brewfile
+    echo
   fi
-  # TODO: Implement the function to install Homebrew
 
-  # Install Git
-  install::git
-
-  # Install fisher
-  install::fisher
-
-  # Install Docker
-  install::docker
-
-  # Install ghq
-  install::ghq
-
-  # Install direnv
-  install::direnv
-
-  # Deploy dot files to ${HOME}
-  local -ar dot_files=( "${base_dot_files[@]}" "${os_specific_dot_files[@]}")
-  deploy_dot_files "${dot_files[@]}"
-
-  # TODO: arbitrary_envs is deprecated
-  ## Install arbitrary environment
-  #install::arbitrary_envs "${arbenv_definitions[@]}"
-
-  # Install asdf-vm
-  install::asdf_vm v0.8.0-rc1
-
-  # Install stack
-  install::stack
+  # Run only on non-NixOS
+  if ! type -t nixos-version >/dev/null 2>&1; then
+    dotfiles+=(config/nix)
+  fi
 
   # Install Nix
-  install::nix 2.3.7
+  install::nix
+
+  # Install Home Manager
+  install::home_manager "${NIXPKGS_VERSION}"
+
+  # Delete existing ${HOME}/.config/nixpkgs directory to replace it with a file under git management
+  rm -rf "${HOME}/.config/nixpkgs"
+
+  # Deploy dot files to ${HOME}
+  deploy_dotfiles "${dotfiles[@]}"
+
+  # Reflecting the configuration under home-manager management
+  add_nix_channels "${nix_channels[@]}"
+  home-manager switch
+
+  # Install fisher and fish plugins
+  install::fisher
+
+  echo "Setup is complete."
 }
 
-#######################################
-# Deploy dot files to ${HOME}
-# Globals:
-#   HOME
-# Arguments:
-#   dot_files::Array
-# Returns:
-#   None
-#######################################
-deploy_dot_files() {
-  # TODO: Implement error handling related to arguments and dependencies
-  local -ar dot_files=("${@}")
-
-  prepare_sub_dir() {
-    local -ar dot_files=("${@}")
-
-    for file in "${dot_files[@]}"; do
-      if [[ "${file}" =~ [:word:]*/[:word:]* ]]; then
-        mkdir -p "${HOME}/.$(dirname "${file}")"
-      fi
-    done
-  }
-
-  prepare_sub_dir "${dot_files[@]}"
-
-  for file in "${dot_files[@]}"; do
-    ln -sfn "${abs_path}"/"${file}" "${HOME}"/."${file}"
-  done
-}
-
-#######################################
-# Deploy launchd agents
-# Globals:
-#   HOME
-#   PATH
-#   abs_path
-# Arguments:
-#   None
-# Returns:
-#   None
-#######################################
- deploy_launchd_agents() {
-  # For User Agents
-  if [[ ! -f "${HOME}/Library/LaunchAgents/local.chroe.brew.plist" ]]; then
-    if [[ ! -d "${HOME}/Library/LaunchAgents" ]]; then
-      mkdir -m 700 "${HOME}/Library/LaunchAgents"
-    fi
-    cp -f "${abs_path}/launchd/user/agents/local.chroe.brew.plist" "${HOME}/Library/LaunchAgents/local.chroe.brew.plist"
-    launchctl load "${HOME}/Library/LaunchAgents/local.chroe.brew.plist"
-  fi
-  if [[ ! -f "${HOME}/Library/LaunchAgents/local.chroe.google-ime-skk.plist" ]]; then
-    cp -f "${abs_path}/launchd/user/agents/local.chroe.google-ime-skk.plist" "${HOME}/Library/LaunchAgents/local.chroe.google-ime-skk.plist"
-    launchctl load "${HOME}/Library/LaunchAgents/local.chroe.google-ime-skk.plist"
-  fi
-
-  # For Global Agents
-  if [[ ! -f /Library/LaunchAgents/local.chroe.locate.updatedb.plist ]]; then
-    echo "Install laundhd Global Agent."
-    echo "Please input sudo password."
-    sudo cp -f "${abs_path}/launchd/global/agents/local.chroe.locate.updatedb.plist" /Library/LaunchAgents/local.chroe.locate.updatedb.plist
-    sudo launchctl load /Library/LaunchAgents/local.chroe.locate.updatedb.plist
-  fi
-}
-
-# Run main
+# Run
 main

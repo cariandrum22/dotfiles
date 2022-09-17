@@ -1,26 +1,51 @@
+{ config, lib, ... }:
+
 let
-  isDarwin = if builtins.currentSystem == "x86_64-darwin" then true else false;
-  username = "claude";
-  homeDirectory =
-    if isDarwin then "/Users/${username}" else "/home/${username}";
-  base = [ ./home/default.nix ./programs/default.nix ];
+  pkgs = import <nixpkgs> { };
+  isDarwin = pkgs.stdenv.isDarwin;
+  base = [
+    ./home
+    ./programs
+  ];
   linux = base ++ [
     ./xsession.nix
-    ./home/packages/linux-desktop.nix
     ./services/picom.nix
     ./services/keybase.nix
     ./services/vscode-server.nix
   ];
-  configurations = if isDarwin then base else linux;
-
-in {
+  synthetic = if isDarwin then base else linux;
+in
+{
   home = {
-    username = username;
-    homeDirectory = homeDirectory;
+    username = builtins.getEnv "USER";
+    homeDirectory = builtins.getEnv "HOME";
     stateVersion = "22.05";
+
+    activation = lib.mkIf isDarwin {
+      copyApplications =
+        let
+          apps = pkgs.buildEnv {
+            name = "home-manager-applications";
+            paths = config.home.packages;
+            pathsToLink = "/Applications";
+          };
+        in
+        lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          baseDir="$HOME/Applications/Home Manager Apps"
+          if [ -d "$baseDir" ]; then
+            rm -rf "$baseDir"
+          fi
+          mkdir -p "$baseDir"
+          for appFile in ${apps}/Applications/*; do
+            target="$baseDir/$(basename "$appFile")"
+            $DRY_RUN_CMD cp ''${VERBOSE_ARG:+-v} -fHRL "$appFile" "$baseDir"
+            $DRY_RUN_CMD chmod ''${VERBOSE_ARG:+-v} -R +w "$target"
+          done
+        '';
+    };
   };
 
-  imports = configurations;
+  imports = synthetic;
 
   xresources.properties = {
     "urxvt*foreground" = "#d3d3d3";

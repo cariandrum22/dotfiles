@@ -65,7 +65,8 @@ let
     "*.lnk"
   ];
 
-in {
+in
+{
   programs.git = {
     enable = true;
     userName = "Takafumi Asano";
@@ -90,7 +91,7 @@ in {
       credential = { helper = "netrc -f ~/.netrc.gpg -v"; };
       color = { ui = true; };
 
-      ghq = { root = [ "~/Codex" "~/go/src" ]; };
+      ghq = { root = [ "~/Go/src" "~/Codex" ]; };
     };
     ignores = builtins.concatLists [ Linux macOS Windows ];
   };
