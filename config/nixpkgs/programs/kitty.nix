@@ -40,6 +40,18 @@
       # white
       color7 = "#E5E9F0";
       color15 = "#ECEFF4";
+
+      background_opacity = "0.9";
+
+      kitty_mod = "ctrl+shift";
+      scrollback_lines = 100000;
+      confirm_os_window_close = 0;
+
+      macos_option_as_alt = true;
+      macos_quit_when_last_window_closed = true;
+    };
+    keybindings = {
+      "f1" = "launch --allow-remote-control kitty +kitten broadcast --match-tab state:focused";
     };
   };
 }
