@@ -1,6 +1,6 @@
 prefix=~/.npm
-also=dev
-init.author.email=cariandrum22@gmail.com
-init.author.name=Takafumi Asano
+include=dev
+init-author-email=cariandrum22@gmail.com
+init-author-name=Takafumi Asano
 init-license=MIT
 color=true
