@@ -4,11 +4,12 @@
     settings = {
       font_family = "Fira Code Retina Nerd Font Complete Mono";
       font_size = "12.0";
-
-      # Nord Colorscheme for Kitty
-      # Based on:
-      # - https://gist.github.com/marcusramberg/64010234c95a93d953e8c79fdaf94192
-      # - https://github.com/arcticicestudio/nord-hyper
+      /*
+        Nord Colorscheme for Kitty
+        Based on:
+        - https://gist.github.com/marcusramberg/64010234c95a93d953e8c79fdaf94192
+        - https://github.com/arcticicestudio/nord-hyper
+      */
       foreground = "#D8DEE9";
       background = "#2E3440";
       selection_foreground = "#000000";
