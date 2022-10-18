@@ -21,6 +21,13 @@ in
     homeDirectory = builtins.getEnv "HOME";
     stateVersion = "22.05";
 
+    # NOTE: macOS applications installed by home-manager cannot be launched
+    # by Spotlight.
+    # Because Spotlight does not display symbolic links in the GUI.
+    # This issue is already listed in GitHub Issues, and the temporal solution
+    # to copy the Applications under $HOME/Applications is the one described
+    # in the issue comment.
+    # https://github.com/nix-community/home-manager/issues/1341#issuecomment-778820334
     activation = lib.mkIf isDarwin {
       copyApplications =
         let
