@@ -87,8 +87,10 @@ main() {
 
     echo "Install a package under homebrew management."
     echo
-    # Install Rosetta 2 in advance because the application installed by brew requires it
-    sudo softwareupdate --install-rosetta --agree-to-license
+    # For Apple Silicon devices, applications installed with Homebrew may require Rosetta2, so install it
+    if [ "$(uname -a)" == 'arm64' ]; then
+      sudo softwareupdate --install-rosetta --agree-to-license
+    fi
     brew bundle --file="${abs_path}"/Brewfile
     echo
   fi
