@@ -11,8 +11,9 @@ in
       # Nix related
       any-nix-shell
       rnix-lsp
-      nixfmt
       nix-prefetch-git
+      nixpkgs-fmt
+      nixfmt
       dep2nix
       vgo2nix
 
@@ -46,6 +47,7 @@ in
       vagrant
       azure-cli
       azure-storage-azcopy
+      powershell
       certbot
       awscli2
       eksctl
@@ -54,6 +56,7 @@ in
 
       # Development Environment
       cmake
+      pkg-config
       gitAndTools.delta
       heroku
       cachix
@@ -66,13 +69,13 @@ in
       ruby_3_0
       rubocop
       python3
-      nodejs-14_x
+      nodejs-16_x
       jdk
 
       # Database Clients
       mysql-client
       mongodb-tools
-      postgresql_10
+      postgresql_14
 
       # GUI Application
       slack
@@ -80,6 +83,7 @@ in
       vscode
       #wireshark
       #yubikey-personalization-gui
+      apache-directory-studio
 
       # Development Environment
       jetbrains.datagrip
