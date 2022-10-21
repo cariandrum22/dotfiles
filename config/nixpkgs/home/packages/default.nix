@@ -72,7 +72,7 @@ in
       # Database Clients
       mysql-client
       mongodb-tools
-      postgresql_10
+      postgresql_14
 
       # GUI Application
       slack
