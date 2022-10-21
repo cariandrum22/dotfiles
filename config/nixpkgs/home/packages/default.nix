@@ -81,6 +81,7 @@ in
       vscode
       #wireshark
       #yubikey-personalization-gui
+      apache-directory-studio
 
       # Development Environment
       jetbrains.datagrip
