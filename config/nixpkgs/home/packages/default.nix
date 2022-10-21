@@ -69,7 +69,7 @@ in
       ruby_3_0
       rubocop
       python3
-      nodejs-14_x
+      nodejs-16_x
       jdk
 
       # Database Clients
