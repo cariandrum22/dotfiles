@@ -56,6 +56,7 @@ in
 
       # Development Environment
       cmake
+      pkg-config
       gitAndTools.delta
       heroku
       cachix
