@@ -8,7 +8,8 @@ let
       "${pkgs.pinentry_gnome}/bin/pinentry-gnome3";
 in
 {
-  home.file = {
+  home.file = lib.mkMerge [
+   {
     ".config/fish/config.fish" = { source = ../../fish/config.fish; };
     ".config/polybar" = {
       source = ../../polybar;
@@ -54,7 +55,9 @@ in
     ".netrc.gpg" = { source = ../../../netrc.gpg; };
     ".pythonstartup" = { source = ../../../pythonstartup; };
     ".npmrc" = { source = ../../../npmrc; };
-  } // lib.optionals pkgs.stdenv.isDarwin {
+   }
+   (lib.mkIf pkgs.stdenv.isDarwin {
     ".gnupg/scdaemon.conf".text = ''disable-ccid'';
-  };
+   })
+  ];
 }
