@@ -46,6 +46,7 @@ in
       vagrant
       azure-cli
       azure-storage-azcopy
+      powershell
       certbot
       awscli2
       eksctl
