@@ -1,8 +1,8 @@
-let
-  pkgs = import <nixpkgs> { config.allowUnfree = true; };
-  unstable = import <unstable> { config.allowUnfree = true; };
+{ pkgs, ... }:
 
-in {
+{
+  nixpkgs.config.allowUnfree = true;
+
   home = {
     packages = with pkgs; [
       # Deep Learning
@@ -23,25 +23,16 @@ in {
       google-chrome
       firefox
       keybase
+      keybase-gui
       ark
       partition-manager
-      slack
       robo3t
-      teams
       _1password-gui
       steam
-      wireshark
       spotify
-      keybase-gui
-      zoom-us
 
       # Utility
       google-drive-ocamlfuse
-      yubikey-manager
-
-      # Development Environment
-      unstable.vscode
-      jetbrains.datagrip
     ];
   };
 }

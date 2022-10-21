@@ -1,26 +1,58 @@
+{ config, lib, ... }:
+
 let
-  isDarwin = if builtins.currentSystem == "x86_64-darwin" then true else false;
-  username = "claude";
-  homeDirectory =
-    if isDarwin then "/Users/${username}" else "/home/${username}";
-  base = [ ./home/default.nix ./programs/default.nix ];
+  pkgs = import <nixpkgs> { };
+  isDarwin = pkgs.stdenv.isDarwin;
+  base = [
+    ./home
+    ./programs
+  ];
   linux = base ++ [
     ./xsession.nix
-    ./home/packages/linux-desktop.nix
     ./services/picom.nix
     ./services/keybase.nix
     ./services/vscode-server.nix
   ];
-  configurations = if isDarwin then base else linux;
-
-in {
+  synthetic = if isDarwin then base else linux;
+in
+{
   home = {
-    username = username;
-    homeDirectory = homeDirectory;
+    username = builtins.getEnv "USER";
+    homeDirectory = builtins.getEnv "HOME";
     stateVersion = "22.05";
+
+    # NOTE: macOS applications installed by home-manager cannot be launched
+    # by Spotlight.
+    # Because Spotlight does not display symbolic links in the GUI.
+    # This issue is already listed in GitHub Issues, and the temporal solution
+    # to copy the Applications under $HOME/Applications is the one described
+    # in the issue comment.
+    # https://github.com/nix-community/home-manager/issues/1341#issuecomment-778820334
+    activation = lib.mkIf isDarwin {
+      copyApplications =
+        let
+          apps = pkgs.buildEnv {
+            name = "home-manager-applications";
+            paths = config.home.packages;
+            pathsToLink = "/Applications";
+          };
+        in
+        lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          baseDir="$HOME/Applications/Home Manager Apps"
+          if [ -d "$baseDir" ]; then
+            rm -rf "$baseDir"
+          fi
+          mkdir -p "$baseDir"
+          for appFile in ${apps}/Applications/*; do
+            target="$baseDir/$(basename "$appFile")"
+            $DRY_RUN_CMD cp ''${VERBOSE_ARG:+-v} -fHRL "$appFile" "$baseDir"
+            $DRY_RUN_CMD chmod ''${VERBOSE_ARG:+-v} -R +w "$target"
+          done
+        '';
+    };
   };
 
-  imports = configurations;
+  imports = synthetic;
 
   xresources.properties = {
     "urxvt*foreground" = "#d3d3d3";

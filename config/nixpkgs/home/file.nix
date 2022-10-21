@@ -1,14 +1,16 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 let
-  pinentry-program = if builtins.currentSystem == "x86_64-darwin" then
-    "${pkgs.pinentry_mac}/Applications/pinentry-mac.app/Contents/MacOS/pinentry-mac"
-  else
-    "${pkgs.pinentry_gnome}/bin/pinentry-gnome3";
-in {
-  home.file = {
+  pinentry-program =
+    if pkgs.stdenv.isDarwin then
+      "${pkgs.pinentry_mac}/Applications/pinentry-mac.app/Contents/MacOS/pinentry-mac"
+    else
+      "${pkgs.pinentry_gnome}/bin/pinentry-gnome3";
+in
+{
+  home.file = lib.mkMerge [
+   {
     ".config/fish/config.fish" = { source = ../../fish/config.fish; };
-    ".config/fish/fishfile" = { source = ../../fish/fishfile; };
     ".config/polybar" = {
       source = ../../polybar;
       recursive = true;
@@ -53,5 +55,9 @@ in {
     ".netrc.gpg" = { source = ../../../netrc.gpg; };
     ".pythonstartup" = { source = ../../../pythonstartup; };
     ".npmrc" = { source = ../../../npmrc; };
-  };
+   }
+   (lib.mkIf pkgs.stdenv.isDarwin {
+    ".gnupg/scdaemon.conf".text = ''disable-ccid'';
+   })
+  ];
 }

@@ -2,8 +2,9 @@ edc/bass
 fisherman/fzf
 fisherman/getopts
 decors/fish-ghq
-fisherman/git_util
 fisherman/spin
 cariandrum22/thunnus
 fisherman/z
 matchai/spacefish
+jorgebucaran/spark.fish
+lgathy/google-cloud-sdk-fish-completion

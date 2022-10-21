@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+source "$(dirname "${BASH_SOURCE[0]}")/../error.sh"
+
 #######################################
 # Install Xcode Command Line Tools
 # Globals:
@@ -9,26 +12,31 @@
 #   None
 #######################################
 install::xcode_command_line_tools() {
-  # shellcheck source=/dev/null
-  source "$(dirname "${BASH_SOURCE[0]}")/../error.sh"
-
   if [[ "${OSTYPE}" != "darwin"* ]]; then
     error "This Platform is not supported."
   fi
 
   # Check if Xcode Command Line Tools installed
   set +e
-  xcode-select -p > /dev/null 2>&1
+  xcode-select -p >/dev/null 2>&1
   local -r exists="${?}"
   set -e
+
+  local -i counter=0
+  local -ir WAITING_TIME=3
+
   if [[ "${exists}" -ne 0 ]]; then
-    touch /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
-    command_line_tools=$(softwareupdate -l \
-        | grep "\*.*Command Line" \
-        | head -n 1 \
-        | awk -F"*" '{print $2}' \
-        | sed -e 's/^[[:blank:]]*//' -e 's/[[:blank:]]*$//')
-    softwareupdate -i "${command_line_tools}" --verbose
-    rm /tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress
+    echo "Start installing Xcode Command Line Tools."
+    echo
+    echo "Note: Follow the instructions of the launched installer to complete the installation. This script will wait until the Xcode Command Line Tools installation is complete."
+    echo
+    xcode-select --install >/dev/null 2>&1
+    until xcode-select -p >/dev/null 2>&1; do
+      sleep ${WAITING_TIME}
+      ((counter += WAITING_TIME))
+      echo "Waiting for Xcode installation to complete. ${counter} seconds elapsed."
+    done
   fi
+  echo "Xcode Command Line Tools installed."
+  echo
 }

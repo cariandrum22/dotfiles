@@ -1,8 +1,11 @@
 let
   pkgs = import <nixpkgs> { config.allowUnfree = true; };
   unstable = import <unstable> { config.allowUnfree = true; };
+
   base = [ ./haskell.nix ];
-in {
+  synthetic = if pkgs.stdenv.isDarwin then base ++ [ ./darwin.nix ] else base ++ [ ./linux-desktop.nix ];
+in
+{
   home = {
     packages = with pkgs; [
       # Nix related
@@ -31,6 +34,9 @@ in {
       procs
       httpie
       curlie
+      mutagen
+      yubikey-manager
+      yubikey-personalization
 
       # DevOps
       docker-compose
@@ -44,17 +50,18 @@ in {
       awscli2
       eksctl
       saml2aws
+      google-cloud-sdk
 
       # Development Environment
       cmake
       gitAndTools.delta
       heroku
-      unstable.cachix
+      cachix
       sqlite
 
       # Compiler and Runtime
       rustup
-      go
+      unstable.go
       dotnet-sdk
       ruby_3_0
       rubocop
@@ -66,11 +73,18 @@ in {
       mysql-client
       mongodb-tools
       postgresql_10
+
+      # GUI Application
+      slack
+      zoom-us
+      vscode
+      #wireshark
+      #yubikey-personalization-gui
+
+      # Development Environment
+      jetbrains.datagrip
     ];
   };
 
-  imports = if builtins.currentSystem == "x86_64-darwin" then
-    base ++ [ ./darwin.nix ]
-  else
-    base ++ [ ./linux-desktop.nix ];
+  imports = synthetic;
 }
