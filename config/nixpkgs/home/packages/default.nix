@@ -11,8 +11,9 @@ in
       # Nix related
       any-nix-shell
       rnix-lsp
-      nixfmt
       nix-prefetch-git
+      nixpkgs-fmt
+      nixfmt
       dep2nix
       vgo2nix
 
