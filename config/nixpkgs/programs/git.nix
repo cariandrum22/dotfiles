@@ -75,6 +75,7 @@ in
       key = "48F302B631525FA4D5A40106AC7AA4174AC64BA5";
       signByDefault = true;
     };
+    lfs.enable = true;
     aliases = {
       co = "checkout";
       br = "branch";
