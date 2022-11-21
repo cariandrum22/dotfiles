@@ -30,6 +30,7 @@
       _1password-gui
       steam
       spotify
+      apache-directory-studio
 
       # Utility
       google-drive-ocamlfuse

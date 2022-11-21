@@ -83,9 +83,8 @@ in
       slack
       zoom-us
       vscode
-      #wireshark
-      #yubikey-personalization-gui
-      apache-directory-studio
+      wireshark
+      yubikey-personalization-gui
 
       # Development Environment
       jetbrains.datagrip
