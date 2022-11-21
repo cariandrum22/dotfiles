@@ -71,7 +71,7 @@ in
       ruby_3_0
       rubocop
       python3
-      nodejs-16_x
+      nodejs-18_x
       jdk
 
       # Database Clients
