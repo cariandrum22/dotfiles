@@ -44,6 +44,8 @@ in
       etcd
       kubectl
       kubernetes-helm
+      krew
+      kubelogin
       vagrant
       azure-cli
       azure-storage-azcopy
