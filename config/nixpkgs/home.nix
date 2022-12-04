@@ -19,7 +19,7 @@ in
   home = {
     username = builtins.getEnv "USER";
     homeDirectory = builtins.getEnv "HOME";
-    stateVersion = "22.05";
+    stateVersion = "22.11";
 
     # NOTE: macOS applications installed by home-manager cannot be launched
     # by Spotlight.

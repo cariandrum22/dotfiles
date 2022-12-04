@@ -15,7 +15,6 @@ in
       nixpkgs-fmt
       nixfmt
       dep2nix
-      vgo2nix
 
       # Utility
       ghq
