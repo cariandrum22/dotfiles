@@ -7,6 +7,7 @@
     cabal-install
     stack
     ormolu
+    haskellPackages.hoogle
   ];
 
   home.file.".ghci".source = ../../../../ghci;

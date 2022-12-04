@@ -44,6 +44,8 @@ in
       etcd
       kubectl
       kubernetes-helm
+      krew
+      kubelogin
       vagrant
       azure-cli
       azure-storage-azcopy
@@ -69,7 +71,7 @@ in
       ruby_3_0
       rubocop
       python3
-      nodejs-16_x
+      nodejs-18_x
       jdk
 
       # Database Clients
@@ -81,9 +83,8 @@ in
       slack
       zoom-us
       vscode
-      #wireshark
-      #yubikey-personalization-gui
-      apache-directory-studio
+      wireshark
+      yubikey-personalization-gui
 
       # Development Environment
       jetbrains.datagrip
