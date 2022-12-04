@@ -10,21 +10,24 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        haskellPackages = pkgs.haskellPackages;
+        packages = with pkgs; [
+          zlib
+          xlibsWrapper
+          xorg.libXrandr
+          xorg.libXScrnSaver
+        ];
+        haskellPackages = with pkgs.haskellPackages; [
+          haskell-language-server
+          ghcid
+          cabal-install
+          cabal-fmt
+          ormolu
+        ];
       in
       {
         devShell = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            haskellPackages.haskell-language-server
-            haskellPackages.ghcid
-            haskellPackages.cabal-install
-            haskellPackages.cabal-fmt
-            haskellPackages.ormolu
-            zlib
-            xlibsWrapper
-            xorg.libXrandr
-            xorg.libXScrnSaver
-          ];
+          nativeBuildInputs = haskellPackages;
+          buildInputs = packages;
         };
       });
 }
