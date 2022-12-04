@@ -15,7 +15,7 @@
       rofi
       feh
       pavucontrol
-      elementary-planner
+      #elementary-planner NOTE: This package is currently broken
       ledger-live-desktop
       yubikey-manager-qt
       remmina
