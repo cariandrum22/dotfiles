@@ -1,1 +1,4 @@
+.direnv
 Brewfile.lock.json
+dist-*
+result
