@@ -3,19 +3,82 @@ import qualified DBus as D
 import qualified DBus.Client as D
 import Data.Ratio ((%))
 import Graphics.X11.ExtraTypes.XF86 ()
-import System.Exit
+import System.Exit ()
 import System.IO (hClose)
 import XMonad
-import XMonad.Actions.CycleWS
+  ( Default (def),
+    Dimension,
+    Full (Full),
+    KeyMask,
+    KeySym,
+    ManageHook,
+    Mirror (Mirror),
+    Tall (Tall),
+    X,
+    XConfig
+      ( XConfig,
+        borderWidth,
+        clickJustFocuses,
+        focusFollowsMouse,
+        focusedBorderColor,
+        handleEventHook,
+        layoutHook,
+        logHook,
+        manageHook,
+        modMask,
+        normalBorderColor,
+        startupHook,
+        terminal,
+        workspaces
+      ),
+    className,
+    composeAll,
+    controlMask,
+    doFloat,
+    doIgnore,
+    io,
+    mod4Mask,
+    resource,
+    shiftMask,
+    spawn,
+    stringProperty,
+    xK_F1,
+    xK_Return,
+    xK_b,
+    xK_l,
+    xK_p,
+    xK_s,
+    xmonad,
+    (-->),
+    (.|.),
+    (<+>),
+    (=?),
+    (|||),
+  )
+import XMonad.Actions.CycleWS ()
 import XMonad.Actions.DynamicProjects
   ( Project (..),
     dynamicProjects,
   )
 import XMonad.Hooks.DynamicLog
+  ( PP
+      ( ppCurrent,
+        ppHidden,
+        ppOutput,
+        ppSep,
+        ppTitle,
+        ppUrgent,
+        ppVisible,
+        ppWsSep
+      ),
+    def,
+    dynamicLogWithPP,
+    shorten,
+    wrap,
+  )
 import XMonad.Hooks.EwmhDesktops
   ( ewmh,
-    ewmhDesktopsLogHook,
-    fullscreenEventHook,
+    ewmhFullscreen,
   )
 import XMonad.Hooks.ManageDocks
   ( avoidStruts,
@@ -35,22 +98,35 @@ import XMonad.Hooks.UrgencyHook
   ( NoUrgencyHook (NoUrgencyHook),
     withUrgencyHook,
   )
-import XMonad.Layout.BoringWindows ( boringWindows )
+import XMonad.Layout.BoringWindows (boringWindows)
 import XMonad.Layout.FixedColumn (FixedColumn (FixedColumn))
+import XMonad.Layout.Grid (Grid (Grid))
 import XMonad.Layout.LimitWindows (limitWindows)
 import XMonad.Layout.Magnifier (magnifiercz')
 import XMonad.Layout.Minimize (minimize)
-import XMonad.Layout.NoBorders ( noBorders )
+import XMonad.Layout.MultiColumns (multiCol)
+import XMonad.Layout.NoBorders (noBorders)
 import XMonad.Layout.PerWorkspace (onWorkspace)
-import XMonad.Layout.Renamed
+import XMonad.Layout.Renamed ()
 import XMonad.Layout.Spacing (spacing)
-import XMonad.Layout.Tabbed
+import XMonad.Layout.Spiral (spiral)
+import XMonad.Layout.Tabbed (def)
 import XMonad.Layout.ThreeColumns (ThreeCol (ThreeColMid))
 import XMonad.Prompt
-    ( XPConfig(font, bgColor, fgColor, fgHLight, bgHLight, borderColor,
-               promptBorderWidth, height, position),
-      XPPosition(Top) )
-import XMonad.Util.EZConfig
+  ( XPConfig
+      ( bgColor,
+        bgHLight,
+        borderColor,
+        fgColor,
+        fgHLight,
+        font,
+        height,
+        position,
+        promptBorderWidth
+      ),
+    XPPosition (Top),
+  )
+import XMonad.Util.EZConfig ()
 import XMonad.Util.NamedActions
   ( NamedAction,
     addDescrKeys,
@@ -60,9 +136,6 @@ import XMonad.Util.NamedActions
     (^++^),
   )
 import XMonad.Util.Run (hPutStr, spawnPipe)
-import XMonad.Layout.Spiral
-import XMonad.Layout.Grid
-import XMonad.Layout.MultiColumns
 
 --------------------------------------------------------------------------------
 -- Main                                                                       --
@@ -78,9 +151,11 @@ main = do
   xmonad $
     dynamicProjects projects $
       withUrgencyHook NoUrgencyHook $
-        ewmh $
-          addDescrKeys ((myModMask, xK_F1), showKeybindings) myKeys $
-            myConfig {logHook = dynamicLogWithPP (myLogHook dbus)}
+        ewmhFullscreen $
+          ewmh $
+            addDescrKeys ((myModMask, xK_F1), showKeybindings) myKeys $
+              myConfig {logHook = dynamicLogWithPP (myLogHook dbus)}
+
 --------------------------------------------------------------------------------
 -- Personal settings                                                          --
 --------------------------------------------------------------------------------
@@ -88,14 +163,53 @@ myModMask :: KeyMask
 myModMask = mod4Mask
 
 myTerminal = "kitty"
+
 myLauncher =
   "rofi -show drun -no-lazy-grab -modi drun "
-     ++ "-font \"Fira Code Nerd Font 12\" -show-icons -drun-display-format \"{name}\" "
-     ++ "-color-window \"" ++ nord2 ++ "," ++ nord2 ++ "," ++ nord2 ++ "\" "
-     ++ "-color-normal \"" ++ nord3 ++ "," ++ nord4 ++ "," ++ nord3 ++ "," ++ nord10 ++ "," ++ nord4 ++ "\" "
-     ++ "-color-urgent \"" ++ nord3 ++ "," ++ nord11 ++ "," ++ nord3 ++ "," ++ nord11 ++ "," ++ nord3 ++ "\" "
-     ++ "-color-active \"" ++ nord3 ++ "," ++ nord10 ++ "," ++ nord3 ++ "," ++ nord10 ++ "," ++ nord4  ++ "\""
+    ++ "-font \"Fira Code Nerd Font 12\" -show-icons -drun-display-format \"{name}\" "
+    ++ "-color-window \""
+    ++ nord2
+    ++ ","
+    ++ nord2
+    ++ ","
+    ++ nord2
+    ++ "\" "
+    ++ "-color-normal \""
+    ++ nord3
+    ++ ","
+    ++ nord4
+    ++ ","
+    ++ nord3
+    ++ ","
+    ++ nord10
+    ++ ","
+    ++ nord4
+    ++ "\" "
+    ++ "-color-urgent \""
+    ++ nord3
+    ++ ","
+    ++ nord11
+    ++ ","
+    ++ nord3
+    ++ ","
+    ++ nord11
+    ++ ","
+    ++ nord3
+    ++ "\" "
+    ++ "-color-active \""
+    ++ nord3
+    ++ ","
+    ++ nord10
+    ++ ","
+    ++ nord3
+    ++ ","
+    ++ nord10
+    ++ ","
+    ++ nord4
+    ++ "\""
+
 myBrowser = "google-chrome"
+
 myScreenLocker = "dm-tool lock"
 
 myFocusFollowsMouse :: Bool
@@ -123,23 +237,38 @@ prompt = 24
 --
 -- Polar Night
 nord0 = "#2E3440"
+
 nord1 = "#3B4252"
+
 nord2 = "#434C5E"
+
 nord3 = "#4C566A"
+
 -- Snow Storm
 nord4 = "#D8DEE9"
+
 nord5 = "#E5E9F0"
+
 nord6 = "#ECEFF4"
+
 -- Frost
 nord7 = "#8FBCBB"
+
 nord8 = "#88C0D0"
+
 nord9 = "#81A1C1"
+
 nord10 = "#5E81AC"
+
 -- Aurora
 nord11 = "#BF616A"
+
 nord12 = "#D08770"
+
 nord13 = "#EBCB8B"
+
 nord14 = "#A3BE8C"
+
 nord15 = "#B48EAD"
 
 -- Fonts
@@ -168,14 +297,22 @@ myPromptTheme =
 -- Workspaces                                                                 --
 --------------------------------------------------------------------------------
 wsGeneral = "\xe712"
-wsWork    = "\xe777"
-wsStudy   = "\xf973"
+
+wsWork = "\xe777"
+
+wsStudy = "\xf973"
+
 wsNetwork = "\xfbf1"
-wsMusic   = "\xfc58"
-wsNote    = "\xfd2c"
+
+wsMusic = "\xfc58"
+
+wsNote = "\xfd2c"
+
 wsMonitor = "\xf1fe"
+
 wsSetting = "\xf993"
-wsGame    = "\xf11b"
+
+wsGame = "\xf11b"
 
 myWorkspaces :: [String]
 myWorkspaces =
@@ -196,22 +333,34 @@ myWorkspaces =
 myLayouts = avoidStruts . minimize . boringWindows $ perWS
 
 -- layout per workspace
-perWS = onWorkspace wsGeneral myTMT3F $
-        onWorkspace wsGame myFT $
-        onWorkspace wsMonitor myMT3GS
+perWS =
+  onWorkspace wsGeneral myTMT3F $
+    onWorkspace wsGame myFT $
+      onWorkspace
+        wsMonitor
+        myMT3GS
         myAll
 
 myTMT3F = myTall ||| myMirrorTall ||| my3Col ||| myFull
-myFT =  myFull ||| myTall
+
+myFT = myFull ||| myTall
+
 myMT3GS = myMirrorTall ||| my3Col ||| myGrid ||| mySpiral
+
 myAll = myTall ||| myMirrorTall ||| my3Col ||| myMultiCol ||| myGrid ||| mySpiral ||| myFull
 
-myTall = spacing mySpacing $ Tall 1 (3/100) (1/2)
-myMirrorTall = spacing mySpacing $ Mirror (Tall 1 (3/100) (3/5))
-my3Col = spacing mySpacing $ ThreeColMid 1 (3/100) (1/2)
-myMultiCol =  spacing mySpacing $ multiCol [1] 1 0.01 (-0.5)
+myTall = spacing mySpacing $ Tall 1 (3 / 100) (1 / 2)
+
+myMirrorTall = spacing mySpacing $ Mirror (Tall 1 (3 / 100) (3 / 5))
+
+my3Col = spacing mySpacing $ ThreeColMid 1 (3 / 100) (1 / 2)
+
+myMultiCol = spacing mySpacing $ multiCol [1] 1 0.01 (-0.5)
+
 myGrid = spacing mySpacing $ Grid
-mySpiral = spacing mySpacing $ spiral (6/7)
+
+mySpiral = spacing mySpacing $ spiral (6 / 7)
+
 myFull = spacing 0 $ noBorders Full
 
 --------------------------------------------------------------------------------
@@ -260,6 +409,7 @@ projects =
           spawn $ myTerminal <> " dstat"
       }
   ]
+
 --------------------------------------------------------------------------------
 -- Keybindings                                                                --
 --------------------------------------------------------------------------------
@@ -280,12 +430,11 @@ myKeys XConfig {XMonad.modMask = modm} =
       key "Lock screen" (modm .|. controlMask, xK_l) $ spawn myScreenLocker,
       key "Sleep" (modm .|. controlMask, xK_l) $ spawn "systemctl suspend"
     ]
-    ^++^
-  keySet
-    "Applications"
-    [ key "Open Google Chrome" (modm, xK_b) $ spawn myBrowser,
-      key "Open Slack" (modm, xK_s) $ spawn "slack"
-    ]
+    ^++^ keySet
+      "Applications"
+      [ key "Open Google Chrome" (modm, xK_b) $ spawn myBrowser,
+        key "Open Slack" (modm, xK_s) $ spawn "slack"
+      ]
   where
     keySet s ks = subtitle s : ks
     key n k a = (k, addName n a)
@@ -351,17 +500,13 @@ myConfig =
   def
     { terminal = myTerminal,
       layoutHook = myLayouts,
-      logHook = ewmhDesktopsLogHook,
       manageHook =
         placeHook (smart (0.5, 0.5))
           <+> manageDocks
           <+> myManageHook
           <+> myManageHook'
           <+> manageHook def,
-      handleEventHook =
-        docksEventHook
-          <+> minimizeEventHook
-          <+> fullscreenEventHook,
+      handleEventHook = minimizeEventHook,
       startupHook = myStartupHook,
       focusFollowsMouse = False,
       clickJustFocuses = False,
