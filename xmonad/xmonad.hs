@@ -336,7 +336,7 @@ projects =
       { projectName = "Study",
         projectDirectory = "~/Documents/Books",
         projectStartHook = Just $ do
-          spawn "nautilus ."
+          spawn "nemo ."
           spawn myTerminal
       },
     Project
