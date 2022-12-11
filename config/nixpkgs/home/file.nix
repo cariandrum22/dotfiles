@@ -18,7 +18,7 @@ in
     ".themes/Nordic" = {
       source = builtins.fetchGit {
         url = "https://github.com/EliverLara/Nordic";
-        ref = "refs/tags/v2.1.0";
+        ref = "refs/tags/v2.2.0";
       };
     };
     ".icons/candy-icons" = {
@@ -26,6 +26,7 @@ in
         url = "https://github.com/EliverLara/candy-icons";
       };
     };
+    ".config/gtk-3.0/settings.ini" = { source = ../../gtk-3.0/settings.ini; };
     ".gnupg/gpg.conf" = {
       text = ''
         list-options show-uid-validity
