@@ -16,6 +16,8 @@
       "100:class_g = 'Code' && !focused"
       "100:class_g = 'Slack' && focused"
       "100:class_g = 'Slack' && !focused"
+      "100:class_g = '1Password' && focused"
+      "100:class_g = '1Password' && !focused"
     ];
     fadeExclude = [
       "_NET_WM_NAME@:s = 'rofi'"
