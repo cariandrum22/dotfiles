@@ -1,5 +1,6 @@
-{
-  imports = [
+let
+  isDarwin = (import <nixpkgs> { }).stdenv.isDarwin;
+  base = [
     ./home-manager.nix
     ./git.nix
     ./kitty.nix
