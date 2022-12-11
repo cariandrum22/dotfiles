@@ -7,4 +7,8 @@
     ./emacs.nix
     ./direnv.nix
   ];
+  synthetic = if isDarwin then base else base ++ [ ./rofi.nix ];
+in
+{
+  imports = synthetic;
 }

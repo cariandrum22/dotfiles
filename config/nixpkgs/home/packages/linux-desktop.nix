@@ -11,8 +11,6 @@
 
       # GUI Applications
       polybarFull
-      dmenu
-      rofi
       feh
       pavucontrol
       #elementary-planner NOTE: This package is currently broken
