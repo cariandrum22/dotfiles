@@ -164,49 +164,7 @@ myModMask = mod4Mask
 
 myTerminal = "kitty"
 
-myLauncher =
-  "rofi -show drun -no-lazy-grab -modi drun "
-    ++ "-font \"Fira Code Nerd Font 12\" -show-icons -drun-display-format \"{name}\" "
-    ++ "-color-window \""
-    ++ nord2
-    ++ ","
-    ++ nord2
-    ++ ","
-    ++ nord2
-    ++ "\" "
-    ++ "-color-normal \""
-    ++ nord3
-    ++ ","
-    ++ nord4
-    ++ ","
-    ++ nord3
-    ++ ","
-    ++ nord10
-    ++ ","
-    ++ nord4
-    ++ "\" "
-    ++ "-color-urgent \""
-    ++ nord3
-    ++ ","
-    ++ nord11
-    ++ ","
-    ++ nord3
-    ++ ","
-    ++ nord11
-    ++ ","
-    ++ nord3
-    ++ "\" "
-    ++ "-color-active \""
-    ++ nord3
-    ++ ","
-    ++ nord10
-    ++ ","
-    ++ nord3
-    ++ ","
-    ++ nord10
-    ++ ","
-    ++ nord4
-    ++ "\""
+myLauncher = "rofi -show drun -modi drun -location 0 -drun-display-format \"{name}\""
 
 myBrowser = "google-chrome"
 
@@ -378,7 +336,7 @@ projects =
       { projectName = "Study",
         projectDirectory = "~/Documents/Books",
         projectStartHook = Just $ do
-          spawn "nautilus ."
+          spawn "nemo ."
           spawn myTerminal
       },
     Project

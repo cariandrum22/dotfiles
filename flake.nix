@@ -29,5 +29,6 @@
           nativeBuildInputs = haskellPackages;
           buildInputs = packages;
         };
+        formatter = pkgs.nixpkgs-fmt;
       });
 }
