@@ -1,8 +1,9 @@
 { lib, pkgs, ... }:
 
 let
+  isDarwin = pkgs.stdenv.isDarwin;
   pinentry-program =
-    if pkgs.stdenv.isDarwin then
+    if isDarwin then
       "${pkgs.pinentry_mac}/Applications/pinentry-mac.app/Contents/MacOS/pinentry-mac"
     else
       "${pkgs.pinentry_gnome}/bin/pinentry-gnome3";
@@ -57,7 +58,7 @@ in
       ".pythonstartup" = { source = ../../../pythonstartup; };
       ".npmrc" = { source = ../../../npmrc; };
     }
-    (lib.mkIf pkgs.stdenv.isDarwin {
+    (lib.mkIf isDarwin {
       ".gnupg/scdaemon.conf".text = ''disable-ccid'';
     })
   ];
