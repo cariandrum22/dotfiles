@@ -29,6 +29,8 @@
       steam
       spotify
       apache-directory-studio
+      blueman
+      system-config-printer
 
       # Utility
       google-drive-ocamlfuse
