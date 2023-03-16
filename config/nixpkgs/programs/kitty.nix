@@ -43,6 +43,10 @@
 
       background_opacity = "0.9";
 
+      remember_window_size = "no";
+      initial_window_width = 640;
+      initial_window_height = 400;
+
       kitty_mod = "ctrl+shift";
       scrollback_lines = 100000;
       confirm_os_window_close = 0;

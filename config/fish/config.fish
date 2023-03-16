@@ -45,6 +45,11 @@ if [ -d "$HOME/Go" ]
     set_path "$GOPATH/bin"
 end
 
+# Configure kitty
+if type -q kitty
+    alias ssh="TERM=xterm-256color $(which ssh)"
+end
+
 # Configure fzf
 if type -q fzf
     set -U FZF_LEGACY_KEYBINDINGS 0
