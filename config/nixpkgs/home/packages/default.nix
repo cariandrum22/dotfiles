@@ -72,6 +72,8 @@ in
       python3
       nodejs-18_x
       jdk
+      sbcl
+      maxima
 
       # Database Clients
       mysql-client
