@@ -5,161 +5,89 @@
 ;;-----------------------------------------------------------------------------
 (setq inhibit-startup-message t)
 
-(defvar run-unix
-  (or (equal system-type 'gnu/linux)
-      (or (equal system-type 'usg-unix-v)
-          (or (equal system-type 'berkeley-unix)
-              (equal system-type 'cygwin)))))
-(defvar run-linux
-  (equal system-type 'gnu/linux))
-(defvar run-system-v
-  (equal system-type 'usg-unix-v))
-(defvar run-bsd
-  (equal system-type 'berkeley-unix))
-(defvar run-cygwin
-  (equal system-type 'cygwin))
-(defvar run-w32
-  (and (null run-unix)
-       (or (equal system-type 'windows-nt)
-           (equal system-type 'ms-dos))))
-(defvar run-darwin (equal system-type 'darwin))
-
 ;;-----------------------------------------------------------------------------
 ;; language and encode setting
 ;;-----------------------------------------------------------------------------
 (set-language-environment 'English)
+(prefer-coding-system 'utf-8)
+(set-buffer-file-coding-system 'utf-8)
+(set-file-name-coding-system 'utf-8)
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
-(set-buffer-file-coding-system 'utf-8)
-(setq default-buffer-file-coding-system 'utf-8)
-(prefer-coding-system 'utf-8)
-(set-default-coding-systems 'utf-8)
-(setq file-name-coding-system 'utf-8)
-
-;;-----------------------------------------------------------------------------
-;; transparency
-;; from Tranceparent Emacs:emacs-fu
-;;   http://emacs-fu.blogspot.jp/2009/02/transparent-emacs.html
-;;-----------------------------------------------------------------------------
-(defun djcb-opacity-modify (&optional dec)
-  "modify the transparency of the emacs frame; if DEC is t,
-   decrease the transparency, otherwise increase it in 10%-steps"
-  (let* ((alpha-or-nil (frame-parameter nil 'alpha)) ; nil before setting
-         (oldalpha (if alpha-or-nil alpha-or-nil 100))
-         (newalpha (if dec (- oldalpha 10) (+ oldalpha 10))))
-    (when (and (>= newalpha frame-alpha-lower-limit) (<= newalpha 100))
-      (modify-frame-parameters nil (list (cons 'alpha newalpha))))))
-;; C-8 will increase opacity (== decrease transparency)
-;; C-9 will decrease opacity (== increase transparency
-;; C-0 will returns the state to normal
-(global-set-key (kbd "C-8") '(lambda()(interactive)(djcb-opacity-modify)))
-(global-set-key (kbd "C-9") '(lambda()(interactive)(djcb-opacity-modify t)))
-(global-set-key (kbd "C-0") '(lambda()(interactive)
-                               (modify-frame-parameters nil `((alpha . 100)))))
 
 ;;-----------------------------------------------------------------------------
 ;; font
 ;;-----------------------------------------------------------------------------
-(when run-w32
-  (create-fontset-from-ascii-font "-outline-Ricty-normal-normal-normal-mono-*-*-*-*-c-*-iso10646-1" nil "Ricty")
-  (set-fontset-font "fontset-Ricty"
-                    'japanese-jisx0208
-                    '("Ricty*" . "jisx0208-sjis"))
-  (set-fontset-font "fontset-Ricty"
-                    'katakana-jisx0201
-                    '("Ricty*" . "jisx0201-katakana"))
-  (set-face-attribute 'default nil :height 140))
+(set-frame-font "Fira Code-8" nil t)
+(set-fontset-font (frame-parameter nil 'font)
+      'japanese-jisx0208
+      (font-spec :family "Source Han Code JP-"))
 
 ;;-----------------------------------------------------------------------------
 ;; load configs for specific features and modes
 ;;-----------------------------------------------------------------------------
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 
-;; activate packages
 (require 'use-package)
-(require 'init-powerline)
 (require 'init-ivy)
-(require 'init-flycheck)
+(require 'init-powerline)
 (require 'init-skk)
-(require 'init-mmm)
-(require 'init-emacs-lisp)
+(require 'init-git)
+(require 'init-which-key)
+(require 'init-projectile)
+(require 'init-flycheck)
+(require 'init-lsp)
 (require 'init-haskell)
+(require 'init-company)
+(require 'init-company-shell)
+(require 'init-docker)
+(require 'init-fish)
+(require 'init-js)
+(require 'init-markdown)
+(require 'init-mmm)
+(require 'init-nix)
 (require 'init-ruby)
 (require 'init-shell)
-(require 'init-fish)
-(require 'init-docker)
-(require 'init-web)
-(require 'init-js2)
-(require 'init-elm)
+(require 'init-toml)
 (require 'init-yaml)
-(require 'init-git)
+(require 'init-web)
 
 ;;-----------------------------------------------------------------------------
 ;; theme
 ;;-----------------------------------------------------------------------------
-(load-theme 'zenburn t)
-(add-to-list 'default-frame-alist '(background-color . "unspecified-bg"))
+(load-theme 'nord t)
 
 ;;-----------------------------------------------------------------------------
 ;; auto-save and backup
 ;;-----------------------------------------------------------------------------
 ;; auto-save
-(setq auto-save-timeout 10)
-(setq auto-save-interval 50)
+(setq auto-save-timeout 10
+      auto-save-interval 50)
 
 ;; backup
-(setq backup-directory-alist '(("." . "~/.emacs.d/backup")))
-(setq version-control t)
-(setq kept-new-versions 5)
-(setq kept-old-versions 1)
-(setq delete-old-versions t)
+(setq backup-directory-alist '(("." . "~/.emacs.d/backup"))
+      version-control t
+      kept-new-versions 5
+      kept-old-versions 1
+      delete-old-versions t)
 
 ;;-----------------------------------------------------------------------------
 ;; others
 ;;-----------------------------------------------------------------------------
 (setq-default tab-width 2 indent-tabs-mode nil)
 
-(setq eol-mnemonic-dos "(CRLF)")
-(setq eol-mnemonic-mac "(CR)")
-(setq eol-mnemonic-unix "(LF)")
+(setq eol-mnemonic-dos "(CRLF)"
+      eol-mnemonic-mac "(CR)"
+      eol-mnemonic-unix "(LF)")
 
-(setq vc-follow-symlinks t)
-(setq auto-revert-check-vc-info t)
+(setq vc-follow-symlinks t
+      auto-revert-check-vc-info t)
 
-(show-paren-mode)
-
-(display-time)
+(display-time-mode t)
 
 (electric-pair-mode t)
-
-;; linum-mode
-;; comment out because it collides with git-gutter
-; (add-hook 'find-file-hook 'linum-mode)
-; (setq linum-format " %3d ")
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   (quote
-    ("84d2f9eeb3f82d619ca4bfffe5f157282f4779732f48a5ac1484d94d5ff5b279" default)))
- '(fish-indent-offset 2)
- '(package-selected-packages (quote (flycheck hindent)))
- '(sidebar-icon-header-end (quote (powerline_left_hard_divider 1)))
- '(sidebar-icon-powerline (quote (powerline_left_hard_divider 0 -0.05 1.0)))
- '(sidebar-icons-modeline
-   (quote
-    (powerline_left_hard_divider powerline_right_hard_divider 0))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(linum ((t (:background "#4c4c4c" :foreground "#9fc59f"))))
- '(sidebar-primary-color ((t (:background "#3f3f3f" :foreground "#7f9f7f"))))
- '(web-mode-html-tag-bracket-face ((t (:foreground "#999999")))))
+(show-paren-mode t)
+(wrap-region-mode t)
 
 ;; Local Variables:
 ;; coding: utf-8

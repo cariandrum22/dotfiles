@@ -91,7 +91,7 @@ in
       };
       credential = { helper = "netrc -f ~/.netrc.gpg -v"; };
       color = { ui = true; };
-
+      init = { defaultBranch = "main"; };
       ghq = { root = [ "~/Go/src" "~/Codex" ]; };
     };
     ignores = builtins.concatLists [ Linux macOS Windows ];

@@ -1,5 +1,8 @@
 { pkgs, ... }:
 
+let
+  unstable = import <unstable> { };
+in
 {
   home.packages = with pkgs; [
     binutils # cabal needs`ar`
@@ -7,7 +10,19 @@
     cabal-install
     stack
     ormolu
+    hlint
+    haskell-language-server
     haskellPackages.hoogle
+    haskellPackages.ghcide
+    haskellPackages.cabal-fmt
+  ];
+
+  nixpkgs.overlays = [
+    (self: super: {
+      haskell-language-server = unstable.haskell-language-server.override {
+        supportedGhcVersions = [ "926" ];
+      };
+    })
   ];
 
   home.file.".ghci".source = ../../../../ghci;

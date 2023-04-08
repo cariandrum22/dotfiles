@@ -1,6 +1,6 @@
 (use-package ivy
   :bind
-  (("\C-s" . swiper)
+  (("C-s" . swiper)
    ("C-c C-r" . ivy-resume)
    ("<f6>" . ivy-resume)
    ("M-x" . counsel-M-x)
@@ -20,7 +20,7 @@
 
   :config
   (ivy-mode t)
-  (setq ivy-use-virtual-buffers t)
-  (setq enable-recursive-minibuffers t))
+  (setq ivy-use-virtual-buffers t
+        enable-recursive-minibuffers t))
   
 (provide 'init-ivy)
