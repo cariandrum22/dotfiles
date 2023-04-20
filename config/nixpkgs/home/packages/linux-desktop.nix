@@ -31,9 +31,20 @@
       apache-directory-studio
       blueman
       system-config-printer
+      gnome.simple-scan
+      microsoft-edge-dev
 
       # Utility
+      trash-cli
+      flameshot
+      xlsfonts
+
+      # Game
+      prismlauncher
+
+      # Drivers
       google-drive-ocamlfuse
+      xboxdrv
     ];
   };
 }
