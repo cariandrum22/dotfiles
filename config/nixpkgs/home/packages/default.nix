@@ -10,6 +10,7 @@ in
     packages = with pkgs; [
       # Nix related
       any-nix-shell
+      cachix
       rnix-lsp
       nix-prefetch-git
       nixpkgs-fmt
@@ -37,6 +38,10 @@ in
       mutagen
       yubikey-manager
       yubikey-personalization
+      zeal
+      rlwrap
+      postman
+      pandoc
 
       # DevOps
       docker-compose
@@ -60,8 +65,8 @@ in
       pkg-config
       gitAndTools.delta
       heroku
-      cachix
       sqlite
+      gradle
 
       # Compiler and Runtime
       rustup
@@ -83,12 +88,12 @@ in
       # GUI Application
       slack
       zoom-us
-      vscode
       wireshark
       yubikey-personalization-gui
 
       # Development Environment
       jetbrains.datagrip
+      jetbrains.idea-ultimate
     ];
   };
 

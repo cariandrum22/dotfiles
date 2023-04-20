@@ -1,6 +1,4 @@
 (use-package fish-mode
-  :config
-  (custom-set-variables '(fish-indent-offset 2))
-  )
+  :init (setq fish-enable-auto-indent t))
 
 (provide 'init-fish)

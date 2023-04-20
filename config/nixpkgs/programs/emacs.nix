@@ -4,7 +4,7 @@
   nixpkgs.overlays = [
     (import (builtins.fetchTarball {
       url =
-        "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
+        "https://github.com/nix-community/emacs-overlay/archive/86ea3268b55bb632de43a80a37501a3d05cdb224.zip";
     }))
   ];
 
@@ -13,42 +13,38 @@
     package = pkgs.emacsGit;
     extraPackages = (epkgs:
       (with epkgs; [
+        use-package
         swiper
+        counsel
         projectile
         counsel-projectile
-        use-package
-        flycheck
-        company
-        mmm-mode
-        lsp-mode
-        lsp-ui
-        lsp-haskell
-        enh-ruby-mode
-        ruby-end
-        inf-ruby
-        rspec-mode
-        robe
-        rbenv
-        projectile-rails
-        rust-mode
-        go-mode
-        dockerfile-mode
-        yaml-mode
-        jinja2-mode
-        web-mode
-        js2-mode
-        elm-mode
-        fish-mode
+        ag
+        powerline
+        which-key
         font-lock-plus
+        flycheck
         magit
         git-gutter
         ddskk
-        ov
-        powerline
-        zenburn-theme
-        frame-local
-        dired-sidebar
         wrap-region
+        nord-theme
+        company
+        company-shell
+        lsp-mode
+        lsp-ui
+        lsp-ivy
+        lsp-treemacs
+        haskell-mode
+        lsp-haskell
+        dockerfile-mode
+        fish-mode
+        jinja2-mode
+        markdown-mode
+        mmm-mode
+        nix-mode
+        toml-mode
+        web-mode
+        yaml-mode
       ]));
   };
 

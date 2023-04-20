@@ -1,11 +1,6 @@
 (use-package ruby-mode
-  :config
-  (progn
-    (use-package robe
-      :config
-      (eval-after-load 'company
-        '(push 'company-robe company-backends)))
-    )
-  )
+  :mode ("\\.\\(?:cap\\|gemspec\\|irbrc\\|gemrc\\|rake\\|rb\\|ru\\|thor\\)\\'"
+         "\\(?:Brewfile\\|Capfile\\|Gemfile\\(?:\\.[a-zA-Z0-9._-]+\\)?\\|[rR]akefile\\)\\'")
+  :hook (ruby-mode . lsp-deferred))
 
 (provide 'init-ruby)

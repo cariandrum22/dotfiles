@@ -7,7 +7,8 @@ let
     ./tmux.nix
     ./emacs.nix
     ./direnv.nix
-  ];
+    ./vscode.nix
+];
   synthetic = if isDarwin then base else base ++ [ ./rofi.nix ];
 in
 {

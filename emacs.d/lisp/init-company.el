@@ -1,5 +1,4 @@
 (use-package company
-  :config
-  (global-company-mode t))
+  :config (global-company-mode t))
 
 (provide 'init-company)
