@@ -19,7 +19,7 @@ in
   home = {
     username = builtins.getEnv "USER";
     homeDirectory = builtins.getEnv "HOME";
-    stateVersion = "22.11";
+    stateVersion = "23.05";
   };
 
   imports = synthetic;
