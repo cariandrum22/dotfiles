@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-readonly NIXPKGS_VERSION="22.05"
+readonly NIXPKGS_VERSION="23.05"
 
 # Environment Setup Script.
 echo "Start setup."
@@ -68,7 +68,7 @@ deploy_dotfiles() {
 main() {
   # List of dotfiles to deploy
   local -a dotfiles=(
-    config/nixpkgs
+    config/home-manager
     config/fish/fish_plugins
   )
 
@@ -106,8 +106,8 @@ main() {
   # Install Home Manager
   install::home_manager "${NIXPKGS_VERSION}"
 
-  # Delete existing ${HOME}/.config/nixpkgs directory to replace it with a file under git management
-  rm -rf "${HOME}/.config/nixpkgs"
+  # Delete existing ${HOME}/.config/home-manager directory to replace it with a file under git management
+  rm -rf "${HOME}/.config/home-manager"
 
   # Deploy dot files to ${HOME}
   deploy_dotfiles "${dotfiles[@]}"
