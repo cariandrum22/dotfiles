@@ -20,7 +20,7 @@ in
   nixpkgs.overlays = [
     (self: super: {
       haskell-language-server = unstable.haskell-language-server.override {
-        supportedGhcVersions = [ "926" ];
+        supportedGhcVersions = [ "927" ];
       };
     })
   ];
