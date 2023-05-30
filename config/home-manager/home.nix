@@ -10,6 +10,7 @@ let
   linux = base ++ [
     ./xsession.nix
     ./services/picom.nix
+    ./services/dunst.nix
     ./services/keybase.nix
     ./services/vscode-server.nix
   ];
