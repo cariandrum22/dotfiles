@@ -19,10 +19,9 @@
       export SSH_AUTH_SOCK
 
       export XMODIFIERS="@im=fcitx"
-      export XMODIFIER="@im=fcitx"
       export GTK_IM_MODULE="fcitx"
       export QT_IM_MODULE="fcitx"
-      fcitx
+      fcitx5 &
 
       xrdb -merge .Xresources
       feh --bg-scale ~/Pictures/Wallpaper/756745.jpg

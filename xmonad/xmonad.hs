@@ -258,17 +258,17 @@ wsGeneral = "\xe712"
 
 wsWork = "\xe777"
 
-wsStudy = "\xf973"
+wsStudy = "\xf0fc9"
 
-wsNetwork = "\xfbf1"
+wsNetwork = "\xf06f3"
 
-wsMusic = "\xfc58"
+wsMusic = "\xf075a"
 
-wsNote = "\xfd2c"
+wsNote = "\xf00bd"
 
 wsMonitor = "\xf1fe"
 
-wsSetting = "\xf993"
+wsSetting = "\xe615"
 
 wsGame = "\xf11b"
 

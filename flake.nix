@@ -12,7 +12,8 @@
         pkgs = nixpkgs.legacyPackages.${system};
         packages = with pkgs; [
           zlib
-          xlibsWrapper
+          xorg.libX11
+          xorg.libXext
           xorg.libXrandr
           xorg.libXScrnSaver
         ];
