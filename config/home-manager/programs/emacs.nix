@@ -4,7 +4,7 @@
   nixpkgs.overlays = [
     (import (builtins.fetchTarball {
       url =
-        "https://github.com/nix-community/emacs-overlay/archive/86ea3268b55bb632de43a80a37501a3d05cdb224.zip";
+        "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
     }))
   ];
 
