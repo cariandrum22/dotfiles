@@ -2,7 +2,6 @@
 thunnus.init
 
 # Set basic environment variables
-set -x LC_ALL en_US.UTF-8
 set -x LANG en_US.UTF-8
 set -x PATH /usr/local/sbin "$HOME/.local/bin" $PATH
 
@@ -90,6 +89,12 @@ if [ (thunnus.os.platform.detect) = macOS ]
     if [ -d /usr/local/opt/texinfo/bin ]
         set_path /usr/local/opt/texinfo/bin
     end
+end
+
+# For WSL
+if [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]
+    set -x PATH "/mnt/c/Program Files/Microsoft VS Code/bin" $PATH
+    thunnus.gpg.agent_relay >/dev/null
 end
 
 # Aliases
