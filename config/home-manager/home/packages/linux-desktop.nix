@@ -38,6 +38,7 @@
       trash-cli
       flameshot
       xlsfonts
+      zeal
 
       # Game
       prismlauncher

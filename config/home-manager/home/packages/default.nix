@@ -38,14 +38,13 @@ in
       mutagen
       yubikey-manager
       yubikey-personalization
-      zeal
       rlwrap
       postman
       pandoc
 
       # DevOps
       docker-compose
-      etcd
+      etcd_3_5
       kubectl
       kubernetes-helm
       krew
@@ -89,7 +88,6 @@ in
       slack
       zoom-us
       wireshark
-      yubikey-personalization-gui
 
       # Development Environment
       jetbrains.datagrip
