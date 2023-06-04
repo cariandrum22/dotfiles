@@ -7,6 +7,7 @@ in
   programs.vscode = {
     enable = true;
     package = unstable.vscode;
+    mutableExtensionsDir = true;
     extensions = pkgs.vscode-utils.extensionsFromVscodeMarketplace [
       {
         name = "cpptools";
