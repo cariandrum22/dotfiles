@@ -10,7 +10,7 @@
 
   programs.emacs = {
     enable = true;
-    package = pkgs.emacsGit;
+    package = pkgs.emacs-git;
     extraPackages = (epkgs:
       (with epkgs; [
         use-package
