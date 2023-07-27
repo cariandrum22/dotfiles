@@ -1,8 +1,6 @@
 { lib, pkgs, ... }:
 
 let
-  unstable = import <unstable> { config.allowUnfree = true; };
-
   haskell = import ./haskell.nix;
   purescript = import ./purescript.nix;
   java = import ./java.nix;
@@ -13,7 +11,30 @@ in
   programs.vscode = {
     enable = true;
     mutableExtensionsDir = false;
-    package = unstable.vscode;
+    package = (pkgs.vscode.override { isInsiders = true; }).overrideAttrs (oldAttrs: rec {
+      pname = "vscode-insiders";
+      version = "1.82.0";
+      src = (builtins.fetchTarball {
+        name = "${pname}-${version}";
+        url = "https://code.visualstudio.com/sha/download?build=insider&os=linux-x64";
+        sha256 = "13mk70fga643xhxf8lijmfkxk51dsfn36lbg51x99s77yabw3wcw";
+      });
+      buildInputs = oldAttrs.buildInputs ++ [ pkgs.krb5 ];
+      runtimeDependencies = lib.optionals pkgs.stdenv.isLinux (oldAttrs.runtimeDependencies ++ [ pkgs.libsecret ]);
+      urlHandlerDesktopItem = pkgs.makeDesktopItem {
+        name = "code-insiders-url-handler";
+        desktopName = "Visual Studio Code - Insiders - URL Handler";
+        comment = "Code Editing. Redefined.";
+        genericName = "Text Editor";
+        exec = "code-insiders" + " --open-url %U";
+        icon = "code";
+        startupNotify = true;
+        categories = [ "Utility" "TextEditor" "Development" "IDE" ];
+        mimeTypes = [ "x-scheme-handler/${pname}" ];
+        keywords = [ "vscode" ];
+        noDisplay = true;
+      };
+    });
     extensions = with pkgs.vscode-extensions; [
       ms-dotnettools.csharp
     ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace ([
@@ -32,14 +53,14 @@ in
       {
         name = "material-icon-theme";
         publisher = "PKief";
-        version = "4.28.0";
-        sha256 = "sha256-DO3dcJPk+TMhfb0IJ/eTB7nIKfyCXIiyhZFBpZjJzsM=";
+        version = "4.29.0";
+        sha256 = "sha256-YqleqYSpZuhGFGkNo3FRLjiglxX+iUCJl69CRCY/oWM";
       }
       {
         name = "gitlens";
         publisher = "eamodio";
-        version = "2023.6.505";
-        sha256 = "sha256-K79F0yxY6Bz8gnL0eBd3P48cx67bEv7ewrw46JrQ/tA=";
+        version = "2023.8.505";
+        sha256 = "sha256-pt31XvvwitFk7MiZ2ZOZ2boa1YikJWZa2JRs/QxOl50=";
       }
       {
         name = "nix-ide";
@@ -195,7 +216,7 @@ in
         name = "terraform";
         publisher = "HashiCorp";
         version = "2.26.2023051115";
-        sha256 = "sha256-VDaxfDdCQT1f5A1xt/gcc9pNE8H38l7/Vz8p4Yhq0DU=";
+        sha256 = "sha256-8RvVJh0GgTRMUolmH1j1qA5qZoBopkS2tv9s227cSic=";
       }
       {
         name = "HCL";
@@ -242,8 +263,20 @@ in
       {
         name = "shellcheck";
         publisher = "timonwong";
-        version = "0.32.6";
-        sha256 = "sha256-/RDvLq82laq4HBpRwP82oTCTXvGeAa0YFAfeFhRqnzQ=";
+        version = "0.33.0";
+        sha256 = "sha256-dDd2Pf26XWehPaIxHBsZ2JDTylvcEwQVffqV+X03wlc=";
+      }
+      {
+        name = "copilot";
+        publisher = "GitHub";
+        version = "1.98.280";
+        sha256 = "sha256-OgjZgWNHVLIDGqDivH+zOL3q6f0YY7L431gbJiwmcd4=";
+      }
+      {
+        name = "copilot-chat";
+        publisher = "GitHub";
+        version = "0.5.2023072001";
+        sha256 = "sha256-l0YIe1Q7IFptQnw1dCZRqYSlWQzmS8X3bqKJ2b9D71Q=";
       }
     ] ++ haskell ++ purescript ++ java ++ microsoft);
   } // settings;

@@ -14,6 +14,8 @@
       "100:class_g = 'Evince' && !focused"
       "100:class_g = 'Code' && focused"
       "100:class_g = 'Code' && !focused"
+      "100:class_g = 'Code - Insiders' && focused"
+      "100:class_g = 'Code - Insiders' && !focused"
       "100:class_g = 'Slack' && focused"
       "100:class_g = 'Slack' && !focused"
       "100:class_g = '1Password' && focused"

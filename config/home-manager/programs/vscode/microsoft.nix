@@ -2,38 +2,38 @@
   {
     name = "vscode-docker";
     publisher = "ms-azuretools";
-    version = "1.25.1";
-    sha256 = "sha256-vEDmGrXgmEtZpsTdfYNL3MzuoJgh5zz+Z+ulMWI1EOQ=";
+    version = "1.26.0";
+    sha256 = "sha256-RkHKO97so3N61UXc35IekmLEsdPQIOpSxiDzCGL3VTs=";
   }
   {
     name = "python";
     publisher = "ms-python";
-    version = "2023.9.11561008";
-    sha256 = "sha256-L2lBrp/vM/lIuIRlV/RQ2pwCGkCfLOUu7aRxsKjRchw=";
+    version = "2023.13.12011006";
+    sha256 = "sha256-xENpr24MS026+v+VOIky4DixGFAnQJxKM2TYz4adsOE=";
   }
   {
     name = "jupyter";
     publisher = "ms-toolsai";
-    version = "2023.5.1001582324";
-    sha256 = "sha256-EyN3WkUCcPokT20fwHvQt7v0t+gNLhm/oehML+XDxUY=";
+    version = "2023.7.1002041100";
+    sha256 = "sha256-6CVugesiUpuPxYn2oiSB8crhxjMMdhQ7bC8+IprOLtA=";
   }
   {
     name = "jupyter-renderers";
     publisher = "ms-toolsai";
-    version = "1.0.15";
+    version = "1.0.17";
     sha256 = "sha256-JR6PunvRRTsSqjSGGAn/1t1B+Ia6X0MgqahehcuSNYA=";
   }
   {
     name = "remote-explorer";
     publisher = "ms-vscode";
-    version = "0.5.2023060509";
-    sha256 = "sha256-OPiXBU+EPEhApfzWziHPabNGInUfi8lYTrvJ0FP2TJI=";
+    version = "0.5.2023071709";
+    sha256 = "sha256-fQ7V8odv1Jd1C1PsdnOMWw0QB12Nxo4aQtX/o3wiYwY=";
   }
   {
     name = "cpptools";
     publisher = "ms-vscode";
-    version = "1.16.0";
-    sha256 = "sha256-bHrbdsGb9VW/R2rKGtTg6mov/BHJhRkHljAzIsvSpP4=";
+    version = "1.16.3";
+    sha256 = "sha256-Y4OX7N4whaJroJ9XQVVnIg1ywzsyZCgebpGFqg8L0F4=";
   }
   {
     name = "cpptools-themes";
@@ -44,8 +44,8 @@
   {
     name = "cmake-tools";
     publisher = "ms-vscode";
-    version = "1.15.12";
-    sha256 = "sha256-1gVx7QAQPN/lcQCfmR1e5Yf+UFtaHQ+eWhxyr4FIvIQ=";
+    version = "1.15.25";
+    sha256 = "sha256-q1NRVE6qaZ/M2oQ6voRa/kdG4m8lx3j4SWVFacv/0rM=";
   }
   {
     name = "makefile-tools";
@@ -56,8 +56,8 @@
   {
     name = "remote-ssh";
     publisher = "ms-vscode-remote";
-    version = "0.103.2023060715";
-    sha256 = "sha256-PEwV+05iCEBGM0RnUjbNTS+6jU1JKegGJxlbtlI47go=";
+    version = "0.103.2023071415";
+    sha256 = "sha256-v9ys6jkJZd5dGv9vlAtwT57v/Wv3oFYGcxrGIV2+LRM=";
   }
   {
     name = "remote-ssh-edit";
@@ -68,7 +68,7 @@
   {
     name = "vscode-eslint";
     publisher = "dbaeumer";
-    version = "2.4.1";
-    sha256 = "sha256-RitdNF/fOJQxheJWCCS4v1pJvjeo/q+w1F6ERAHmtQc=";
+    version = "2.4.2";
+    sha256 = "sha256-eIjaiVQ7PNJUtOiZlM+lw6VmW07FbMWPtY7UoedWtbw=";
   }
 ]

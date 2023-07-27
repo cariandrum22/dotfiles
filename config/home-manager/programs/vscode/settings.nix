@@ -2,6 +2,7 @@
   userSettings = {
     "window.zoomLevel" = -1.0;
     "editor" = {
+      "emptySelectionClipboard" = true;
       "fontFamily " = "'Fira Code', 'FiraCode Nerd Font', Menlo, Monaco, 'Courier New', monospace";
       "fontSize" = 12;
       "fontLigatures" = true;
@@ -14,6 +15,9 @@
       "detectIndentation" = true;
       "tabSize" = 8;
       "renderWhitespace" = "all";
+      "inlineSuggest" = {
+        "enabled" = true;
+      };
     };
     "workbench" = {
       "welcome.enabled" = false;
