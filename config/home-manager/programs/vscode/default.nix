@@ -6,6 +6,26 @@ let
   java = import ./java.nix;
   microsoft = import ./microsoft.nix;
   settings = import ./settings.nix;
+
+  # Start of the code segment borrowed from nixpkgs
+  # (https://github.com/NixOS/nixpkgs/blob/nixos-23.05/pkgs/applications/editors/vscode/vscode.nix)
+  # The original code is licensed under the MIT license.
+  inherit (pkgs.stdenv.hostPlatform) system;
+
+  plat = {
+    x86_64-linux = "linux-x64";
+    x86_64-darwin = "darwin";
+    aarch64-darwin = "darwin-arm64";
+  }.${system};
+
+  archive_fmt = if pkgs.stdenv.isDarwin then "zip" else "tar.gz";
+
+  sha256 = {
+    x86_64-linux = "13rbbn632h3xvzd3jsiaxls3xkncfz1lah0fl5za3n4w4c2qynzr";
+    x86_64-darwin = "0rlcilz27zhwv3xjgrl03yzgwa4ky97c7ipi16mjh7xvms2vdshj";
+    aarch64-darwin = "0xfh4i80n0vn6s4blkxqdpg32nlwl8pdlmz45ymnswn0x1lj8ysq";
+  }.${system};
+  # End of the borrowed nixpkgs code segment from above
 in
 {
   programs.vscode = {
@@ -14,10 +34,10 @@ in
     package = (pkgs.vscode.override { isInsiders = true; }).overrideAttrs (oldAttrs: rec {
       pname = "vscode-insiders";
       version = "1.82.0";
-      src = (builtins.fetchTarball {
-        name = "${pname}-${version}";
-        url = "https://code.visualstudio.com/sha/download?build=insider&os=linux-x64";
-        sha256 = "13mk70fga643xhxf8lijmfkxk51dsfn36lbg51x99s77yabw3wcw";
+      src = (builtins.fetchurl {
+        name = "${pname}-${version}.${archive_fmt}";
+        url = "https://code.visualstudio.com/sha/download?build=insider&os=${plat}";
+        inherit sha256;
       });
       buildInputs = oldAttrs.buildInputs ++ [ pkgs.krb5 ];
       runtimeDependencies = lib.optionals pkgs.stdenv.isLinux (oldAttrs.runtimeDependencies ++ [ pkgs.libsecret ]);
