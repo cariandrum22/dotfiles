@@ -6,5 +6,8 @@
     }/modules/vscode-server/home.nix"
   ];
 
-  services.vscode-server.enable = true;
+  services.vscode-server = {
+    enable = true;
+    installPath = "~/.vscode-server-insiders";
+  };
 }
