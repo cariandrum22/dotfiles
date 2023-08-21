@@ -20,8 +20,10 @@ let
 
   archive_fmt = if pkgs.stdenv.isDarwin then "zip" else "tar.gz";
 
+  commit = "501baeb5e07b5a404f862d922bacb93771d91331";
+
   sha256 = {
-    x86_64-linux = "13rbbn632h3xvzd3jsiaxls3xkncfz1lah0fl5za3n4w4c2qynzr";
+    x86_64-linux = "1prshql24lbwgydbsv115vqqicgziixd3nllzc891a1f4f74vy53";
     x86_64-darwin = "0rlcilz27zhwv3xjgrl03yzgwa4ky97c7ipi16mjh7xvms2vdshj";
     aarch64-darwin = "0xfh4i80n0vn6s4blkxqdpg32nlwl8pdlmz45ymnswn0x1lj8ysq";
   }.${system};
@@ -33,7 +35,7 @@ in
     mutableExtensionsDir = false;
     package = (pkgs.vscode.override { isInsiders = true; }).overrideAttrs (oldAttrs: rec {
       pname = "vscode-insiders";
-      version = "1.82.0";
+      version = "1.82.0-${commit}";
       src = (builtins.fetchurl {
         name = "${pname}-${version}.${archive_fmt}";
         url = "https://code.visualstudio.com/sha/download?build=insider&os=${plat}";
@@ -79,13 +81,13 @@ in
       {
         name = "gitlens";
         publisher = "eamodio";
-        version = "2023.8.505";
-        sha256 = "sha256-pt31XvvwitFk7MiZ2ZOZ2boa1YikJWZa2JRs/QxOl50=";
+        version = "2023.8.1905";
+        sha256 = "sha256-5NPAqCS/5bQwrQioulFskiNlIHmOgh1aWbDh1d2TFrc=";
       }
       {
         name = "nix-ide";
         publisher = "jnoortheen";
-        version = "0.2.1";
+        version = "0.2.2";
         sha256 = "sha256-yC4ybThMFA2ncGhp8BYD7IrwYiDU3226hewsRvJYKy4=";
       }
       {
@@ -97,8 +99,8 @@ in
       {
         name = "rust-analyzer";
         publisher = "rust-lang";
-        version = "0.4.1540";
-        sha256 = "sha256-WHciY9pXbOB/qWlyaW+lXFstF6R7JhjsY72JmS23jhA=";
+        version = "0.4.1630";
+        sha256 = "sha256-s3HeFdz6KkE7rd1vKXBrv9aXq6dUu5azrmGJqEfAUdc=";
       }
       {
         name = "Idris";
@@ -109,7 +111,7 @@ in
       {
         name = "vscode-fish";
         publisher = "bmalehorn";
-        version = "1.0.33";
+        version = "1.0.36";
         sha256 = "sha256-ZQlG+HrjU4DFfpyiY8o0/ayDms6MGEObW8pV1Lmr5/Y=";
       }
       {
@@ -133,44 +135,44 @@ in
       {
         name = "prettier-vscode";
         publisher = "esbenp";
-        version = "9.13.0";
+        version = "10.1.0";
         sha256 = "sha256-Iqz1O6odSzAfojCgGDwDA1YtnWU5Ei7vx9Qt25/1SLw=";
       }
       {
         name = "Go";
         publisher = "golang";
-        version = "0.38.0";
+        version = "0.39.1";
         sha256 = "sha256-wOWouVz4mE4BzmgQOLQyVWsMadMqeUkFWHnruxStU0Q=";
       }
       {
         name = "ruby-lsp";
         publisher = "Shopify";
-        version = "0.3.1";
-        sha256 = "sha256-K6h9x1gB6BWcy3MVhjNSnKBOi2HAN7ePABq6lW692Iw=";
+        version = "0.4.5";
+        sha256 = "sha256-6VlNuyRTZ2bC/9pLT2C0Pqlh+1bQDB80C82nd9d4tiA=";
       }
       {
         name = "vscode-markdownlint";
         publisher = "DavidAnson";
-        version = "0.50.0";
+        version = "0.51.0";
         sha256 = "sha256-F+lryIhSudDz68t1eGrfqI8EuoUUOWU5LfWj0IRCQyY=";
       }
       {
         name = "vscode-edit-csv";
         publisher = "janisdd";
-        version = "0.7.6";
-        sha256 = "sha256-42ydpKamn/T26w8N2WzhCIw/UAlmNcKbfVQaj5WOWK0=";
+        version = "0.8.2";
+        sha256 = "sha256-DbAGQnizAzvpITtPwG4BHflUwBUrmOWCO7hRDOr/YWQ=";
       }
       {
         name = "even-better-toml";
         publisher = "tamasfe";
-        version = "0.19.0";
+        version = "0.19.2";
         sha256 = "sha256-MqSQarNThbEf1wHDTf1yA46JMhWJN46b08c7tV6+1nU=";
       }
       {
         name = "Bookmarks";
         publisher = "alefragnani";
-        version = "13.3.1";
-        sha256 = "sha256-CZSFprI8HMQvc8P9ZH+m0j9J6kqmSJM1/Ik24ghif2A=";
+        version = "13.4.1";
+        sha256 = "sha256-MFr5oePj1gqPXkUi+kvXHhgckw28EAbM48Q3p3oWKCs=";
       }
       {
         name = "change-case";
@@ -181,7 +183,7 @@ in
       {
         name = "code-spell-checker";
         publisher = "streetsidesoftware";
-        version = "2.20.4";
+        version = "2.20.5";
         sha256 = "sha256-GOXKXZPEynyqRUUY0pdNwt+141kJleg74IbCP4/34R8=";
       }
       {
@@ -199,8 +201,8 @@ in
       {
         name = "errorlens";
         publisher = "usernamehw";
-        version = "3.11.1";
-        sha256 = "sha256-yCX+imIaSww3LJ/v3ofs3qBVAXVkTT2Njha8oaqrAX8=";
+        version = "3.13.0";
+        sha256 = "sha256-HslBfJsKDUGq+xdCBfYlxsWJ4xOB9flfyO2aUCqwmYM=";
       }
       {
         name = "Kotlin";
@@ -211,7 +213,7 @@ in
       {
         name = "scala";
         publisher = "scala-lang";
-        version = "0.5.6";
+        version = "0.5.7";
         sha256 = "sha256-eizIPazqEb27aQ+o9nTD1O58zbjkHYHNhGjK0uJgnwA=";
       }
       {
@@ -223,20 +225,20 @@ in
       {
         name = "vscode-graphql";
         publisher = "GraphQL";
-        version = "0.8.7";
+        version = "0.8.17";
         sha256 = "sha256-u3VcpgLKiEeUr1I6w71wleKyaO6v0gmHiw5Ama6fv88=";
       }
       {
         name = "vscode-graphql-syntax";
         publisher = "GraphQL";
-        version = "1.1.0";
+        version = "1.2.2";
         sha256 = "sha256-qazU0UyZ9de6Huj2AYZqqBo4jVW/ZQmFJhV7XXAblxo=";
       }
       {
         name = "terraform";
         publisher = "HashiCorp";
-        version = "2.26.2023051115";
-        sha256 = "sha256-8RvVJh0GgTRMUolmH1j1qA5qZoBopkS2tv9s227cSic=";
+        version = "2.27.2023071109";
+        sha256 = "sha256-RXQZu0J4UJwFl1e00cWNX5PeorfOXQ1AO+xmtQUmoxg=";
       }
       {
         name = "HCL";
@@ -247,8 +249,8 @@ in
       {
         name = "i18n-ally";
         publisher = "Lokalise";
-        version = "2.9.1";
-        sha256 = "sha256-PMQxdeiLXVrvYUvLfgcuracVNIRIbshdl7CU2D3a/jU=";
+        version = "2.10.0";
+        sha256 = "sha256-n35OwKaSF0CBhw7n+/05h/O1jalZ5pp5wNqPmWF1bH4=";
       }
       {
         name = "icon-fonts";
@@ -259,20 +261,20 @@ in
       {
         name = "mesonbuild";
         publisher = "mesonbuild";
-        version = "1.9.0";
-        sha256 = "sha256-HflSqDGZEHf7p2MnqXmBinwfbYh4A+6KJcvD7mDyp0k=";
+        version = "1.10.0";
+        sha256 = "sha256-Mfsf7nxcKMY0Qk0v1jh/mM22fhyKl76OVRrtCCztQQo=";
       }
       {
         name = "latex-workshop";
         publisher = "James-Yu";
-        version = "9.11.4";
-        sha256 = "sha256-qRPk0aQJCr4L3GIE8DhvBwWAJqK7mlBSgYNecBk42gM=";
+        version = "9.13.4";
+        sha256 = "sha256-5LGMbkvAE4QJiH4z/6eSRPMFSgd9mZ8BpEwIB+en9zk=";
       }
       {
         name = "ruff";
         publisher = "charliermarsh";
-        version = "2023.17.11351528";
-        sha256 = "sha256-GMa3xMrPz3EEyPWTNSLzdZU3zKcVvbLmMVdStSHc8V4=";
+        version = "2023.34.0";
+        sha256 = "sha256-KOntjiE+n1yf9047XDldGg2pT+zknI/aEg6h71LwEB8=";
       }
       {
         name = "shell-format";
@@ -283,20 +285,26 @@ in
       {
         name = "shellcheck";
         publisher = "timonwong";
-        version = "0.33.0";
-        sha256 = "sha256-dDd2Pf26XWehPaIxHBsZ2JDTylvcEwQVffqV+X03wlc=";
+        version = "0.33.1";
+        sha256 = "sha256-ICQH/0OiNPgHOfj+bWk53ynqTZnplV4j4vTRoln2pVI=";
       }
       {
         name = "copilot";
         publisher = "GitHub";
-        version = "1.98.280";
-        sha256 = "sha256-OgjZgWNHVLIDGqDivH+zOL3q6f0YY7L431gbJiwmcd4=";
+        version = "1.105.350";
+        sha256 = "sha256-OuWENMzWkMHLwFKbc/9J7/PVej21afCUFC3SBg9twOg=";
       }
       {
         name = "copilot-chat";
         publisher = "GitHub";
-        version = "0.5.2023072001";
-        sha256 = "sha256-l0YIe1Q7IFptQnw1dCZRqYSlWQzmS8X3bqKJ2b9D71Q=";
+        version = "0.7.2023081801";
+        sha256 = "sha256-4n28k0pqHEluL7mbsTfMMkePfRK5U5MzMNhLTRogoVY=";
+      }
+      {
+        name = "cmake";
+        publisher = "twxs";
+        version = "0.0.17";
+        sha256 = "sha256-CFiva1AO/oHpszbpd7lLtDzbv1Yi55yQOQPP/kCTH4Y=";
       }
     ] ++ haskell ++ purescript ++ java ++ microsoft);
   } // settings;

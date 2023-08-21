@@ -8,14 +8,14 @@
   {
     name = "python";
     publisher = "ms-python";
-    version = "2023.13.12011006";
-    sha256 = "sha256-xENpr24MS026+v+VOIky4DixGFAnQJxKM2TYz4adsOE=";
+    version = "2023.15.12331008";
+    sha256 = "sha256-pCo0jX4af0AOLL5nWbSteHa8OUtm1O7xVqwEJzyxfRY=";
   }
   {
     name = "jupyter";
     publisher = "ms-toolsai";
-    version = "2023.7.1002041100";
-    sha256 = "sha256-6CVugesiUpuPxYn2oiSB8crhxjMMdhQ7bC8+IprOLtA=";
+    version = "2023.8.1002351100";
+    sha256 = "sha256-01EfyYLpbq34zbTO8wXxkbUuZVC0NHKManFS5agPfbU=";
   }
   {
     name = "jupyter-renderers";
@@ -32,8 +32,8 @@
   {
     name = "cpptools";
     publisher = "ms-vscode";
-    version = "1.16.3";
-    sha256 = "sha256-Y4OX7N4whaJroJ9XQVVnIg1ywzsyZCgebpGFqg8L0F4=";
+    version = "1.17.3";
+    sha256 = "sha256-4ktrc85HCS689+gaPNPZkSJpaMexgSa+vIttLuNJdTs=";
   }
   {
     name = "cpptools-themes";
@@ -44,20 +44,20 @@
   {
     name = "cmake-tools";
     publisher = "ms-vscode";
-    version = "1.15.25";
-    sha256 = "sha256-q1NRVE6qaZ/M2oQ6voRa/kdG4m8lx3j4SWVFacv/0rM=";
+    version = "1.16.2";
+    sha256 = "sha256-tuSkTn2zUOl7w3Lb+Mia4S7RbQWhtsgA1QVh9KiBNJM=";
   }
   {
     name = "makefile-tools";
     publisher = "ms-vscode";
-    version = "0.8.1";
-    sha256 = "sha256-VCrMhTcO1EjK93wPVcZBwB3PPynOeSABS6hokgtaXBc=";
+    version = "0.8.5";
+    sha256 = "sha256-mHKaL3BXQsh+0Ntq3Kb+0aDMuzZPvg+dmkrc0st02U4=";
   }
   {
     name = "remote-ssh";
     publisher = "ms-vscode-remote";
-    version = "0.103.2023071415";
-    sha256 = "sha256-v9ys6jkJZd5dGv9vlAtwT57v/Wv3oFYGcxrGIV2+LRM=";
+    version = "0.106.2023081815";
+    sha256 = "sha256-A2zP0ayIMWHJ7jf/ZjoJMRYAhrIy39l4Yjj9ZAzgeew=";
   }
   {
     name = "remote-ssh-edit";
