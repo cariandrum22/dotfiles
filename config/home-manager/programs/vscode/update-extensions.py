@@ -1,7 +1,8 @@
 import sys
+import platform
+import subprocess
 import http.client
 import json
-import subprocess
 
 MARKETPLACE_DOMAIN = "marketplace.visualstudio.com"
 ASSETS_DOMAIN = "{publisher}.gallery.vsassets.io"
@@ -9,7 +10,7 @@ EXTENSION_QUERY_ENDPOINT = "/_apis/public/gallery/extensionquery"
 DOWNLOAD_ENDPOINT = (
     "/_apis/public/gallery/publisher/{publisher}"
     "/extension/{extension}/{version}"
-    "/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage"
+    "/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage{queryString}"
 )
 
 
@@ -17,12 +18,6 @@ def open_extension_file(file):
     with open(file, "r") as file:
         lines = list(map(str.strip, file))
         return lines
-
-
-def prepare_extension_list():
-    extensions = open_extension_file("extensions")
-    extensions_from_nixpkgs = open_extension_file("extensions-from-nixpkgs")
-    return list(set(extensions) - set(extensions_from_nixpkgs))
 
 
 def to_dict(item):
@@ -70,21 +65,48 @@ def query(extension):
     return result
 
 
-def results_to_nix_attr(publisher, name, version, sha256):
+def results_to_nix_attr(publisher, name, version, sha256, arch=None):
     return f"""
   {{
     name = "{name}";
     publisher = "{publisher}";
     version = "{version}";
     sha256 = "{sha256}";
+    {'arch = "' + arch + '";' if arch is not None else ''}
   }}"""
 
+
+def convert_system_arch_representation():
+    system = platform.system().lower()
+    machine = platform.machine()
+    if machine == "x86_64":
+        return f"{system}-x64"
+    elif machine == "i686":
+        return  f"{system}-x86"
+    elif machine == "aarch64" or machine == "arm64":
+        return  f"{system}-arm64"
+    elif machine == "armv7l":
+        return  f"{system}-armhf"
+
+
+def extract_version_and_platform(versions):
+    for version in versions:
+        if version.get("targetPlatform") == convert_system_arch_representation():
+            return version["version"], version["targetPlatform"]
+    for version in versions:
+        if "targetPlatform" not in version:
+            return version["version"], None
 
 def extract_extension_info(result):
     extension = result["body"]["results"][0]["extensions"][0]
     publisher = extension["publisher"]["publisherName"]
     name = extension["extensionName"]
-    version = extension["versions"][0]["version"]
+    version, arch = extract_version_and_platform(extension["versions"])
+    queryString = ""
+
+    if arch:
+        queryString = f"?targetPlatform={arch}"
+
     sha256 = (
         subprocess.run(
             [
@@ -92,7 +114,7 @@ def extract_extension_info(result):
                 "https://"
                 + ASSETS_DOMAIN.format(publisher=publisher)
                 + DOWNLOAD_ENDPOINT.format(
-                    publisher=publisher, extension=name, version=version
+                    publisher=publisher, extension=name, version=version, queryString=queryString
                 ),
             ],
             check=True,
@@ -101,13 +123,13 @@ def extract_extension_info(result):
             encoding="utf-8",
         )
     ).stdout.strip()
-    return results_to_nix_attr(publisher, name, version, sha256)
+    return results_to_nix_attr(publisher, name, version, sha256, arch)
 
 
 def main():
     print("Updating VSCode extensions...")
 
-    results = list(map(query, parse_extension_list(prepare_extension_list())))
+    results = list(map(query, parse_extension_list(open_extension_file("extensions"))))
 
     extensions_nix = "".join([extract_extension_info(result) for result in results])
     with open("extensions.nix", "w") as file:

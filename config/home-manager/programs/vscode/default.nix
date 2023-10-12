@@ -4,13 +4,6 @@ let
   extensions = import ./extensions.nix;
   settings = import ./settings.nix { inherit pkgs; };
 
-  extensions_from_nixpkgs = with builtins; let
-    es = map (e: lib.splitString "." e)
-      (filter (i: i != "")
-        (lib.splitString "\n" (readFile ./extensions-from-nixpkgs)));
-  in
-  map (e: pkgs.vscode-extensions.${elemAt e 0}.${elemAt e 1}) es;
-
   # Start of the code segment borrowed from nixpkgs
   # (https://github.com/NixOS/nixpkgs/blob/nixos-23.05/pkgs/applications/editors/vscode/vscode.nix)
   # The original code is licensed under the MIT license.
@@ -61,7 +54,6 @@ in
         noDisplay = true;
       };
     });
-    extensions = extensions_from_nixpkgs
-      ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace extensions;
+    extensions = pkgs.vscode-utils.extensionsFromVscodeMarketplace extensions;
   } // settings;
 }
