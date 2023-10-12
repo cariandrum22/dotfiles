@@ -1,3 +1,5 @@
+{ pkgs }:
+
 {
   userSettings = {
     "window.zoomLevel" = -1.0;
@@ -18,6 +20,7 @@
       "inlineSuggest" = {
         "enabled" = true;
       };
+      "wordWrap" = "on";
     };
     "workbench" = {
       "welcome.enabled" = false;
@@ -71,6 +74,19 @@
     ];
     "[typescriptreact]" = {
       "editor.defaultFormatter" = "esbenp.prettier-vscode";
+    };
+    "terraform.languageServer.path" = "${pkgs.terraform-ls}/bin/terraform-ls";
+    "terraform.experimentalFeatures.validateOnSave" = true;
+    "[terraform]" = {
+      "editor.defaultFormatter" = "hashicorp.terraform";
+      "editor.formatOnSave" = true;
+      "editor.formatOnSaveMode" = "file";
+      "languageServer.path" = "terrarom-ls";
+    };
+    "[terraform-vars]" = {
+      "editor.defaultFormatter" = "hashicorp.terraform";
+      "editor.formatOnSave" = true;
+      "editor.formatOnSaveMode" = "file";
     };
   };
 }
