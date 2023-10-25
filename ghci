@@ -1,9 +1,27 @@
 :set -Wall
-:set -Wwarn
 :set -fdiagnostics-color=always
+:set -ferror-spans
+:set -fprint-equality-relations
+:set -fprint-expanded-synonyms
+:set -fprint-explicit-coercions
+:set -fprint-explicit-foralls
+:set -fprint-explicit-kinds
+:set -fprint-explicit-runtime-reps
+:set -fprint-potential-instances
+:set -fprint-typechecker-elaboration
+:set -fprint-unicode-syntax
 
-:set prompt "\ESC[35m\xe777\ESC[m> "
-:set prompt-cont "\ESC[1;35m > \ESC[m"
+:set prompt "\ESC[35m\xe777\ESC[0m> "
+:set prompt-cont "\ESC[35m|> \ESC[0m"
+
+:set editor emacs
+
+-- Collect type and location information after loading modules
+:set +c
+-- Enable parsing of multiline commands
+:set +m
+-- Display the type of each variable bound after a statement is entered at the prompt
+:set +t
 
 :seti -XGADTSyntax
 :seti -XGeneralizedNewtypeDeriving
