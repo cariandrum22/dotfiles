@@ -79,6 +79,9 @@ in
       sbcl
       maxima
 
+      # Language Server
+      terraform-ls
+
       # Database Clients
       mysql-client
       mongodb-tools

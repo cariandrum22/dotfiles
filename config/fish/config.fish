@@ -102,6 +102,7 @@ alias where="command -v"
 alias j="jobs -l"
 alias ll="ls -lh"
 alias la="ls -lha"
+alias code="code-insiders"
 
 # Normalize path(trim tail slash)
 thunnus.path.normalize $PATH
