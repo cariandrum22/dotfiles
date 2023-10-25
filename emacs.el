@@ -18,10 +18,11 @@
 ;;-----------------------------------------------------------------------------
 ;; font
 ;;-----------------------------------------------------------------------------
-(set-frame-font "Fira Code-8" nil t)
-(set-fontset-font (frame-parameter nil 'font)
-      'japanese-jisx0208
-      (font-spec :family "Source Han Code JP-"))
+(when (display-graphic-p)
+      (set-frame-font "Fira Code-8" nil t)
+      (set-fontset-font (frame-parameter nil 'font)
+            'japanese-jisx0208
+            (font-spec :family "Source Han Code JP-")))
 
 ;;-----------------------------------------------------------------------------
 ;; load configs for specific features and modes
