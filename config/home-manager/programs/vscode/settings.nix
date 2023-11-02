@@ -5,7 +5,7 @@
     "window.zoomLevel" = -1.0;
     "editor" = {
       "emptySelectionClipboard" = true;
-      "fontFamily " = "'Fira Code', 'FiraCode Nerd Font', Menlo, Monaco, 'Courier New', monospace";
+      "fontFamily" = "'Fira Code', 'FiraCode Nerd Font', Menlo, Monaco, 'Courier New', monospace";
       "fontSize" = 12;
       "fontLigatures" = true;
       "formatOnSave" = true;
