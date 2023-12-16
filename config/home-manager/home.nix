@@ -13,6 +13,7 @@ let
     ./services/dunst.nix
     ./services/keybase.nix
     ./services/vscode-server.nix
+    ./services/gpg-agent.nix
   ];
   synthetic = if isDarwin then base else linux;
 in
@@ -20,7 +21,7 @@ in
   home = {
     username = builtins.getEnv "USER";
     homeDirectory = builtins.getEnv "HOME";
-    stateVersion = "23.05";
+    stateVersion = "23.11";
   };
 
   imports = synthetic;

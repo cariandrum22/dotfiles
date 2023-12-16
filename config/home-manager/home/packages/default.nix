@@ -39,7 +39,6 @@ in
       yubikey-manager
       yubikey-personalization
       rlwrap
-      postman
       pandoc
 
       # DevOps
@@ -66,12 +65,13 @@ in
       heroku
       sqlite
       gradle
+      clang-tools
 
       # Compiler and Runtime
       rustup
       unstable.go
       dotnet-sdk
-      ruby_3_0
+      ruby_3_3
       rubocop
       python3
       nodejs-18_x
