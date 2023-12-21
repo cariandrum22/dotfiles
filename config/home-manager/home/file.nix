@@ -1,13 +1,5 @@
 { lib, pkgs, ... }:
 
-let
-  isDarwin = pkgs.stdenv.isDarwin;
-  pinentry-program =
-    if isDarwin then
-      "${pkgs.pinentry_mac}/Applications/pinentry-mac.app/Contents/MacOS/pinentry-mac"
-    else
-      "${pkgs.pinentry_gnome}/bin/pinentry-gnome3";
-in
 {
   home.file = lib.mkMerge [
     {
@@ -49,16 +41,11 @@ in
           no-emit-version
         '';
       };
-      ".gnupg/gpg-agent.conf" = {
-        text = ''
-          pinentry-program ${pinentry-program}
-        '';
-      };
       ".netrc.gpg" = { source = ../../../netrc.gpg; };
       ".pythonstartup" = { source = ../../../pythonstartup; };
       ".npmrc" = { source = ../../../npmrc; };
     }
-    (lib.mkIf isDarwin {
+    (lib.mkIf pkgs.stdenv.isDarwin {
       ".gnupg/scdaemon.conf".text = ''disable-ccid'';
     })
   ];
