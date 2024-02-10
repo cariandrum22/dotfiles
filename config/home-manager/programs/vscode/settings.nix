@@ -88,5 +88,13 @@
       "editor.formatOnSave" = true;
       "editor.formatOnSaveMode" = "file";
     };
+    "[dockerfile]" = {
+      "editor.defaultFormatter" = "ms-azuretools.vscode-docker";
+    };
+    "[typescript]" = {
+      "editor.defaultFormatter" = "esbenp.prettier-vscode";
+    };
+    "rubyLsp.rubyVersionManager" = "none";
+    "rubyLsp.rubyExecutablePath" = "${pkgs.ruby_3_3}/bin/ruby";
   };
 }
