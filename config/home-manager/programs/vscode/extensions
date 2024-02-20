@@ -35,6 +35,7 @@ mattn.Lisp
 mesonbuild.mesonbuild
 ms-azuretools.vscode-docker
 ms-dotnettools.csharp
+ms-dotnettools.vscode-dotnet-runtime
 ms-python.python
 ms-toolsai.jupyter
 ms-toolsai.jupyter-renderers
@@ -52,6 +53,7 @@ scala-lang.scala
 Shopify.ruby-lsp
 spacethimble.vscode-purescript-emmet
 streetsidesoftware.code-spell-checker
+svelte.svelte-vscode
 tamasfe.even-better-toml
 timonwong.shellcheck
 twxs.cmake
