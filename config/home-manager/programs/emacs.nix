@@ -1,5 +1,13 @@
 { pkgs, ... }:
-
+let
+  nord-theme' = pkgs.fetchFromGitHub
+    {
+      owner = "cariandrum22";
+      repo = "emacs";
+      rev = "fix-invalid-face-box-error";
+      sha256 = "ZU5dGvGrZvivbA+981IyIu8a4xftL3QyUavGwBc7mQc=";
+    };
+in
 {
   nixpkgs.overlays = [
     (import (builtins.fetchTarball {
@@ -27,7 +35,7 @@
         git-gutter
         ddskk
         wrap-region
-        nord-theme
+        ws-butler
         company
         company-shell
         lsp-mode
@@ -45,6 +53,12 @@
         toml-mode
         web-mode
         yaml-mode
+        (melpaPackages.nord-theme.overrideAttrs (old: {
+          src = nord-theme';
+        }))
+        all-the-icons
+        all-the-icons-dired
+        dired-sidebar
       ]));
   };
 
@@ -57,7 +71,6 @@
   };
 
   programs.git.ignores = [
-    # -*- mode: gitignore; -*-
     "*~"
     "#*#"
     "/.emacs.desktop"

@@ -52,6 +52,9 @@
 (require 'init-toml)
 (require 'init-yaml)
 (require 'init-web)
+(require 'init-whitespace)
+(require 'init-ws-butler)
+(require 'init-dired-sidebar)
 
 ;;-----------------------------------------------------------------------------
 ;; theme
@@ -75,7 +78,9 @@
 ;;-----------------------------------------------------------------------------
 ;; others
 ;;-----------------------------------------------------------------------------
-(setq-default tab-width 2 indent-tabs-mode nil)
+(setq-default
+      tab-width 2
+      indent-tabs-mode nil)
 
 (setq eol-mnemonic-dos "(CRLF)"
       eol-mnemonic-mac "(CR)"
