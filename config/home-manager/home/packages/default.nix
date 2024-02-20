@@ -48,7 +48,6 @@ in
       kubernetes-helm
       krew
       kubelogin
-      vagrant
       azure-cli
       azure-storage-azcopy
       powershell
