@@ -7,13 +7,12 @@
     packages = with pkgs; [
       # Deep Learning
       cudatoolkit
-      cudaPackages.cudnn
 
       # GUI Applications
       polybarFull
       feh
       pavucontrol
-      #elementary-planner NOTE: This package is currently broken
+      planify
       ledger-live-desktop
       yubikey-manager-qt
       remmina
@@ -22,7 +21,6 @@
       firefox
       keybase
       keybase-gui
-      ark
       partition-manager
       robo3t
       _1password-gui
@@ -33,6 +31,9 @@
       system-config-printer
       gnome.simple-scan
       microsoft-edge-dev
+      peazip
+      pdfarranger
+      gimp
 
       # Utility
       trash-cli
