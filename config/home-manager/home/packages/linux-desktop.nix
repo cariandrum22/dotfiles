@@ -7,7 +7,6 @@
     packages = with pkgs; [
       # Deep Learning
       cudatoolkit
-      cudaPackages.cudnn
 
       # GUI Applications
       polybarFull
