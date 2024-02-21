@@ -33,6 +33,7 @@
       microsoft-edge-dev
       peazip
       pdfarranger
+      gimp
 
       # Utility
       trash-cli
