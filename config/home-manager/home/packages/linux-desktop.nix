@@ -12,7 +12,7 @@
       polybarFull
       feh
       pavucontrol
-      #elementary-planner NOTE: This package is currently broken
+      planify
       ledger-live-desktop
       yubikey-manager-qt
       remmina
