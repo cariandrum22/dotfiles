@@ -22,7 +22,6 @@
       firefox
       keybase
       keybase-gui
-      ark
       partition-manager
       robo3t
       _1password-gui
@@ -33,6 +32,7 @@
       system-config-printer
       gnome.simple-scan
       microsoft-edge-dev
+      peazip
 
       # Utility
       trash-cli
