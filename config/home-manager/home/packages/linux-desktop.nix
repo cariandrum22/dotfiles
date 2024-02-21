@@ -32,6 +32,7 @@
       gnome.simple-scan
       microsoft-edge-dev
       peazip
+      pdfarranger
 
       # Utility
       trash-cli
