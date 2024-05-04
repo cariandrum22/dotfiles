@@ -15,7 +15,7 @@
       "copyWithSyntaxHighlighting" = false;
       "largeFileOptimizations" = false;
       "detectIndentation" = true;
-      "tabSize" = 8;
+      "tabSize" = 2;
       "renderWhitespace" = "all";
       "inlineSuggest" = {
         "enabled" = true;
@@ -34,12 +34,23 @@
       };
     };
     "terminal" = {
-      "explorerKind" = "external";
-      "external" = {
-        "linuxExec" = "kitty";
-        "osxExec" = "kitty.app";
-      };
       "integrated" = {
+        "defaultProfile" = {
+          linux = "tmux";
+          osx = "tmux";
+        };
+        "profiles" = {
+          "tmux" = {
+            "path" = "tmux";
+            "args" = [
+              "-c"
+              "tmux"
+              "new-session"
+              "-A"
+              "-s (string replace $HOME '~' $PWD)"
+            ];
+          };
+        };
         "fontSize" = 12;
       };
     };
