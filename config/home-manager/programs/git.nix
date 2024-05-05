@@ -93,6 +93,9 @@ in
       color = { ui = true; };
       init = { defaultBranch = "main"; };
       ghq = { root = [ "~/Go/src" "~/Codex" ]; };
+      pull = {
+        rebase = true;
+      };
     };
     ignores = builtins.concatLists [ Linux macOS Windows ];
   };
