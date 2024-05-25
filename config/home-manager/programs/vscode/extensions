@@ -46,6 +46,7 @@ ms-vscode.makefile-tools
 ms-vscode.remote-explorer
 nwolverson.ide-purescript
 nwolverson.language-purescript
+pbkit.vscode-pbkit
 PKief.material-icon-theme
 redhat.java
 rust-lang.rust-analyzer
@@ -64,3 +65,4 @@ vscjava.vscode-java-debug
 webfreak.code-d
 wmaurer.change-case
 zjhmale.Idris
+zxh404.vscode-proto3
