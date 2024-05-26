@@ -33,6 +33,9 @@ if type -q any-nix-shell
     any-nix-shell fish --info-right | source
 end
 
+# Configure XDG Base Directory
+set -x XDG_CONFIG_HOME "$HOME/.config"
+
 # Configure Homebrew
 if [ -f /opt/homebrew/bin/brew ]
     eval $(/opt/homebrew/bin/brew shellenv)
@@ -96,6 +99,9 @@ if [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]
     set -x PATH "/mnt/c/Program Files/Microsoft VS Code/bin" $PATH
     thunnus.gpg.agent_relay >/dev/null
 end
+
+# For Terragrunt with OpenTofu
+set -x TERRAGRUNT_TFPATH "$HOME/.local/bin/tofu"
 
 # Aliases
 alias where="command -v"
