@@ -31,7 +31,7 @@
       system-config-printer
       gnome.simple-scan
       microsoft-edge-dev
-      peazip
+      #peazip
       pdfarranger
       gimp
 

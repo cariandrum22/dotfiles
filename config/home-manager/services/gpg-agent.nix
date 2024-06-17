@@ -5,6 +5,6 @@
     {
       enable = true;
       enableScDaemon = true;
-      pinentryFlavor = if pkgs.stdenv.isDarwin then "qt" else "gnome3";
+      pinentryPackage = if pkgs.stdenv.isDarwin then pkgs.pinentry-qt else pkgs.pinentry-gnome3;
     };
 }

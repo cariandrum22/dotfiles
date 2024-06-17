@@ -11,10 +11,10 @@ in
       # Nix related
       any-nix-shell
       cachix
-      rnix-lsp
+      nixd
       nix-prefetch-git
       nixpkgs-fmt
-      nixfmt
+      nixfmt-classic
       dep2nix
 
       # Utility
