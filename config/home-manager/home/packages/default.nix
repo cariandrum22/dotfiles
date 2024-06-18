@@ -3,7 +3,7 @@ let
   unstable = import <unstable> { config.allowUnfree = true; };
 
   base = [ ./haskell.nix ];
-  synthetic = if pkgs.stdenv.isDarwin then base ++ [ ./darwin.nix ] else base ++ [ ./linux-desktop.nix ];
+  synthetic = if pkgs.stdenv.isDarwin then base ++ [ ./darwin.nix ] else base ++ [ ./linux.nix ./linux-desktop.nix ];
 in
 {
   home = {
@@ -40,8 +40,6 @@ in
       yubikey-personalization
       rlwrap
       pandoc
-      psmisc
-      inotify-tools
       lsof
       colordiff
       cosign
