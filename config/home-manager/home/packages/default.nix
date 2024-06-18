@@ -40,6 +40,11 @@ in
       yubikey-personalization
       rlwrap
       pandoc
+      psmisc
+      inotify-tools
+      lsof
+      colordiff
+      cosign
 
       # DevOps
       docker-compose
@@ -56,6 +61,8 @@ in
       eksctl
       saml2aws
       google-cloud-sdk
+      k6
+      redis
 
       # Development Environment
       cmake
