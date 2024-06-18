@@ -4,26 +4,20 @@ let
   unstable = import <unstable> { };
 in
 {
-  home.packages = with pkgs; [
-    binutils # cabal needs`ar`
-    ghc
-    cabal-install
-    stack
-    ormolu
-    hlint
-    haskell-language-server
-    haskellPackages.hoogle
-    haskellPackages.ghcide
-    haskellPackages.cabal-fmt
-  ];
-
-  nixpkgs.overlays = [
-    (self: super: {
-      haskell-language-server = unstable.haskell-language-server.override {
-        supportedGhcVersions = [ "927" ];
-      };
-    })
-  ];
+  home.packages =
+    (with pkgs; [
+      binutils # cabal needs`ar`
+      ghc
+      cabal-install
+      ormolu
+      hlint
+    ]) ++ (with unstable; [
+      stack
+      haskellPackages.hoogle
+      haskellPackages.ghcide
+      haskellPackages.cabal-fmt
+      (haskell-language-server.override { supportedGhcVersions = [ "965" ]; })
+    ]);
 
   home.file.".ghci".source = ../../../../ghci;
 
