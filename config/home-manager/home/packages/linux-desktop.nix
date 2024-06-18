@@ -5,9 +5,6 @@
 
   home = {
     packages = with pkgs; [
-      # Deep Learning
-      cudatoolkit
-
       # GUI Applications
       polybarFull
       feh

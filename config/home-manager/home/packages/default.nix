@@ -3,7 +3,7 @@ let
   unstable = import <unstable> { config.allowUnfree = true; };
 
   base = [ ./haskell.nix ];
-  synthetic = if pkgs.stdenv.isDarwin then base ++ [ ./darwin.nix ] else base ++ [ ./linux-desktop.nix ];
+  synthetic = if pkgs.stdenv.isDarwin then base ++ [ ./darwin.nix ] else base ++ [ ./linux.nix ./linux-desktop.nix ];
 in
 {
   home = {
@@ -40,6 +40,9 @@ in
       yubikey-personalization
       rlwrap
       pandoc
+      lsof
+      colordiff
+      cosign
 
       # DevOps
       docker-compose
@@ -56,6 +59,8 @@ in
       eksctl
       saml2aws
       google-cloud-sdk
+      k6
+      redis
 
       # Development Environment
       cmake
