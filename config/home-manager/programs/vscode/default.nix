@@ -17,12 +17,12 @@ let
 
   archive_fmt = if pkgs.stdenv.isDarwin then "zip" else "tar.gz";
 
-  commit = "816c6f7d7bc4da9796cd19ac6b122b6e26f50d7f";
+  commit = "406d1d726fc68ab1146a2baf8afd134d5b95075a";
 
   sha256 = {
-    x86_64-linux = "1xcy8rh3ij2r2ra04kyag2a8ih6rklyl5v2yyqpq4gnl84q8h5nm";
-    x86_64-darwin = "152y04wj7aw0ajszh425sq40xyazi012rklncg3jvkbzvlac03pc";
-    aarch64-darwin = "1h5a905qd93rx18fxpw2d6dr78glcrcjb4zc1hylfpqz42xcvd8m";
+    x86_64-linux = "11ls5bxbjwx7iphwdgrndkwsnvjrc279rigms00s2ja487dclfaq";
+    x86_64-darwin = "0b0cmqyic499ygyykiiyhi28miigcdx7fhyxjs8v4fyc1qgc3lg2";
+    aarch64-darwin = "1ai5kbd43c1wf4c4riiwjqnp6kf5hp6qk44wmfm22g3bb5h89sxa";
   }.${system};
   # End of the borrowed nixpkgs code segment from above
 in
@@ -32,7 +32,7 @@ in
     mutableExtensionsDir = false;
     package = (pkgs.vscode.override { isInsiders = true; }).overrideAttrs (oldAttrs: rec {
       pname = "vscode-insiders";
-      version = "1.90.0-${commit}";
+      version = "1.91.0-${commit}";
       src = (builtins.fetchurl {
         name = "${pname}-${version}.${archive_fmt}";
         url = "https://code.visualstudio.com/sha/download?build=insider&os=${plat}";
