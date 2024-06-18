@@ -8,7 +8,7 @@ in
     binutils # cabal needs`ar`
     ghc
     cabal-install
-    stack
+    unstable.stack
     ormolu
     hlint
     haskell-language-server
@@ -20,7 +20,7 @@ in
   nixpkgs.overlays = [
     (self: super: {
       haskell-language-server = unstable.haskell-language-server.override {
-        supportedGhcVersions = [ "927" ];
+        supportedGhcVersions = [ "965" ];
       };
     })
   ];
