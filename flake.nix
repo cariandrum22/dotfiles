@@ -16,6 +16,7 @@
           xorg.libXext
           xorg.libXrandr
           xorg.libXScrnSaver
+          alsa-lib
         ];
         haskellPackages = with pkgs.haskellPackages; [
           haskell-language-server

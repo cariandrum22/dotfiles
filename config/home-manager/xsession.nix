@@ -4,11 +4,10 @@
     windowManager = {
       xmonad = {
         enable = true;
-        extraPackages = haskellPackages: [
-          haskellPackages.dbus
-          haskellPackages.xmonad-contrib
-          haskellPackages.xmonad-extras
-          haskellPackages.xmonad
+        extraPackages = haskellPackages: with haskellPackages; [
+          dbus
+          xmonad-contrib
+          xmonad-extras
         ];
         enableContribAndExtras = true;
         config = ../../xmonad/xmonad.hs;
