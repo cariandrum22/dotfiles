@@ -78,6 +78,7 @@ import XMonad.Layout.PerWorkspace (onWorkspace)
 import XMonad.Layout.Spacing (spacing)
 import XMonad.Layout.Spiral (spiral)
 import XMonad.Layout.ThreeColumns (ThreeCol (ThreeColMid))
+import XMonad.Util.Hacks (fixSteamFlicker)
 import XMonad.Util.NamedActions
   ( NamedAction,
     addDescrKeys,
@@ -361,7 +362,7 @@ myConfig =
           <+> manageDocks
           <+> myManageHook
           <+> myManageHook',
-      handleEventHook = minimizeEventHook,
+      handleEventHook = fixSteamFlicker <+> minimizeEventHook,
       startupHook = myStartupHook,
       focusFollowsMouse = False,
       clickJustFocuses = False,

@@ -1,0 +1,16 @@
+packages: .
+
+source-repository-package
+  type: git
+  location: https://github.com/xmonad/xmonad
+  tag: v0.18.0
+
+source-repository-package
+  type: git
+  location: https://github.com/xmonad/xmonad-contrib
+  tag: ec5c751b35c1c9b07bd4361617f7c4076aeaa85f
+
+source-repository-package
+  type: git
+  location: https://github.com/xmonad/xmonad-extras
+  tag: 14e1c4ce9759b959c05b03aac1bb718abc50f762

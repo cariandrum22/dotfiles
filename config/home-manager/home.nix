@@ -24,6 +24,8 @@ in
     stateVersion = "24.05";
   };
 
+  nixpkgs.overlays = [ (import ./overlays/xmonad.nix) ];
+
   imports = synthetic;
 
   xresources.properties = {
