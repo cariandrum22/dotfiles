@@ -21,6 +21,7 @@ GraphQL.vscode-graphql-syntax
 hashicorp.hcl
 hashicorp.terraform
 haskell.haskell
+hbenl.vscode-test-explorer
 idleberg.icon-fonts
 itryapitsin.Sbt
 James-Yu.latex-workshop
@@ -44,6 +45,7 @@ ms-vscode-remote.remote-ssh-edit
 ms-vscode.cmake-tools
 ms-vscode.makefile-tools
 ms-vscode.remote-explorer
+ms-vscode.test-adapter-converter
 nwolverson.ide-purescript
 nwolverson.language-purescript
 pbkit.vscode-pbkit
