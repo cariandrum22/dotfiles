@@ -11,6 +11,7 @@
       # Utility
       psmisc
       inotify-tools
+      zip
     ];
   };
 }
