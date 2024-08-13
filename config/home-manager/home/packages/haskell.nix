@@ -16,7 +16,7 @@ in
       haskellPackages.hoogle
       haskellPackages.ghcide
       haskellPackages.cabal-fmt
-      (haskell-language-server.override { supportedGhcVersions = [ "965" ]; })
+      (haskell-language-server.override { supportedGhcVersions = [ "966" ]; })
     ]);
 
   home.file.".ghci".source = ../../../../ghci;
