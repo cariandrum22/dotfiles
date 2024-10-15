@@ -1,9 +1,10 @@
-let
-  pkgs = import <nixpkgs> { config.allowUnfree = true; };
-  unstable = import <unstable> { config.allowUnfree = true; };
+{ pkgs, ... }:
 
+let
   base = [ ./haskell.nix ];
-  synthetic = if pkgs.stdenv.isDarwin then base ++ [ ./darwin.nix ] else base ++ [ ./linux.nix ./linux-desktop.nix ];
+  isDarwin = (import <nixpkgs> { }).stdenv.isDarwin;
+  synthetic =
+    if isDarwin then base ++ [ ./darwin.nix ] else base ++ [ ./linux.nix ./linux-desktop.nix ];
 in
 {
   home = {
