@@ -24,7 +24,15 @@ in
     stateVersion = "24.05";
   };
 
-  nixpkgs.overlays = [ (import ./overlays/xmonad.nix) ];
+  nixpkgs = {
+    config = {
+      allowUnfree = true;
+      packageOverrides = pkgs: {
+        unstable = import <unstable> { config = config.nixpkgs.config; };
+      };
+    };
+    overlays = [ (import ./overlays/xmonad.nix) ];
+  };
 
   imports = synthetic;
 

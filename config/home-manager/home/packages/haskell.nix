@@ -1,25 +1,23 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
-let
-  unstable = import <unstable> { };
-in
 {
-  home.packages =
-    (with pkgs; [
+  home = {
+    packages = lib.flatten (with pkgs; [
       binutils # cabal needs`ar`
       ghc
       cabal-install
       ormolu
       hlint
-    ]) ++ (with unstable; [
-      stack
-      haskellPackages.hoogle
-      haskellPackages.ghcide
-      haskellPackages.cabal-fmt
-      (haskell-language-server.override { supportedGhcVersions = [ "966" ]; })
+      (with unstable; [
+        stack
+        haskellPackages.hoogle
+        haskellPackages.ghcide
+        haskellPackages.cabal-fmt
+        (haskell-language-server.override { supportedGhcVersions = [ "966" ]; })
+      ])
     ]);
-
-  home.file.".ghci".source = ../../../../ghci;
+    file.".ghci".source = ../../../../ghci;
+  };
 
   programs.git.ignores = [
     "dist"
