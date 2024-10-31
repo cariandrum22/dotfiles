@@ -44,6 +44,7 @@ in
       lsof
       colordiff
       cosign
+      shellcheck
 
       # DevOps
       docker-compose
