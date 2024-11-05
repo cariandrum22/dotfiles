@@ -1,8 +1,6 @@
 { pkgs, ... }:
 
 {
-  nixpkgs.config.allowUnfree = true;
-
   home = {
     packages = with pkgs; [
       # GUI Applications
@@ -21,22 +19,23 @@
       partition-manager
       robo3t
       _1password-gui
-      steam
       spotify
       apache-directory-studio
       blueman
       system-config-printer
       gnome.simple-scan
       microsoft-edge-dev
-      #peazip
+      unstable.peazip
       pdfarranger
       gimp
+      gnome.gnome-control-center
 
       # Utility
       trash-cli
       flameshot
       xlsfonts
       zeal
+      dupeguru
 
       # Game
       prismlauncher

@@ -1,20 +1,27 @@
-let
-  pkgs = import <nixpkgs> { config.allowUnfree = true; };
-  unstable = import <unstable> { config.allowUnfree = true; };
+{ pkgs, ... }:
 
+let
   base = [ ./haskell.nix ];
-  synthetic = if pkgs.stdenv.isDarwin then base ++ [ ./darwin.nix ] else base ++ [ ./linux.nix ./linux-desktop.nix ];
+  isDarwin = (import <nixpkgs> { }).stdenv.isDarwin;
+  synthetic =
+    if isDarwin then
+      base ++ [ ./darwin.nix ]
+    else
+      base
+      ++ [
+        ./linux.nix
+        ./linux-desktop.nix
+      ];
 in
 {
   home = {
     packages = with pkgs; [
       # Nix related
-      any-nix-shell
       cachix
-      nixd
+      any-nix-shell
       nix-prefetch-git
-      nixpkgs-fmt
-      nixfmt-classic
+      nixfmt-rfc-style
+      nixd
       dep2nix
 
       # Utility
@@ -43,6 +50,7 @@ in
       lsof
       colordiff
       cosign
+      shellcheck
 
       # DevOps
       docker-compose
@@ -74,7 +82,7 @@ in
       # Compiler and Runtime
       rustup
       unstable.go
-      dotnet-sdk
+      dotnet-sdk_8
       ruby_3_3
       rubocop
       python3
@@ -85,6 +93,7 @@ in
 
       # Language Server
       terraform-ls
+      rubyPackages_3_3.ruby-lsp
 
       # Database Clients
       mysql-client
@@ -96,7 +105,7 @@ in
       zoom-us
       wireshark
 
-      # Development Environment
+      # Integrated Development Environment
       jetbrains.datagrip
       jetbrains.idea-ultimate
     ];
