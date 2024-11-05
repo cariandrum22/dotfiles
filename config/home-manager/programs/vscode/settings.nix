@@ -9,6 +9,7 @@
       "fontSize" = 12;
       "fontLigatures" = true;
       "formatOnSave" = true;
+      "formatOnSaveMode" = "modifications";
       "renderControlCharacters" = true;
       "suggestSelection" = "recentlyUsed";
       "acceptSuggestionOnEnter" = "off";
@@ -78,26 +79,20 @@
       "manageHLS" = "PATH";
       "formattingProvider" = "ormolu";
     };
-    "rust-analyzer.server.path" = "rust-analyzer";
+    "rust-analyzer.server.path" = "${pkgs.rust-analyzer}/bin/rust-analyzer";
     "shellcheck.customArgs" = [
       "--source-path=SCRIPTDIR"
       "--external-sources"
     ];
-    "[typescriptreact]" = {
-      "editor.defaultFormatter" = "esbenp.prettier-vscode";
+    "terraform" = {
+      "languageServer.path" = "${pkgs.terraform-ls}/bin/terraform-ls";
+      "experimentalFeatures.validateOnSave" = true;
     };
-    "terraform.languageServer.path" = "${pkgs.terraform-ls}/bin/terraform-ls";
-    "terraform.experimentalFeatures.validateOnSave" = true;
     "[terraform]" = {
       "editor.defaultFormatter" = "hashicorp.terraform";
-      "editor.formatOnSave" = true;
-      "editor.formatOnSaveMode" = "file";
-      "languageServer.path" = "terrarom-ls";
     };
     "[terraform-vars]" = {
       "editor.defaultFormatter" = "hashicorp.terraform";
-      "editor.formatOnSave" = true;
-      "editor.formatOnSaveMode" = "file";
     };
     "[dockerfile]" = {
       "editor.defaultFormatter" = "ms-azuretools.vscode-docker";
@@ -105,7 +100,19 @@
     "[typescript]" = {
       "editor.defaultFormatter" = "esbenp.prettier-vscode";
     };
-    "rubyLsp.rubyVersionManager" = "none";
+    "[typescriptreact]" = {
+      "editor.defaultFormatter" = "esbenp.prettier-vscode";
+    };
     "rubyLsp.rubyExecutablePath" = "${pkgs.ruby_3_3}/bin/ruby";
+    "[python]" = {
+      "editor.defaultFormatter" = "charliermarsh.ruff";
+    };
+    "python" = {
+      "envFile" = "\${workspaceFolder}/.venv";
+    };
+    "nix" = {
+      "serverPath" = "${pkgs.nixd}/bin/nixd";
+      "formatterPath" = "${pkgs.nixfmt-rfc-style}/bin/nixfmt";
+    };
   };
 }

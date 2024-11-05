@@ -1,3 +1,4 @@
+aaron-bond.better-comments
 alefragnani.Bookmarks
 arcticicestudio.nord-visual-studio-code
 berberman.vscode-cabal-fmt
@@ -12,12 +13,14 @@ dhall.dhall-lang
 dhall.vscode-dhall-lsp-server
 eamodio.gitlens
 esbenp.prettier-vscode
+evilz.vscode-reveal
 foxundermoon.shell-format
 GitHub.copilot
 GitHub.copilot-chat
 golang.go
 GraphQL.vscode-graphql
 GraphQL.vscode-graphql-syntax
+Gruntfuggly.todo-tree
 hashicorp.hcl
 hashicorp.terraform
 haskell.haskell
@@ -35,8 +38,6 @@ mathiasfrohlich.Kotlin
 mattn.Lisp
 mesonbuild.mesonbuild
 ms-azuretools.vscode-docker
-ms-dotnettools.csharp
-ms-dotnettools.vscode-dotnet-runtime
 ms-python.python
 ms-toolsai.jupyter
 ms-toolsai.jupyter-renderers
