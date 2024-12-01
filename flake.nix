@@ -1,33 +1,42 @@
 {
-  description = "dotfiles";
+  description = "A Nix flake for managing and applying my personal dotfiles.";
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs";
     flake-utils.url = "github:numtide/flake-utils";
   };
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        packages = with pkgs; [
-          zlib
-          xorg.libX11
-          xorg.libXext
-          xorg.libXrandr
-          xorg.libXScrnSaver
-        ] ++ lib.optionals stdenv.isLinux [ alsa-lib ];
-        haskellPackages = with pkgs.haskellPackages; [
-          haskell-language-server
-          ghcid
-          cabal-install
-          cabal-fmt
-          ormolu
-        ];
+        lib = pkgs.lib;
+        packages =
+          with pkgs;
+          [
+            zlib
+            (with xorg; [
+              libX11
+              libXext
+              libXrandr
+              libXScrnSaver
+            ])
+            (with haskellPackages; [ cabal-fmt ])
+            ghcid
+            cabal-install
+            ormolu
+            (haskell-language-server.override { supportedGhcVersions = [ "966" ]; })
+            ruff
+          ]
+          ++ lib.optionals stdenv.isLinux [ alsa-lib ];
       in
       {
-        devShell = pkgs.mkShell {
-          nativeBuildInputs = haskellPackages;
-          buildInputs = packages;
-        };
-        formatter = pkgs.nixpkgs-fmt;
-      });
+        devShell = pkgs.mkShell { buildInputs = lib.flatten packages; };
+        formatter = pkgs.nixfmt-rfc-style;
+      }
+    );
 }

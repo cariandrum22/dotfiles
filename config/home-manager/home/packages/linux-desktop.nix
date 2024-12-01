@@ -23,12 +23,12 @@
       apache-directory-studio
       blueman
       system-config-printer
-      gnome.simple-scan
-      microsoft-edge-dev
+      simple-scan
+      microsoft-edge
       unstable.peazip
       pdfarranger
       gimp
-      gnome.gnome-control-center
+      gnome-control-center
 
       # Utility
       trash-cli
