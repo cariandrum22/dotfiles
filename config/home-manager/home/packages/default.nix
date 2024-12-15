@@ -22,7 +22,6 @@ in
       nix-prefetch-git
       nixfmt-rfc-style
       nixd
-      dep2nix
 
       # Utility
       ghq
