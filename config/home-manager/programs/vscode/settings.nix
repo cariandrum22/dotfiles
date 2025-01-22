@@ -9,7 +9,7 @@
       "fontSize" = 12;
       "fontLigatures" = true;
       "formatOnSave" = true;
-      "formatOnSaveMode" = "modifications";
+      "formatOnSaveMode" = "file";
       "renderControlCharacters" = true;
       "suggestSelection" = "recentlyUsed";
       "acceptSuggestionOnEnter" = "off";
@@ -111,6 +111,7 @@
       "envFile" = "\${workspaceFolder}/.venv";
     };
     "nix" = {
+      "enableLanguageServer" = true;
       "serverPath" = "${pkgs.nixd}/bin/nixd";
       "formatterPath" = "${pkgs.nixfmt-rfc-style}/bin/nixfmt";
     };

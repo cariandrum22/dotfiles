@@ -75,7 +75,7 @@ in
       gitAndTools.delta
       heroku
       sqlite
-      gradle
+      unstable.gradle
       clang-tools
 
       # Compiler and Runtime
