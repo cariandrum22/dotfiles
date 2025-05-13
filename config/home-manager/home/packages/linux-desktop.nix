@@ -43,6 +43,9 @@
       # Drivers
       google-drive-ocamlfuse
       xboxdrv
+
+      # Experimental
+      (callPackage ./cursor.nix { })
     ];
   };
 }
