@@ -1,0 +1,296 @@
+#!/usr/bin/env bash
+#
+# This script updates the OpenTofu binary to the specified version.
+#
+
+# Define the name of the OpenTofu binary
+readonly TOFU_BINARY="tofu"
+
+# Define the base URL for downloading OpenTofu releases
+readonly TOFU_RELEASES_BASE_URL="https://github.com/opentofu/opentofu/releases/download"
+
+# URL for the OpenTofu GPG key
+readonly OPENTOFU_GPG_KEY_URL="https://get.opentofu.org/opentofu.gpg"
+
+# Fingerprint for verifying the OpenTofu GPG key
+readonly OPENTOFU_GPG_KEY_FINGERPRINT="E3E6E43D84CB852EADB0051D0C0AF313E5FD9F80"
+
+# Get the architecture from the environment variable, defaulting to amd64
+readonly ARCHITECTURE="${ARCHITECTURE:-amd64}"
+
+# Detect the operating system
+OS=$(uname -s)
+readonly OS
+
+# Get the version from the argument
+declare -r input_version="$1"
+
+# Get the binary install path from the argument
+declare -r install_path="${2:-$HOME/.local/bin}"
+
+# Flag to determine if an update is needed
+declare should_update="false"
+
+#######################################
+# Display an error message in red.
+# Globals:
+#   None
+# Arguments:
+#   $1 - Error message to display
+# Outputs:
+#   Writes error message to STDERR
+#######################################
+error() {
+  printf '\e[31m[ERROR] %s\e[0m\n' "$1" 1>&2
+}
+
+#######################################
+# Display an informational message in green.
+# Globals:
+#   None
+# Arguments:
+#   $1 - Information message to display
+# Outputs:
+#   Writes information message to STDOUT
+#######################################
+information() {
+  printf '\e[32m[INFO] %s\e[0m\n' "$1"
+}
+
+#######################################
+# Remove the temporary directory if it exists.
+# Globals:
+#   TMP_DIR
+# Arguments:
+#   None
+# Outputs:
+#   Writes cleanup information to STDOUT
+#######################################
+cleanup() {
+  if [[ -d "$TMP_DIR" ]]; then
+    information "Cleaning up temporary directory: $TMP_DIR"
+    rm -rf "$TMP_DIR"
+  fi
+}
+
+# Ensure cleanup on exit by trapping signals
+trap cleanup EXIT
+
+#######################################
+# Determine the platform based on the operating system.
+# Globals:
+#   OS
+# Arguments:
+#   None
+# Outputs:
+#   Sets PLATFORM variable
+#######################################
+check_platform() {
+  case "$OS" in
+  Linux)
+    PLATFORM="linux"
+    ;;
+  Darwin)
+    PLATFORM="darwin"
+    ;;
+  *)
+    error "Unsupported operating system: $OS"
+    exit 1
+    ;;
+  esac
+  declare -r PLATFORM
+}
+
+#######################################
+# Validate the input version string format.
+# Globals:
+#   input_version
+# Arguments:
+#   None
+# Outputs:
+#   Exits with error if the version string is invalid
+#######################################
+check_version_string() {
+  if [ -z "$input_version" ] || ! [[ "$input_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+.*$ ]]; then
+    error "Invalid or missing version argument."
+    echo "Usage: $0 v<major>.<minor>.<patch> (e.g., $0 v1.2.3, $0 v1.2.3-rc.1)"
+    exit 1
+  fi
+}
+
+#######################################
+# Compare the current version of OpenTofu with the input version.
+# Globals:
+#   TOFU_BINARY, input_version
+# Arguments:
+#   None
+# Outputs:
+#   Sets should_update flag
+#######################################
+check_tofu_version() {
+  if ! command -v "$TOFU_BINARY" &>/dev/null; then
+    error "$TOFU_BINARY command not found. Please ensure it is installed and in your PATH."
+    exit 1
+  else
+    local -r current_version=$("$TOFU_BINARY" version | awk 'NR==1 {print $2}')
+
+    # Compare the versions and determine if an update is needed
+    if [[ "$input_version" == "$current_version" ]]; then
+      information "The specified \`${input_version}\` is currently installed."
+    else
+      should_update="true"
+    fi
+  fi
+}
+
+#######################################
+# Check and import the OpenTofu GPG key if not already present.
+# Globals:
+#   OPENTOFU_GPG_KEY_URL, OPENTOFU_GPG_KEY_FINGERPRINT
+# Arguments:
+#   None
+# Outputs:
+#   Imports GPG key if necessary
+#######################################
+check_gpg_key() {
+  if ! gpg --list-keys "$OPENTOFU_GPG_KEY_FINGERPRINT" &>/dev/null; then
+    echo "The GPG key with fingerprint ${OPENTOFU_GPG_KEY_FINGERPRINT} does not exist."
+    echo "Would you like to import the key?"
+    echo "Enter 'yes' or 'y' to proceed with the import, or 'no' or 'n' to exit. Any other input will stop the script."
+
+    read -r response
+
+    case "$response" in
+    yes | y)
+      echo "Importing keys..."
+      if ! curl -fsSL "$OPENTOFU_GPG_KEY_URL" | gpg --import; then
+        error "Failed to import key."
+        exit 1
+      else
+        echo "The GPG key has been successfully imported."
+      fi
+      ;;
+    no | n)
+      echo "Exiting without importing the key."
+      exit 0
+      ;;
+    *)
+      error "Invalid input. Exiting the script."
+      exit 1
+      ;;
+    esac
+  fi
+}
+
+#######################################
+# Verify the GPG signature of the downloaded file.
+# Globals:
+#   None
+# Arguments:
+#   $1 - Path to the signature file
+#   $2 - Path to the file to verify
+# Outputs:
+#   Exits with error if verification fails
+#######################################
+verify_gpg_signature() {
+  local -r signature=$1
+  local -r file=$2
+
+  information "Verifying GPG signature of ${file}..."
+  if ! gpg --verify "$signature" "$file"; then
+    error "GPG signature verification of ${file} failed."
+    exit 1
+  fi
+  information "GPG signature verification of ${file} successful."
+}
+
+#######################################
+# Download, verify, and install the specified version of OpenTofu.
+# Globals:
+#   TOFU_RELEASES_BASE_URL, PLATFORM, ARCHITECTURE, input_version, install_path
+# Arguments:
+#   None
+# Outputs:
+#   Writes update information to STDOUT
+#######################################
+run_update() {
+  TMP_DIR=$(mktemp -d)
+  information "Temporary directory created: $TMP_DIR"
+
+  # Construct the download URLs
+  local -r tofu_archive_url="${TOFU_RELEASES_BASE_URL}/${input_version}/tofu_${input_version#v}_${PLATFORM}_${ARCHITECTURE}.zip"
+  local -r tofu_archive_sig_url="${tofu_archive_url}.gpgsig"
+  local -r checksums_url="${TOFU_RELEASES_BASE_URL}/${input_version}/tofu_${input_version#v}_SHA256SUMS"
+  local -r checksums_sig_url="${checksums_url}.gpgsig"
+  local urls=("$tofu_archive_url" "$tofu_archive_sig_url" "$checksums_url" "$checksums_sig_url")
+
+  # Download the files and their signatures
+  for url in "${urls[@]}"; do
+    information "Downloading: $url"
+
+    # Check if downloads were successful
+    if ! curl -fsSL "$url" -o "$TMP_DIR/${url##*/}"; then
+      error "Failed to download ${url##*/}."
+      exit 1
+    fi
+  done
+
+  # Verify the signature
+  verify_gpg_signature "$TMP_DIR/${checksums_sig_url##*/}" "$TMP_DIR/${checksums_url##*/}"
+  verify_gpg_signature "$TMP_DIR/${tofu_archive_sig_url##*/}" "$TMP_DIR/${tofu_archive_url##*/}"
+
+  # Calculate the SHA256 checksum of the downloaded archive
+  local -r actual_checksum=$(sha256sum "$TMP_DIR/${tofu_archive_url##*/}" | awk '{print $1}')
+
+  # Extract the expected checksum from the SHA256SUMS file
+  local -r expected_checksum=$(grep "${tofu_archive_url##*/}" "$TMP_DIR/${checksums_url##*/}" | awk '{print $1}')
+
+  # Verify the SHA256 checksum
+  information "Verifying SHA256 checksum..."
+  if [[ "$actual_checksum" == "$expected_checksum" ]]; then
+    information "SHA256 checksum verification successful."
+  else
+    error "SHA256 checksum verification failed."
+    error "  Expected: $expected_checksum"
+    error "  Actual:   $actual_checksum"
+    exit 1
+  fi
+
+  # Unzip the archive
+  information "Unzipping to: $TMP_DIR"
+  unzip -q "$TMP_DIR/${tofu_archive_url##*/}" -d "$TMP_DIR"
+
+  # Install tofu binary
+  if ! cp -f "$TMP_DIR/$TOFU_BINARY" "$install_path/$TOFU_BINARY"; then
+    error "Update failed"
+  else
+    information "Update successful."
+  fi
+}
+
+#######################################
+# Main entry point for the script.
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   Executes the update process
+#######################################
+main() {
+  check_platform
+
+  cleanup
+
+  check_version_string
+  check_tofu_version
+
+  if [[ "$should_update" == "true" ]]; then
+    check_gpg_key
+    run_update
+  else
+    exit 0
+  fi
+}
+
+main

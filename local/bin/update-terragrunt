@@ -1,0 +1,218 @@
+#!/usr/bin/env bash
+#
+# This script updates the Terragrunt binary to the specified version.
+#
+
+# Define the name of the terragrunt binary
+readonly TERRAGRUNT_BINARY="terragrunt"
+
+# Define the base URL for downloading Terragrunt releases
+readonly TERRAGRUNT_BINARY_RELEASES_BASE_URL="https://github.com/gruntwork-io/terragrunt/releases/download"
+
+# Get the architecture from the environment variable, defaulting to amd64
+readonly ARCHITECTURE="${ARCHITECTURE:-amd64}"
+
+# Detect the operating system
+OS=$(uname -s)
+readonly OS
+
+# Get the version from the argument
+declare -r input_version="$1"
+
+# Get the binary install path from the argument
+declare -r install_path="${2:-$HOME/.local/bin}"
+
+# Flag to determine if an update is needed
+declare should_update="false"
+
+#######################################
+# Display an error message in red.
+# Globals:
+#   None
+# Arguments:
+#   $1 - Error message to display
+# Outputs:
+#   Writes error message to STDERR
+#######################################
+error() {
+  echo -e "\e[31m[ERROR] $1\e[0m" 1>&2
+}
+
+#######################################
+# Display an informational message in green.
+# Globals:
+#   None
+# Arguments:
+#   $1 - Information message to display
+# Outputs:
+#   Writes information message to STDOUT
+#######################################
+information() {
+  echo -e "\e[32m[INFO] $1\e[0m"
+}
+
+#######################################
+# Remove the temporary directory if it exists.
+# Globals:
+#   TMP_DIR
+# Arguments:
+#   None
+# Outputs:
+#   Writes cleanup information to STDOUT
+#######################################
+cleanup() {
+  if [ -d "$TMP_DIR" ]; then
+    information "Cleaning up temporary directory: $TMP_DIR"
+    rm -rf "$TMP_DIR"
+  fi
+}
+
+# Ensure cleanup on exit by trapping signals
+trap cleanup EXIT
+
+#######################################
+# Determine the platform based on the operating system.
+# Globals:
+#   OS
+# Arguments:
+#   None
+# Outputs:
+#   Sets PLATFORM variable
+#######################################
+check_platform() {
+  case "$OS" in
+  Linux)
+    PLATFORM="linux"
+    ;;
+  Darwin)
+    PLATFORM="darwin"
+    ;;
+  *)
+    error "Unsupported operating system: $OS"
+    exit 1
+    ;;
+  esac
+  declare -r PLATFORM
+}
+
+#######################################
+# Validate the input version string format.
+# Globals:
+#   input_version
+# Arguments:
+#   None
+# Outputs:
+#   Exits with error if the version string is invalid
+#######################################
+check_version_string() {
+  if [ -z "$input_version" ] || ! [[ "$input_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+.*$ ]]; then
+    error "Invalid or missing version argument."
+    echo "Usage: $0 v<major>.<minor>.<patch> (e.g., $0 v1.2.3, $0 v1.2.3-rc.1)"
+    exit 1
+  fi
+}
+
+#######################################
+# Compare the current version of Terragrunt with the input version.
+# Globals:
+#   TERRAGRUNT_BINARY, input_version
+# Arguments:
+#   None
+# Outputs:
+#   Sets should_update flag
+#######################################
+check_terragrunt_version() {
+  if ! command -v "$TERRAGRUNT_BINARY" &>/dev/null; then
+    error "$TERRAGRUNT_BINARY command not found. Please ensure it is installed and in your PATH."
+    exit 1
+  else
+    local -r current_version=$("$TERRAGRUNT_BINARY" --version | awk '{print $3}')
+
+    # Compare the versions and store the result in a variable
+    if [ "$input_version" = "$current_version" ]; then
+      information "The specified \`${input_version}\` is currently installed."
+    else
+      should_update="true"
+    fi
+  fi
+}
+
+#######################################
+# Download, verify, and install the specified version of Terragrunt.
+# Globals:
+#   TERRAGRUNT_BINARY_RELEASES_BASE_URL, PLATFORM, ARCHITECTURE, input_version, install_path
+# Arguments:
+#   None
+# Outputs:
+#   Writes update information to STDOUT
+#######################################
+run_update() {
+  TMP_DIR=$(mktemp -d)
+  information "Temporary directory created: $TMP_DIR"
+
+  # Construct the download URLs
+  local -r terragrunt_binary_url="${TERRAGRUNT_BINARY_RELEASES_BASE_URL}/${input_version}/terragrunt_${PLATFORM}_${ARCHITECTURE}"
+  local -r checksums_url="${TERRAGRUNT_BINARY_RELEASES_BASE_URL}/${input_version}/SHA256SUMS"
+  local urls=("$terragrunt_binary_url" "$checksums_url")
+
+  # Download the checksums file and its signature
+  for url in "${urls[@]}"; do
+    information "Downloading: $url"
+
+    # Check if downloads were successful
+    if ! curl -fsSL "$url" -o "$TMP_DIR/${url##*/}"; then
+      error "Failed to download ${url##*/}."
+      exit 1
+    fi
+  done
+
+  # Calculate the SHA256 checksum of the downloaded archive
+  local -r actual_checksum=$(sha256sum "$TMP_DIR/${terragrunt_binary_url##*/}" | awk '{print $1}')
+
+  # Extract the expected checksum from the SHA256SUMS file
+  local -r expected_checksum=$(grep "${terragrunt_binary_url##*/}" "$TMP_DIR/${checksums_url##*/}" | awk '{print $1}')
+
+  # Verify the SHA256 checksum
+  information "Verifying SHA256 checksum..."
+  if [ "$actual_checksum" = "$expected_checksum" ]; then
+    information "SHA256 checksum verification successful."
+  else
+    error "SHA256 checksum verification failed."
+    error "  Expected: $expected_checksum"
+    error "  Actual:   $actual_checksum"
+    exit 1
+  fi
+
+  # Install terragrunt binary
+  if ! cp -f "$TMP_DIR/${terragrunt_binary_url##*/}" "$install_path/$TERRAGRUNT_BINARY"; then
+    error "Update failed"
+  else
+    information "Update successful."
+  fi
+}
+
+#######################################
+# Main entry point for the script.
+# Globals:
+#   None
+# Arguments:
+#   None
+# Outputs:
+#   Executes the update process
+#######################################
+main() {
+  check_platform
+
+  cleanup
+
+  check_version_string
+  check_terragrunt_version
+
+  if [[ "$should_update" == "true" ]]; then
+    run_update
+  else
+    exit 0
+  fi
+}
+
+main
