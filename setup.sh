@@ -57,6 +57,34 @@ deploy_dotfiles() {
 }
 
 #######################################
+# Deploy local/bin files to ${HOME}/.local/bin
+# Globals:
+#   HOME
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+deploy_local_bin_files() {
+  local -r bin_dir="${HOME}/.local/bin"
+
+  if [[ ! -d "${bin_dir}" ]]; then
+    mkdir -p "${bin_dir}"
+  fi
+
+  local -a bin_files=()
+  while IFS= read -r file; do
+    bin_files+=("${file}")
+  done < <(find "${abs_path}/local/bin" -type f -not -path "*/\.*")
+
+  for bin_file in "${bin_files[@]}"; do
+    local file_name
+    file_name=$(basename "${bin_file}")
+    ln -sfn "${bin_file}" "${bin_dir}/${file_name}"
+  done
+}
+
+#######################################
 # Entry point
 # Globals:
 #   None
@@ -109,8 +137,11 @@ main() {
   # Delete existing ${HOME}/.config/home-manager directory to replace it with a file under git management
   rm -rf "${HOME}/.config/home-manager"
 
-  # Deploy dot files to ${HOME}
+  # Deploy dotfiles to ${HOME}
   deploy_dotfiles "${dotfiles[@]}"
+
+  # Deploy ${HOME}/.local/bin files
+  deploy_local_bin_files
 
   # Reflecting the configuration under home-manager management
   add_nix_channels "${nix_channels[@]}"
