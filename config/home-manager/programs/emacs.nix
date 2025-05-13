@@ -1,25 +1,26 @@
 { pkgs, ... }:
 let
-  nord-theme' = pkgs.fetchFromGitHub
-    {
-      owner = "cariandrum22";
-      repo = "emacs";
-      rev = "fix-invalid-face-box-error";
-      sha256 = "ZU5dGvGrZvivbA+981IyIu8a4xftL3QyUavGwBc7mQc=";
-    };
+  nord-theme' = pkgs.fetchFromGitHub {
+    owner = "cariandrum22";
+    repo = "emacs";
+    rev = "fix-invalid-face-box-error";
+    sha256 = "ZU5dGvGrZvivbA+981IyIu8a4xftL3QyUavGwBc7mQc=";
+  };
 in
 {
   nixpkgs.overlays = [
-    (import (builtins.fetchTarball {
-      url =
-        "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
-    }))
+    (import (
+      builtins.fetchTarball {
+        url = "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
+      }
+    ))
   ];
 
   programs.emacs = {
     enable = true;
-    package = pkgs.emacs-git;
-    extraPackages = (epkgs:
+    package = pkgs.emacs;
+    extraPackages = (
+      epkgs:
       (with epkgs; [
         use-package
         swiper
@@ -44,6 +45,10 @@ in
         lsp-treemacs
         haskell-mode
         lsp-haskell
+        proof-general
+        elpy
+        py-isort
+
         dockerfile-mode
         fish-mode
         jinja2-mode
@@ -59,11 +64,14 @@ in
         all-the-icons
         all-the-icons-dired
         dired-sidebar
-      ]));
+      ])
+    );
   };
 
   home.file = {
-    ".emacs.el" = { source = ../../../emacs.el; };
+    ".emacs.el" = {
+      source = ../../../emacs.el;
+    };
     ".emacs.d" = {
       source = ../../../emacs.d;
       recursive = true;
