@@ -103,6 +103,11 @@ end
 # For Terragrunt with OpenTofu
 set -x TERRAGRUNT_TFPATH "$HOME/.local/bin/tofu"
 
+# Configure Krew
+if type -q krew
+    set_path "$HOME/.krew/bin"
+end
+
 # Aliases
 alias where="command -v"
 alias j="jobs -l"
