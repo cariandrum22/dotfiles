@@ -4,8 +4,9 @@
   (setq flycheck-emacs-lisp-load-path 'inherit
         flycheck-display-errors-delay 0.3)
   (flycheck-define-checker python
-    "A Python syntax and style checker using the Ruff.
+    "A Python syntax and style checker using Ruff.
 
+Ruff is a fast and lightweight Python linter and formatter that supports a wide range of linting rules. It was chosen for its performance and compatibility with modern Python projects.
 See URL `http://pypi.python.org/pypi/ruff'."
     :command ("ruff"
               "check"
