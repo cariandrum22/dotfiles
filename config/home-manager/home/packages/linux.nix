@@ -10,6 +10,7 @@
       psmisc
       inotify-tools
       zip
+      squashfsTools
     ];
   };
 }

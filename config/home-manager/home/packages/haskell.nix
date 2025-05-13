@@ -2,20 +2,23 @@
 
 {
   home = {
-    packages = lib.flatten (with pkgs; [
-      binutils # cabal needs`ar`
-      ghc
-      cabal-install
-      ormolu
-      hlint
-      (with unstable; [
-        stack
-        haskellPackages.hoogle
-        haskellPackages.ghcide
-        haskellPackages.cabal-fmt
-        (haskell-language-server.override { supportedGhcVersions = [ "966" ]; })
-      ])
-    ]);
+    packages = lib.flatten (
+      with pkgs;
+      [
+        binutils # cabal needs`ar`
+        ghc
+        cabal-install
+        ormolu
+        hlint
+        (with unstable; [
+          stack
+          haskellPackages.hoogle
+          haskellPackages.ghcide
+          haskellPackages.cabal-fmt
+          (haskell-language-server.override { supportedGhcVersions = [ "984" ]; })
+        ])
+      ]
+    );
     file.".ghci".source = ../../../../ghci;
   };
 
