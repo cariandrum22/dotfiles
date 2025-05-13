@@ -1,20 +1,38 @@
-
 # -*- encoding: utf-8 -*-
-# Python Startup
+import atexit
+import builtins
+import datetime
+import json
+import math
+import os
+import re
 import readline
 import rlcompleter
-import atexit
-import os
-#from see import see
+import sys
+from pprint import PrettyPrinter, pprint
 
-# TAB Completion
-readline.parse_and_bind('tab: complete')
+# Pretty Print
+builtins.print = PrettyPrinter(depth=5, width=80, compact=True).pprint
 
-# Histroy file
-histfile = os.path.join(os.environ['HOME'], '.pythonhistory')
+
+def pretty_display(value):
+    if value is not None:
+        _ = pprint.pformat(value, width=80)
+        print(_)
+        sys._getframe().f_globals["_"] = value
+
+
+sys.displayhook = pretty_display
+
+# Histroy
+histfile = os.path.join(os.environ["HOME"], ".python_history")
 try:
     readline.read_history_file(histfile)
 except IOError:
     pass
 atexit.register(readline.write_history_file, histfile)
-del os, histfile, readline, rlcompleter, atexit
+
+# TAB Completion
+readline.parse_and_bind("tab: complete")
+readline.parse_and_bind("set show-all-if-ambiguous on")
+readline.parse_and_bind("set completion-ignore-case on")
