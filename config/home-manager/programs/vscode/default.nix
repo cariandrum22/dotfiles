@@ -9,29 +9,31 @@ let
   # The original code is licensed under the MIT license.
   inherit (pkgs.stdenv.hostPlatform) system;
 
-  plat = {
-    x86_64-linux = "linux-x64";
-    x86_64-darwin = "darwin";
-    aarch64-darwin = "darwin-arm64";
-  }.${system};
+  plat =
+    {
+      x86_64-linux = "linux-x64";
+      aarch64-darwin = "darwin-arm64";
+    }
+    .${system};
 
   archive_fmt = if pkgs.stdenv.isDarwin then "zip" else "tar.gz";
-  commit = "3d0aeb47a2ecfde9ff5141470b30c36d41c321d9";
+  commit = "5d3e84d3aaaea9e132bad476f1be5a4846289b75";
 
-  sha256 = {
-    x86_64-linux = "0h72q9nqm41xpda9gif5x7cfic331dzpfada2zq8mxwf51wc83bp";
-    x86_64-darwin = "0h8ry7k5cnj42bfzq9xjy1522zhkbfkmgpw9vrw67n77if5w5grk";
-    aarch64-darwin = "0xywyzx903vdc8f7d74lg10jxdpmwp87mk4zgavjphc8iyg2nrss";
-  }.${system};
-  # End of the borrowed nixpkgs code segment from above
+  sha256 =
+    {
+      x86_64-linux = "09niibfi8qppvbqqd0j80gvsr4njsnphrq5nlfr0dh0xazj33lzf";
+      aarch64-darwin = "1ch4igiwwj2rlplg15k7bmnnjwn76sxid06aqxip865qqr6qfjzn";
+    }
+    .${system};
 in
+# End of the borrowed nixpkgs code segment from above
 {
   programs.vscode = {
     enable = true;
     mutableExtensionsDir = false;
     package = (pkgs.vscode.override { isInsiders = true; }).overrideAttrs (oldAttrs: rec {
       pname = "vscode-insiders";
-      version = "1.97.0-${commit}";
+      version = "1.101.0-${commit}";
       src = (
         builtins.fetchurl {
           name = "${pname}-${version}.${archive_fmt}";
@@ -40,7 +42,9 @@ in
         }
       );
       buildInputs = oldAttrs.buildInputs ++ [ pkgs.krb5 ];
-      runtimeDependencies = lib.optionals pkgs.stdenv.isLinux (oldAttrs.runtimeDependencies ++ [ pkgs.libsecret ]);
+      runtimeDependencies = lib.optionals pkgs.stdenv.isLinux (
+        oldAttrs.runtimeDependencies ++ [ pkgs.libsecret ]
+      );
       urlHandlerDesktopItem = pkgs.makeDesktopItem {
         name = "code-insiders-url-handler";
         desktopName = "Visual Studio Code - Insiders - URL Handler";
@@ -49,7 +53,12 @@ in
         exec = "code-insiders" + " --open-url %U";
         icon = "code";
         startupNotify = true;
-        categories = [ "Utility" "TextEditor" "Development" "IDE" ];
+        categories = [
+          "Utility"
+          "TextEditor"
+          "Development"
+          "IDE"
+        ];
         mimeTypes = [ "x-scheme-handler/${pname}" ];
         keywords = [ "vscode" ];
         noDisplay = true;

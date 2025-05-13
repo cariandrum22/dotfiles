@@ -115,5 +115,8 @@
       "serverPath" = "${pkgs.nixd}/bin/nixd";
       "formatterPath" = "${pkgs.nixfmt-rfc-style}/bin/nixfmt";
     };
+    "shellcheck" = {
+      "executablePath" = "${pkgs.shellcheck}/bin/shellcheck";
+    };
   };
 }
