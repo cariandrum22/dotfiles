@@ -12,19 +12,17 @@ let
   plat =
     {
       x86_64-linux = "linux-x64";
-      x86_64-darwin = "darwin";
       aarch64-darwin = "darwin-arm64";
     }
     .${system};
 
   archive_fmt = if pkgs.stdenv.isDarwin then "zip" else "tar.gz";
-  commit = "fc7f88a0a73dac40ba16af282b40fddfb0d01f75";
+  commit = "5d3e84d3aaaea9e132bad476f1be5a4846289b75";
 
   sha256 =
     {
-      x86_64-linux = "0knhfr7nj6fykzvhzn9a8ydifyjspy6nl24yc9wx1a1ai96sv5m2";
-      x86_64-darwin = "1k4iydhr90zsvvsb7ncv1rpzy3r7i24h17f84h9rx1j2y3jfhkb8";
-      aarch64-darwin = "0r0anvrrmgqg0d8fq6r6vh14gsscvzz754wg0dcsyji9c90nzvbb";
+      x86_64-linux = "09niibfi8qppvbqqd0j80gvsr4njsnphrq5nlfr0dh0xazj33lzf";
+      aarch64-darwin = "1ch4igiwwj2rlplg15k7bmnnjwn76sxid06aqxip865qqr6qfjzn";
     }
     .${system};
 in
@@ -35,7 +33,7 @@ in
     mutableExtensionsDir = false;
     package = (pkgs.vscode.override { isInsiders = true; }).overrideAttrs (oldAttrs: rec {
       pname = "vscode-insiders";
-      version = "1.99.0-${commit}";
+      version = "1.101.0-${commit}";
       src = (
         builtins.fetchurl {
           name = "${pname}-${version}.${archive_fmt}";
