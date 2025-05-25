@@ -7,16 +7,16 @@
       polybarFull
       feh
       pavucontrol
-      planify
+      #planify
       ledger-live-desktop
-      yubikey-manager-qt
+      yubioath-flutter
       remmina
       libreoffice
       google-chrome
       firefox
       keybase
       keybase-gui
-      partition-manager
+      gparted
       robo3t
       _1password-gui
       spotify
@@ -24,7 +24,6 @@
       blueman
       system-config-printer
       simple-scan
-      microsoft-edge
       unstable.peazip
       pdfarranger
       gimp
@@ -42,7 +41,6 @@
 
       # Drivers
       google-drive-ocamlfuse
-      xboxdrv
 
       # Experimental
       (callPackage ./cursor.nix { })
