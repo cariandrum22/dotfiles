@@ -73,17 +73,25 @@
         };
       };
     };
-    "diffEditor.ignoreTrimWhitespace" = false;
-    "vsintellicode.modify.editor.suggestSelection" = "automaticallyOverrodeDefaultValue";
+    "diffEditor" = {
+      "ignoreTrimWhitespace" = false;
+    };
+    "vsintellicode" = {
+      "modify" = {
+        "editor" = {
+          "suggestSelection" = "automaticallyOverrodeDefaultValue";
+        };
+      };
+    };
     "haskell" = {
       "manageHLS" = "PATH";
       "formattingProvider" = "ormolu";
     };
-    "rust-analyzer.server.path" = "${pkgs.rust-analyzer}/bin/rust-analyzer";
-    "shellcheck.customArgs" = [
-      "--source-path=SCRIPTDIR"
-      "--external-sources"
-    ];
+    "rust-analyzer" = {
+      "server" = {
+        "path" = "${pkgs.rust-analyzer}/bin/rust-analyzer";
+      };
+    };
     "terraform" = {
       "languageServer.path" = "${pkgs.terraform-ls}/bin/terraform-ls";
       "experimentalFeatures.validateOnSave" = true;
@@ -117,6 +125,13 @@
     };
     "shellcheck" = {
       "executablePath" = "${pkgs.shellcheck}/bin/shellcheck";
+      "customArgs" = [
+        "--source-path=SCRIPTDIR"
+        "--external-sources"
+      ];
+    };
+    "shellformat" = {
+      "path" = "${pkgs.shfmt}/bin/shellformat";
     };
   };
 }
