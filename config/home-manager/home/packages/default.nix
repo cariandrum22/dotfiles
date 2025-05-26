@@ -55,6 +55,7 @@ in
         colordiff
         cosign
         shellcheck
+        shfmt
         unstable.goreleaser
         rclone
 
