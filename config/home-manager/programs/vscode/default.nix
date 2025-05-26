@@ -80,6 +80,8 @@ in
         ln -rs "$unpacked" "$packed"
       '';
     });
-    extensions = pkgs.vscode-utils.extensionsFromVscodeMarketplace extensions;
-  } // settings;
+    profiles.default = {
+      extensions = pkgs.vscode-utils.extensionsFromVscodeMarketplace extensions;
+    } // settings;
+  };
 }

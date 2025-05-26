@@ -90,7 +90,7 @@ in
         ruby_3_3
         rubocop
         python3
-        nodejs-18_x
+        nodejs_22
         jdk
         sbcl
         maxima

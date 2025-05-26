@@ -29,7 +29,7 @@
             ghcid
             cabal-install
             ormolu
-            (haskell-language-server.override { supportedGhcVersions = [ "966" ]; })
+            (haskell-language-server.override { supportedGhcVersions = [ "984" ]; })
             ruff
           ]
           ++ lib.optionals stdenv.isLinux [ alsa-lib ];
