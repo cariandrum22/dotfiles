@@ -101,7 +101,7 @@ if [ -f /proc/sys/fs/binfmt_misc/WSLInterop ]
 end
 
 # For Terragrunt with OpenTofu
-set -x TERRAGRUNT_TFPATH "$HOME/.local/bin/tofu"
+set -x TG_TF_PATH "$HOME/.local/bin/tofu"
 
 # Configure Krew
 if type -q krew
