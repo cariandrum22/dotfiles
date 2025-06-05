@@ -16,6 +16,7 @@ eamodio.gitlens
 EditorConfig.EditorConfig
 esbenp.prettier-vscode
 evilz.vscode-reveal
+figma.figma-vscode-extension
 foxundermoon.shell-format
 GitHub.copilot
 GitHub.copilot-chat
@@ -30,6 +31,7 @@ hbenl.vscode-test-explorer
 idleberg.icon-fonts
 itryapitsin.Sbt
 James-Yu.latex-workshop
+jackiotyu.git-worktree-manager
 janisdd.vscode-edit-csv
 jnoortheen.nix-ide
 justusadam.language-haskell

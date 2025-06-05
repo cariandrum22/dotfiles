@@ -75,11 +75,44 @@ in
         k6
         redis
 
+        # AI Tools
+        (unstable.claude-code.overrideAttrs (
+          finalAttrs: oldAttrs: rec {
+            version = "1.0.10";
+            src = fetchzip {
+              url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
+              hash = "sha256-DcHlxeOOIKDe/Due952rH5qGT3KX+lUx84ctuj2/3aw=";
+            };
+            npmDepsHash = "sha256-2v9wCcaOgA3RezX/pnqigsn6XhKcqP2adM2IGRhiHgc=";
+          }
+        ))
+        (unstable.codex.overrideAttrs (
+          finalAttrs: oldAttrs: {
+            version = "0.0.0-dev";
+            src = fetchFromGitHub {
+              owner = "openai";
+              repo = "codex";
+              rev = "44022db8d0c4a0cfe5b5b041ef0c1c8811ce6e12";
+              hash = "sha256-S9xzyg6fC/uiW9xNv0HXW+GzYaJFKzjQn7ZTugc0tEM=";
+            };
+
+            pnpmDeps = pnpm_10.fetchDeps {
+              inherit (finalAttrs)
+                pname
+                version
+                src
+                pnpmWorkspaces
+                ;
+              hash = "sha256-SyKP++eeOyoVBFscYi+Q7IxCphcEeYgpuAj70+aCdNA=";
+            };
+          }
+        ))
+
         # Development Environment
         cmake
         pkg-config
         gitAndTools.delta
-        heroku
+        unstable.heroku
         sqlite
         unstable.gradle
         clang-tools
