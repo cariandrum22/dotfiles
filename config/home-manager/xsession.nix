@@ -4,11 +4,12 @@
     windowManager = {
       xmonad = {
         enable = true;
-        extraPackages = haskellPackages: with haskellPackages; [
-          dbus
-          xmonad-contrib
-          xmonad-extras
-        ];
+        extraPackages =
+          haskellPackages: with haskellPackages; [
+            dbus
+            xmonad-contrib
+            xmonad-extras
+          ];
         enableContribAndExtras = true;
         config = ../../xmonad/xmonad.hs;
       };
@@ -20,6 +21,7 @@
       export XMODIFIERS="@im=fcitx"
       export GTK_IM_MODULE="fcitx"
       export QT_IM_MODULE="fcitx"
+      export GLFW_IM_MODULE="ibus"
       fcitx5 &
 
       xrdb -merge .Xresources
