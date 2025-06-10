@@ -53,6 +53,7 @@ ms-vscode.remote-explorer
 ms-vscode.test-adapter-converter
 ms-vscode-remote.remote-containers
 ms-vscode-remote.vscode-remote-extensionpack
+MustafaHafidi.liquidhaskell-diagnostics
 noku.rails-run-spec-vscode
 nwolverson.ide-purescript
 nwolverson.language-purescript
