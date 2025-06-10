@@ -75,10 +75,26 @@ end
 
 # Configure Java
 if type -q java
-    if [ (thunnus.os.platform.detect) = macOS ]
+    if [ (uname) = Darwin ]
         set -x JAVA_HOME (/usr/libexec/java_home)
     else
         set -x JAVA_HOME (type -p javac|xargs readlink -f|xargs dirname|xargs dirname)
+    end
+end
+
+# Configure JavaScript
+if type -q node
+    switch (uname)
+        case Darwin
+            set total_mem (sysctl -n hw.memsize)
+        case Linux
+            set total_mem (math (awk '/MemTotal/ {print $2}' /proc/meminfo) \* 1024)
+        case '*'
+            # exit from if block only
+    end
+
+    if set -q total_mem
+        set -x NODE_OPTIONS "--max-old-space-size=$(math round $total_mem / 4)"
     end
 end
 
@@ -88,7 +104,7 @@ if type -q python
 end
 
 # Configure Texinfo
-if [ (thunnus.os.platform.detect) = macOS ]
+if [ (uname) = Darwin ]
     if [ -d /usr/local/opt/texinfo/bin ]
         set_path /usr/local/opt/texinfo/bin
     end
