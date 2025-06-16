@@ -96,14 +96,18 @@ def extract_version_and_platform(versions):
     for version in versions:
         if "targetPlatform" not in version:
             return version["version"], None
+    return None, None
 
 def extract_extension_info(result):
     extension = result["body"]["results"][0]["extensions"][0]
     publisher = extension["publisher"]["publisherName"]
     name = extension["extensionName"]
     version, arch = extract_version_and_platform(extension["versions"])
+    
+    if version is None:
+        raise ValueError(f"No compatible version found for extension {publisher}.{name}")
+    
     queryString = ""
-
     if arch:
         queryString = f"?targetPlatform={arch}"
 
