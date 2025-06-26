@@ -108,6 +108,8 @@ in
           }
         ))
 
+        (callPackage ./gemini-cli.nix { })
+
         # Development Environment
         cmake
         pkg-config
