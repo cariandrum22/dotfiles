@@ -58,6 +58,7 @@ in
         shfmt
         unstable.goreleaser
         rclone
+        ripgrep
 
         # DevOps
         docker-compose
@@ -70,7 +71,6 @@ in
         certbot
         unstable.awscli2
         eksctl
-        saml2aws
         google-cloud-sdk
         k6
         redis
@@ -109,17 +109,17 @@ in
 
         (callPackage ./gemini-cli.nix { })
 
-        # Development Environment
+        # Development toolchain
         cmake
         pkg-config
-        gitAndTools.delta
-        unstable.heroku
-        sqlite
-        unstable.gradle
         clang-tools
+        gitAndTools.delta
+        uv
+        rustup
+        unstable.gradle
+        unstable.heroku
 
         # Compiler and Runtime
-        rustup
         unstable.go
         dotnet-sdk_8
         ruby_3_3
@@ -135,9 +135,10 @@ in
         rubyPackages_3_3.ruby-lsp
 
         # Database Clients
+        sqlite
         mysql-client
         mongodb-tools
-        postgresql_14
+        postgresql_15
 
         # GUI Application
         slack
