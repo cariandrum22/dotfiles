@@ -1,6 +1,7 @@
 aaron-bond.better-comments
 alefragnani.Bookmarks
 alexkrechik.cucumberautocomplete
+anthropic.claude-code
 arcticicestudio.nord-visual-studio-code
 berberman.vscode-cabal-fmt
 bmalehorn.vscode-fish
@@ -42,6 +43,7 @@ lokalise.i18n-ally
 mathiasfrohlich.Kotlin
 mattn.Lisp
 mesonbuild.mesonbuild
+mikestead.dotenv
 ms-azuretools.vscode-docker
 ms-python.python
 ms-toolsai.jupyter
