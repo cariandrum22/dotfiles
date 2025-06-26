@@ -91,8 +91,8 @@ in
             src = fetchFromGitHub {
               owner = "openai";
               repo = "codex";
-              rev = "44022db8d0c4a0cfe5b5b041ef0c1c8811ce6e12";
-              hash = "sha256-S9xzyg6fC/uiW9xNv0HXW+GzYaJFKzjQn7ZTugc0tEM=";
+              rev = "fcfe43c7df46836a1c60cec4dfd1591d3036a0c8";
+              hash = "sha256-yZtIvXl0vjU65A109eO0HJ6KnTaCaCSmLZk5BfwE5dI";
             };
 
             pnpmDeps = pnpm_10.fetchDeps {
