@@ -78,12 +78,11 @@ in
         # AI Tools
         (unstable.claude-code.overrideAttrs (
           finalAttrs: oldAttrs: rec {
-            version = "1.0.10";
+            version = "1.0.35";
             src = fetchzip {
               url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-              hash = "sha256-DcHlxeOOIKDe/Due952rH5qGT3KX+lUx84ctuj2/3aw=";
+              hash = "sha256-Lt79XxHrgy6rPAHBf1QtwjsKnrZmsKFeVFOvHwN4aOY=";
             };
-            npmDepsHash = "sha256-2v9wCcaOgA3RezX/pnqigsn6XhKcqP2adM2IGRhiHgc=";
           }
         ))
         (unstable.codex.overrideAttrs (
