@@ -11,6 +11,8 @@
       inotify-tools
       zip
       squashfsTools
+      wirelesstools
+      iw
     ];
   };
 }
