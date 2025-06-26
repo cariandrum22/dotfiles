@@ -1,20 +1,20 @@
 # This code is based on https://gist.github.com/lukalot/fcbf3216ad13b8303ab0947af0d5abd5
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
   apiResponse = pkgs.fetchurl {
     url = "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable";
-    sha256 = "sha256-/BtqPtGRFyFnWcgmlBBn1fP55MJBsDNsjMLsk/TChm4=";
+    sha256 = "sha256-eIkAWuL5TMv455URMeuE5+8owkMZXROL2QfccKlAKjI=";
   };
 
   data = builtins.fromJSON (builtins.readFile apiResponse);
   downloadUrl = data.downloadUrl;
 
   pname = "cursor";
-  version = "0.49.6";
+  version = "1.1.6";
 
   src = pkgs.fetchurl {
     url = downloadUrl;
-    hash = "sha256-WH4/Zw0VJmRGyRzMlkThkhZ4fGysMKBUSIPCTsyGS4w=";
+    hash = "sha256-T0vJRs14tTfT2kqnrQWPFXVCIcULPIud1JEfzjqcEIM=";
   };
   appimageContents = pkgs.appimageTools.extract { inherit pname version src; };
 in

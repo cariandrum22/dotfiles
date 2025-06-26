@@ -78,12 +78,11 @@ in
         # AI Tools
         (unstable.claude-code.overrideAttrs (
           finalAttrs: oldAttrs: rec {
-            version = "1.0.10";
+            version = "1.0.35";
             src = fetchzip {
               url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-              hash = "sha256-DcHlxeOOIKDe/Due952rH5qGT3KX+lUx84ctuj2/3aw=";
+              hash = "sha256-Lt79XxHrgy6rPAHBf1QtwjsKnrZmsKFeVFOvHwN4aOY=";
             };
-            npmDepsHash = "sha256-2v9wCcaOgA3RezX/pnqigsn6XhKcqP2adM2IGRhiHgc=";
           }
         ))
         (unstable.codex.overrideAttrs (
@@ -92,8 +91,8 @@ in
             src = fetchFromGitHub {
               owner = "openai";
               repo = "codex";
-              rev = "44022db8d0c4a0cfe5b5b041ef0c1c8811ce6e12";
-              hash = "sha256-S9xzyg6fC/uiW9xNv0HXW+GzYaJFKzjQn7ZTugc0tEM=";
+              rev = "fcfe43c7df46836a1c60cec4dfd1591d3036a0c8";
+              hash = "sha256-yZtIvXl0vjU65A109eO0HJ6KnTaCaCSmLZk5BfwE5dI";
             };
 
             pnpmDeps = pnpm_10.fetchDeps {
