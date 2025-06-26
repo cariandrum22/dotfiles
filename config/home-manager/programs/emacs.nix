@@ -34,7 +34,7 @@ in
         flycheck
         magit
         git-gutter
-        ddskk
+        #ddskk
         wrap-region
         ws-butler
         company

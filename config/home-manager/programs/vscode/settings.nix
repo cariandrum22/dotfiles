@@ -38,7 +38,7 @@
       "integrated" = {
         "defaultProfile" = {
           linux = "tmux";
-          osx = "tmux";
+          osx = "kitty";
         };
         "profiles" = {
           "tmux" = {
@@ -69,6 +69,7 @@
         "useLocalServer" = false;
         "remotePlatform" = {
           eto = "linux";
+          "eto.d" = "linux";
           heilwig = "macOS";
         };
       };
@@ -133,5 +134,6 @@
     "shellformat" = {
       "path" = "${pkgs.shfmt}/bin/shellformat";
     };
+    "extensions.verifySignature" = false;
   };
 }

@@ -39,8 +39,8 @@ in
         du-dust
         duf
         tldr
-        glances
-        gtop
+        unstable.glances
+        unstable.gtop
         hyperfine
         gping
         procs
@@ -59,6 +59,7 @@ in
         unstable.goreleaser
         rclone
         ripgrep
+        nodePackages.vercel
 
         # DevOps
         docker-compose
