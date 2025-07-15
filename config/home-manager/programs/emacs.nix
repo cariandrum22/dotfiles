@@ -29,7 +29,7 @@ in
   programs.emacs = {
     enable = true;
     package = pkgs.emacs;
-    extraPackages = (
+    extraPackages =
       epkgs:
       (with epkgs; [
         use-package
@@ -74,8 +74,7 @@ in
         all-the-icons
         all-the-icons-dired
         dired-sidebar
-      ])
-    );
+      ]);
   };
 
   home.file = {

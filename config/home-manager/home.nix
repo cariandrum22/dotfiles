@@ -2,7 +2,7 @@
 
 let
   pkgs = import <nixpkgs> { };
-  isDarwin = pkgs.stdenv.isDarwin;
+  inherit (pkgs.stdenv) isDarwin;
   base = [
     ./home
     ./programs
@@ -28,7 +28,7 @@ in
     config = {
       allowUnfree = true;
       packageOverrides = pkgs: {
-        unstable = import <unstable> { config = config.nixpkgs.config; };
+        unstable = import <unstable> { inherit (config.nixpkgs) config; };
       };
     };
     overlays = [ (import ./overlays/xmonad.nix) ];

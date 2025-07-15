@@ -1,5 +1,8 @@
+# This file intentionally uses direct import to determine platform
+# without requiring function arguments, maintaining compatibility
 let
-  isDarwin = (import <nixpkgs> { }).stdenv.isDarwin;
+  pkgs = import <nixpkgs> { };
+  inherit (pkgs.stdenv) isDarwin;
   base = [
     ./home-manager.nix
     ./git.nix

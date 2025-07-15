@@ -1,15 +1,23 @@
 { config, pkgs, ... }:
 
-let colorScheme = import ../lib/theme/nord.nix;
-in {
+let
+  colorScheme = import ../lib/theme/nord.nix;
+in
+{
   programs.rofi = {
     enable = true;
-    plugins = with pkgs; [ rofi-calc rofi-emoji ];
+    plugins = with pkgs; [
+      rofi-calc
+      rofi-emoji
+    ];
     font = "Fira Code Nerd Font 12";
     terminal = "kitty";
     theme =
-      let inherit (config.lib.formats.rasi) mkLiteral;
-      in with colorScheme; {
+      let
+        inherit (config.lib.formats.rasi) mkLiteral;
+      in
+      with colorScheme;
+      {
         "*" = {
           margin = 0;
           padding = 0;
@@ -60,7 +68,9 @@ in {
           background-color = mkLiteral nord2;
           padding = mkLiteral "6 4";
         };
-        "#prompt" = { text-color = mkLiteral nord8; };
+        "#prompt" = {
+          text-color = mkLiteral nord8;
+        };
         "#textbox-prompt-colon" = {
           expand = false;
           margin = mkLiteral "0 12";
@@ -81,8 +91,12 @@ in {
           padding = mkLiteral "0 12 0 0";
           text-color = mkLiteral nord5;
         };
-        "#message" = { padding = mkLiteral "2 0 0"; };
-        "#textbox" = { text-color = mkLiteral "@foreground"; };
+        "#message" = {
+          padding = mkLiteral "2 0 0";
+        };
+        "#textbox" = {
+          text-color = mkLiteral "@foreground";
+        };
         "#listview" = {
           background-color = mkLiteral "@background";
         };

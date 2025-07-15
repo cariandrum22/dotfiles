@@ -66,7 +66,7 @@
       };
       urgency_critical = {
         background = "#BF616A";
-        foreground = "#D8DEE9"; #FDF1DB #f5bfd2 #ff8585   #ffdfd3  #fec8d8      #FDF1DB #8fbcbb
+        foreground = "#D8DEE9"; # FDF1DB #f5bfd2 #ff8585   #ffdfd3  #fec8d8      #FDF1DB #8fbcbb
         timeout = 0;
       };
     };

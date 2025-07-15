@@ -34,13 +34,11 @@ in
     package = (pkgs.vscode.override { isInsiders = true; }).overrideAttrs (oldAttrs: rec {
       pname = "vscode-insiders";
       version = "1.103.0-${commit}";
-      src = (
-        builtins.fetchurl {
-          name = "${pname}-${version}.${archive_fmt}";
-          url = "https://code.visualstudio.com/sha/download?build=insider&os=${plat}";
-          inherit sha256;
-        }
-      );
+      src = builtins.fetchurl {
+        name = "${pname}-${version}.${archive_fmt}";
+        url = "https://code.visualstudio.com/sha/download?build=insider&os=${plat}";
+        inherit sha256;
+      };
       buildInputs = oldAttrs.buildInputs ++ [ pkgs.krb5 ];
       runtimeDependencies = lib.optionals pkgs.stdenv.isLinux (
         oldAttrs.runtimeDependencies ++ [ pkgs.libsecret ]

@@ -24,7 +24,7 @@
   nord15 = "#B48EAD";
 
   meta = {
-    homepage = https://www.nordtheme.com/;
+    homepage = "https://www.nordtheme.com/";
     description = "Nord Theme";
   };
 }

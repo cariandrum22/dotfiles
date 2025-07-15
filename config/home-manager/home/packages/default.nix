@@ -1,11 +1,11 @@
 { pkgs, lib, ... }:
 
 let
+  inherit (pkgs.stdenv) isDarwin;
   base = [
     ./haskell.nix
     ./azure.nix
   ];
-  isDarwin = (import <nixpkgs> { }).stdenv.isDarwin;
   synthetic =
     if isDarwin then
       base ++ [ ./darwin.nix ]

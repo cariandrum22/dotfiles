@@ -7,7 +7,7 @@ let
   };
 
   data = builtins.fromJSON (builtins.readFile apiResponse);
-  downloadUrl = data.downloadUrl;
+  inherit (data) downloadUrl;
 
   pname = "cursor";
   version = "1.2.2";
