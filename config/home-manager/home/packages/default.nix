@@ -88,7 +88,25 @@ in
           }
         ))
         (callPackage ./codex.nix { inherit pkgs; })
-        (callPackage ./gemini-cli.nix { })
+        (unstable.gemini-cli.overrideAttrs (
+          finalAttrs: oldAttrs: {
+            version = "0.1.12";
+            src = pkgs.fetchFromGitHub {
+              owner = "google-gemini";
+              repo = "gemini-cli";
+              tag = "v${finalAttrs.version}";
+              hash = "sha256-7StuYqKGnTTZY3BKK3X1kWNReRUfyvhfH3wGw0Pz2zM=";
+              postFetch = ''
+                ${lib.getExe pkgs.npm-lockfile-fix} $out/package-lock.json
+              '';
+            };
+
+            npmDeps = pkgs.fetchNpmDeps {
+              inherit (finalAttrs) src;
+              hash = "sha256-yt1Z/atE07vt27OdiLHPV1ZSHJ80zkGkcuro7rJxOrc";
+            };
+          }
+        ))
 
         # Development toolchain
         cmake
