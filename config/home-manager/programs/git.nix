@@ -64,7 +64,20 @@ let
     # Windows shortcuts
     "*.lnk"
   ];
-
+  Claude = [
+    ".claude/"
+  ];
+  Markdown = [
+    # Markdown files
+    "*.md"
+    "*.markdown"
+    "*.mkd"
+    "*.mdown"
+    "*.mdwn"
+    "*.mdtxt"
+    "*.mdtext"
+    "!README.md"
+  ];
 in
 {
   programs.git = {
@@ -87,16 +100,32 @@ in
     extraConfig = {
       core = {
         editor = "emacs";
-        excludesfile = "~/.gitignore";
       };
-      credential = { helper = "netrc -f ~/.netrc.gpg -v"; };
-      color = { ui = true; };
-      init = { defaultBranch = "main"; };
-      ghq = { root = [ "~/Go/src" "~/Codex" ]; };
+      credential = {
+        helper = "netrc -f ~/.netrc.gpg -v";
+      };
+      color = {
+        ui = true;
+      };
+      init = {
+        defaultBranch = "main";
+      };
+      ghq = {
+        root = [
+          "~/Go/src"
+          "~/Codex"
+        ];
+      };
       pull = {
         rebase = true;
       };
     };
-    ignores = builtins.concatLists [ Linux macOS Windows ];
+    ignores = builtins.concatLists [
+      Linux
+      macOS
+      Windows
+      Claude
+      Markdown
+    ];
   };
 }
