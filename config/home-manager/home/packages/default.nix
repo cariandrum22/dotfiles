@@ -87,28 +87,7 @@ in
             };
           }
         ))
-        (unstable.codex.overrideAttrs (
-          finalAttrs: oldAttrs: {
-            version = "0.0.0-dev";
-            src = fetchFromGitHub {
-              owner = "openai";
-              repo = "codex";
-              rev = "fcfe43c7df46836a1c60cec4dfd1591d3036a0c8";
-              hash = "sha256-yZtIvXl0vjU65A109eO0HJ6KnTaCaCSmLZk5BfwE5dI";
-            };
-
-            pnpmDeps = pnpm_10.fetchDeps {
-              inherit (finalAttrs)
-                pname
-                version
-                src
-                pnpmWorkspaces
-                ;
-              hash = "sha256-SyKP++eeOyoVBFscYi+Q7IxCphcEeYgpuAj70+aCdNA=";
-            };
-          }
-        ))
-
+        (callPackage ./codex.nix { inherit pkgs; })
         (callPackage ./gemini-cli.nix { })
 
         # Development toolchain
