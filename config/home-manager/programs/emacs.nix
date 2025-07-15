@@ -6,6 +6,16 @@ let
     rev = "fix-invalid-face-box-error";
     sha256 = "ZU5dGvGrZvivbA+981IyIu8a4xftL3QyUavGwBc7mQc=";
   };
+  ws-butler' = pkgs.emacsPackages.trivialBuild {
+    pname = "ws-butler";
+    version = "20250310.205";
+    src = pkgs.fetchgit {
+      url = "https://github.com/lewang/ws-butler.git";
+      rev = "e3a38d93e01014cd47bf5af4924459bd145fd7c4";
+      sha256 = "sha256-P3G5iEmwK/mijvNRyrqxG4xypnbGh3r6SHOBqZMT89g=";
+      leaveDotGit = true;
+    };
+  };
 in
 {
   nixpkgs.overlays = [
@@ -36,7 +46,7 @@ in
         git-gutter
         ddskk
         wrap-region
-        ws-butler
+        ws-butler'
         company
         company-shell
         lsp-mode
