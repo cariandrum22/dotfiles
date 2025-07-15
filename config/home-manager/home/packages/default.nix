@@ -25,6 +25,7 @@ in
         cachix
         any-nix-shell
         nix-prefetch-git
+        prefetch-npm-deps
         nixfmt-rfc-style
         nixd
 
