@@ -32,6 +32,7 @@
       # Utility
       trash-cli
       flameshot
+      scrot
       xlsfonts
       zeal
       dupeguru

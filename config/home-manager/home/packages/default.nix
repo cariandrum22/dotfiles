@@ -25,6 +25,7 @@ in
         cachix
         any-nix-shell
         nix-prefetch-git
+        prefetch-npm-deps
         nixfmt-rfc-style
         nixd
 
@@ -79,36 +80,33 @@ in
         # AI Tools
         (unstable.claude-code.overrideAttrs (
           finalAttrs: oldAttrs: rec {
-            version = "1.0.35";
+            version = "1.0.51";
             src = fetchzip {
               url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-              hash = "sha256-Lt79XxHrgy6rPAHBf1QtwjsKnrZmsKFeVFOvHwN4aOY=";
+              hash = "sha256-sAILRsi8ZViMfcpqykfnFQzHTJHRwRSZz45otMqa4U0=";
             };
           }
         ))
-        (unstable.codex.overrideAttrs (
+        (callPackage ./codex.nix { inherit pkgs; })
+        (unstable.gemini-cli.overrideAttrs (
           finalAttrs: oldAttrs: {
-            version = "0.0.0-dev";
-            src = fetchFromGitHub {
-              owner = "openai";
-              repo = "codex";
-              rev = "fcfe43c7df46836a1c60cec4dfd1591d3036a0c8";
-              hash = "sha256-yZtIvXl0vjU65A109eO0HJ6KnTaCaCSmLZk5BfwE5dI";
+            version = "0.1.12";
+            src = pkgs.fetchFromGitHub {
+              owner = "google-gemini";
+              repo = "gemini-cli";
+              tag = "v${finalAttrs.version}";
+              hash = "sha256-7StuYqKGnTTZY3BKK3X1kWNReRUfyvhfH3wGw0Pz2zM=";
+              postFetch = ''
+                ${lib.getExe pkgs.npm-lockfile-fix} $out/package-lock.json
+              '';
             };
 
-            pnpmDeps = pnpm_10.fetchDeps {
-              inherit (finalAttrs)
-                pname
-                version
-                src
-                pnpmWorkspaces
-                ;
-              hash = "sha256-SyKP++eeOyoVBFscYi+Q7IxCphcEeYgpuAj70+aCdNA=";
+            npmDeps = pkgs.fetchNpmDeps {
+              inherit (finalAttrs) src;
+              hash = "sha256-yt1Z/atE07vt27OdiLHPV1ZSHJ80zkGkcuro7rJxOrc";
             };
           }
         ))
-
-        (callPackage ./gemini-cli.nix { })
 
         # Development toolchain
         cmake

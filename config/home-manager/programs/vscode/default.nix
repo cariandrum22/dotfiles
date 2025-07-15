@@ -17,12 +17,12 @@ let
     .${system};
 
   archive_fmt = if pkgs.stdenv.isDarwin then "zip" else "tar.gz";
-  commit = "5d3e84d3aaaea9e132bad476f1be5a4846289b75";
+  commit = "cd20192782347e3afdbabc65ddaab56acd56da58";
 
   sha256 =
     {
-      x86_64-linux = "09niibfi8qppvbqqd0j80gvsr4njsnphrq5nlfr0dh0xazj33lzf";
-      aarch64-darwin = "1ch4igiwwj2rlplg15k7bmnnjwn76sxid06aqxip865qqr6qfjzn";
+      x86_64-linux = "1csbr3za65kczl976ksl04i9i8pzg71i4vadjbvqiamlc886zsa0";
+      aarch64-darwin = "16qfsl6nffr6ipc2g36cp9drd3d3jmpmvnvk353yvdaq4f7hsvp5";
     }
     .${system};
 in
@@ -33,7 +33,7 @@ in
     mutableExtensionsDir = false;
     package = (pkgs.vscode.override { isInsiders = true; }).overrideAttrs (oldAttrs: rec {
       pname = "vscode-insiders";
-      version = "1.101.0-${commit}";
+      version = "1.103.0-${commit}";
       src = (
         builtins.fetchurl {
           name = "${pname}-${version}.${archive_fmt}";
