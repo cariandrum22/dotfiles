@@ -17,11 +17,11 @@ let
     .${system};
 
   archive_fmt = if pkgs.stdenv.isDarwin then "zip" else "tar.gz";
-  commit = "cd20192782347e3afdbabc65ddaab56acd56da58";
+  commit = "b5d2dfbd1133331d3ff6f9fca1a4d8920d5cbeb9";
 
   sha256 =
     {
-      x86_64-linux = "1csbr3za65kczl976ksl04i9i8pzg71i4vadjbvqiamlc886zsa0";
+      x86_64-linux = "080a74n6np754kdv92vcygvbs7ywbgkpbw5sl8fqqm8l4n8n3zqs";
       aarch64-darwin = "16qfsl6nffr6ipc2g36cp9drd3d3jmpmvnvk353yvdaq4f7hsvp5";
     }
     .${system};
@@ -80,6 +80,7 @@ in
     });
     profiles.default = {
       extensions = pkgs.vscode-utils.extensionsFromVscodeMarketplace extensions;
-    } // settings;
+      inherit (settings) userSettings;
+    };
   };
 }

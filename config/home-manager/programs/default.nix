@@ -1,9 +1,7 @@
-# This file intentionally uses direct import to determine platform
-# without requiring function arguments, maintaining compatibility
-let
-  pkgs = import <nixpkgs> { };
-  inherit (pkgs.stdenv) isDarwin;
-  base = [
+{ pkgs, ... }:
+
+{
+  imports = [
     ./home-manager.nix
     ./git.nix
     ./kitty.nix
@@ -12,8 +10,4 @@ let
     ./direnv.nix
     ./vscode
   ];
-  synthetic = if isDarwin then base else base ++ [ ./rofi.nix ];
-in
-{
-  imports = synthetic;
 }

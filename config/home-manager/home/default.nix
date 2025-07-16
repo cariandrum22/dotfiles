@@ -1,6 +1,5 @@
 {
   imports = [
     ./file.nix
-    ./packages
   ];
 }

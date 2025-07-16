@@ -5,6 +5,6 @@
 
   services.vscode-server = {
     enable = true;
-    installPath = "~/.vscode-server-insiders";
+    installPath = "$HOME/.vscode-server-insiders";
   };
 }

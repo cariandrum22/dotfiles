@@ -2,9 +2,20 @@
   description = "Personal dotfiles configuration";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
     flake-utils.url = "github:numtide/flake-utils";
     pre-commit-hooks.url = "github:cachix/git-hooks.nix";
+
+    xmonad = {
+      url = "path:./xmonad";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+    };
+
+    home-manager-config = {
+      url = "path:./config/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -13,6 +24,8 @@
       nixpkgs,
       flake-utils,
       pre-commit-hooks,
+      xmonad,
+      home-manager-config,
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
@@ -175,7 +188,7 @@
                 always_run = true;
               };
 
-              # Shell script linting  
+              # Shell script linting
               shellcheck = {
                 enable = true;
                 # SC1091 is about following sourced files, which exist at runtime
@@ -271,5 +284,10 @@
 
         formatter = pkgs.nixfmt-rfc-style;
       }
-    );
+    )
+    // {
+      # Re-export sub-flakes for convenience
+      inherit (xmonad) packages apps overlays;
+      inherit (home-manager-config) homeConfigurations;
+    };
 }
