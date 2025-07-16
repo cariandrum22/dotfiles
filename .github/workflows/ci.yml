@@ -1,0 +1,143 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-flake:
+    name: Check flake
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v14
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Setup Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v8
+
+      - name: Check top-level flake
+        run: nix flake check --impure
+
+      - name: Check home-manager flake
+        run: |
+          cd config/home-manager
+          nix flake check --impure
+
+      - name: Check xmonad flake
+        run: |
+          cd xmonad
+          nix flake check
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v14
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Setup Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v8
+
+      - name: Run pre-commit hooks
+        run: |
+          nix develop --impure --command pre-commit run --all-files
+
+  build-home-manager:
+    name: Build Home Manager configurations
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        system: [x86_64-linux, x86_64-darwin, aarch64-linux, aarch64-darwin]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v14
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+            extra-platforms = |
+              ${{ matrix.system == 'aarch64-linux' && 'aarch64-linux' ||
+                  matrix.system == 'aarch64-darwin' && 'aarch64-darwin' || '' }}
+
+      - name: Setup Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v8
+
+      - name: Build Home Manager configuration
+        run: |
+          cd config/home-manager
+          nix build --impure .#homeConfigurations."user@${{ matrix.system }}".activationPackage
+
+  build-xmonad:
+    name: Build XMonad
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        system: [x86_64-linux, aarch64-linux]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v14
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+            extra-platforms = ${{ matrix.system == 'aarch64-linux' && 'aarch64-linux' || '' }}
+
+      - name: Setup Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v8
+
+      - name: Build XMonad
+        run: |
+          cd xmonad
+          nix build .#packages.${{ matrix.system }}.default
+
+  format-check:
+    name: Check formatting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v14
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Setup Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v8
+
+      - name: Check Nix formatting
+        run: |
+          find . -name "*.nix" -type f -print0 | \
+            xargs -0 nix develop --impure --command nixfmt-rfc-style --check
+
+      - name: Check other formatting
+        run: |
+          nix develop --impure --command prettier --check "**/*.{md,yml,yaml,json}" || true

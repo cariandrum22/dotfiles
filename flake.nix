@@ -76,6 +76,9 @@
 
           # Python tools
           ruff
+
+          # CI/CD tools
+          act
         ];
       in
       {
