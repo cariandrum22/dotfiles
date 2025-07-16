@@ -1,0 +1,49 @@
+name: Update flake.lock
+
+on:
+  schedule:
+    # Run every Monday at 00:00 UTC
+    - cron: 0 0 * * 1
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        flake:
+          - path: .
+            name: root
+          - path: config/home-manager
+            name: home-manager
+          - path: xmonad
+            name: xmonad
+    name: Update ${{ matrix.flake.name }} flake.lock
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v14
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+
+      - name: Update flake.lock
+        uses: DeterminateSystems/update-flake-lock@v24
+        with:
+          path-to-flake-dir: ${{ matrix.flake.path }}
+          pr-title: "chore(${{ matrix.flake.name }}): update flake.lock"
+          pr-body: |
+            Automated update of `flake.lock` file for ${{ matrix.flake.name }}.
+
+            This PR updates the following inputs to their latest versions.
+            Please review the changes and ensure all tests pass before merging.
+          pr-labels: |
+            dependencies
+            automated
+          branch: update-${{ matrix.flake.name }}-flake-lock
