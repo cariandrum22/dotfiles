@@ -23,6 +23,7 @@ class Metadata(NamedTuple):
 
     version: str
     commit: str
+    urls: dict[str, str]
     hashes: dict[str, str]
 
 
@@ -44,35 +45,47 @@ def get_current_commit(metadata_file: Path) -> str:
     return match.group(1)
 
 
-def get_latest_commit() -> str:
-    """Fetch latest commit from GitHub API."""
-    data = fetch_json("https://api.github.com/repos/microsoft/vscode/commits/main")
-    return data["sha"]
-
-
-def get_version(plat: str) -> str:
-    """Fetch version for the given platform."""
+def get_latest_info() -> tuple[str, str]:
+    """Fetch latest commit and version from VSCode API."""
+    # Use the Linux x64 endpoint as reference
     data = fetch_json(
-        f"https://update.code.visualstudio.com/api/update/insider/{plat}/stable"
+        "https://update.code.visualstudio.com/api/update/linux-x64/insider/latest"
     )
-    return data.get("productVersion", "").replace("-insider", "")
+    commit = data["version"]
+    version = data.get("productVersion", "").replace("-insider", "")
+    return commit, version
 
 
-def prefetch_sha256(commit: str, system: str, plat: str) -> tuple[str, str]:
-    """Get sha256 for a specific commit and platform."""
-    url = f"https://update.code.visualstudio.com/commit:{commit}/insider/{plat}/stable"
+
+
+def prefetch_sha256(commit: str, system: str, plat: str) -> tuple[str, str, str]:
+    """Get sha256 and URL for a specific commit and platform."""
+    # First, get the actual download URL from the API
+    api_url = f"https://update.code.visualstudio.com/api/update/{plat}/insider/latest"
 
     try:
+        data = fetch_json(api_url)
+        # Ensure we're getting the right commit
+        if data["version"] != commit:
+            raise RuntimeError(
+                f"Commit mismatch: expected {commit}, got {data['version']}"
+            )
+
+        download_url = data["url"]
+
         result = subprocess.run(
-            ["nix-prefetch-url", url], capture_output=True, text=True, check=True
+            ["nix-prefetch-url", download_url],
+            capture_output=True,
+            text=True,
+            check=True,
         )
-        return system, result.stdout.strip()
+        return system, download_url, result.stdout.strip()
     except subprocess.CalledProcessError as e:
         raise RuntimeError(f"Failed to prefetch {plat}: {e.stderr}") from e
 
 
-def fetch_all_hashes(commit: str) -> dict[str, str]:
-    """Fetch sha256 hashes for all platforms in parallel."""
+def fetch_all_metadata(commit: str) -> tuple[dict[str, str], dict[str, str]]:
+    """Fetch URLs and sha256 hashes for all platforms in parallel."""
     with ThreadPoolExecutor(max_workers=len(PLATFORMS)) as executor:
         fetch_func = partial(prefetch_sha256, commit)
         futures = [
@@ -80,21 +93,30 @@ def fetch_all_hashes(commit: str) -> dict[str, str]:
             for system, plat in PLATFORMS.items()
         ]
 
-        results = []
+        urls = {}
+        hashes = {}
         for future in futures:
             try:
-                system, sha256 = future.result()
+                system, url, sha256 = future.result()
                 print(f"  {system}: {sha256}")
-                results.append((system, sha256))
+                urls[system] = url
+                hashes[system] = sha256
             except Exception as e:
                 print(f"  Failed: {e}")
                 raise
 
-        return dict(results)
+        return urls, hashes
 
 
 def generate_nix_content(metadata: Metadata) -> str:
     """Generate metadata.nix content."""
+    # Extract commit hash from URLs to use variable reference
+    url_lines = []
+    for system, url in sorted(metadata.urls.items()):
+        # Replace the commit hash in URL with ${commit}
+        url_with_var = url.replace(f"/{metadata.commit}/", "/${commit}/")
+        url_lines.append(f'    {system} = "{url_with_var}";')
+
     sha256_lines = "\n".join(
         f'    {system} = "{sha256}";'
         for system, sha256 in sorted(metadata.hashes.items())
@@ -102,9 +124,12 @@ def generate_nix_content(metadata: Metadata) -> str:
 
     return f"""\
 # This file is automatically updated by the update-vscode-insiders workflow
-{{
+rec {{
   version = "{metadata.version}";
   commit = "{metadata.commit}";
+  url = {{
+{chr(10).join(url_lines)}
+  }};
   sha256 = {{
 {sha256_lines}
   }};
@@ -126,25 +151,21 @@ def update_vscode_insiders() -> bool:
 
     # Check current vs latest
     current_commit = get_current_commit(metadata_file)
-    latest_commit = get_latest_commit()
+    latest_commit, version = get_latest_info()
 
     print(f"Current commit: {current_commit}")
     print(f"Latest commit: {latest_commit}")
+    print(f"Version: {version}")
 
     if current_commit == latest_commit:
         print("Already up to date")
         return False
 
-    # Fetch new metadata
-    print("\nFetching version information...")
-    version = get_version(PLATFORMS["x86_64-linux"])
-    print(f"Version: {version}")
-
     print("\nFetching new sha256 hashes...")
-    hashes = fetch_all_hashes(latest_commit)
+    urls, hashes = fetch_all_metadata(latest_commit)
 
     # Update file
-    metadata = Metadata(version, latest_commit, hashes)
+    metadata = Metadata(version, latest_commit, urls, hashes)
     content = generate_nix_content(metadata)
 
     print(f"\nUpdating {metadata_file}...")

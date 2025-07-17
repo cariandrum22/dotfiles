@@ -148,7 +148,7 @@ jobs:
       - name: Check Nix formatting
         run: |
           find . -name "*.nix" -type f -print0 | \
-            xargs -0 nix develop --impure --command nixfmt-rfc-style --check
+            xargs -0 nix run .#formatter.x86_64-linux -- --check
 
       - name: Check other formatting
         run: |

@@ -33,7 +33,7 @@ in
       version = "${metadata.version}-${commit}";
       src = builtins.fetchurl {
         name = "${pname}-${version}.${platformInfo.archive}";
-        url = "https://update.code.visualstudio.com/commit:${commit}/insider/${platformInfo.vscode-plat}/stable";
+        url = metadata.url.${system} or (throw "No URL for system: ${system}");
         inherit sha256;
       };
       buildInputs = oldAttrs.buildInputs ++ [ pkgs.krb5 ];
