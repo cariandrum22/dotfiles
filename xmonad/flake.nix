@@ -12,52 +12,57 @@
       nixpkgs,
       flake-utils,
     }:
-    flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        pkgs = nixpkgs.legacyPackages.${system};
-        inherit (pkgs) haskellPackages;
+    flake-utils.lib.eachSystem
+      [
+        "x86_64-linux"
+        "aarch64-linux"
+      ]
+      (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+          inherit (pkgs) haskellPackages;
 
-        myxmonad = haskellPackages.mkDerivation {
-          pname = "myxmonad";
-          version = "0.1.0.0";
-          src = ./.;
-          isLibrary = false;
-          isExecutable = true;
-          executableHaskellDepends = with haskellPackages; [
-            base
-            Cabal
-            containers
-            unordered-containers
-            utf8-string
-            X11
-            xmonad
-            xmonad-contrib
-            xmonad-extras
-          ];
-          license = pkgs.lib.licenses.mit;
-        };
-      in
-      {
-        packages = {
-          default = myxmonad;
-          inherit myxmonad;
-        };
+          myxmonad = haskellPackages.mkDerivation {
+            pname = "myxmonad";
+            version = "0.1.0.0";
+            src = ./.;
+            isLibrary = false;
+            isExecutable = true;
+            executableHaskellDepends = with haskellPackages; [
+              base
+              Cabal
+              containers
+              unordered-containers
+              utf8-string
+              X11
+              xmonad
+              xmonad-contrib
+              xmonad-extras
+            ];
+            license = pkgs.lib.licenses.mit;
+          };
+        in
+        {
+          packages = {
+            default = myxmonad;
+            inherit myxmonad;
+          };
 
-        apps.default = flake-utils.lib.mkApp { drv = myxmonad; };
+          apps.default = flake-utils.lib.mkApp { drv = myxmonad; };
 
-        devShells.default = haskellPackages.shellFor {
-          packages = ps: [ myxmonad ];
-          buildInputs = with haskellPackages; [
-            cabal-install
-            ghc
-            haskell-language-server
-            ormolu
-            hlint
-          ];
-        };
-      }
-    )
+          devShells.default = haskellPackages.shellFor {
+            packages = ps: [ myxmonad ];
+            buildInputs = with haskellPackages; [
+              cabal-install
+              ghc
+              haskell-language-server
+              ormolu
+              hlint
+            ];
+          };
+        }
+      )
     // {
       # System-agnostic overlay
       overlays.default = final: prev: {
