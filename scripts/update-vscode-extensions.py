@@ -21,10 +21,13 @@ import json
 import platform
 import subprocess
 import sys
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any, TypedDict
 
 MARKETPLACE_DOMAIN = "marketplace.visualstudio.com"
+HTTP_SERVER_ERROR_THRESHOLD = 500
 ASSETS_DOMAIN = "{publisher}.gallery.vsassets.io"
 EXTENSION_QUERY_ENDPOINT = "/_apis/public/gallery/extensionquery"
 DOWNLOAD_ENDPOINT = (
@@ -120,16 +123,45 @@ def parse_extension_list(extensions: list[str]) -> list[Extension]:
     return [to_dict(ext) for ext in extensions]
 
 
-def query(extension: Extension) -> QueryResult:
-    """Query marketplace for extension information.
+def _make_marketplace_request(
+    headers: dict[str, str], data: dict[str, Any]
+) -> tuple[int, str, bytes]:
+    """Make HTTP request to marketplace.
+
+    Args:
+        headers: HTTP headers
+        data: Request payload
+
+    Returns:
+        Tuple of (status_code, reason, body)
+    """
+    connection = http.client.HTTPSConnection(MARKETPLACE_DOMAIN, timeout=30)
+    try:
+        connection.request(
+            "POST", EXTENSION_QUERY_ENDPOINT, json.dumps(data), headers
+        )
+        response = connection.getresponse()
+        return response.status, response.reason, response.read()
+    finally:
+        connection.close()
+
+
+def query(
+    extension: Extension, retries: int = 3, backoff_base: float = 1.0
+) -> QueryResult:
+    """Query marketplace for extension information with retry logic.
 
     Args:
         extension: Extension dictionary with publisher and name
+        retries: Number of retry attempts (default: 3)
+        backoff_base: Base delay for exponential backoff in seconds (default: 1.0)
 
     Returns:
         Query result with status, reason, and body
+
+    Raises:
+        RuntimeError: If all retry attempts fail
     """
-    connection = http.client.HTTPSConnection(MARKETPLACE_DOMAIN)
     headers = {
         "Content-Type": "application/json",
         "Accept": "application/json;api-version=3.0-preview.1",
@@ -153,15 +185,46 @@ def query(extension: Extension) -> QueryResult:
         "assetTypes": [],
         "flags": 0x200,  # Include latest version only
     }
-    connection.request("POST", EXTENSION_QUERY_ENDPOINT, json.dumps(data), headers)
-    response = connection.getresponse()
-    result = {
-        "status": response.status,
-        "reason": response.reason,
-        "body": json.loads(response.read()),
-    }
-    connection.close()
-    return result
+
+    last_error = None
+    for attempt in range(retries):
+        try:
+            status, reason, body = _make_marketplace_request(headers, data)
+
+            # Check for HTTP errors
+            if status >= HTTP_SERVER_ERROR_THRESHOLD:
+                raise http.client.HTTPException(f"Server error: {status} {reason}")
+
+            return {
+                "status": status,
+                "reason": reason,
+                "body": json.loads(body),
+            }
+
+        except (http.client.HTTPException, ConnectionError, TimeoutError) as e:
+            last_error = e
+            if attempt < retries - 1:
+                delay = backoff_base * (2**attempt)
+                error_type = type(e).__name__
+                print(f"  Retry {attempt + 1}/{retries} after {delay}s: {error_type}")
+                time.sleep(delay)
+            continue
+        except json.JSONDecodeError as e:
+            last_error = e
+            ext_name = f"{extension['publisher']}.{extension['name']}"
+            msg = f"Invalid JSON response for {ext_name}: {e}"
+            raise RuntimeError(msg) from e
+        except Exception as e:
+            last_error = e
+            ext_name = f"{extension['publisher']}.{extension['name']}"
+            msg = f"Unexpected error querying {ext_name}: {e}"
+            raise RuntimeError(msg) from e
+
+    msg = (
+        f"Failed to query {extension['publisher']}.{extension['name']} "
+        f"after {retries} attempts: {last_error}"
+    )
+    raise RuntimeError(msg) from last_error
 
 
 def results_to_nix_attr(
@@ -252,11 +315,12 @@ def extract_version_and_platform(
     raise ValueError(msg)
 
 
-def extract_extension_info(result: QueryResult) -> str:
+def extract_extension_info(result: QueryResult, retries: int = 3) -> str:
     """Extract extension info and fetch sha256.
 
     Args:
         result: Query result from marketplace
+        retries: Number of retry attempts for nix-prefetch-url (default: 3)
 
     Returns:
         Nix attribute string for the extension
@@ -267,24 +331,38 @@ def extract_extension_info(result: QueryResult) -> str:
     version, arch = extract_version_and_platform(extension["versions"])
     query_string = f"?targetPlatform={arch}" if arch else ""
 
-    sha256 = (
-        subprocess.run(
-            [
-                "nix-prefetch-url",
-                "https://"
-                + ASSETS_DOMAIN.format(publisher=publisher)
-                + DOWNLOAD_ENDPOINT.format(
-                    publisher=publisher,
-                    extension=name,
-                    version=version,
-                    queryString=query_string,
-                ),
-            ],
-            check=True,
-            capture_output=True,
-            encoding="utf-8",
+    url = (
+        "https://"
+        + ASSETS_DOMAIN.format(publisher=publisher)
+        + DOWNLOAD_ENDPOINT.format(
+            publisher=publisher,
+            extension=name,
+            version=version,
+            queryString=query_string,
         )
-    ).stdout.strip()
+    )
+
+    # Retry logic for nix-prefetch-url
+    for attempt in range(retries):
+        try:
+            result = subprocess.run(
+                ["nix-prefetch-url", url],
+                check=True,
+                capture_output=True,
+                encoding="utf-8",
+                timeout=60,
+            )
+            sha256 = result.stdout.strip()
+            break
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+            if attempt < retries - 1:
+                delay = 2 ** attempt
+                print(f"    Retry prefetch {attempt + 1}/{retries} after {delay}s")
+                time.sleep(delay)
+            else:
+                error_msg = getattr(e, "stderr", "Unknown error")
+                msg = f"Failed to prefetch {name}: {error_msg}"
+                raise RuntimeError(msg) from e
     return results_to_nix_attr(publisher, name, version, sha256, arch)
 
 
@@ -318,27 +396,63 @@ def parse_args() -> argparse.Namespace:
             "(default: ../config/home-manager/programs/vscode/extensions.nix)"
         ),
     )
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=3,
+        help="Number of parallel workers (default: 3)",
+    )
+    parser.add_argument(
+        "--retries",
+        type=int,
+        default=3,
+        help="Number of retry attempts for failed requests (default: 3)",
+    )
     return parser.parse_args()
 
 
-def process_extensions(extensions: list[Extension]) -> list[QueryResult]:
-    """Query marketplace for all extensions.
+def process_extensions(
+    extensions: list[Extension], workers: int = 3, retries: int = 3
+) -> list[QueryResult]:
+    """Query marketplace for all extensions in parallel.
 
     Args:
         extensions: List of extensions to query
+        workers: Number of parallel workers
+        retries: Number of retry attempts per extension
 
     Returns:
         List of successful query results
     """
     results = []
-    for ext in extensions:
-        print(f"Querying {ext['publisher']}.{ext['name']}...")
-        try:
-            result = query(ext)
-            results.append(result)
-        except Exception as e:
-            print(f"  Failed: {e}")
-            continue
+    failed = []
+
+    print(f"Querying {len(extensions)} extensions with {workers} workers...")
+
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        # Submit all tasks
+        future_to_ext = {
+            executor.submit(query, ext, retries): ext for ext in extensions
+        }
+
+        # Process completed tasks
+        for future in as_completed(future_to_ext):
+            ext = future_to_ext[future]
+            ext_name = f"{ext['publisher']}.{ext['name']}"
+
+            try:
+                result = future.result()
+                print(f"✓ {ext_name}")
+                results.append(result)
+            except Exception as e:
+                print(f"✗ {ext_name}: {e}")
+                failed.append(ext_name)
+
+    if failed:
+        print(f"\nFailed to query {len(failed)} extensions:")
+        for name in failed:
+            print(f"  - {name}")
+
     return results
 
 
@@ -376,10 +490,23 @@ def main() -> int:
 
     # Query marketplace and generate output
     extensions = parse_extension_list(extensions_list)
-    results = process_extensions(extensions)
+    results = process_extensions(extensions, args.workers, args.retries)
 
     # Generate Nix expression
-    extensions_nix = "".join([extract_extension_info(result) for result in results])
+    print("\nGenerating Nix expressions...")
+    extensions_nix_parts = []
+    for result in results:
+        try:
+            nix_attr = extract_extension_info(result, args.retries)
+            extensions_nix_parts.append(nix_attr)
+        except Exception as e:
+            ext_info = result["body"]["results"][0]["extensions"][0]
+            ext_name = (
+                f"{ext_info['publisher']['publisherName']}.{ext_info['extensionName']}"
+            )
+            print(f"Failed to generate Nix for {ext_name}: {e}")
+
+    extensions_nix = "".join(extensions_nix_parts)
     with output_file.open("w") as file:
         file.write("[")
         file.write(extensions_nix)

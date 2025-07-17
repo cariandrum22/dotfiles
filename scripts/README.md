@@ -31,11 +31,18 @@ Updates VSCode extensions Nix expressions from the marketplace.
 ./scripts/update-vscode-extensions.py \
   --file /path/to/extensions \
   --output /path/to/extensions.nix
+
+# Adjust parallelism and retry behavior
+./scripts/update-vscode-extensions.py \
+  --workers 5 \        # Use 5 parallel workers (default: 3)
+  --retries 5          # Retry failed requests 5 times (default: 3)
 ```
 
 - Reads extension list from file or installed VSCode
-- Queries VS Code marketplace for latest versions
+- Queries VS Code marketplace for latest versions in parallel
 - Generates `extensions.nix` with metadata and SHA256 hashes
+- Automatic retry with exponential backoff for failed requests
+- Configurable parallelism to avoid overwhelming the marketplace API
 - Run automatically monthly via GitHub Actions
 
 ### Workflow
