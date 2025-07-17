@@ -74,7 +74,7 @@ def get_installed_extensions() -> list[str]:
                 extensions = [
                     line.strip() for line in result.stdout.splitlines() if line.strip()
                 ]
-                print(f"Found {len(extensions)} installed extensions via {cmd}")
+                print(f"✓ Found {len(extensions)} installed extensions via {cmd}")
                 return extensions
             except (subprocess.CalledProcessError, FileNotFoundError):
                 continue
@@ -206,7 +206,7 @@ def query(
             if attempt < retries - 1:
                 delay = backoff_base * (2**attempt)
                 error_type = type(e).__name__
-                print(f"  Retry {attempt + 1}/{retries} after {delay}s: {error_type}")
+                print(f"  → Retry {attempt + 1}/{retries} after {delay}s: {error_type}")
                 time.sleep(delay)
             continue
         except json.JSONDecodeError as e:
@@ -357,7 +357,7 @@ def extract_extension_info(result: QueryResult, retries: int = 3) -> str:
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
             if attempt < retries - 1:
                 delay = 2 ** attempt
-                print(f"    Retry prefetch {attempt + 1}/{retries} after {delay}s")
+                print(f"    → Retry prefetch {attempt + 1}/{retries} after {delay}s")
                 time.sleep(delay)
             else:
                 error_msg = getattr(e, "stderr", "Unknown error")
@@ -427,7 +427,7 @@ def process_extensions(
     results = []
     failed = []
 
-    print(f"Querying {len(extensions)} extensions with {workers} workers...")
+    print(f"\nQuerying {len(extensions)} extensions with {workers} workers...")
 
     with ThreadPoolExecutor(max_workers=workers) as executor:
         # Submit all tasks
@@ -442,18 +442,70 @@ def process_extensions(
 
             try:
                 result = future.result()
-                print(f"✓ {ext_name}")
+                print(f"  ✓ {ext_name}")
                 results.append(result)
             except Exception as e:
-                print(f"✗ {ext_name}: {e}")
+                print(f"  ✗ {ext_name}: {e}")
                 failed.append(ext_name)
 
     if failed:
-        print(f"\nFailed to query {len(failed)} extensions:")
+        print(f"\n⚠️  Failed to query {len(failed)} extensions:")
         for name in failed:
-            print(f"  - {name}")
+            print(f"    - {name}")
 
     return results
+
+
+def get_extensions_list(
+    *, from_installed: bool, extensions_file: Path
+) -> list[str] | None:
+    """Get extensions list from file or installed VSCode.
+
+    Args:
+        from_installed: Whether to get from installed VSCode
+        extensions_file: Path to extensions file
+
+    Returns:
+        List of extensions or None if error
+    """
+    if from_installed:
+        return get_installed_extensions()
+    if not extensions_file.exists():
+        print(f"\n❌ Error: Extensions file not found: {extensions_file}")
+        return None
+    extensions_list = read_extensions_file(extensions_file)
+    print(f"✓ Found {len(extensions_list)} extensions in {extensions_file}")
+    return extensions_list
+
+
+def write_nix_output(
+    results: list[QueryResult], output_file: Path, retries: int
+) -> None:
+    """Generate and write Nix expressions to file.
+
+    Args:
+        results: Query results from marketplace
+        output_file: Path to write output
+        retries: Number of retries for prefetch
+    """
+    print("\nGenerating Nix expressions...")
+    extensions_nix_parts = []
+    for result in results:
+        try:
+            nix_attr = extract_extension_info(result, retries)
+            extensions_nix_parts.append(nix_attr)
+        except Exception as e:
+            ext_info = result["body"]["results"][0]["extensions"][0]
+            ext_name = (
+                f"{ext_info['publisher']['publisherName']}.{ext_info['extensionName']}"
+            )
+            print(f"  ✗ Failed to generate Nix for {ext_name}: {e}")
+
+    extensions_nix = "".join(extensions_nix_parts)
+    with output_file.open("w") as file:
+        file.write("[")
+        file.write(extensions_nix)
+        file.write("\n]\n")
 
 
 def main() -> int:
@@ -477,45 +529,38 @@ def main() -> int:
         else script_dir.parent / "config/home-manager/programs/vscode/extensions.nix"
     )
 
-    print("Updating VSCode extensions...")
+    print("Checking VSCode extensions...")
 
     # Get extensions list
-    if args.from_installed:
-        extensions_list = get_installed_extensions()
-    else:
-        if not extensions_file.exists():
-            print(f"Error: Extensions file not found: {extensions_file}")
-            return 1
-        extensions_list = read_extensions_file(extensions_file)
+    extensions_list = get_extensions_list(
+        from_installed=args.from_installed, extensions_file=extensions_file
+    )
+    if extensions_list is None:
+        return 1
 
     # Query marketplace and generate output
     extensions = parse_extension_list(extensions_list)
     results = process_extensions(extensions, args.workers, args.retries)
 
-    # Generate Nix expression
-    print("\nGenerating Nix expressions...")
-    extensions_nix_parts = []
-    for result in results:
-        try:
-            nix_attr = extract_extension_info(result, args.retries)
-            extensions_nix_parts.append(nix_attr)
-        except Exception as e:
-            ext_info = result["body"]["results"][0]["extensions"][0]
-            ext_name = (
-                f"{ext_info['publisher']['publisherName']}.{ext_info['extensionName']}"
-            )
-            print(f"Failed to generate Nix for {ext_name}: {e}")
+    # Write output
+    write_nix_output(results, output_file, args.retries)
 
-    extensions_nix = "".join(extensions_nix_parts)
-    with output_file.open("w") as file:
-        file.write("[")
-        file.write(extensions_nix)
-        file.write("\n]\n")
-
-    print(f"\nSuccessfully updated {output_file}")
-    print(f"Total extensions: {len(results)}")
+    print(f"\n✅ Successfully updated {output_file}")
+    print(f"  Total extensions: {len(results)}")
     return 0
 
 
+def main_with_error_handling() -> None:
+    """Entry point with error handling."""
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        print("\n⚠️  Interrupted by user")
+        sys.exit(130)
+    except Exception as e:
+        print(f"\n❌ Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
 if __name__ == "__main__":
-    sys.exit(main())
+    main_with_error_handling()
