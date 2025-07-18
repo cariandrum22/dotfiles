@@ -26,8 +26,6 @@
     let
       systems = [
         "x86_64-linux"
-        "aarch64-linux"
-        "x86_64-darwin"
         "aarch64-darwin"
       ];
       forAllSystems = nixpkgs.lib.genAttrs systems;
@@ -87,8 +85,6 @@
       # Home configurations for each system
       homeConfigurations = {
         "user@x86_64-linux" = mkHomeConfiguration { system = "x86_64-linux"; };
-        "user@aarch64-linux" = mkHomeConfiguration { system = "aarch64-linux"; };
-        "user@x86_64-darwin" = mkHomeConfiguration { system = "x86_64-darwin"; };
         "user@aarch64-darwin" = mkHomeConfiguration { system = "aarch64-darwin"; };
       };
 

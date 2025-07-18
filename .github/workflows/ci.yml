@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        system: [x86_64-linux, x86_64-darwin, aarch64-linux, aarch64-darwin]
+        system: [x86_64-linux, aarch64-darwin]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -100,7 +100,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        system: [x86_64-linux, aarch64-linux]
+        system: [x86_64-linux]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
