@@ -15,6 +15,17 @@ jobs:
     name: Check flake
     runs-on: ubuntu-latest
     steps:
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: true
+          docker-images: true
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -45,6 +56,17 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: true
+          docker-images: true
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -73,6 +95,19 @@ jobs:
             os: macos-latest
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Free disk space (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          # Remove tools that are not needed
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: true
+          docker-images: true
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -91,6 +126,12 @@ jobs:
           cd config/home-manager
           nix build --impure .#homeConfigurations."user@${{ matrix.system }}".activationPackage
 
+      - name: Cleanup Nix store
+        if: always()
+        run: |
+          nix-collect-garbage -d
+          df -h
+
   build-xmonad:
     name: Build XMonad
     runs-on: ubuntu-latest
@@ -98,6 +139,17 @@ jobs:
       matrix:
         system: [x86_64-linux]
     steps:
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          swap-storage: true
+          docker-images: true
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
