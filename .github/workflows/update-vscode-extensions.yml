@@ -1,0 +1,49 @@
+name: Update VSCode Extensions
+
+on:
+  schedule:
+    # Run monthly on the 1st at 02:00 UTC
+    - cron: 0 2 1 * *
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v14
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Update VSCode Extensions
+        run: python3 scripts/update-vscode-extensions.py
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(vscode): update VSCode extensions"
+          title: "chore(vscode): update VSCode extensions"
+          body: |
+            Automated update of VSCode extensions versions and hashes.
+
+            This PR updates the extensions.nix file with the latest versions
+            from the Visual Studio Code marketplace.
+          branch: update-vscode-extensions
+          delete-branch: true
+          labels: |
+            dependencies
+            automated

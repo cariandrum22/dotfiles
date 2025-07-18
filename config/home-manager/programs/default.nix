@@ -1,6 +1,7 @@
-let
-  isDarwin = (import <nixpkgs> { }).stdenv.isDarwin;
-  base = [
+{ pkgs, ... }:
+
+{
+  imports = [
     ./home-manager.nix
     ./git.nix
     ./kitty.nix
@@ -9,8 +10,4 @@ let
     ./direnv.nix
     ./vscode
   ];
-  synthetic = if isDarwin then base else base ++ [ ./rofi.nix ];
-in
-{
-  imports = synthetic;
 }

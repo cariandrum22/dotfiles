@@ -3,7 +3,9 @@
 {
   home.file = lib.mkMerge [
     {
-      ".config/fish/config.fish" = { source = ../../fish/config.fish; };
+      ".config/fish/config.fish" = {
+        source = ../../fish/config.fish;
+      };
       ".config/polybar" = {
         source = ../../polybar;
         recursive = true;
@@ -19,7 +21,9 @@
           url = "https://github.com/EliverLara/candy-icons";
         };
       };
-      ".config/gtk-3.0/settings.ini" = { source = ../../gtk-3.0/settings.ini; };
+      ".config/gtk-3.0/settings.ini" = {
+        source = ../../gtk-3.0/settings.ini;
+      };
       ".gnupg/gpg.conf" = {
         text = ''
           list-options show-uid-validity
@@ -41,10 +45,18 @@
           no-emit-version
         '';
       };
-      ".netrc.gpg" = { source = ../../../netrc.gpg; };
-      ".pythonstartup" = { source = ../../../pythonstartup; };
-      ".npmrc" = { source = ../../../npmrc; };
-      ".claude/settings.json" = { source = ../../../claude/settings.json; };
+      ".netrc.gpg" = {
+        source = ../../../netrc.gpg;
+      };
+      ".pythonstartup" = {
+        source = ../../../pythonstartup;
+      };
+      ".npmrc" = {
+        source = ../../../npmrc;
+      };
+      ".claude/settings.json" = {
+        source = ../../../claude/settings.json;
+      };
     }
     (lib.mkIf pkgs.stdenv.isDarwin {
       ".gnupg/scdaemon.conf".text = ''disable-ccid'';

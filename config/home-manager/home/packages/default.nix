@@ -1,21 +1,5 @@
 { pkgs, lib, ... }:
 
-let
-  base = [
-    ./haskell.nix
-    ./azure.nix
-  ];
-  isDarwin = (import <nixpkgs> { }).stdenv.isDarwin;
-  synthetic =
-    if isDarwin then
-      base ++ [ ./darwin.nix ]
-    else
-      base
-      ++ [
-        ./linux.nix
-        ./linux-desktop.nix
-      ];
-in
 {
   home = {
     packages = lib.flatten (
@@ -154,6 +138,4 @@ in
       ]
     );
   };
-
-  imports = synthetic;
 }

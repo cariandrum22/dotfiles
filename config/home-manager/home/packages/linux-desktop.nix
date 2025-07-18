@@ -7,7 +7,7 @@
       polybarFull
       feh
       pavucontrol
-      #planify
+      planify
       ledger-live-desktop
       yubioath-flutter
       remmina

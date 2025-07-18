@@ -2,3 +2,4 @@
 Brewfile.lock.json
 dist-*
 result
+.pre-commit-config.yaml

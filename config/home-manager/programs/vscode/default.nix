@@ -3,44 +3,39 @@
 let
   extensions = import ./extensions.nix;
   settings = import ./settings.nix { inherit pkgs; };
+  metadata = import ./metadata.nix;
 
-  # Start of the code segment borrowed from nixpkgs
-  # (https://github.com/NixOS/nixpkgs/blob/nixos-23.05/pkgs/applications/editors/vscode/vscode.nix)
-  # The original code is licensed under the MIT license.
   inherit (pkgs.stdenv.hostPlatform) system;
 
-  plat =
-    {
-      x86_64-linux = "linux-x64";
-      aarch64-darwin = "darwin-arm64";
-    }
-    .${system};
+  # Platform mappings
+  platforms = {
+    x86_64-linux = {
+      vscode-plat = "linux-x64";
+      archive = "tar.gz";
+    };
+    aarch64-darwin = {
+      vscode-plat = "darwin-arm64";
+      archive = "zip";
+    };
+  };
 
-  archive_fmt = if pkgs.stdenv.isDarwin then "zip" else "tar.gz";
-  commit = "cd20192782347e3afdbabc65ddaab56acd56da58";
+  platformInfo = platforms.${system} or (throw "Unsupported system: ${system}");
 
-  sha256 =
-    {
-      x86_64-linux = "1csbr3za65kczl976ksl04i9i8pzg71i4vadjbvqiamlc886zsa0";
-      aarch64-darwin = "16qfsl6nffr6ipc2g36cp9drd3d3jmpmvnvk353yvdaq4f7hsvp5";
-    }
-    .${system};
+  inherit (metadata) commit;
+  sha256 = metadata.sha256.${system} or (throw "No sha256 for system: ${system}");
 in
-# End of the borrowed nixpkgs code segment from above
 {
   programs.vscode = {
     enable = true;
     mutableExtensionsDir = false;
     package = (pkgs.vscode.override { isInsiders = true; }).overrideAttrs (oldAttrs: rec {
       pname = "vscode-insiders";
-      version = "1.103.0-${commit}";
-      src = (
-        builtins.fetchurl {
-          name = "${pname}-${version}.${archive_fmt}";
-          url = "https://code.visualstudio.com/sha/download?build=insider&os=${plat}";
-          inherit sha256;
-        }
-      );
+      version = "${metadata.version}-${commit}";
+      src = builtins.fetchurl {
+        name = "${pname}-${version}.${platformInfo.archive}";
+        url = metadata.url.${system} or (throw "No URL for system: ${system}");
+        inherit sha256;
+      };
       buildInputs = oldAttrs.buildInputs ++ [ pkgs.krb5 ];
       runtimeDependencies = lib.optionals pkgs.stdenv.isLinux (
         oldAttrs.runtimeDependencies ++ [ pkgs.libsecret ]
@@ -82,6 +77,7 @@ in
     });
     profiles.default = {
       extensions = pkgs.vscode-utils.extensionsFromVscodeMarketplace extensions;
-    } // settings;
+      inherit (settings) userSettings;
+    };
   };
 }
