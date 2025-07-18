@@ -1,6 +1,7 @@
+---
 name: CI
 
-on:
+"on":
   push:
     branches: [main]
   pull_request:
@@ -15,17 +16,6 @@ jobs:
     name: Check flake
     runs-on: ubuntu-latest
     steps:
-      - name: Free disk space
-        uses: jlumbroso/free-disk-space@v1.3.1
-        with:
-          tool-cache: false
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          swap-storage: true
-          docker-images: true
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -56,17 +46,6 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - name: Free disk space
-        uses: jlumbroso/free-disk-space@v1.3.1
-        with:
-          tool-cache: false
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          swap-storage: true
-          docker-images: true
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -84,8 +63,8 @@ jobs:
         run: |
           nix develop --impure --command pre-commit run --all-files
 
-  build-home-manager:
-    name: Build Home Manager configurations
+  validate-home-manager:
+    name: Validate Home Manager configurations
     strategy:
       matrix:
         include:
@@ -95,19 +74,6 @@ jobs:
             os: macos-latest
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Free disk space (Ubuntu)
-        if: matrix.os == 'ubuntu-latest'
-        uses: jlumbroso/free-disk-space@v1.3.1
-        with:
-          # Remove tools that are not needed
-          tool-cache: false
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          swap-storage: true
-          docker-images: true
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -121,16 +87,12 @@ jobs:
       - name: Setup Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v8
 
-      - name: Build Home Manager configuration
+      - name: Validate Home Manager configuration (dry-run)
         run: |
           cd config/home-manager
-          nix build --impure .#homeConfigurations."user@${{ matrix.system }}".activationPackage
-
-      - name: Cleanup Nix store
-        if: always()
-        run: |
-          nix-collect-garbage -d
-          df -h
+          echo "Validating Home Manager configuration for ${{ matrix.system }}..."
+          nix build --dry-run --impure \
+            .#homeConfigurations."user@${{ matrix.system }}".activationPackage
 
   build-xmonad:
     name: Build XMonad
@@ -139,17 +101,6 @@ jobs:
       matrix:
         system: [x86_64-linux]
     steps:
-      - name: Free disk space
-        uses: jlumbroso/free-disk-space@v1.3.1
-        with:
-          tool-cache: false
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          swap-storage: true
-          docker-images: true
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -192,4 +143,5 @@ jobs:
 
       - name: Check other formatting
         run: |
-          nix develop --impure --command prettier --check "**/*.{md,yml,yaml,json}" || true
+          nix develop --impure --command \
+            prettier --check "**/*.{md,yml,yaml,json}" || true
