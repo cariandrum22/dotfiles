@@ -35,11 +35,7 @@ bash setup.sh
 
 # Apply Home Manager configuration
 cd config/home-manager
-# Option 1: Auto-detect current system
-nix run .#homeConfigurations."user@$(nix eval --raw --expr 'builtins.currentSystem')".activationPackage
-
-# Option 2: Use the simpler alias (same as above)
-nix run . -- switch
+nix run --impure . -- switch
 ```
 
 ## Usage
@@ -50,11 +46,11 @@ nix run . -- switch
 # Update flakes (run in each directory)
 nix flake update
 cd config/home-manager && nix flake update
-cd xmonad && nix flake update
+cd xmonad && nix flake update  # Linux only
 
 # Apply changes
 cd config/home-manager
-nix run . -- switch
+nix run --impure . -- switch
 ```
 
 ### Working with the Repository
@@ -83,7 +79,7 @@ nix develop
 ### Window Management
 
 - `xmonad/` - XMonad window manager configuration (Linux only)
-  - Independent flake for Haskell-based window manager
+  - Configuration and source files for the custom XMonad build
 - `config/polybar/` - Status bar configuration for Linux
 
 ### Shell and Terminal
