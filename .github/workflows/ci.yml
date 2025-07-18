@@ -64,10 +64,14 @@ jobs:
 
   build-home-manager:
     name: Build Home Manager configurations
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        system: [x86_64-linux, aarch64-darwin]
+        include:
+          - system: x86_64-linux
+            os: ubuntu-latest
+          - system: aarch64-darwin
+            os: macos-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -78,14 +82,6 @@ jobs:
           extra-conf: |
             experimental-features = nix-command flakes
             accept-flake-config = true
-            # Enable cross-compilation for ARM platforms
-            extra-platforms = aarch64-linux
-
-      - name: Setup QEMU for cross-compilation
-        if: startsWith(matrix.system, 'aarch64')
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
 
       - name: Setup Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v8
@@ -111,14 +107,6 @@ jobs:
           extra-conf: |
             experimental-features = nix-command flakes
             accept-flake-config = true
-            # Enable cross-compilation for aarch64-linux
-            extra-platforms = aarch64-linux
-
-      - name: Setup QEMU for cross-compilation
-        if: matrix.system == 'aarch64-linux'
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
 
       - name: Setup Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v8
