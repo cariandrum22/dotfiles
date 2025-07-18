@@ -35,6 +35,10 @@ bash setup.sh
 
 # Apply Home Manager configuration
 cd config/home-manager
+# Option 1: Auto-detect current system
+nix run .#homeConfigurations."user@$(nix eval --raw --expr 'builtins.currentSystem')".activationPackage
+
+# Option 2: Use the simpler alias (same as above)
 nix run . -- switch
 ```
 

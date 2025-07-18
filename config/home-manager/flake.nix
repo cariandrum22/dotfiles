@@ -8,10 +8,6 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    myxmonad = {
-      url = "path:../../xmonad";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs =
@@ -20,7 +16,6 @@
       nixpkgs,
       nixpkgs-unstable,
       home-manager,
-      myxmonad,
       ...
     }:
     let
@@ -42,7 +37,6 @@
             inherit system;
             config.allowUnfree = true;
             overlays = [
-              myxmonad.overlays.default
               (import ./overlays/xmonad.nix)
               (final: prev: {
                 unstable = import nixpkgs-unstable {
@@ -91,14 +85,41 @@
       # For convenience, provide a default package that builds the home configuration
       packages = forAllSystems (system: {
         default = self.homeConfigurations."user@${system}".activationPackage;
+
+        # Special output for current system
+        current = self.homeConfigurations."user@${builtins.currentSystem}".activationPackage;
       });
 
       # Provide apps for easy activation
-      apps = forAllSystems (system: {
-        default = {
-          type = "app";
-          program = "${self.packages.${system}.default}/activate";
-        };
-      });
+      apps = forAllSystems (
+        system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+        in
+        {
+          default = {
+            type = "app";
+            program = "${self.packages.${system}.default}/activate";
+          };
+
+          # Alternative: Use current system
+          switch = {
+            type = "app";
+            program = toString (
+              pkgs.writeShellScript "switch" ''
+                #!/usr/bin/env bash
+                set -e
+
+                # Detect current system
+                SYSTEM=$(${pkgs.nix}/bin/nix eval --raw --expr 'builtins.currentSystem')
+                echo "Detected system: $SYSTEM"
+
+                # Build and activate for current system
+                ${pkgs.nix}/bin/nix run .#homeConfigurations."user@$SYSTEM".activationPackage
+              ''
+            );
+          };
+        }
+      );
     };
 }
