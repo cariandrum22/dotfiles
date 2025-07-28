@@ -91,6 +91,7 @@
             };
           }
         ))
+        claudius
 
         # Development toolchain
         cmake
