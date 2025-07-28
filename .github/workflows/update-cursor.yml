@@ -1,0 +1,49 @@
+name: Update Cursor
+
+on:
+  schedule:
+    # Run daily at 02:00 UTC
+    - cron: 0 2 * * *
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v14
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Update Cursor
+        run: python scripts/update-cursor.py
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(cursor): update Cursor AppImage"
+          title: "chore(cursor): update Cursor AppImage"
+          body: |
+            Automated update of Cursor AppImage.
+
+            This PR updates Cursor to the latest version with new sha256 hashes.
+            Please ensure the build succeeds before merging.
+          branch: update-cursor
+          delete-branch: true
+          labels: |
+            dependencies
+            automated

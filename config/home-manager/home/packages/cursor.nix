@@ -3,18 +3,18 @@
 let
   apiResponse = pkgs.fetchurl {
     url = "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable";
-    sha256 = "sha256-/pIWX1F3BH42SwKN9Ms5GOgx5scXpPfoCqZ70035fjU=";
+    sha256 = "0vq7rqlncw5mv4dfnrxndcsj16dnwkz7f27i94x1yyf67730zk23";
   };
 
   data = builtins.fromJSON (builtins.readFile apiResponse);
   inherit (data) downloadUrl;
 
   pname = "cursor";
-  version = "1.2.2";
+  version = "1.2.4";
 
   src = pkgs.fetchurl {
     url = downloadUrl;
-    hash = "sha256-mQr1QMw4wP+kHvE9RWPkCKtHObbr0jpyOxNw3LfTPfc=";
+    hash = "sha256-5H7PynQYsZN218rdIdNCor9QGkk4GGyLeGGzGwz436o=";
   };
   appimageContents = pkgs.appimageTools.extract { inherit pname version src; };
 in
