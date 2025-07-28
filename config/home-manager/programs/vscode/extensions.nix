@@ -28,6 +28,13 @@
 
   }
   {
+    name = "markdown-mermaid";
+    publisher = "bierner";
+    version = "1.28.0";
+    sha256 = "0vc94jhx77yzixry5lw29sc8idhnf5rl1d7k0gkmswxm6bl0611l";
+
+  }
+  {
     name = "claude-code";
     publisher = "anthropic";
     version = "1.0.62";
@@ -63,17 +70,17 @@
     arch = "linux-x64";
   }
   {
-    name = "cucumber-official";
-    publisher = "CucumberOpen";
-    version = "1.11.0";
-    sha256 = "1dyk89b3rb795wvqs08hxgg469aa50dqgjgglrbpn24rm6nvvypr";
-
-  }
-  {
     name = "path-intellisense";
     publisher = "christian-kohler";
     version = "2.10.0";
     sha256 = "06x9ksl4bghfpxh4n65d1d7dr11spl140p9ch4mc01nrdibgckbc";
+
+  }
+  {
+    name = "cucumber-official";
+    publisher = "CucumberOpen";
+    version = "1.11.0";
+    sha256 = "1dyk89b3rb795wvqs08hxgg469aa50dqgjgglrbpn24rm6nvvypr";
 
   }
   {
@@ -221,13 +228,6 @@
     publisher = "hbenl";
     version = "2.22.1";
     sha256 = "1hvzrv7vaxn993imb8h40hch0svg9vrmj7a01pmqwp4hjdkbzxgs";
-
-  }
-  {
-    name = "icon-fonts";
-    publisher = "idleberg";
-    version = "2.5.4";
-    sha256 = "0yb9mlkjgjy8a6qx0ffkwxwpl88nvdvhqizq0f1npjrywhs3ka14";
 
   }
   {
