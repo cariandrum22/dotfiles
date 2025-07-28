@@ -2,8 +2,8 @@ name: Update VSCode Extensions
 
 on:
   schedule:
-    # Run monthly on the 1st at 02:00 UTC
-    - cron: 0 2 1 * *
+    # Run daily at 02:00 UTC
+    - cron: 0 2 * * *
   workflow_dispatch:
 
 permissions:
