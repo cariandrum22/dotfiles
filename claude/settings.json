@@ -1,5 +1,4 @@
 {
-  "apiKeyHelper": null,
   "cleanupPeriodDays": 30,
   "env": {},
   "includeCoAuthoredBy": false,
@@ -124,7 +123,5 @@
       "Write(/nix/**)"
     ]
   },
-  "preferredNotifChannel": "terminal_bell",
-  "model": "opus",
-  "theme": "dark"
+  "model": "opus"
 }
