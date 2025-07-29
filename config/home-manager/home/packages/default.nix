@@ -10,7 +10,7 @@
         any-nix-shell
         nix-prefetch-git
         prefetch-npm-deps
-        nixfmt-rfc-style
+        unstable.nixfmt-rfc-style
         nixd
 
         # Utility

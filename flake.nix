@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     pre-commit-hooks.url = "github:cachix/git-hooks.nix";
 
@@ -28,6 +29,7 @@
     {
       self,
       nixpkgs,
+      nixpkgs-unstable,
       flake-utils,
       pre-commit-hooks,
       claudius,
@@ -43,6 +45,7 @@
         system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
+          pkgs-unstable = nixpkgs-unstable.legacyPackages.${system};
           inherit (pkgs) lib;
 
           # Haskell and XMonad development packages
@@ -70,7 +73,7 @@
             nil
             nix-tree
             nix-diff
-            nixfmt-rfc-style
+            pkgs-unstable.nixfmt-rfc-style
             deadnix
             statix
 
@@ -99,7 +102,10 @@
               src = ./.;
               hooks = {
                 # Nix formatting and linting
-                nixfmt-rfc-style.enable = true;
+                nixfmt-rfc-style = {
+                  enable = true;
+                  package = pkgs-unstable.nixfmt-rfc-style;
+                };
                 deadnix = {
                   enable = true;
                   settings = {
@@ -297,7 +303,7 @@
             };
           };
 
-          formatter = pkgs.nixfmt-rfc-style;
+          formatter = pkgs-unstable.nixfmt-rfc-style;
         }
       )
     // {
