@@ -6,7 +6,6 @@
       fish
       bash # The version of bash preinstalled on macos is old
       pinentry_mac
-      gnupg
       iterm2
       sequelpro
     ];
