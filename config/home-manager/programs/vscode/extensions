@@ -4,6 +4,7 @@ alexkrechik.cucumberautocomplete
 anthropic.claude-code
 arcticicestudio.nord-visual-studio-code
 berberman.vscode-cabal-fmt
+bierner.markdown-mermaid
 bmalehorn.vscode-fish
 bradlc.vscode-tailwindcss
 charliermarsh.ruff
@@ -30,7 +31,6 @@ hashicorp.hcl
 hashicorp.terraform
 haskell.haskell
 hbenl.vscode-test-explorer
-idleberg.icon-fonts
 itryapitsin.Sbt
 James-Yu.latex-workshop
 jackiotyu.git-worktree-manager

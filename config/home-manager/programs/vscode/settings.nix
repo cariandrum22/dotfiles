@@ -53,6 +53,7 @@
           };
         };
         "fontSize" = 12;
+        "enableBell" = true;
       };
     };
     "files" = {
