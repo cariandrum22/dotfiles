@@ -55,30 +55,29 @@
         in
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          modules =
-            [
-              ./home.nix
-              {
-                home = {
-                  inherit username homeDirectory;
-                };
-              }
-            ]
-            ++ nixpkgs.lib.optionals (system == "x86_64-darwin" || system == "aarch64-darwin") [
-              ./darwin-specific.nix
-              ./home/packages/darwin.nix
-            ]
-            ++ nixpkgs.lib.optionals (system == "x86_64-linux" || system == "aarch64-linux") [
-              ./xsession.nix
-              ./home/packages/linux.nix
-              ./home/packages/linux-desktop.nix
-              ./programs/rofi.nix
-              ./services/picom.nix
-              ./services/dunst.nix
-              ./services/keybase.nix
-              ./services/vscode-server.nix
-              ./services/gpg-agent.nix
-            ];
+          modules = [
+            ./home.nix
+            {
+              home = {
+                inherit username homeDirectory;
+              };
+            }
+          ]
+          ++ nixpkgs.lib.optionals (system == "x86_64-darwin" || system == "aarch64-darwin") [
+            ./darwin-specific.nix
+            ./home/packages/darwin.nix
+          ]
+          ++ nixpkgs.lib.optionals (system == "x86_64-linux" || system == "aarch64-linux") [
+            ./xsession.nix
+            ./home/packages/linux.nix
+            ./home/packages/linux-desktop.nix
+            ./programs/rofi.nix
+            ./services/picom.nix
+            ./services/dunst.nix
+            ./services/keybase.nix
+            ./services/vscode-server.nix
+            ./services/gpg-agent.nix
+          ];
         };
     in
     {
