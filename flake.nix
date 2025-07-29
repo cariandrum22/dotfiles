@@ -6,6 +6,11 @@
     flake-utils.url = "github:numtide/flake-utils";
     pre-commit-hooks.url = "github:cachix/git-hooks.nix";
 
+    claudius = {
+      url = "github:cariandrum22/claudius";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     xmonad = {
       url = "path:./xmonad";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -15,6 +20,7 @@
     home-manager-config = {
       url = "path:./config/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.claudius.follows = "claudius";
     };
   };
 
@@ -24,6 +30,7 @@
       nixpkgs,
       flake-utils,
       pre-commit-hooks,
+      claudius,
       xmonad,
       home-manager-config,
     }:

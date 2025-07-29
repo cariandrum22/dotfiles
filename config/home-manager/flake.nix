@@ -8,6 +8,10 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    claudius = {
+      url = "github:cariandrum22/claudius";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -16,6 +20,7 @@
       nixpkgs,
       nixpkgs-unstable,
       home-manager,
+      claudius,
       ...
     }:
     let
@@ -43,6 +48,7 @@
                   inherit system;
                   config.allowUnfree = true;
                 };
+                claudius = claudius.packages.${system}.default;
               })
             ];
           };
