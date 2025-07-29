@@ -124,6 +124,37 @@ if type -q krew
     set_path "$HOME/.krew/bin"
 end
 
+# For Gemini-CLI
+if type -q op and type -q gemini
+    set -x GOOGLE_CLOUD_PROJECT "op://Private/Vertex AI - personal/project"
+    set -x GOOGLE_CLOUD_LOCATION "op://Private/Vertex AI - personal/location"
+    set -x GOOGLE_APPLICATION_CREDENTIALS "op://Private/Vertex AI - personal/credentials"
+end
+
+# Get secrets from 1Password
+if type -q op and type -q claudius
+    set -x CLAUDIUS_SECRET_CF_AIG_ACCOUNT_ID "op://Private/CLOUDFLARE AI Gateway/Account ID"
+    set -x CLAUDIUS_SECRET_CF_AIG_GATEWAY_ID "op://Private/CLOUDFLARE AI Gateway/Gateway ID"
+    set -x CLAUDIUS_SECRET_CF_AIG_TOKEN "op://Private/CLOUDFLARE AI Gateway/credential"
+    set -x CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT "op://Private/Personal AI Gateway Credential/endpoint"
+    set -x CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN "op://Private/Personal AI Gateway Credential/credential"
+
+    # Base URLs
+    if type -q claude
+        set -x CLAUDIUS_SECRET_ANTHROPIC_BASE_URL "{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT}}/{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN}}/anthropic"
+        alias claude="claudius run -- claude"
+    end
+    if type -q gemini
+        set -x CLAUDIUS_SECRET_GOOGLE_VERTEX_BASE_URL "{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT}}/{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN}}/google-vertex-ai"
+        alias gemini="claudius run -- gemini"
+    end
+    if type -q codex
+        set -x CLAUDIUS_SECRET_OPENAI_API_KEY "op://Private/OpenAI Codex CLI/credential"
+        set -x CLAUDIUS_SECRET_OPENAI_BASE_URL "{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT}}/{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN}}/openai"
+        alias codex="claudius run -- codex"
+    end
+end
+
 # Aliases
 alias where="command -v"
 alias j="jobs -l"
