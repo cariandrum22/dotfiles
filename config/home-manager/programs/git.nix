@@ -67,6 +67,9 @@ let
   Claude = [
     ".claude/"
   ];
+  Agents = [
+    ".agents"
+  ];
   Markdown = [
     # Markdown files
     "*.md"
@@ -125,6 +128,7 @@ in
       macOS
       Windows
       Claude
+      Agents
       Markdown
     ];
   };
