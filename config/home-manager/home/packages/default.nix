@@ -32,6 +32,7 @@
         httpie
         curlie
         mutagen
+        gnupg
         yubikey-manager
         yubikey-personalization
         rlwrap
