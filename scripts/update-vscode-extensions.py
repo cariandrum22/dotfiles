@@ -246,14 +246,19 @@ def results_to_nix_attr(
     Returns:
         Formatted Nix attribute string
     """
-    arch_line = f'arch = "{arch}";' if arch is not None else ""
-    return f"""
-  {{
+    if arch is not None:
+        return f"""  {{
     name = "{name}";
     publisher = "{publisher}";
     version = "{version}";
     sha256 = "{sha256}";
-    {arch_line}
+    arch = "{arch}";
+  }}"""
+    return f"""  {{
+    name = "{name}";
+    publisher = "{publisher}";
+    version = "{version}";
+    sha256 = "{sha256}";
   }}"""
 
 
@@ -501,11 +506,36 @@ def write_nix_output(
             )
             print(f"  ✗ Failed to generate Nix for {ext_name}: {e}")
 
-    extensions_nix = "".join(extensions_nix_parts)
+    extensions_nix = "\n".join(extensions_nix_parts)
     with output_file.open("w") as file:
-        file.write("[")
+        file.write("[\n")
         file.write(extensions_nix)
         file.write("\n]\n")
+
+    # Format the generated file with nixfmt-rfc-style
+    print("  → Formatting with nixfmt-rfc-style...")
+    try:
+        # Use nix fmt with the project's formatter for consistent formatting
+        script_dir = Path(__file__).parent
+        project_root = script_dir.parent
+        subprocess.run(
+            [
+                "nix",
+                "fmt",
+                str(output_file),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            cwd=str(project_root),  # Run from project root to use the flake
+        )
+        print("  ✓ Formatted successfully")
+    except subprocess.CalledProcessError as e:
+        print(f"  ⚠️  Warning: Failed to format with nixfmt-rfc-style: {e}")
+        if e.stderr:
+            print(f"     {e.stderr.strip()}")
+    except FileNotFoundError:
+        print("  ⚠️  Warning: nix command not found, skipping formatting")
 
 
 def main() -> int:
