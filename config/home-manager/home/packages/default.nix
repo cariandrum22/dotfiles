@@ -45,7 +45,6 @@
         unstable.goreleaser
         rclone
         ripgrep
-        _1password-cli
 
         # DevOps
         docker-compose

@@ -18,7 +18,6 @@
       keybase-gui
       gparted
       robo3t
-      _1password-gui
       spotify
       apache-directory-studio
       blueman
