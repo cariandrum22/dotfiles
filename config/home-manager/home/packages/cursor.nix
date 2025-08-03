@@ -1,20 +1,14 @@
-# This code is based on https://gist.github.com/lukalot/fcbf3216ad13b8303ab0947af0d5abd5
 { pkgs, lib, ... }:
 let
-  apiResponse = pkgs.fetchurl {
-    url = "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable";
-    sha256 = "0lq258nph67n28dgzp4870dg56p50ag2yc99j9ybfb17fw2w8a9m";
-  };
-
-  data = builtins.fromJSON (builtins.readFile apiResponse);
-  inherit (data) downloadUrl;
-
   pname = "cursor";
-  version = "1.3.8";
+  version = "1.3.9";
+
+  # Fixed download URL - update this with update-cursor.py script
+  downloadUrl = "https://downloads.cursor.com/production/54c27320fab08c9f5dd5873f07fca101f7a3e076/linux/x64/Cursor-1.3.9-x86_64.AppImage";
 
   src = pkgs.fetchurl {
     url = downloadUrl;
-    hash = "sha256-qR1Wu3H0JUCKIoUP/QFC1YyYiRaQ9PVN7ZT9TjHwn1k=";
+    hash = "sha256-0kkTL6ZCnLxGBQSVoZ7UEOBNtTZVQolVAk/2McCV0Rw=";
   };
   appimageContents = pkgs.appimageTools.extract { inherit pname version src; };
 in
