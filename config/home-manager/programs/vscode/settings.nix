@@ -2,7 +2,10 @@
 
 {
   userSettings = {
-    "window.zoomLevel" = -1.0;
+    "accessibility.signals.terminalBell" = {
+      "sound" = "on";
+    };
+    "terminal.integrated.enableBell" = true;
     "editor" = {
       "emptySelectionClipboard" = true;
       "fontFamily" = "'Fira Code', 'FiraCode Nerd Font', Menlo, Monaco, 'Courier New', monospace";
@@ -53,7 +56,6 @@
           };
         };
         "fontSize" = 12;
-        "enableBell" = true;
       };
     };
     "files" = {
@@ -102,9 +104,6 @@
     };
     "[terraform-vars]" = {
       "editor.defaultFormatter" = "hashicorp.terraform";
-    };
-    "[dockerfile]" = {
-      "editor.defaultFormatter" = "ms-azuretools.vscode-docker";
     };
     "[typescript]" = {
       "editor.defaultFormatter" = "esbenp.prettier-vscode";
