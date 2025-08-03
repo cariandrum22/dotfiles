@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Update Cursor AppImage hashes."""
+"""Update Cursor AppImage version and hash."""
 
 import json
 import re
@@ -16,7 +16,6 @@ CURSOR_API_URL = "https://www.cursor.com/api/download?platform=linux-x64&release
 class CursorInfo(NamedTuple):
     """Cursor metadata."""
 
-    api_response_hash: str
     download_url: str
     download_hash: str
     version: str
@@ -31,21 +30,26 @@ def fetch_json(url: str) -> dict:
         raise RuntimeError(f"Failed to fetch {url}: {e}") from e
 
 
-def get_current_hashes(cursor_file: Path) -> tuple[str, str]:
-    """Extract current API response and download hashes from cursor.nix."""
+def get_current_info(cursor_file: Path) -> tuple[str, str, str]:
+    """Extract current version, URL and hash from cursor.nix."""
     content = cursor_file.read_text()
 
-    # Extract API response hash
-    api_match = re.search(r'sha256 = "([^"]+)";', content)
-    if not api_match:
-        raise ValueError("Could not find API response sha256 in cursor.nix")
+    # Extract version
+    version_match = re.search(r'version = "([^"]+)";', content)
+    if not version_match:
+        raise ValueError("Could not find version in cursor.nix")
+
+    # Extract download URL
+    url_match = re.search(r'downloadUrl = "([^"]+)";', content)
+    if not url_match:
+        raise ValueError("Could not find downloadUrl in cursor.nix")
 
     # Extract download hash
-    download_match = re.search(r'hash = "([^"]+)";', content)
-    if not download_match:
+    hash_match = re.search(r'hash = "([^"]+)";', content)
+    if not hash_match:
         raise ValueError("Could not find download hash in cursor.nix")
 
-    return api_match.group(1), download_match.group(1)
+    return version_match.group(1), url_match.group(1), hash_match.group(1)
 
 
 def prefetch_url(url: str, name: str | None = None, *, sri_format: bool = False) -> str:
@@ -86,13 +90,7 @@ def get_latest_cursor_info() -> CursorInfo:
     """Fetch latest Cursor information."""
     print(f"Fetching Cursor API response from {CURSOR_API_URL}...")
 
-    # First, get the API response hash (nix32 format for sha256 field)
-    api_response_hash = prefetch_url(
-        CURSOR_API_URL, "cursor-api-response", sri_format=False
-    )
-    print(f"  API response hash: {api_response_hash}")
-
-    # Fetch the actual API response to get download URL
+    # Fetch the API response to get download URL
     data = fetch_json(CURSOR_API_URL)
     download_url = data["downloadUrl"]
 
@@ -111,18 +109,26 @@ def get_latest_cursor_info() -> CursorInfo:
     download_hash = prefetch_url(download_url, sri_format=True)
     print(f"  Download hash: {download_hash}")
 
-    return CursorInfo(api_response_hash, download_url, download_hash, version)
+    return CursorInfo(download_url, download_hash, version)
 
 
 def update_cursor_nix(cursor_file: Path, info: CursorInfo) -> bool:
-    """Update cursor.nix with new hashes. Returns True if updated."""
+    """Update cursor.nix with new version, URL and hash. Returns True if updated."""
     content = cursor_file.read_text()
     original_content = content
 
-    # Update API response hash
+    # Update version
     content = re.sub(
-        r'(sha256 = ")[^"]+(")',
-        f'\\g<1>{info.api_response_hash}\\g<2>',
+        r'(version = ")[^"]+(")',
+        f'\\g<1>{info.version}\\g<2>',
+        content,
+        count=1
+    )
+
+    # Update download URL
+    content = re.sub(
+        r'(downloadUrl = ")[^"]+(")',
+        f'\\g<1>{info.download_url}\\g<2>',
         content,
         count=1
     )
@@ -131,14 +137,6 @@ def update_cursor_nix(cursor_file: Path, info: CursorInfo) -> bool:
     content = re.sub(
         r'(hash = ")[^"]+(")',
         f'\\g<1>{info.download_hash}\\g<2>',
-        content,
-        count=1
-    )
-
-    # Update version
-    content = re.sub(
-        r'(version = ")[^"]+(")',
-        f'\\g<1>{info.version}\\g<2>',
         content,
         count=1
     )
@@ -162,18 +160,20 @@ def update_cursor() -> bool:
 
     print("Checking for Cursor updates...")
 
-    # Get current hashes
-    current_api_hash, current_download_hash = get_current_hashes(cursor_file)
-    print(f"Current API hash: {current_api_hash}")
-    print(f"Current download hash: {current_download_hash}")
+    # Get current info
+    current_version, current_url, current_hash = get_current_info(cursor_file)
+    print(f"Current version: {current_version}")
+    print(f"Current URL: {current_url}")
+    print(f"Current hash: {current_hash}")
 
     # Get latest info
     print("\nFetching latest Cursor information...")
     latest_info = get_latest_cursor_info()
 
     # Check if update is needed
-    if (current_api_hash == latest_info.api_response_hash and
-        current_download_hash == latest_info.download_hash):
+    if (current_version == latest_info.version and
+        current_url == latest_info.download_url and
+        current_hash == latest_info.download_hash):
         print("\nAlready up to date")
         return False
 
@@ -181,9 +181,9 @@ def update_cursor() -> bool:
     print(f"\nUpdating {cursor_file}...")
     if update_cursor_nix(cursor_file, latest_info):
         print("\n✅ Successfully updated Cursor")
-        print(f"  API hash: {current_api_hash} → {latest_info.api_response_hash}")
-        print(f"  Download hash: {current_download_hash} → {latest_info.download_hash}")
-        print(f"  Version: {latest_info.version}")
+        print(f"  Version: {current_version} → {latest_info.version}")
+        print(f"  URL: {current_url} → {latest_info.download_url}")
+        print(f"  Hash: {current_hash} → {latest_info.download_hash}")
         return True
     print("\n❌ Failed to update cursor.nix")
     return False
