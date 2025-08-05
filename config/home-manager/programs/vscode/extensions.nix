@@ -469,6 +469,12 @@
     sha256 = "0208cms054yj2l8pz9jrv3ydydmb47wr4i0sw8qywpi8yimddf11";
   }
   {
+    name = "vscode-ide";
+    publisher = "tlaplus";
+    version = "2025.8.50455";
+    sha256 = "16k22m1azazh9l90qcksjrzk7qnsv8cam35n3s31gm61p7ll9f9l";
+  }
+  {
     name = "emacs-mcx";
     publisher = "tuttieee";
     version = "0.88.8";
