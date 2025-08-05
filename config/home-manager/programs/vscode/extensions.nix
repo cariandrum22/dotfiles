@@ -1,11 +1,5 @@
 [
   {
-    name = "better-comments";
-    publisher = "aaron-bond";
-    version = "3.0.2";
-    sha256 = "15w1ixvp6vn9ng6mmcmv9ch0ngx8m85i1yabxdfn6zx3ypq802c5";
-  }
-  {
     name = "Bookmarks";
     publisher = "alefragnani";
     version = "13.5.0";
@@ -18,22 +12,28 @@
     sha256 = "1x51ya0k9ybc01dzzamlp22x1f0a6m1jby2q5986500mxbi9s2jf";
   }
   {
-    name = "claude-code";
-    publisher = "anthropic";
-    version = "1.0.67";
-    sha256 = "1isf3ii7j2flrd6gg5ahzm3c7r2p24qgfpv1794a60am475kqbl5";
+    name = "better-comments";
+    publisher = "aaron-bond";
+    version = "3.0.2";
+    sha256 = "15w1ixvp6vn9ng6mmcmv9ch0ngx8m85i1yabxdfn6zx3ypq802c5";
   }
   {
-    name = "vscode-cabal-fmt";
-    publisher = "berberman";
-    version = "0.0.3";
-    sha256 = "0kfcipzhmf70447vmdikipq5s8192hm055is8hfxp4k3v32mz3ad";
+    name = "claude-code";
+    publisher = "anthropic";
+    version = "1.0.68";
+    sha256 = "1p8m2ciswkzcsdwyfkaxwwljgxx7dyb6sxcbvdv0ha5q5d51y26m";
   }
   {
     name = "nord-visual-studio-code";
     publisher = "arcticicestudio";
     version = "0.19.0";
     sha256 = "05bmzrmkw9syv2wxqlfddc3phjads6ql2grknws85fcqzqbfl1kb";
+  }
+  {
+    name = "vscode-cabal-fmt";
+    publisher = "berberman";
+    version = "0.0.3";
+    sha256 = "0kfcipzhmf70447vmdikipq5s8192hm055is8hfxp4k3v32mz3ad";
   }
   {
     name = "markdown-mermaid";
@@ -79,16 +79,16 @@
     sha256 = "18fw4snqfa7bys04r8748vv6x7gfaq2bqvhqm9x3z1fsf7mimv06";
   }
   {
-    name = "dhall-lang";
-    publisher = "dhall";
-    version = "0.0.4";
-    sha256 = "0sa04srhqmngmw71slnrapi2xay0arj42j4gkan8i11n7bfi1xpf";
-  }
-  {
     name = "vscode-eslint";
     publisher = "dbaeumer";
     version = "3.0.15";
     sha256 = "10ng8kbydm1dzz2ififww343b68i718ari8dpzrfs73b40s9vsx1";
+  }
+  {
+    name = "dhall-lang";
+    publisher = "dhall";
+    version = "0.0.4";
+    sha256 = "0sa04srhqmngmw71slnrapi2xay0arj42j4gkan8i11n7bfi1xpf";
   }
   {
     name = "vscode-dhall-lsp-server";
@@ -109,10 +109,10 @@
     sha256 = "1hxzvrj65dnzhjk6qp7dy860gvl8n57wb8s8s6chdil04a2xi0ri";
   }
   {
-    name = "prettier-vscode";
-    publisher = "esbenp";
-    version = "11.0.0";
-    sha256 = "1fcz8f4jgnf24kblf8m8nwgzd5pxs2gmrv235cpdgmqz38kf9n54";
+    name = "vscode-reveal";
+    publisher = "evilz";
+    version = "4.3.3";
+    sha256 = "06hl6d8s896nx5z6a62xw2wwip1v4ir2ianybxlplz6c825x1ara";
   }
   {
     name = "figma-vscode-extension";
@@ -121,10 +121,10 @@
     sha256 = "10h2mmmb39mbj0gxx2hss4ciyp9x2hhmpsi8v3w3alka2agqp2nr";
   }
   {
-    name = "vscode-reveal";
-    publisher = "evilz";
-    version = "4.3.3";
-    sha256 = "06hl6d8s896nx5z6a62xw2wwip1v4ir2ianybxlplz6c825x1ara";
+    name = "prettier-vscode";
+    publisher = "esbenp";
+    version = "11.0.0";
+    sha256 = "1fcz8f4jgnf24kblf8m8nwgzd5pxs2gmrv235cpdgmqz38kf9n54";
   }
   {
     name = "shell-format";
@@ -135,14 +135,14 @@
   {
     name = "copilot";
     publisher = "GitHub";
-    version = "1.352.1714";
-    sha256 = "189x2acy1igpahsxsnan9ccff7rqzrnl8lcnb8jbkw32n0717i0q";
+    version = "1.352.1716";
+    sha256 = "0izl59a6gdkq7z023nyx5157q32ghbvl1d5gc9pdkvk050y1k97z";
   }
   {
     name = "copilot-chat";
     publisher = "GitHub";
-    version = "0.30.2025080201";
-    sha256 = "0ln94j1kyx7z6jchnlqh76ds7bvxi7kjnh9yv60gf3a06ddwnff6";
+    version = "0.30.2025080501";
+    sha256 = "11pi0k59rafxxq54wjlss3dknrwpjifcvgwyyjdiqp5bh6qidqar";
   }
   {
     name = "Go";
@@ -181,17 +181,17 @@
     sha256 = "1bab360z7mhijjmnxx1prqv9n3kf5m8qakpibysgqiq7pc78xbb5";
   }
   {
+    name = "haskell";
+    publisher = "haskell";
+    version = "2.7.0";
+    sha256 = "0dgz9bvmriqii7ixgx850jwly4z4qvvi39s0f500vbx21pq30i5f";
+  }
+  {
     name = "terraform";
     publisher = "HashiCorp";
     version = "2.34.2025012311";
     sha256 = "0zzp6rdsv8r116wv0hcycip45l8nr5g8xgfdvm2vx6ly0ph4xj7v";
     arch = "linux-x64";
-  }
-  {
-    name = "haskell";
-    publisher = "haskell";
-    version = "2.7.0";
-    sha256 = "0dgz9bvmriqii7ixgx850jwly4z4qvvi39s0f500vbx21pq30i5f";
   }
   {
     name = "vscode-test-explorer";
@@ -230,16 +230,16 @@
     sha256 = "1ib8czlqhqq1rz6jrazfd9z3gfqdwqazxdvwmsyp765m0vf78xcg";
   }
   {
-    name = "vscode-colorize";
-    publisher = "kamikillerto";
-    version = "0.17.1";
-    sha256 = "0svjkhg3n3b3imz6ipky79l2drn0nfzk5sh7jyjflj0rda7hja17";
-  }
-  {
     name = "language-haskell";
     publisher = "justusadam";
     version = "3.6.0";
     sha256 = "115y86w6n2bi33g1xh6ipz92jz5797d3d00mr4k8dv5fz76d35dd";
+  }
+  {
+    name = "vscode-colorize";
+    publisher = "kamikillerto";
+    version = "0.17.1";
+    sha256 = "0svjkhg3n3b3imz6ipky79l2drn0nfzk5sh7jyjflj0rda7hja17";
   }
   {
     name = "vscode-clangd";
@@ -260,16 +260,16 @@
     sha256 = "0zi8s1y9l7sfgxfl26vqqqylsdsvn5v2xb3x8pcc4q0xlxgjbq1j";
   }
   {
-    name = "mesonbuild";
-    publisher = "mesonbuild";
-    version = "1.27.0";
-    sha256 = "0p0addwf4lqnhkd39k8wj5cj2c1ps3naqrjg2dc481n3qz1w6h3l";
-  }
-  {
     name = "Lisp";
     publisher = "mattn";
     version = "0.1.12";
     sha256 = "0k10d77ffl6ybmk7mrpmlsawzwppp87aix2a2i24jq7lqnnqb9n7";
+  }
+  {
+    name = "mesonbuild";
+    publisher = "mesonbuild";
+    version = "1.27.0";
+    sha256 = "0p0addwf4lqnhkd39k8wj5cj2c1ps3naqrjg2dc481n3qz1w6h3l";
   }
   {
     name = "dotenv";
@@ -322,16 +322,16 @@
     sha256 = "0lk5zzqk8japh8srb4zbsz52cvnvxkgvwcnsr1qsmfps936ii16j";
   }
   {
-    name = "remote-explorer";
-    publisher = "ms-vscode";
-    version = "0.6.2025072209";
-    sha256 = "1f5qm8ql60ja5qn5s7mccdhanfvfkvs9zii6dc39fvka7nc3bsh9";
-  }
-  {
     name = "makefile-tools";
     publisher = "ms-vscode";
     version = "0.13.10";
     sha256 = "1z955cdarb71xgffg9i3vgzdmfczk5sqrqjidkkbjxryq5wgyz2i";
+  }
+  {
+    name = "remote-explorer";
+    publisher = "ms-vscode";
+    version = "0.6.2025072209";
+    sha256 = "1f5qm8ql60ja5qn5s7mccdhanfvfkvs9zii6dc39fvka7nc3bsh9";
   }
   {
     name = "test-adapter-converter";
@@ -340,28 +340,28 @@
     sha256 = "0d823dh1594yf5vyfdpg68z5vjn6pa6pmnx6nph95daspzgsab43";
   }
   {
-    name = "vscode-remote-extensionpack";
-    publisher = "ms-vscode-remote";
-    version = "0.26.0";
-    sha256 = "0xjld7p1zg9zybcw47xzrikgyc3hp9lfk6vbrm0syba8n90k8jk1";
-  }
-  {
     name = "remote-containers";
     publisher = "ms-vscode-remote";
     version = "0.424.0";
     sha256 = "04dc8vh00jbd6hlif30v513fk3bryxxcl92mjinanvcyaijz73h4";
   }
   {
-    name = "rails-run-spec-vscode";
-    publisher = "noku";
-    version = "0.1.4";
-    sha256 = "1i8digd3dxrcpjlkl86g3hfh47f19zm6ly3svxx54fil86661fcc";
+    name = "vscode-remote-extensionpack";
+    publisher = "ms-vscode-remote";
+    version = "0.26.0";
+    sha256 = "0xjld7p1zg9zybcw47xzrikgyc3hp9lfk6vbrm0syba8n90k8jk1";
   }
   {
     name = "liquidhaskell-diagnostics";
     publisher = "MustafaHafidi";
     version = "1.3.1";
     sha256 = "19hs9ld9mag45yz46r8hrx0hp2dc9392yzxv7z51k2zxl5x8d07k";
+  }
+  {
+    name = "rails-run-spec-vscode";
+    publisher = "noku";
+    version = "0.1.4";
+    sha256 = "1i8digd3dxrcpjlkl86g3hfh47f19zm6ly3svxx54fil86661fcc";
   }
   {
     name = "ide-purescript";
@@ -384,8 +384,8 @@
   {
     name = "material-icon-theme";
     publisher = "PKief";
-    version = "5.24.0";
-    sha256 = "1mrn37h41c8kwkhxdns2dx8fw0x7cjq8skpaal5nfqz0pn4kwisa";
+    version = "5.25.0";
+    sha256 = "0kr41nrxxql9bcknmcsj5dg7b7qcardy6qx2n2h8q9w54xzwai4f";
   }
   {
     name = "java";
@@ -397,8 +397,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2562";
-    sha256 = "1gfza7rnjnz6y491hhd4kcshwbqcnnj88nqlw4wb47wlgrzf4jng";
+    version = "0.4.2564";
+    sha256 = "05am2wsnkla20x4mkkgydvwlawasvw3scl09v16gyvnf9ra2aasj";
     arch = "linux-x64";
   }
   {
@@ -438,16 +438,16 @@
     sha256 = "0qcxgyw704b4rr5igrq86pm8xdaz880gspv98q3rj2i57hqzpx3z";
   }
   {
-    name = "vscode-styled-components";
-    publisher = "styled-components";
-    version = "1.7.8";
-    sha256 = "1k4ymnq91758qpazip78g6lv2m2a1mxc2iz0fzqk92q02y6c10jn";
-  }
-  {
     name = "vscode-stylelint";
     publisher = "stylelint";
     version = "1.5.3";
     sha256 = "1krm508kgrd6aghn5giim35rgf25qfd5z292jb1131hqz3vjq0vy";
+  }
+  {
+    name = "vscode-styled-components";
+    publisher = "styled-components";
+    version = "1.7.8";
+    sha256 = "1k4ymnq91758qpazip78g6lv2m2a1mxc2iz0fzqk92q02y6c10jn";
   }
   {
     name = "svelte-vscode";
@@ -456,17 +456,17 @@
     sha256 = "1qcnsycyzd1260dsky5s33pi2rs9jxxpwk9f5fbc226km64kwi4y";
   }
   {
-    name = "even-better-toml";
-    publisher = "tamasfe";
-    version = "0.21.2";
-    sha256 = "0208cms054yj2l8pz9jrv3ydydmb47wr4i0sw8qywpi8yimddf11";
-  }
-  {
     name = "shellcheck";
     publisher = "timonwong";
     version = "0.38.2";
     sha256 = "06n5smk21hpi3kd3id4r7wjl69v2xd4gn24a1lz2y2q4x8d630i6";
     arch = "linux-x64";
+  }
+  {
+    name = "even-better-toml";
+    publisher = "tamasfe";
+    version = "0.21.2";
+    sha256 = "0208cms054yj2l8pz9jrv3ydydmb47wr4i0sw8qywpi8yimddf11";
   }
   {
     name = "emacs-mcx";
