@@ -37,6 +37,7 @@
         "git-rebase-todo" = "default";
       };
     };
+    "window.zoomLevel" = -1.0;
     "terminal" = {
       "integrated" = {
         "defaultProfile" = {
