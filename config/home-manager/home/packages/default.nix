@@ -45,6 +45,8 @@
         unstable.goreleaser
         rclone
         ripgrep
+        tlaplus
+        tlaps
 
         # DevOps
         docker-compose
