@@ -27,6 +27,7 @@
       pdfarranger
       gimp
       gnome-control-center
+      tlaplusToolbox
 
       # Utility
       trash-cli
