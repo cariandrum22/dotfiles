@@ -4,11 +4,11 @@ let
   version = "1.4.2";
 
   # Fixed download URL - update this with update-cursor.py script
-  downloadUrl = "https://downloads.cursor.com/production/07aa3b4519da4feab4761c58da3eeedd253a1671/linux/x64/Cursor-1.4.2-x86_64.AppImage";
+  downloadUrl = "https://downloads.cursor.com/production/d01860bc5f5a36b62f8a77cd42578126270db343/linux/x64/Cursor-1.4.2-x86_64.AppImage";
 
   src = pkgs.fetchurl {
     url = downloadUrl;
-    hash = "sha256-KizCmurR5JkyoVVBNSNZ2lgwbaa5eAQTe59OFSJNaD0=";
+    hash = "sha256-WMZA0CjApcSTup4FLIxxaO7hMMZrJPawYsfCXnFK4EE=";
   };
   appimageContents = pkgs.appimageTools.extract { inherit pname version src; };
 in
