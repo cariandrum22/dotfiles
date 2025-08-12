@@ -1,19 +1,53 @@
 #!/usr/bin/env python3
-"""Update Cursor AppImage version and hash."""
+"""Update Cursor AppImage metadata for Nix expressions.
 
-import json
+This script automatically updates the Cursor editor AppImage version and sha256 hash
+used by Nix to build the package. It fetches the latest release information from
+Cursor's API and updates the local Nix expression.
+
+Usage:
+    ./update-cursor.py
+
+    The script will:
+    1. Check current version in cursor.nix
+    2. Fetch latest version from Cursor's API
+    3. If newer, download and calculate sha256 hash
+    4. Update cursor.nix with new version and hash
+
+Files modified:
+    config/home-manager/home/packages/cursor.nix
+
+Platform:
+    Linux x86_64 only (AppImage)
+
+Exit codes:
+    0: Success (updated or already up-to-date)
+    1: Error occurred
+
+Environment:
+    SCRIPT_USER_AGENT: Set custom User-Agent header (default: Python-urllib/X.X)
+"""
+
+from __future__ import annotations
+
 import re
-import subprocess  # noqa: S404 - Required for nix-prefetch-url
 import sys
-from pathlib import Path
-from typing import NamedTuple
-from urllib.error import URLError
-from urllib.request import urlopen
+from typing import TYPE_CHECKING, NamedTuple
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
+import common
+
+# Constants
 CURSOR_API_URL = "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable"
+RE_VERSION = re.compile(r'version = "([^"]+)"')
+RE_DOWNLOAD_URL = re.compile(r'downloadUrl = "([^"]+)"')
+RE_HASH = re.compile(r'hash = "([^"]+)"')
+RE_VERSION_IN_URL = re.compile(r'[Cc]ursor-(\d+\.\d+\.\d+)')
 
 
-class CursorConfigError(ValueError):
+class CursorConfigError(common.ConfigError):
     """Error reading cursor.nix configuration."""
 
     def __init__(self, field: str) -> None:
@@ -21,28 +55,12 @@ class CursorConfigError(ValueError):
         super().__init__(f"Could not find {field} in cursor.nix")
 
 
-class CursorFetchError(RuntimeError):
-    """Error fetching cursor information."""
-
-    def __init__(self, url: str, error: Exception) -> None:
-        """Initialize with URL and error."""
-        super().__init__(f"Failed to fetch {url}: {error}")
-
-
-class CursorVersionError(ValueError):
+class CursorVersionError(common.UpdateScriptError):
     """Error extracting version from URL."""
 
     def __init__(self, url: str) -> None:
         """Initialize with URL."""
         super().__init__(f"Could not extract version from URL: {url}")
-
-
-class CursorPrefetchError(RuntimeError):
-    """Error prefetching URL."""
-
-    def __init__(self, url: str, stderr: str) -> None:
-        """Initialize with URL and stderr."""
-        super().__init__(f"Failed to prefetch {url}: {stderr}")
 
 
 class CursorInfo(NamedTuple):
@@ -53,186 +71,190 @@ class CursorInfo(NamedTuple):
     version: str
 
 
-def fetch_json(url: str) -> dict:
-    """Fetch and parse JSON from URL."""
-    try:
-        with urlopen(url) as response:  # noqa: S310 - Only used with trusted HTTPS URL
-            return json.loads(response.read())
-    except (URLError, json.JSONDecodeError) as e:
-        raise CursorFetchError(url, e) from e
+# ----- Pure helpers ----------------------------------------------------------------
 
 
-def get_current_info(cursor_file: Path) -> tuple[str, str, str]:
-    """Extract current version, URL and hash from cursor.nix."""
-    content = cursor_file.read_text(encoding="utf-8")
-
-    # Extract version
-    version_match = re.search(r'version = "([^"]+)";', content)
-    if not version_match:
-        raise CursorConfigError("version")
-
-    # Extract download URL
-    url_match = re.search(r'downloadUrl = "([^"]+)";', content)
-    if not url_match:
-        raise CursorConfigError("downloadUrl")
-
-    # Extract download hash
-    hash_match = re.search(r'hash = "([^"]+)";', content)
-    if not hash_match:
-        raise CursorConfigError("hash")
-
-    return version_match.group(1), url_match.group(1), hash_match.group(1)
+def _extract_field(content: str, regex: re.Pattern[str], field_name: str) -> str:
+    """Extract field from Nix file content using regex."""
+    if (match := regex.search(content)) is None:
+        raise CursorConfigError(field_name)
+    return match.group(1)
 
 
-def prefetch_url(url: str, name: str | None = None, *, sri_format: bool = False) -> str:
-    """Get sha256 hash for a URL using nix-prefetch-url."""
-    try:
-        cmd = ["nix-prefetch-url", url]
-        if name:
-            cmd.extend(["--name", name])
-
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-
-        nix32_hash = result.stdout.strip()
-
-        if sri_format:
-            # Convert nix32 to SRI format
-            convert_cmd = [
-                "nix", "hash", "convert",
-                "--hash-algo", "sha256", "--to", "sri", nix32_hash,
-            ]
-            convert_result = subprocess.run(
-                convert_cmd,
-                capture_output=True,
-                text=True,
-                check=True,
-            )
-            return convert_result.stdout.strip()
-        return nix32_hash  # noqa: TRY300 - Conflicts with RET505
-    except subprocess.CalledProcessError as e:
-        raise CursorPrefetchError(url, e.stderr) from e
+def _parse_cursor_info(content: str) -> tuple[str, str, str]:
+    """Parse version, URL and hash from cursor.nix content."""
+    version = _extract_field(content, RE_VERSION, "version")
+    url = _extract_field(content, RE_DOWNLOAD_URL, "downloadUrl")
+    hash_value = _extract_field(content, RE_HASH, "hash")
+    return version, url, hash_value
 
 
-def get_latest_cursor_info() -> CursorInfo:
-    """Fetch latest Cursor information."""
+def _extract_version_from_url(url: str) -> str:
+    """Extract version number from download URL."""
+    if (match := RE_VERSION_IN_URL.search(url)) is None:
+        raise CursorVersionError(url)
+    return match.group(1)
+
+
+def _generate_nix_content(
+    content: str, version: str, download_url: str, download_hash: str,
+) -> str:
+    """Update Nix file content with new values."""
+    # Update version
+    content = RE_VERSION.sub(f'version = "{version}"', content, count=1)
+    # Update download URL
+    content = RE_DOWNLOAD_URL.sub(f'downloadUrl = "{download_url}"', content, count=1)
+    # Update hash
+    return RE_HASH.sub(f'hash = "{download_hash}"', content, count=1)
+
+
+# ----- API interaction -------------------------------------------------------------
+
+
+def fetch_latest_cursor_info() -> CursorInfo:
+    """Fetch latest Cursor information from API."""
     print(f"Fetching Cursor API response from {CURSOR_API_URL}...")
 
-    # Fetch the API response to get download URL
-    data = fetch_json(CURSOR_API_URL)
+    # Fetch download URL from API
+    data = common.fetch_json(CURSOR_API_URL)
     download_url = data["downloadUrl"]
 
-    # Extract version from download URL
-    # URL format: https://downloads.cursor.com/.../Cursor-1.2.4-x86_64.AppImage
-    version_match = re.search(r'[Cc]ursor-(\d+\.\d+\.\d+)', download_url)
-    if not version_match:
-        raise CursorVersionError(download_url)
-    version = version_match.group(1)
+    # Extract version from URL
+    version = _extract_version_from_url(download_url)
 
     print(f"  Version: {version}")
     print(f"  Download URL: {download_url}")
 
     # Get the download hash (SRI format for hash field)
     print("Fetching download hash...")
-    download_hash = prefetch_url(download_url, sri_format=True)
+    download_hash = _prefetch_sri_hash(download_url)
     print(f"  Download hash: {download_hash}")
 
     return CursorInfo(download_url, download_hash, version)
 
 
+def _prefetch_sri_hash(url: str) -> str:
+    """Prefetch URL and convert to SRI format hash."""
+    # Get nix32 hash
+    nix32_hash = common.run_nix_prefetch(url)
+
+    # Convert to SRI format
+    try:
+        result = common.run_command(
+            [
+                "nix", "hash", "convert",
+                "--hash-algo", "sha256", "--to", "sri", nix32_hash,
+            ],
+            check=True,
+        )
+        return result.stdout.strip()
+    except common.SubprocessError as e:
+        msg = "nix hash convert"
+        raise common.SubprocessError(msg, e.error) from e
+
+
+# ----- File operations -------------------------------------------------------------
+
+
+def _cursor_nix_path() -> Path:
+    """Get path to cursor.nix relative to this script."""
+    return common.resolve_script_relative(
+        "..", "config", "home-manager", "home", "packages", "cursor.nix",
+    )
+
+
 def update_cursor_nix(cursor_file: Path, info: CursorInfo) -> bool:
-    """Update cursor.nix with new version, URL and hash. Returns True if updated."""
-    content = cursor_file.read_text(encoding="utf-8")
+    """Update cursor.nix with new metadata.
+
+    Returns:
+        True if file was updated, False if content unchanged
+    """
+    content = common.read_text(cursor_file)
     original_content = content
 
-    # Update version
-    content = re.sub(
-        r'(version = ")[^"]+(")',
-        f'\\g<1>{info.version}\\g<2>',
-        content,
-        count=1,
+    # Generate updated content
+    new_content = _generate_nix_content(
+        content, info.version, info.download_url, info.download_hash,
     )
 
-    # Update download URL
-    content = re.sub(
-        r'(downloadUrl = ")[^"]+(")',
-        f'\\g<1>{info.download_url}\\g<2>',
-        content,
-        count=1,
-    )
-
-    # Update download hash
-    content = re.sub(
-        r'(hash = ")[^"]+(")',
-        f'\\g<1>{info.download_hash}\\g<2>',
-        content,
-        count=1,
-    )
-
-    if content == original_content:
+    if new_content == original_content:
         return False
 
-    cursor_file.write_text(content, encoding="utf-8")
+    common.write_text(cursor_file, new_content)
     return True
 
 
-def find_cursor_file() -> Path:
-    """Find cursor.nix file relative to script location."""
-    script_dir = Path(__file__).parent
-    return script_dir.parent / "config/home-manager/home/packages/cursor.nix"
+# ----- Main logic ------------------------------------------------------------------
 
 
-def update_cursor() -> bool:
-    """Main update logic. Returns True if updated, False if already up to date."""
-    cursor_file = find_cursor_file()
+def update_cursor(*, verbose: bool = True) -> bool:  # noqa: C901 - Clear sequential steps for update process
+    """Update Cursor metadata if newer version available.
 
-    print("Checking for Cursor updates...")
+    Args:
+        verbose: Whether to print progress messages
+
+    Returns:
+        True if updated, False if already up-to-date
+
+    Raises:
+        Various exceptions on errors
+    """
+    cursor_file = _cursor_nix_path()
+
+    if verbose:
+        print("Checking for Cursor updates...")
 
     # Get current info
-    current_version, current_url, current_hash = get_current_info(cursor_file)
-    print(f"Current version: {current_version}")
-    print(f"Current URL: {current_url}")
-    print(f"Current hash: {current_hash}")
+    current_content = common.read_text(cursor_file)
+    current_version, current_url, current_hash = _parse_cursor_info(current_content)
+
+    if verbose:
+        print(f"Current version: {current_version}")
+        print(f"Current URL: {current_url}")
+        print(f"Current hash: {current_hash}")
 
     # Get latest info
-    print("\nFetching latest Cursor information...")
-    latest_info = get_latest_cursor_info()
+    if verbose:
+        print("\nFetching latest Cursor information...")
+    latest_info = fetch_latest_cursor_info()
 
     # Check if update is needed
-    if (current_version == latest_info.version and
-        current_url == latest_info.download_url and
-        current_hash == latest_info.download_hash):
-        print("\nAlready up to date")
+    if (
+        current_version == latest_info.version
+        and current_url == latest_info.download_url
+        and current_hash == latest_info.download_hash
+    ):
+        if verbose:
+            print("\nAlready up to date")
         return False
 
     # Update file
-    print(f"\nUpdating {cursor_file}...")
+    if verbose:
+        print(f"\nUpdating {cursor_file}...")
+
     if update_cursor_nix(cursor_file, latest_info):
-        print("\n✅ Successfully updated Cursor")
-        print(f"  Version: {current_version} → {latest_info.version}")
-        print(f"  URL: {current_url} → {latest_info.download_url}")
-        print(f"  Hash: {current_hash} → {latest_info.download_hash}")
+        if verbose:
+            print("\n✅ Successfully updated Cursor")
+            print(f"  Version: {current_version} → {latest_info.version}")
+            print(f"  URL: {current_url} → {latest_info.download_url}")
+            print(f"  Hash: {current_hash} → {latest_info.download_hash}")
         return True
-    print("\n❌ Failed to update cursor.nix")
+
+    if verbose:
+        print("\n❌ Failed to update cursor.nix")
     return False
 
 
 def main() -> None:
     """Main entry point."""
     try:
-        update_cursor()
+        update_cursor(verbose=True)
         sys.exit(0)
     except (
         CursorConfigError,
-        CursorFetchError,
         CursorVersionError,
-        CursorPrefetchError,
+        common.UpdateScriptError,
         FileNotFoundError,
-        subprocess.CalledProcessError,
     ) as e:
         print(f"\n❌ Error: {e}", file=sys.stderr)
         sys.exit(1)

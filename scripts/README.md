@@ -2,6 +2,38 @@
 
 This directory contains utility scripts for maintaining the dotfiles repository.
 
+All scripts follow a functional programming style with shared utilities in `common.py` for
+consistent error handling, HTTP operations, and file I/O.
+
+## Common Module (common.py)
+
+Shared utilities for all update scripts:
+
+- **HTTP operations**: Consistent headers, User-Agent handling, JSON fetching
+- **File I/O**: UTF-8 text reading/writing with proper error handling
+- **Subprocess execution**: Wrappers for nix-prefetch-url and other commands
+- **Retry logic**: Exponential backoff for network operations
+- **Error types**: Custom exception hierarchy for better error reporting
+- **Path utilities**: Resolve paths relative to script location
+
+### Environment Variables
+
+- `SCRIPT_USER_AGENT`: Set custom User-Agent header (default: Python-urllib/X.X)
+
+## update-cursor.py
+
+Updates Cursor editor AppImage metadata for Nix.
+
+```bash
+# Check for updates and update cursor.nix if needed
+./scripts/update-cursor.py
+```
+
+- Fetches the latest version from Cursor's API
+- Downloads and calculates SHA256 hash for the AppImage
+- Updates `config/home-manager/home/packages/cursor.nix`
+- Linux x86_64 only (AppImage format)
+
 ## update-vscode-insiders.py
 
 Updates VSCode Insiders version metadata and SHA256 hashes.
@@ -55,3 +87,33 @@ Updates VSCode extensions Nix expressions from the marketplace.
 3. Commit the updated `extensions.nix`
 
 Or use the `--from-installed` flag to sync with your current VSCode installation.
+
+## Code Quality
+
+All Python scripts are linted with `ruff` using strict rules. Some exceptions are documented inline
+with `noqa` comments:
+
+- `UP047`: Generic type parameters not needed for simple utility functions
+- `C901`: Complex functions kept for clarity in sequential update processes
+- `TRY300`: Early return patterns preferred over else blocks for readability
+- `BLE001`: Catch-all exceptions needed for API error resilience
+
+To check code quality:
+
+```bash
+# Check all scripts
+ruff check scripts/*.py
+
+# Auto-fix issues where possible
+ruff check scripts/*.py --fix
+```
+
+## Error Handling
+
+All scripts provide detailed error messages and proper exit codes:
+
+- Exit code 0: Success (updated or already up-to-date)
+- Exit code 1: Error occurred
+
+Scripts use a consistent exception hierarchy defined in `common.py` for better error reporting and
+debugging.

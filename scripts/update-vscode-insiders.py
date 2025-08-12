@@ -1,222 +1,255 @@
 #!/usr/bin/env python3
-"""Update VSCode Insiders commit and sha256 hashes."""
+"""Update VSCode Insiders metadata for Nix expressions.
 
-import json
+This script automatically updates the VSCode Insiders metadata used by Nix to build
+the latest version. It fetches the current build information from Microsoft's update
+API and generates sha256 hashes for each supported platform.
+
+Usage:
+    ./update-vscode-insiders.py
+
+    The script will:
+    1. Check the current commit in metadata.nix
+    2. Fetch the latest commit from Microsoft's API
+    3. If newer, download and hash the packages for all platforms
+    4. Update metadata.nix with new version info and hashes
+
+Files modified:
+    config/home-manager/programs/vscode/metadata.nix
+
+Supported platforms:
+    - x86_64-linux (Linux 64-bit)
+    - aarch64-darwin (macOS Apple Silicon)
+
+Exit codes:
+    0: Success (updated or already up-to-date)
+    1: Error occurred
+
+Environment:
+    SCRIPT_USER_AGENT: Set custom User-Agent header (default: Python-urllib/X.X)
+"""
+
+from __future__ import annotations
+
 import re
-import subprocess  # noqa: S404 - Required for nix-prefetch-url
 import sys
 from concurrent.futures import ThreadPoolExecutor
-from functools import partial
+from dataclasses import dataclass
 from pathlib import Path
-from typing import NamedTuple
-from urllib.error import URLError
-from urllib.request import urlopen
+from typing import TYPE_CHECKING, NamedTuple
 
-PLATFORMS = {
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
+import common
+
+# ----- Constants (no magic values) -------------------------------------------------
+
+INSIDER_CHANNEL = "insider"
+LATEST_TAG = "latest"
+BASE_API = "https://update.code.visualstudio.com/api/update"
+HTTP_TIMEOUT = 30  # seconds
+
+PLATFORMS: Mapping[str, str] = {
     "x86_64-linux": "linux-x64",
     "aarch64-darwin": "darwin-arm64",
 }
 
+# precompiled regexes
+RE_COMMIT = re.compile(r'commit\s*=\s*"([^"]+)"')
 
-class VscodeConfigError(ValueError):
+
+# ----- Errors ----------------------------------------------------------------------
+
+
+class VscodeConfigError(common.ConfigError):
     """Error reading metadata.nix configuration."""
 
 
-class VscodeFetchError(RuntimeError):
-    """Error fetching VSCode information."""
-
-    def __init__(self, url: str, error: Exception) -> None:
-        """Initialize with URL and error."""
-        super().__init__(f"Failed to fetch {url}: {error}")
-
-
-class VscodePrefetchError(RuntimeError):
-    """Error prefetching URL."""
-
-    def __init__(self, plat: str, stderr: str) -> None:
-        """Initialize with platform and stderr."""
-        super().__init__(f"Failed to prefetch {plat}: {stderr}")
-
-
-class VscodeCommitMismatchError(RuntimeError):
+class VscodeCommitMismatchError(common.UpdateScriptError):
     """Error when commit doesn't match expected value."""
 
     def __init__(self, expected: str, actual: str) -> None:
-        """Initialize with expected and actual commits."""
         super().__init__(f"Commit mismatch: expected {expected}, got {actual}")
 
 
+# ----- Data ------------------------------------------------------------------------
+
+
 class Metadata(NamedTuple):
-    """VSCode Insiders metadata."""
+    """VSCode Insiders metadata (immutable container)."""
 
     version: str
     commit: str
-    urls: dict[str, str]
-    hashes: dict[str, str]
+    urls: Mapping[str, str]
+    hashes: Mapping[str, str]
 
 
-def fetch_json(url: str) -> dict:
+@dataclass(frozen=True, slots=True)
+class FetchResult:
+    """Result for a single platform fetch, used to build dicts immutably."""
+
+    system: str
+    url: str
+    sha256: str
+
+
+# ----- Pure helpers ----------------------------------------------------------------
+
+
+def _fetch_json(url: str) -> dict:
     """Fetch and parse JSON from URL."""
-    try:
-        with urlopen(url) as response:  # noqa: S310 - Only used with trusted HTTPS URLs
-            return json.loads(response.read())
-    except (URLError, json.JSONDecodeError) as e:
-        raise VscodeFetchError(url, e) from e
+    return common.fetch_json(url, timeout=HTTP_TIMEOUT)
 
 
-def get_current_commit(metadata_file: Path) -> str:
-    """Extract current commit from metadata.nix."""
-    content = metadata_file.read_text(encoding="utf-8")
-    match = re.search(r'commit = "([^"]+)"', content)
-    if not match:
+def _api_url(plat: str, channel: str = INSIDER_CHANNEL, tag: str = LATEST_TAG) -> str:
+    """Compose VSCode update API URL."""
+    return f"{BASE_API}/{plat}/{channel}/{tag}"
+
+
+def _current_commit_from_text(s: str) -> str:
+    """Extract current commit from metadata.nix content."""
+    if (m := RE_COMMIT.search(s)) is None:
         msg = "Could not find commit in metadata.nix"
         raise VscodeConfigError(msg)
-    return match.group(1)
+    return m.group(1)
 
 
-def get_latest_info() -> tuple[str, str]:
-    """Fetch latest commit and version from VSCode API."""
-    # Use the Linux x64 endpoint as reference
-    data = fetch_json(
-        "https://update.code.visualstudio.com/api/update/linux-x64/insider/latest",
-    )
+def _latest_commit_and_version() -> tuple[str, str]:
+    """Fetch latest commit and version using a reference platform."""
+    data = _fetch_json(_api_url(PLATFORMS["x86_64-linux"]))
+    # VSCode API returns "version" = commit, productVersion = "1.xx.0-insider"
     commit = data["version"]
-    version = data.get("productVersion", "").replace("-insider", "")
+    version = str(data.get("productVersion", "")).removesuffix("-insider")
     return commit, version
 
 
-def prefetch_sha256(commit: str, system: str, plat: str) -> tuple[str, str, str]:
-    """Get sha256 and URL for a specific commit and platform."""
-    # First, get the actual download URL from the API
-    api_url = f"https://update.code.visualstudio.com/api/update/{plat}/insider/latest"
+def _prefetch_sha256_for(commit: str, system: str, plat: str) -> FetchResult:
+    """Resolve URL for platform and prefetch sha256 (nix-prefetch-url)."""
+    data = _fetch_json(_api_url(plat))
+    actual = data["version"]
+    if actual != commit:
+        raise VscodeCommitMismatchError(commit, actual)
+    url = data["url"]
 
     try:
-        data = fetch_json(api_url)
-        # Ensure we're getting the right commit
-        if data["version"] != commit:
-            raise VscodeCommitMismatchError(commit, data["version"])
+        out = common.run_nix_prefetch(url)
+    except common.SubprocessError as exc:
+        msg = f"nix-prefetch-url for {plat}"
+        raise common.SubprocessError(msg, exc.error) from exc
 
-        download_url = data["url"]
+    return FetchResult(system=system, url=url, sha256=out)
 
-        result = subprocess.run(
-            ["nix-prefetch-url", download_url],
-            capture_output=True,
-            text=True,
-            check=True,
+
+def _fetch_all(commit: str) -> tuple[Mapping[str, str], Mapping[str, str]]:
+    """Fetch URLs and hashes for all platforms in parallel (immutable output)."""
+    with ThreadPoolExecutor(max_workers=len(PLATFORMS)) as pool:
+        results = list(
+            pool.map(
+                lambda kv: _prefetch_sha256_for(commit, kv[0], kv[1]),
+                PLATFORMS.items(),
+            ),
         )
-        return system, download_url, result.stdout.strip()
-    except subprocess.CalledProcessError as e:
-        raise VscodePrefetchError(plat, e.stderr) from e
+
+    urls = {r.system: r.url for r in results}
+    hashes = {r.system: r.sha256 for r in results}
+    return urls, hashes
 
 
-def fetch_all_metadata(commit: str) -> tuple[dict[str, str], dict[str, str]]:
-    """Fetch URLs and sha256 hashes for all platforms in parallel."""
-    with ThreadPoolExecutor(max_workers=len(PLATFORMS)) as executor:
-        fetch_func = partial(prefetch_sha256, commit)
-        futures = [
-            executor.submit(fetch_func, system, plat)
-            for system, plat in PLATFORMS.items()
-        ]
-
-        urls = {}
-        hashes = {}
-        for future in futures:
-            try:
-                system, url, sha256 = future.result()
-                print(f"  {system}: {sha256}")
-                urls[system] = url
-                hashes[system] = sha256
-            except Exception as e:
-                print(f"  Failed: {e}")
-                raise
-
-        return urls, hashes
-
-
-def generate_nix_content(metadata: Metadata) -> str:
-    """Generate metadata.nix content."""
-    # Extract commit hash from URLs to use variable reference
-    url_lines = []
-    for system, url in sorted(metadata.urls.items()):
-        # Replace the commit hash in URL with ${commit}
-        url_with_var = url.replace(f"/{metadata.commit}/", "/${commit}/")
-        url_lines.append(f'    {system} = "{url_with_var}";')
-
-    sha256_lines = "\n".join(
-        f'    {system} = "{sha256}";'
-        for system, sha256 in sorted(metadata.hashes.items())
+def _generate_nix(metadata: Metadata) -> str:
+    """Render metadata.nix content deterministically."""
+    url_lines = [
+        f'    {system} = "{url.replace(f"/{metadata.commit}/", "/${{commit}}/")}";'
+        for system, url in sorted(metadata.urls.items())
+    ]
+    sha_lines = [
+        f'    {system} = "{sha}";' for system, sha in sorted(metadata.hashes.items())
+    ]
+    body = "\n".join(
+        (
+            "# This file is automatically updated by the "
+            "update-vscode-insiders workflow",
+            "rec {",
+            f'  version = "{metadata.version}";',
+            f'  commit = "{metadata.commit}";',
+            "  url = {",
+            "\n".join(url_lines),
+            "  };",
+            "  sha256 = {",
+            "\n".join(sha_lines),
+            "  };",
+            "}",
+            "",
+        ),
     )
-
-    return f"""\
-# This file is automatically updated by the update-vscode-insiders workflow
-rec {{
-  version = "{metadata.version}";
-  commit = "{metadata.commit}";
-  url = {{
-{chr(10).join(url_lines)}
-  }};
-  sha256 = {{
-{sha256_lines}
-  }};
-}}
-"""
+    return body  # noqa: RET504
 
 
-def find_metadata_file() -> Path:
-    """Find metadata.nix file relative to script location."""
-    script_dir = Path(__file__).parent
-    return script_dir.parent / "config/home-manager/programs/vscode/metadata.nix"
+def _metadata_path(script_path: Path) -> Path:
+    """Compute metadata.nix path relative to this script."""
+    return (
+        script_path.parent
+        / ".."
+        / "config"
+        / "home-manager"
+        / "programs"
+        / "vscode"
+        / "metadata.nix"
+    ).resolve()
 
 
-def update_vscode_insiders() -> bool:
-    """Main update logic. Returns True if updated, False if already up to date."""
-    metadata_file = find_metadata_file()
+# ----- Orchestration (minimal side effects) ----------------------------------------
 
-    print("Checking for VSCode Insiders updates...")
 
-    # Check current vs latest
-    current_commit = get_current_commit(metadata_file)
-    latest_commit, version = get_latest_info()
+def update_vscode_insiders(*, verbose: bool = True) -> bool:
+    """Return True if updated, False if already up-to-date; print when requested."""
+    meta_path = _metadata_path(Path(__file__))
+    current_commit = _current_commit_from_text(common.read_text(meta_path))
+    latest_commit, version = _latest_commit_and_version()
 
-    print(f"Current commit: {current_commit}")
-    print(f"Latest commit: {latest_commit}")
-    print(f"Version: {version}")
+    if verbose:
+        print("Checking for VSCode Insiders updates...")
+        print(f"Current commit: {current_commit}")
+        print(f"Latest commit:  {latest_commit}")
+        print(f"Version:        {version}")
 
     if current_commit == latest_commit:
-        print("Already up to date")
+        if verbose:
+            print("Already up to date")
         return False
 
-    print("\nFetching new sha256 hashes...")
-    urls, hashes = fetch_all_metadata(latest_commit)
+    if verbose:
+        print("\nFetching new sha256 hashes...")
 
-    # Update file
-    metadata = Metadata(version, latest_commit, urls, hashes)
-    content = generate_nix_content(metadata)
+    urls, hashes = _fetch_all(latest_commit)
+    metadata = Metadata(version=version, commit=latest_commit, urls=urls, hashes=hashes)
+    content = _generate_nix(metadata)
 
-    print(f"\nUpdating {metadata_file}...")
-    metadata_file.write_text(content, encoding="utf-8")
+    if verbose:
+        print(f"\nUpdating {meta_path}...")
 
-    print("\n✅ Successfully updated VSCode Insiders")
-    print(f"  Commit: {current_commit} → {latest_commit}")
-    print(f"  Version: {version}")
+    common.write_text(meta_path, content)
+
+    if verbose:
+        print("\n✅ Successfully updated VSCode Insiders")
+        print(f"  Commit:  {current_commit} → {latest_commit}")
+        print(f"  Version: {version}")
 
     return True
 
 
 def main() -> None:
-    """Main entry point."""
+    """CLI entrypoint with narrow exception surface."""
     try:
-        update_vscode_insiders()
+        update_vscode_insiders(verbose=True)
         sys.exit(0)
     except (
         VscodeConfigError,
-        VscodeFetchError,
-        VscodePrefetchError,
         VscodeCommitMismatchError,
+        common.UpdateScriptError,
         FileNotFoundError,
-        subprocess.CalledProcessError,
-    ) as e:
-        print(f"\n❌ Error: {e}", file=sys.stderr)
+    ) as exc:
+        print(f"\n❌ Error: {exc}", file=sys.stderr)
         sys.exit(1)
 
 
