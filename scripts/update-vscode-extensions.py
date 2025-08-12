@@ -1,172 +1,159 @@
 #!/usr/bin/env python3
-"""Update VSCode extensions from marketplace.
+"""Update VSCode extensions from marketplace (functional style).
 
-This script queries the Visual Studio Code marketplace for extensions
-and generates a Nix expression with their metadata and sha256 hashes.
+This script fetches VSCode extension metadata from the official marketplace and
+generates Nix expressions with proper sha256 hashes for each extension.
 
 Usage:
-    # Update from extensions file:
-    ./update-vscode-extensions.py
+    ./update-vscode-extensions.py                   # Read from extensions file
+    ./update-vscode-extensions.py --from-installed  # Read from installed VSCode
 
-    # Update from currently installed extensions:
-    ./update-vscode-extensions.py --from-installed
+    The script will:
+    1. Get extension list from file or installed VSCode
+    2. Query the marketplace for each extension metadata
+    3. Download and calculate sha256 hashes
+    4. Generate Nix expressions for all extensions
 
-    # Update from specific file:
-    ./update-vscode-extensions.py --file /path/to/extensions
+Files:
+    Input:  config/home-manager/programs/vscode/extensions
+    Output: config/home-manager/programs/vscode/extensions.nix
+
+Extension ID format:
+    publisher.extension-name (e.g., ms-python.python)
+
+Environment:
+    SCRIPT_USER_AGENT: Set custom User-Agent header (default: Python-urllib/X.X)
 """
+
+from __future__ import annotations
 
 import argparse
 import http.client
 import json
 import platform
-import subprocess
+import subprocess  # noqa: S404 - needed for code CLI and nix-prefetch-url
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, TypedDict
+from typing import TYPE_CHECKING, Any, TypedDict
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Mapping
+
+import common
+
+# ----- Constants -------------------------------------------------------------------
 
 MARKETPLACE_DOMAIN = "marketplace.visualstudio.com"
-HTTP_SERVER_ERROR_THRESHOLD = 500
-ASSETS_DOMAIN = "{publisher}.gallery.vsassets.io"
 EXTENSION_QUERY_ENDPOINT = "/_apis/public/gallery/extensionquery"
+ASSETS_DOMAIN = "{publisher}.gallery.vsassets.io"
 DOWNLOAD_ENDPOINT = (
     "/_apis/public/gallery/publisher/{publisher}"
     "/extension/{extension}/{version}"
-    "/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage{queryString}"
+    "/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage{qs}"
 )
+
+# Build API headers dynamically
+_api_headers_base = {
+    "Content-Type": "application/json",
+    "Accept": "application/json;api-version=3.0-preview.1",
+}
+if common.DEFAULT_USER_AGENT:
+    _api_headers_base["User-Agent"] = common.DEFAULT_USER_AGENT
+API_HEADERS: Mapping[str, str] = _api_headers_base
+
+HTTP_TIMEOUT = 30  # seconds
+HTTP_SERVER_ERROR_THRESHOLD = 500
+NIX_PREFETCH_TIMEOUT = 60  # seconds
+DEFAULT_WORKERS = 3
+DEFAULT_RETRIES = 3
+
+ARCH_MAP: Mapping[str, str] = {
+    "x86_64": "x64",
+    "i686": "x86",
+    "aarch64": "arm64",
+    "arm64": "arm64",
+    "armv7l": "armhf",
+}
+
+# ----- Errors ---------------------------------------------------------------------
+
+
+class VscodeExtensionError(RuntimeError):
+    """Base error for VSCode extension operations."""
+
+
+class ExtensionFetchError(VscodeExtensionError):
+    """Error fetching extension information."""
+
+    def __init__(self, ext: str, error: Exception) -> None:
+        super().__init__(f"Failed to get {ext}: {error}")
+
+
+class ExtensionInstalledError(VscodeExtensionError):
+    """Error getting installed extensions."""
+
+    def __init__(self, error: Exception) -> None:
+        super().__init__(f"Failed to get installed extensions: {error}")
+
+
+class ExtensionServerError(http.client.HTTPException):
+    """Server error from marketplace."""
+
+    def __init__(self, status: int, reason: str) -> None:
+        super().__init__(f"Server error: {status} {reason}")
+
+
+# ----- Data types -----------------------------------------------------------------
 
 
 class Extension(TypedDict):
-    """Extension dictionary structure."""
+    """Extension identifier (publisher.name)."""
 
     publisher: str
     name: str
 
 
 class QueryResult(TypedDict):
-    """Query result structure."""
+    """Marketplace query result."""
 
     status: int
     reason: str
     body: dict[str, Any]
 
 
-def get_installed_extensions() -> list[str]:
-    """Get list of installed extensions from VSCode.
+@dataclass(frozen=True, slots=True)
+class PrefetchResult:
+    """Resolved VSIX URL and sha256 for a single extension version."""
 
-    Returns:
-        List of extension identifiers in publisher.name format
-
-    Raises:
-        RuntimeError: If VSCode command fails
-    """
-    try:
-        # Try code-insiders first, then regular code
-        for cmd in ["code-insiders", "code"]:
-            try:
-                result = subprocess.run(
-                    [cmd, "--list-extensions"],
-                    capture_output=True,
-                    text=True,
-                    check=True,
-                )
-                extensions = [
-                    line.strip() for line in result.stdout.splitlines() if line.strip()
-                ]
-                print(f"✓ Found {len(extensions)} installed extensions via {cmd}")
-                return extensions
-            except (subprocess.CalledProcessError, FileNotFoundError):
-                continue
-
-        msg = "Could not find VSCode command (tried code-insiders and code)"
-        raise RuntimeError(msg)
-    except Exception as e:
-        raise RuntimeError(f"Failed to get installed extensions: {e}") from e
+    publisher: str
+    name: str
+    version: str
+    sha256: str
+    arch: str | None
 
 
-def read_extensions_file(file_path: Path) -> list[str]:
-    """Read extension list from file.
-
-    Args:
-        file_path: Path to the extensions file
-
-    Returns:
-        List of extension identifiers in publisher.name format
-    """
-    with file_path.open() as f:
-        return [line.strip() for line in f if line.strip()]
+# ----- Pure helpers ----------------------------------------------------------------
 
 
-def to_dict(item: str) -> Extension:
-    """Convert extension string to dictionary.
-
-    Args:
-        item: Extension identifier in publisher.name format
-
-    Returns:
-        Dictionary with publisher and name keys
-    """
-    publisher, name = item.split(".")
+def _split_ext_id(ext_id: str) -> Extension:
+    """Split 'publisher.name' into dict."""
+    publisher, name = ext_id.split(".", maxsplit=1)
     return {"publisher": publisher, "name": name}
 
 
-def parse_extension_list(extensions: list[str]) -> list[Extension]:
-    """Parse list of extension strings into dictionaries.
-
-    Args:
-        extensions: List of extension identifiers
-
-    Returns:
-        List of extension dictionaries
-    """
-    return [to_dict(ext) for ext in extensions]
+def _extensions_from_file(path: Path) -> list[str]:
+    """Read non-empty lines as extension IDs."""
+    return [
+        ln.strip() for ln in path.read_text(encoding="utf-8").splitlines() if ln.strip()
+    ]
 
 
-def _make_marketplace_request(
-    headers: dict[str, str], data: dict[str, Any]
-) -> tuple[int, str, bytes]:
-    """Make HTTP request to marketplace.
-
-    Args:
-        headers: HTTP headers
-        data: Request payload
-
-    Returns:
-        Tuple of (status_code, reason, body)
-    """
-    connection = http.client.HTTPSConnection(MARKETPLACE_DOMAIN, timeout=30)
-    try:
-        connection.request(
-            "POST", EXTENSION_QUERY_ENDPOINT, json.dumps(data), headers
-        )
-        response = connection.getresponse()
-        return response.status, response.reason, response.read()
-    finally:
-        connection.close()
-
-
-def query(
-    extension: Extension, retries: int = 3, backoff_base: float = 1.0
-) -> QueryResult:
-    """Query marketplace for extension information with retry logic.
-
-    Args:
-        extension: Extension dictionary with publisher and name
-        retries: Number of retry attempts (default: 3)
-        backoff_base: Base delay for exponential backoff in seconds (default: 1.0)
-
-    Returns:
-        Query result with status, reason, and body
-
-    Raises:
-        RuntimeError: If all retry attempts fail
-    """
-    headers = {
-        "Content-Type": "application/json",
-        "Accept": "application/json;api-version=3.0-preview.1",
-    }
-    data = {
+def _payload_for(extension: Extension) -> dict[str, Any]:
+    """Build marketplace query payload for one extension."""
+    return {
         "filters": [
             {
                 "criteria": [
@@ -180,278 +167,185 @@ def query(
                 "pageSize": 100,
                 "sortBy": 0,
                 "sortOrder": 0,
-            }
+            },
         ],
         "assetTypes": [],
-        "flags": 0x200,  # Include latest version only
+        "flags": 0x200,  # include latest version only
     }
 
-    last_error = None
-    for attempt in range(retries):
-        try:
-            status, reason, body = _make_marketplace_request(headers, data)
 
-            # Check for HTTP errors
-            if status >= HTTP_SERVER_ERROR_THRESHOLD:
-                raise http.client.HTTPException(f"Server error: {status} {reason}")
-
-            return {
-                "status": status,
-                "reason": reason,
-                "body": json.loads(body),
-            }
-
-        except (http.client.HTTPException, ConnectionError, TimeoutError) as e:
-            last_error = e
-            if attempt < retries - 1:
-                delay = backoff_base * (2**attempt)
-                error_type = type(e).__name__
-                print(f"  → Retry {attempt + 1}/{retries} after {delay}s: {error_type}")
-                time.sleep(delay)
-            continue
-        except json.JSONDecodeError as e:
-            last_error = e
-            ext_name = f"{extension['publisher']}.{extension['name']}"
-            msg = f"Invalid JSON response for {ext_name}: {e}"
-            raise RuntimeError(msg) from e
-        except Exception as e:
-            last_error = e
-            ext_name = f"{extension['publisher']}.{extension['name']}"
-            msg = f"Unexpected error querying {ext_name}: {e}"
-            raise RuntimeError(msg) from e
-
-    msg = (
-        f"Failed to query {extension['publisher']}.{extension['name']} "
-        f"after {retries} attempts: {last_error}"
-    )
-    raise RuntimeError(msg) from last_error
+def _marketplace_request(payload: dict[str, Any]) -> tuple[int, str, bytes]:
+    """POST to marketplace and return (status, reason, raw_bytes)."""
+    conn = http.client.HTTPSConnection(MARKETPLACE_DOMAIN, timeout=HTTP_TIMEOUT)
+    try:
+        conn.request(
+            "POST", EXTENSION_QUERY_ENDPOINT, json.dumps(payload), dict(API_HEADERS),
+        )
+        resp = conn.getresponse()
+        return resp.status, resp.reason, resp.read()
+    finally:
+        conn.close()
 
 
-def results_to_nix_attr(
-    publisher: str,
-    name: str,
-    version: str,
-    sha256: str,
-    arch: str | None = None,
-) -> str:
-    """Convert extension metadata to Nix attribute.
-
-    Args:
-        publisher: Extension publisher
-        name: Extension name
-        version: Extension version
-        sha256: Package sha256 hash
-        arch: Optional architecture string
-
-    Returns:
-        Formatted Nix attribute string
-    """
-    if arch is not None:
-        return f"""  {{
-    name = "{name}";
-    publisher = "{publisher}";
-    version = "{version}";
-    sha256 = "{sha256}";
-    arch = "{arch}";
-  }}"""
-    return f"""  {{
-    name = "{name}";
-    publisher = "{publisher}";
-    version = "{version}";
-    sha256 = "{sha256}";
-  }}"""
+def _retry_backoff(delays: Iterable[float]) -> Iterable[float]:
+    """Yield a sequence of delays for retries."""
+    yield from delays
 
 
-def convert_system_arch_representation() -> str:
-    """Convert system architecture to VSCode format.
-
-    Returns:
-        Architecture string in VSCode format (e.g., linux-x64)
-
-    Raises:
-        ValueError: If architecture is unsupported
-    """
+def _system_arch() -> str:
+    """Compute VSCode target platform (e.g., linux-x64)."""
     system = platform.system().lower()
     machine = platform.machine()
-
-    arch_map = {
-        "x86_64": "x64",
-        "i686": "x86",
-        "aarch64": "arm64",
-        "arm64": "arm64",
-        "armv7l": "armhf",
-    }
-
-    arch_suffix = arch_map.get(machine)
-    if not arch_suffix:
+    arch = ARCH_MAP.get(machine)
+    if arch is None:
         msg = f"Unsupported architecture: {machine}"
         raise ValueError(msg)
+    return f"{system}-{arch}"
 
-    return f"{system}-{arch_suffix}"
 
-
-def extract_version_and_platform(
-    versions: list[dict[str, Any]],
-) -> tuple[str, str | None]:
-    """Extract version and platform from version list.
-
-    Args:
-        versions: List of version dictionaries from marketplace
-
-    Returns:
-        Tuple of (version, platform) where platform may be None
-
-    Raises:
-        ValueError: If no suitable version is found
-    """
-    target_platform = convert_system_arch_representation()
-
-    # First try to find platform-specific version
-    for version in versions:
-        if version.get("targetPlatform") == target_platform:
-            return version["version"], version["targetPlatform"]
-
-    # Fall back to universal version
-    for version in versions:
-        if "targetPlatform" not in version:
-            return version["version"], None
-
+def _pick_version(versions: list[dict[str, Any]]) -> tuple[str, str | None]:
+    """Pick best version: prefer platform-specific, else universal."""
+    target = _system_arch()
+    for v in versions:
+        if v.get("targetPlatform") == target:
+            return v["version"], v["targetPlatform"]
+    for v in versions:
+        if "targetPlatform" not in v:
+            return v["version"], None
     msg = "No suitable version found"
     raise ValueError(msg)
 
 
-def extract_extension_info(result: QueryResult, retries: int = 3) -> str:
-    """Extract extension info and fetch sha256.
-
-    Args:
-        result: Query result from marketplace
-        retries: Number of retry attempts for nix-prefetch-url (default: 3)
-
-    Returns:
-        Nix attribute string for the extension
-    """
-    extension = result["body"]["results"][0]["extensions"][0]
-    publisher = extension["publisher"]["publisherName"]
-    name = extension["extensionName"]
-    version, arch = extract_version_and_platform(extension["versions"])
-    query_string = f"?targetPlatform={arch}" if arch else ""
-
-    url = (
+def _vsix_url(publisher: str, name: str, version: str, arch: str | None) -> str:
+    """Build download URL for a VSIX."""
+    qs = f"?targetPlatform={arch}" if arch else ""
+    return (
         "https://"
         + ASSETS_DOMAIN.format(publisher=publisher)
         + DOWNLOAD_ENDPOINT.format(
-            publisher=publisher,
-            extension=name,
-            version=version,
-            queryString=query_string,
+            publisher=publisher, extension=name, version=version, qs=qs,
         )
     )
 
-    # Retry logic for nix-prefetch-url
+
+def _nix_attr(pr: PrefetchResult) -> str:
+    """Render a Nix attribute block."""
+    base = (
+        f"  {{\n"
+        f'    name = "{pr.name}";\n'
+        f'    publisher = "{pr.publisher}";\n'
+        f'    version = "{pr.version}";\n'
+        f'    sha256 = "{pr.sha256}";\n'
+    )
+    if pr.arch is not None:
+        base += f'    arch = "{pr.arch}";\n'
+    return base + "  }"
+
+
+# ----- Effectful helpers (boundary) ------------------------------------------------
+
+
+def get_installed_extensions() -> list[str]:
+    """Return installed extensions (publisher.name)."""
+    for cmd in ("code-insiders", "code"):
+        try:
+            proc = subprocess.run(
+                [cmd, "--list-extensions"],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            exts = [ln.strip() for ln in proc.stdout.splitlines() if ln.strip()]
+            print(f"✓ Found {len(exts)} installed extensions via {cmd}")
+            return exts  # noqa: TRY300 - Early return pattern is clearer than else block
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            continue
+    raise ExtensionInstalledError(
+        RuntimeError("Could not find VSCode command (tried code-insiders and code)"),
+    )
+
+
+def query_marketplace(
+    extension: Extension,
+    *,
+    retries: int = DEFAULT_RETRIES,
+    backoff_base: float = 1.0,
+) -> QueryResult:
+    """Query marketplace with retry/backoff; raise on final failure."""
+    delays = list(
+        _retry_backoff(backoff_base * (2**i) for i in range(max(retries - 1, 0))),
+    )
+    payload = _payload_for(extension)
+    last_exc: Exception | None = None
+
     for attempt in range(retries):
         try:
-            result = subprocess.run(
-                ["nix-prefetch-url", url],
-                check=True,
-                capture_output=True,
-                encoding="utf-8",
-                timeout=60,
-            )
-            sha256 = result.stdout.strip()
-            break
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
-            if attempt < retries - 1:
-                delay = 2 ** attempt
-                print(f"    → Retry prefetch {attempt + 1}/{retries} after {delay}s")
+            status, reason, body = _marketplace_request(payload)
+            if status >= HTTP_SERVER_ERROR_THRESHOLD:
+                raise ExtensionServerError(status, reason)
+            return {"status": status, "reason": reason, "body": json.loads(body)}
+        except (
+            http.client.HTTPException,
+            ConnectionError,
+            TimeoutError,
+            json.JSONDecodeError,
+        ) as e:
+            last_exc = e
+            if attempt < len(delays):
+                delay = delays[attempt]
+                ext_name = f"{extension['publisher']}.{extension['name']}"
+                print(
+                    f"  → Retry {attempt + 1}/{retries} after {delay:.1f}s: {ext_name}",
+                )
                 time.sleep(delay)
             else:
-                error_msg = getattr(e, "stderr", "Unknown error")
-                msg = f"Failed to prefetch {name}: {error_msg}"
-                raise RuntimeError(msg) from e
-    return results_to_nix_attr(publisher, name, version, sha256, arch)
+                break
+
+    ext_name = f"{extension['publisher']}.{extension['name']}"
+    raise ExtensionFetchError(ext_name, last_exc or RuntimeError("unknown error"))
 
 
-def parse_args() -> argparse.Namespace:
-    """Parse command line arguments.
+def prefetch_sha256(url: str, *, timeout: int = NIX_PREFETCH_TIMEOUT) -> str:
+    """Run nix-prefetch-url and return sha256."""
+    proc = subprocess.run(
+        ["nix-prefetch-url", url],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+    )
+    return proc.stdout.strip()
 
-    Returns:
-        Parsed arguments
-    """
-    parser = argparse.ArgumentParser(
-        description="Update VSCode extensions Nix expressions"
-    )
-    parser.add_argument(
-        "--from-installed",
-        action="store_true",
-        help="Get extensions from installed VSCode instead of file",
-    )
-    parser.add_argument(
-        "--file",
-        type=Path,
-        help=(
-            "Path to extensions file "
-            "(default: ../config/home-manager/programs/vscode/extensions)"
-        ),
-    )
-    parser.add_argument(
-        "--output",
-        type=Path,
-        help=(
-            "Output path for extensions.nix "
-            "(default: ../config/home-manager/programs/vscode/extensions.nix)"
-        ),
-    )
-    parser.add_argument(
-        "--workers",
-        type=int,
-        default=3,
-        help="Number of parallel workers (default: 3)",
-    )
-    parser.add_argument(
-        "--retries",
-        type=int,
-        default=3,
-        help="Number of retry attempts for failed requests (default: 3)",
-    )
-    return parser.parse_args()
+
+# ----- Pipeline steps --------------------------------------------------------------
 
 
 def process_extensions(
-    extensions: list[Extension], workers: int = 3, retries: int = 3
+    extensions: list[Extension],
+    *,
+    workers: int = DEFAULT_WORKERS,
+    retries: int = DEFAULT_RETRIES,
 ) -> list[QueryResult]:
-    """Query marketplace for all extensions in parallel.
-
-    Args:
-        extensions: List of extensions to query
-        workers: Number of parallel workers
-        retries: Number of retry attempts per extension
-
-    Returns:
-        List of successful query results
-    """
-    results = []
-    failed = []
-
+    """Fetch marketplace JSON for all extensions in parallel."""
     print(f"\nQuerying {len(extensions)} extensions with {workers} workers...")
+    results: list[QueryResult] = []
+    failed: list[str] = []
 
-    with ThreadPoolExecutor(max_workers=workers) as executor:
-        # Submit all tasks
-        future_to_ext = {
-            executor.submit(query, ext, retries): ext for ext in extensions
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        futures = {
+            ex.submit(query_marketplace, ext, retries=retries): ext
+            for ext in extensions
         }
-
-        # Process completed tasks
-        for future in as_completed(future_to_ext):
-            ext = future_to_ext[future]
-            ext_name = f"{ext['publisher']}.{ext['name']}"
-
+        for fut in as_completed(futures):
+            ext = futures[fut]
+            name = f"{ext['publisher']}.{ext['name']}"
             try:
-                result = future.result()
-                print(f"  ✓ {ext_name}")
-                results.append(result)
-            except Exception as e:
-                print(f"  ✗ {ext_name}: {e}")
-                failed.append(ext_name)
+                res = fut.result()
+                print(f"  ✓ {name}")
+                results.append(res)
+            except Exception as e:  # noqa: BLE001 - Catch all marketplace API errors to continue processing
+                print(f"  ✗ {name}: {e}")
+                failed.append(name)
 
     if failed:
         print(f"\n⚠️  Failed to query {len(failed)} extensions:")
@@ -461,73 +355,62 @@ def process_extensions(
     return results
 
 
-def get_extensions_list(
-    *, from_installed: bool, extensions_file: Path
-) -> list[str] | None:
-    """Get extensions list from file or installed VSCode.
+def extract_prefetch(
+    result: QueryResult, *, retries: int = DEFAULT_RETRIES,
+) -> PrefetchResult:
+    """Extract version/platform, prefetch sha256, and return structured result."""
+    ext = result["body"]["results"][0]["extensions"][0]
+    publisher = ext["publisher"]["publisherName"]
+    name = ext["extensionName"]
+    version, arch = _pick_version(ext["versions"])
+    url = _vsix_url(publisher, name, version, arch)
 
-    Args:
-        from_installed: Whether to get from installed VSCode
-        extensions_file: Path to extensions file
+    last_exc: Exception | None = None
+    for attempt in range(retries):
+        try:
+            sha256 = prefetch_sha256(url, timeout=NIX_PREFETCH_TIMEOUT)
+            return PrefetchResult(publisher, name, version, sha256, arch)
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+            last_exc = e
+            if attempt < retries - 1:
+                delay = 2**attempt
+                print(f"    → Retry prefetch {attempt + 1}/{retries} after {delay}s")
+                time.sleep(delay)
+            else:
+                break
 
-    Returns:
-        List of extensions or None if error
-    """
-    if from_installed:
-        return get_installed_extensions()
-    if not extensions_file.exists():
-        print(f"\n❌ Error: Extensions file not found: {extensions_file}")
-        return None
-    extensions_list = read_extensions_file(extensions_file)
-    print(f"✓ Found {len(extensions_list)} extensions in {extensions_file}")
-    return extensions_list
+    msg = f"Failed to prefetch {publisher}.{name}: {last_exc}"
+    raise RuntimeError(msg)
 
 
 def write_nix_output(
-    results: list[QueryResult], output_file: Path, retries: int
+    results: list[QueryResult], output_file: Path, *, retries: int,
 ) -> None:
-    """Generate and write Nix expressions to file.
-
-    Args:
-        results: Query results from marketplace
-        output_file: Path to write output
-        retries: Number of retries for prefetch
-    """
+    """Generate Nix list and write to file; format with nix fmt if available."""
     print("\nGenerating Nix expressions...")
-    extensions_nix_parts = []
-    for result in results:
+    attrs: list[str] = []
+    for res in results:
         try:
-            nix_attr = extract_extension_info(result, retries)
-            extensions_nix_parts.append(nix_attr)
-        except Exception as e:
-            ext_info = result["body"]["results"][0]["extensions"][0]
-            ext_name = (
-                f"{ext_info['publisher']['publisherName']}.{ext_info['extensionName']}"
-            )
+            pref = extract_prefetch(res, retries=retries)
+            attrs.append(_nix_attr(pref))
+        except (KeyError, IndexError, AttributeError, TypeError, RuntimeError) as e:
+            ext = res["body"]["results"][0]["extensions"][0]
+            ext_name = f"{ext['publisher']['publisherName']}.{ext['extensionName']}"
             print(f"  ✗ Failed to generate Nix for {ext_name}: {e}")
 
-    extensions_nix = "\n".join(extensions_nix_parts)
-    with output_file.open("w") as file:
-        file.write("[\n")
-        file.write(extensions_nix)
-        file.write("\n]\n")
+    # Deterministic ordering for stable diffs
+    body = "[\n" + "\n".join(sorted(attrs)) + "\n]\n"
+    output_file.write_text(body, encoding="utf-8")
 
-    # Format the generated file with nixfmt-rfc-style
     print("  → Formatting with nixfmt-rfc-style...")
     try:
-        # Use nix fmt with the project's formatter for consistent formatting
-        script_dir = Path(__file__).parent
-        project_root = script_dir.parent
+        project_root = Path(__file__).parent.parent
         subprocess.run(
-            [
-                "nix",
-                "fmt",
-                str(output_file),
-            ],
+            ["nix", "fmt", str(output_file)],
             check=True,
             capture_output=True,
             text=True,
-            cwd=str(project_root),  # Run from project root to use the flake
+            cwd=str(project_root),
         )
         print("  ✓ Formatted successfully")
     except subprocess.CalledProcessError as e:
@@ -538,59 +421,108 @@ def write_nix_output(
         print("  ⚠️  Warning: nix command not found, skipping formatting")
 
 
-def main() -> int:
-    """Update VSCode extensions.
+# ----- CLI glue -------------------------------------------------------------------
 
-    Returns:
-        Exit code (0 for success)
-    """
-    args = parse_args()
 
-    # Determine paths
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """Parse CLI arguments."""
+    p = argparse.ArgumentParser(description="Update VSCode extensions Nix expressions")
+    p.add_argument(
+        "--from-installed",
+        action="store_true",
+        help="Read extensions from installed VS Code instead of file",
+    )
+    p.add_argument(
+        "--file",
+        type=Path,
+        help="Path to extensions file (default: ../config/.../extensions)",
+    )
+    p.add_argument(
+        "--output",
+        type=Path,
+        help="Output path for extensions.nix (default: ../config/.../extensions.nix)",
+    )
+    p.add_argument(
+        "--workers",
+        type=int,
+        default=DEFAULT_WORKERS,
+        help=f"Number of parallel workers (default: {DEFAULT_WORKERS})",
+    )
+    p.add_argument(
+        "--retries",
+        type=int,
+        default=DEFAULT_RETRIES,
+        help=f"Retry attempts for requests/prefetch (default: {DEFAULT_RETRIES})",
+    )
+    return p.parse_args(argv)
+
+
+def resolve_paths(args: argparse.Namespace) -> tuple[Path, Path]:
+    """Resolve input and output paths relative to script location."""
     script_dir = Path(__file__).parent
-    extensions_file = (
-        args.file
-        if args.file
-        else script_dir.parent / "config/home-manager/programs/vscode/extensions"
+    default_in = script_dir.parent / "config/home-manager/programs/vscode/extensions"
+    default_out = (
+        script_dir.parent / "config/home-manager/programs/vscode/extensions.nix"
     )
-    output_file = (
-        args.output
-        if args.output
-        else script_dir.parent / "config/home-manager/programs/vscode/extensions.nix"
-    )
+    return (args.file or default_in, args.output or default_out)
+
+
+def get_extensions_list(*, from_installed: bool, extensions_file: Path) -> list[str]:
+    """Return extension IDs from installed VS Code or file."""
+    if from_installed:
+        return get_installed_extensions()
+    if not extensions_file.exists():
+        msg = f"Extensions file not found: {extensions_file}"
+        raise FileNotFoundError(msg)
+    exts = _extensions_from_file(extensions_file)
+    print(f"✓ Found {len(exts)} extensions in {extensions_file}")
+    return exts
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Program entrypoint (returns exit code)."""
+    args = parse_args(argv)
+    ext_path, out_path = resolve_paths(args)
 
     print("Checking VSCode extensions...")
 
-    # Get extensions list
-    extensions_list = get_extensions_list(
-        from_installed=args.from_installed, extensions_file=extensions_file
-    )
-    if extensions_list is None:
+    try:
+        ext_ids = get_extensions_list(
+            from_installed=args.from_installed, extensions_file=ext_path,
+        )
+    except (common.UpdateScriptError, common.SubprocessError) as e:
+        print(f"\n❌ Error: {e}", file=sys.stderr)
+        return 1
+    except FileNotFoundError as e:
+        print(f"\n❌ Error: {e}", file=sys.stderr)
         return 1
 
-    # Query marketplace and generate output
-    extensions = parse_extension_list(extensions_list)
-    results = process_extensions(extensions, args.workers, args.retries)
+    exts = [_split_ext_id(x) for x in ext_ids]
+    results = process_extensions(exts, workers=args.workers, retries=args.retries)
+    write_nix_output(results, out_path, retries=args.retries)
 
-    # Write output
-    write_nix_output(results, output_file, args.retries)
-
-    print(f"\n✅ Successfully updated {output_file}")
+    print(f"\n✅ Successfully updated {out_path}")
     print(f"  Total extensions: {len(results)}")
     return 0
 
 
-def main_with_error_handling() -> None:
-    """Entry point with error handling."""
+def main_with_errors() -> None:
+    """Wrapper to print structured errors and exit with codes."""
     try:
         sys.exit(main())
     except KeyboardInterrupt:
         print("\n⚠️  Interrupted by user")
         sys.exit(130)
-    except Exception as e:
+    except (
+        VscodeExtensionError,
+        ValueError,
+        RuntimeError,
+        http.client.HTTPException,
+        subprocess.CalledProcessError,
+    ) as e:
         print(f"\n❌ Error: {e}", file=sys.stderr)
         sys.exit(1)
 
 
 if __name__ == "__main__":
-    main_with_error_handling()
+    main_with_errors()

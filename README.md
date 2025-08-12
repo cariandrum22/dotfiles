@@ -94,7 +94,8 @@ nix develop
 
 ### Utilities
 
-- `scripts/` - Helper scripts for updating VS Code extensions
+- `scripts/` - Python scripts for updating external dependencies (Cursor, VSCode Insiders,
+  extensions)
 - `function/` - Setup and installation helper functions
 
 ## Additional Notes
