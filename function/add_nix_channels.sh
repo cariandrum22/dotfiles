@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck source=function/error.sh
 source "$(dirname "${BASH_SOURCE[0]}")/error.sh"
 
 #######################################

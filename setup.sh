@@ -19,11 +19,17 @@ abs_path="$(
 readonly abs_path
 
 # Import functions
+# shellcheck source=./function/install/xcode_command_line_tools.sh
 source ./function/install/xcode_command_line_tools.sh
+# shellcheck source=./function/install/homebrew.sh
 source ./function/install/homebrew.sh
+# shellcheck source=./function/install/nix.sh
 source ./function/install/nix.sh
+# shellcheck source=./function/install/home_manager.sh
 source ./function/install/home_manager.sh
+# shellcheck source=./function/install/fisher.sh
 source ./function/install/fisher.sh
+# shellcheck source=./function/add_nix_channels.sh
 source ./function/add_nix_channels.sh
 
 #######################################

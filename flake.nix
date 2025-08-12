@@ -209,11 +209,21 @@
                   always_run = true;
                 };
 
-                # Shell script linting
+                # Shell script linting (general)
                 shellcheck = {
                   enable = true;
-                  # SC1091 is about following sourced files, which exist at runtime
-                  entry = "${pkgs.shellcheck}/bin/shellcheck -e SC1091";
+                  excludes = [ "^\\.envrc$" ]; # Handle .envrc separately
+                  entry = "${pkgs.shellcheck}/bin/shellcheck -x";
+                };
+
+                # Shell script linting for .envrc specifically
+                shellcheck-envrc = {
+                  enable = true;
+                  name = "shellcheck-envrc";
+                  entry = "${pkgs.shellcheck}/bin/shellcheck -e SC2148";
+                  files = "^\\.envrc$";
+                  language = "system";
+                  pass_filenames = true;
                 };
 
                 # Fish shell syntax check
