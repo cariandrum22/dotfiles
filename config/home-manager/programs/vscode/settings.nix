@@ -134,5 +134,13 @@
     "shellformat" = {
       "path" = "${pkgs.shfmt}/bin/shellformat";
     };
+    # TOML settings
+    "[toml]" = {
+      # Enhanced TOML for syntax highlighting and validation only
+      # Formatting will be done by taplo via pre-commit hooks
+      "editor.formatOnSave" = false;
+      # Explicitly disable formatter to avoid conflicts with taplo
+      "editor.defaultFormatter" = null;
+    };
   };
 }

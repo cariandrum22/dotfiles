@@ -1,0 +1,28 @@
+include = [ "pyproject.toml", ".ruff.toml", "**/.ruff.toml" ]
+exclude = [
+".direnv/**",
+"**/.direnv/**",
+"**/node_modules/**",
+"**/target/**",
+"**/result/**"
+]
+
+
+[schema]
+enabled = false
+
+
+[[rule]]
+include = [ "pyproject.toml" ]
+
+
+[rule.schema]
+url = "https://json.schemastore.org/pyproject.json"
+
+
+[[rule]]
+include = [ ".ruff.toml", "**/.ruff.toml" ]
+
+
+[rule.schema]
+url = "https://json.schemastore.org/ruff.json"
