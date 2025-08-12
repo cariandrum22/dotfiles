@@ -3,7 +3,7 @@
 
 import json
 import re
-import subprocess
+import subprocess  # noqa: S404 - Required for nix-prefetch-url
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from functools import partial
@@ -18,6 +18,34 @@ PLATFORMS = {
 }
 
 
+class VscodeConfigError(ValueError):
+    """Error reading metadata.nix configuration."""
+
+
+class VscodeFetchError(RuntimeError):
+    """Error fetching VSCode information."""
+
+    def __init__(self, url: str, error: Exception) -> None:
+        """Initialize with URL and error."""
+        super().__init__(f"Failed to fetch {url}: {error}")
+
+
+class VscodePrefetchError(RuntimeError):
+    """Error prefetching URL."""
+
+    def __init__(self, plat: str, stderr: str) -> None:
+        """Initialize with platform and stderr."""
+        super().__init__(f"Failed to prefetch {plat}: {stderr}")
+
+
+class VscodeCommitMismatchError(RuntimeError):
+    """Error when commit doesn't match expected value."""
+
+    def __init__(self, expected: str, actual: str) -> None:
+        """Initialize with expected and actual commits."""
+        super().__init__(f"Commit mismatch: expected {expected}, got {actual}")
+
+
 class Metadata(NamedTuple):
     """VSCode Insiders metadata."""
 
@@ -30,18 +58,19 @@ class Metadata(NamedTuple):
 def fetch_json(url: str) -> dict:
     """Fetch and parse JSON from URL."""
     try:
-        with urlopen(url) as response:
+        with urlopen(url) as response:  # noqa: S310 - Only used with trusted HTTPS URLs
             return json.loads(response.read())
     except (URLError, json.JSONDecodeError) as e:
-        raise RuntimeError(f"Failed to fetch {url}: {e}") from e
+        raise VscodeFetchError(url, e) from e
 
 
 def get_current_commit(metadata_file: Path) -> str:
     """Extract current commit from metadata.nix."""
-    content = metadata_file.read_text()
+    content = metadata_file.read_text(encoding="utf-8")
     match = re.search(r'commit = "([^"]+)"', content)
     if not match:
-        raise ValueError("Could not find commit in metadata.nix")
+        msg = "Could not find commit in metadata.nix"
+        raise VscodeConfigError(msg)
     return match.group(1)
 
 
@@ -49,13 +78,11 @@ def get_latest_info() -> tuple[str, str]:
     """Fetch latest commit and version from VSCode API."""
     # Use the Linux x64 endpoint as reference
     data = fetch_json(
-        "https://update.code.visualstudio.com/api/update/linux-x64/insider/latest"
+        "https://update.code.visualstudio.com/api/update/linux-x64/insider/latest",
     )
     commit = data["version"]
     version = data.get("productVersion", "").replace("-insider", "")
     return commit, version
-
-
 
 
 def prefetch_sha256(commit: str, system: str, plat: str) -> tuple[str, str, str]:
@@ -67,9 +94,7 @@ def prefetch_sha256(commit: str, system: str, plat: str) -> tuple[str, str, str]
         data = fetch_json(api_url)
         # Ensure we're getting the right commit
         if data["version"] != commit:
-            raise RuntimeError(
-                f"Commit mismatch: expected {commit}, got {data['version']}"
-            )
+            raise VscodeCommitMismatchError(commit, data["version"])
 
         download_url = data["url"]
 
@@ -81,7 +106,7 @@ def prefetch_sha256(commit: str, system: str, plat: str) -> tuple[str, str, str]
         )
         return system, download_url, result.stdout.strip()
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(f"Failed to prefetch {plat}: {e.stderr}") from e
+        raise VscodePrefetchError(plat, e.stderr) from e
 
 
 def fetch_all_metadata(commit: str) -> tuple[dict[str, str], dict[str, str]]:
@@ -169,7 +194,7 @@ def update_vscode_insiders() -> bool:
     content = generate_nix_content(metadata)
 
     print(f"\nUpdating {metadata_file}...")
-    metadata_file.write_text(content)
+    metadata_file.write_text(content, encoding="utf-8")
 
     print("\n✅ Successfully updated VSCode Insiders")
     print(f"  Commit: {current_commit} → {latest_commit}")
@@ -178,12 +203,19 @@ def update_vscode_insiders() -> bool:
     return True
 
 
-def main():
+def main() -> None:
     """Main entry point."""
     try:
         update_vscode_insiders()
         sys.exit(0)
-    except Exception as e:
+    except (
+        VscodeConfigError,
+        VscodeFetchError,
+        VscodePrefetchError,
+        VscodeCommitMismatchError,
+        FileNotFoundError,
+        subprocess.CalledProcessError,
+    ) as e:
         print(f"\n❌ Error: {e}", file=sys.stderr)
         sys.exit(1)
 

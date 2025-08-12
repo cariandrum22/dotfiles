@@ -3,7 +3,7 @@
 
 import json
 import re
-import subprocess
+import subprocess  # noqa: S404 - Required for nix-prefetch-url
 import sys
 from pathlib import Path
 from typing import NamedTuple
@@ -11,6 +11,38 @@ from urllib.error import URLError
 from urllib.request import urlopen
 
 CURSOR_API_URL = "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable"
+
+
+class CursorConfigError(ValueError):
+    """Error reading cursor.nix configuration."""
+
+    def __init__(self, field: str) -> None:
+        """Initialize with field name."""
+        super().__init__(f"Could not find {field} in cursor.nix")
+
+
+class CursorFetchError(RuntimeError):
+    """Error fetching cursor information."""
+
+    def __init__(self, url: str, error: Exception) -> None:
+        """Initialize with URL and error."""
+        super().__init__(f"Failed to fetch {url}: {error}")
+
+
+class CursorVersionError(ValueError):
+    """Error extracting version from URL."""
+
+    def __init__(self, url: str) -> None:
+        """Initialize with URL."""
+        super().__init__(f"Could not extract version from URL: {url}")
+
+
+class CursorPrefetchError(RuntimeError):
+    """Error prefetching URL."""
+
+    def __init__(self, url: str, stderr: str) -> None:
+        """Initialize with URL and stderr."""
+        super().__init__(f"Failed to prefetch {url}: {stderr}")
 
 
 class CursorInfo(NamedTuple):
@@ -24,30 +56,30 @@ class CursorInfo(NamedTuple):
 def fetch_json(url: str) -> dict:
     """Fetch and parse JSON from URL."""
     try:
-        with urlopen(url) as response:
+        with urlopen(url) as response:  # noqa: S310 - Only used with trusted HTTPS URL
             return json.loads(response.read())
     except (URLError, json.JSONDecodeError) as e:
-        raise RuntimeError(f"Failed to fetch {url}: {e}") from e
+        raise CursorFetchError(url, e) from e
 
 
 def get_current_info(cursor_file: Path) -> tuple[str, str, str]:
     """Extract current version, URL and hash from cursor.nix."""
-    content = cursor_file.read_text()
+    content = cursor_file.read_text(encoding="utf-8")
 
     # Extract version
     version_match = re.search(r'version = "([^"]+)";', content)
     if not version_match:
-        raise ValueError("Could not find version in cursor.nix")
+        raise CursorConfigError("version")
 
     # Extract download URL
     url_match = re.search(r'downloadUrl = "([^"]+)";', content)
     if not url_match:
-        raise ValueError("Could not find downloadUrl in cursor.nix")
+        raise CursorConfigError("downloadUrl")
 
     # Extract download hash
     hash_match = re.search(r'hash = "([^"]+)";', content)
     if not hash_match:
-        raise ValueError("Could not find download hash in cursor.nix")
+        raise CursorConfigError("hash")
 
     return version_match.group(1), url_match.group(1), hash_match.group(1)
 
@@ -72,7 +104,7 @@ def prefetch_url(url: str, name: str | None = None, *, sri_format: bool = False)
             # Convert nix32 to SRI format
             convert_cmd = [
                 "nix", "hash", "convert",
-                "--hash-algo", "sha256", "--to", "sri", nix32_hash
+                "--hash-algo", "sha256", "--to", "sri", nix32_hash,
             ]
             convert_result = subprocess.run(
                 convert_cmd,
@@ -81,9 +113,9 @@ def prefetch_url(url: str, name: str | None = None, *, sri_format: bool = False)
                 check=True,
             )
             return convert_result.stdout.strip()
-        return nix32_hash
+        return nix32_hash  # noqa: TRY300 - Conflicts with RET505
     except subprocess.CalledProcessError as e:
-        raise RuntimeError(f"Failed to prefetch {url}: {e.stderr}") from e
+        raise CursorPrefetchError(url, e.stderr) from e
 
 
 def get_latest_cursor_info() -> CursorInfo:
@@ -98,7 +130,7 @@ def get_latest_cursor_info() -> CursorInfo:
     # URL format: https://downloads.cursor.com/.../Cursor-1.2.4-x86_64.AppImage
     version_match = re.search(r'[Cc]ursor-(\d+\.\d+\.\d+)', download_url)
     if not version_match:
-        raise ValueError(f"Could not extract version from URL: {download_url}")
+        raise CursorVersionError(download_url)
     version = version_match.group(1)
 
     print(f"  Version: {version}")
@@ -114,7 +146,7 @@ def get_latest_cursor_info() -> CursorInfo:
 
 def update_cursor_nix(cursor_file: Path, info: CursorInfo) -> bool:
     """Update cursor.nix with new version, URL and hash. Returns True if updated."""
-    content = cursor_file.read_text()
+    content = cursor_file.read_text(encoding="utf-8")
     original_content = content
 
     # Update version
@@ -122,7 +154,7 @@ def update_cursor_nix(cursor_file: Path, info: CursorInfo) -> bool:
         r'(version = ")[^"]+(")',
         f'\\g<1>{info.version}\\g<2>',
         content,
-        count=1
+        count=1,
     )
 
     # Update download URL
@@ -130,7 +162,7 @@ def update_cursor_nix(cursor_file: Path, info: CursorInfo) -> bool:
         r'(downloadUrl = ")[^"]+(")',
         f'\\g<1>{info.download_url}\\g<2>',
         content,
-        count=1
+        count=1,
     )
 
     # Update download hash
@@ -138,13 +170,13 @@ def update_cursor_nix(cursor_file: Path, info: CursorInfo) -> bool:
         r'(hash = ")[^"]+(")',
         f'\\g<1>{info.download_hash}\\g<2>',
         content,
-        count=1
+        count=1,
     )
 
     if content == original_content:
         return False
 
-    cursor_file.write_text(content)
+    cursor_file.write_text(content, encoding="utf-8")
     return True
 
 
@@ -189,12 +221,19 @@ def update_cursor() -> bool:
     return False
 
 
-def main():
+def main() -> None:
     """Main entry point."""
     try:
-        updated = update_cursor()
-        sys.exit(0 if updated else 0)
-    except Exception as e:
+        update_cursor()
+        sys.exit(0)
+    except (
+        CursorConfigError,
+        CursorFetchError,
+        CursorVersionError,
+        CursorPrefetchError,
+        FileNotFoundError,
+        subprocess.CalledProcessError,
+    ) as e:
         print(f"\n❌ Error: {e}", file=sys.stderr)
         sys.exit(1)
 

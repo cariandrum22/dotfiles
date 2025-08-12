@@ -19,7 +19,7 @@ import argparse
 import http.client
 import json
 import platform
-import subprocess
+import subprocess  # noqa: S404 - Required for code CLI
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -35,6 +35,34 @@ DOWNLOAD_ENDPOINT = (
     "/extension/{extension}/{version}"
     "/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage{queryString}"
 )
+
+
+class VscodeExtensionError(RuntimeError):
+    """Base error for VSCode extension operations."""
+
+
+class ExtensionFetchError(VscodeExtensionError):
+    """Error fetching extension information."""
+
+    def __init__(self, ext: str, error: Exception) -> None:
+        """Initialize with extension and error."""
+        super().__init__(f"Failed to get {ext}: {error}")
+
+
+class ExtensionInstalledError(VscodeExtensionError):
+    """Error getting installed extensions."""
+
+    def __init__(self, error: Exception) -> None:
+        """Initialize with error."""
+        super().__init__(f"Failed to get installed extensions: {error}")
+
+
+class ExtensionServerError(http.client.HTTPException):
+    """Server error from marketplace."""
+
+    def __init__(self, status: int, reason: str) -> None:
+        """Initialize with status and reason."""
+        super().__init__(f"Server error: {status} {reason}")
 
 
 class Extension(TypedDict):
@@ -75,14 +103,14 @@ def get_installed_extensions() -> list[str]:
                     line.strip() for line in result.stdout.splitlines() if line.strip()
                 ]
                 print(f"✓ Found {len(extensions)} installed extensions via {cmd}")
-                return extensions
+                return extensions  # noqa: TRY300
             except (subprocess.CalledProcessError, FileNotFoundError):
                 continue
-
+        # If we get here, neither command worked
         msg = "Could not find VSCode command (tried code-insiders and code)"
-        raise RuntimeError(msg)
+        raise RuntimeError(msg)  # noqa: TRY301
     except Exception as e:
-        raise RuntimeError(f"Failed to get installed extensions: {e}") from e
+        raise ExtensionInstalledError(e) from e
 
 
 def read_extensions_file(file_path: Path) -> list[str]:
@@ -94,7 +122,7 @@ def read_extensions_file(file_path: Path) -> list[str]:
     Returns:
         List of extension identifiers in publisher.name format
     """
-    with file_path.open() as f:
+    with file_path.open(encoding="utf-8") as f:
         return [line.strip() for line in f if line.strip()]
 
 
@@ -124,7 +152,7 @@ def parse_extension_list(extensions: list[str]) -> list[Extension]:
 
 
 def _make_marketplace_request(
-    headers: dict[str, str], data: dict[str, Any]
+    headers: dict[str, str], data: dict[str, Any],
 ) -> tuple[int, str, bytes]:
     """Make HTTP request to marketplace.
 
@@ -138,7 +166,7 @@ def _make_marketplace_request(
     connection = http.client.HTTPSConnection(MARKETPLACE_DOMAIN, timeout=30)
     try:
         connection.request(
-            "POST", EXTENSION_QUERY_ENDPOINT, json.dumps(data), headers
+            "POST", EXTENSION_QUERY_ENDPOINT, json.dumps(data), headers,
         )
         response = connection.getresponse()
         return response.status, response.reason, response.read()
@@ -147,7 +175,7 @@ def _make_marketplace_request(
 
 
 def query(
-    extension: Extension, retries: int = 3, backoff_base: float = 1.0
+    extension: Extension, retries: int = 3, backoff_base: float = 1.0,
 ) -> QueryResult:
     """Query marketplace for extension information with retry logic.
 
@@ -180,7 +208,7 @@ def query(
                 "pageSize": 100,
                 "sortBy": 0,
                 "sortOrder": 0,
-            }
+            },
         ],
         "assetTypes": [],
         "flags": 0x200,  # Include latest version only
@@ -193,7 +221,7 @@ def query(
 
             # Check for HTTP errors
             if status >= HTTP_SERVER_ERROR_THRESHOLD:
-                raise http.client.HTTPException(f"Server error: {status} {reason}")
+                raise ExtensionServerError(status, reason)  # noqa: TRY301
 
             return {
                 "status": status,
@@ -378,7 +406,7 @@ def parse_args() -> argparse.Namespace:
         Parsed arguments
     """
     parser = argparse.ArgumentParser(
-        description="Update VSCode extensions Nix expressions"
+        description="Update VSCode extensions Nix expressions",
     )
     parser.add_argument(
         "--from-installed",
@@ -417,7 +445,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def process_extensions(
-    extensions: list[Extension], workers: int = 3, retries: int = 3
+    extensions: list[Extension], workers: int = 3, retries: int = 3,
 ) -> list[QueryResult]:
     """Query marketplace for all extensions in parallel.
 
@@ -449,7 +477,14 @@ def process_extensions(
                 result = future.result()
                 print(f"  ✓ {ext_name}")
                 results.append(result)
-            except Exception as e:
+            except (
+                http.client.HTTPException,
+                json.JSONDecodeError,
+                KeyError,
+                IndexError,
+                RuntimeError,
+                VscodeExtensionError,
+            ) as e:
                 print(f"  ✗ {ext_name}: {e}")
                 failed.append(ext_name)
 
@@ -462,7 +497,7 @@ def process_extensions(
 
 
 def get_extensions_list(
-    *, from_installed: bool, extensions_file: Path
+    *, from_installed: bool, extensions_file: Path,
 ) -> list[str] | None:
     """Get extensions list from file or installed VSCode.
 
@@ -484,7 +519,7 @@ def get_extensions_list(
 
 
 def write_nix_output(
-    results: list[QueryResult], output_file: Path, retries: int
+    results: list[QueryResult], output_file: Path, retries: int,
 ) -> None:
     """Generate and write Nix expressions to file.
 
@@ -499,7 +534,7 @@ def write_nix_output(
         try:
             nix_attr = extract_extension_info(result, retries)
             extensions_nix_parts.append(nix_attr)
-        except Exception as e:
+        except (KeyError, IndexError, AttributeError, TypeError) as e:
             ext_info = result["body"]["results"][0]["extensions"][0]
             ext_name = (
                 f"{ext_info['publisher']['publisherName']}.{ext_info['extensionName']}"
@@ -507,7 +542,7 @@ def write_nix_output(
             print(f"  ✗ Failed to generate Nix for {ext_name}: {e}")
 
     extensions_nix = "\n".join(extensions_nix_parts)
-    with output_file.open("w") as file:
+    with output_file.open("w", encoding="utf-8") as file:
         file.write("[\n")
         file.write(extensions_nix)
         file.write("\n]\n")
@@ -549,21 +584,19 @@ def main() -> int:
     # Determine paths
     script_dir = Path(__file__).parent
     extensions_file = (
-        args.file
-        if args.file
-        else script_dir.parent / "config/home-manager/programs/vscode/extensions"
+        args.file or
+        script_dir.parent / "config/home-manager/programs/vscode/extensions"
     )
     output_file = (
-        args.output
-        if args.output
-        else script_dir.parent / "config/home-manager/programs/vscode/extensions.nix"
+        args.output or
+        script_dir.parent / "config/home-manager/programs/vscode/extensions.nix"
     )
 
     print("Checking VSCode extensions...")
 
     # Get extensions list
     extensions_list = get_extensions_list(
-        from_installed=args.from_installed, extensions_file=extensions_file
+        from_installed=args.from_installed, extensions_file=extensions_file,
     )
     if extensions_list is None:
         return 1
@@ -587,7 +620,14 @@ def main_with_error_handling() -> None:
     except KeyboardInterrupt:
         print("\n⚠️  Interrupted by user")
         sys.exit(130)
-    except Exception as e:
+    except (
+        VscodeExtensionError,
+        FileNotFoundError,
+        ValueError,
+        RuntimeError,
+        http.client.HTTPException,
+        subprocess.CalledProcessError,
+    ) as e:
         print(f"\n❌ Error: {e}", file=sys.stderr)
         sys.exit(1)
 
