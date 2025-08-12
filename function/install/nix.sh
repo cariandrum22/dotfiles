@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck source=function/error.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../error.sh"
 
 #######################################
@@ -13,6 +14,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/../error.sh"
 load_profile() {
   if [ -e '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' ]; then
     set +u
+    # shellcheck source=/dev/null
     source '/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh'
     set -u
   fi
