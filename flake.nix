@@ -92,6 +92,9 @@
             # Python tools
             ruff
 
+            # TOML tools
+            taplo
+
             # CI/CD tools
             act
           ];
@@ -295,6 +298,12 @@
                 # GitHub Actions
                 actionlint = {
                   enable = true;
+                };
+
+                # TOML formatting and validation
+                taplo = {
+                  enable = true;
+                  types = [ "toml" ];
                 };
 
                 # Commit message formatting
