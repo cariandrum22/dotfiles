@@ -47,6 +47,7 @@
         ripgrep
         tlaplus
         tlaps
+        tree
 
         # DevOps
         docker-compose
