@@ -159,7 +159,7 @@ def _fetch_all(commit: str) -> tuple[Mapping[str, str], Mapping[str, str]]:
 def _generate_nix(metadata: Metadata) -> str:
     """Render metadata.nix content deterministically."""
     url_lines = [
-        f'    {system} = "{url.replace(f"/{metadata.commit}/", "/${{commit}}/")}";'
+        f'    {system} = "{url.replace(f"/{metadata.commit}/", "/${commit}/")}";'
         for system, url in sorted(metadata.urls.items())
     ]
     sha_lines = [
