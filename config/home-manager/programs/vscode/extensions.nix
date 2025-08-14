@@ -62,14 +62,14 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "1.0.77";
-    sha256 = "1k37sy0w5ji47339q39kxrv809w40hb0jd8n3329kj8qm2chiqnm";
+    version = "1.0.80";
+    sha256 = "1c2cxadqc0klipv58by3dnf684y06n5p9a1d61kadcqs0psbdnaq";
   }
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "3.23.0";
-    sha256 = "1zq7lavyd51wa1ks0hm1ckahni0pwd14wbbb9ah03s0xp4pj32jq";
+    version = "3.24.0";
+    sha256 = "1y6zppq31nlgk1zakg3lw578sq5v4kjnvkzpsni1mcgly931vb4h";
   }
   {
     name = "cmake";
@@ -98,14 +98,14 @@
   {
     name = "copilot";
     publisher = "GitHub";
-    version = "1.355.1731";
-    sha256 = "196jqzjs8r3q9yzxwhpjm5wn7klman042ilym2hcm50f6pvbclpw";
+    version = "1.356.1734";
+    sha256 = "1hr92fc29pff8i9961rrsgdx55qvpng7mizjwfikw3plpiqbrisz";
   }
   {
     name = "copilot-chat";
     publisher = "GitHub";
-    version = "0.31.2025081204";
-    sha256 = "0zw0cn93f43dy4if7qa7qi02pmc909whqzzac7iglf7gyixkj2ia";
+    version = "0.31.2025081301";
+    sha256 = "1p3c3x9fvx2w8z6j7bdh6bbjhm8q997hbd7vs0vns4vrabf2jh0z";
   }
   {
     name = "cucumber-official";
@@ -170,8 +170,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2025.8.1205";
-    sha256 = "07m0jgy79n5bfk7kf4rvm2mkl8n60aswrky3v49ckx8v7j3y2rz2";
+    version = "2025.8.1305";
+    sha256 = "1va8k8g9p6fixmjhykacmq9v0gaygkfa9yv8zwgqw6mqycm3b47b";
   }
   {
     name = "haskell";
@@ -201,8 +201,8 @@
   {
     name = "jupyter";
     publisher = "ms-toolsai";
-    version = "2025.8.2025081201";
-    sha256 = "0xm5qbbr9d0xfm2c9l224wqs4fjmiwr9vscnlfns22i29wfkqgaq";
+    version = "2025.8.2025081401";
+    sha256 = "05si444dfchxjnaqf6z2gg4iypzk249w0vhg97yf2dfy8i3ivana";
     arch = "linux-x64";
   }
   {
@@ -305,14 +305,14 @@
   {
     name = "remote-explorer";
     publisher = "ms-vscode";
-    version = "0.6.2025072209";
-    sha256 = "1f5qm8ql60ja5qn5s7mccdhanfvfkvs9zii6dc39fvka7nc3bsh9";
+    version = "0.6.2025081309";
+    sha256 = "19c04ds5mf9rcq3528657xw2mk5prq3577hdcfgg0wsair37ga5b";
   }
   {
     name = "remote-ssh";
     publisher = "ms-vscode-remote";
-    version = "0.121.2025073115";
-    sha256 = "0n8in0qiicnjxvp95gdk0f3syx3bpydcl7spzjy78wqyqk68f3kc";
+    version = "0.121.2025081315";
+    sha256 = "0yxgymq8xw4y7vy88p3125dyjmpbv9330p75i3w84y566r01g5vf";
   }
   {
     name = "remote-ssh-edit";
