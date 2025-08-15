@@ -5,7 +5,6 @@
     "accessibility.signals.terminalBell" = {
       "sound" = "on";
     };
-    "terminal.integrated.enableBell" = true;
     "editor" = {
       "emptySelectionClipboard" = true;
       "fontFamily" = "'Fira Code', 'FiraCode Nerd Font', Menlo, Monaco, 'Courier New', monospace";
