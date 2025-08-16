@@ -72,7 +72,9 @@
         "useLocalServer" = false;
         "remotePlatform" = {
           eto = "linux";
+          "eto.stultitia.me" = "linux";
           heilwig = "macOS";
+          chroe = "macOS";
         };
       };
     };
