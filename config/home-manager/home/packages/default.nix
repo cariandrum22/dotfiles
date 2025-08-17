@@ -67,22 +67,22 @@
         # AI Tools
         (unstable.claude-code.overrideAttrs (
           finalAttrs: oldAttrs: rec {
-            version = "1.0.51";
+            version = "1.0.83";
             src = fetchzip {
               url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-              hash = "sha256-sAILRsi8ZViMfcpqykfnFQzHTJHRwRSZz45otMqa4U0=";
+              hash = "sha256-h6bAP6nMifQ6cfM80A1QxSYM53LYbEX1WsyPiNPby0M=";
             };
           }
         ))
-        (callPackage ./codex.nix { inherit pkgs; })
+        (callPackage ./codex.nix { inherit pkgs unstable; })
         (unstable.gemini-cli.overrideAttrs (
           finalAttrs: oldAttrs: {
-            version = "0.1.12";
+            version = "0.1.21"; # gemini-cli version
             src = pkgs.fetchFromGitHub {
               owner = "google-gemini";
               repo = "gemini-cli";
               tag = "v${finalAttrs.version}";
-              hash = "sha256-7StuYqKGnTTZY3BKK3X1kWNReRUfyvhfH3wGw0Pz2zM=";
+              hash = "sha256-4s+mU8BhJQDwLJtKcWTH0ks/W4n/FuEjWzT8aFQAPWI=";
               postFetch = ''
                 ${lib.getExe pkgs.npm-lockfile-fix} $out/package-lock.json
               '';
@@ -90,7 +90,7 @@
 
             npmDeps = pkgs.fetchNpmDeps {
               inherit (finalAttrs) src;
-              hash = "sha256-yt1Z/atE07vt27OdiLHPV1ZSHJ80zkGkcuro7rJxOrc";
+              hash = "sha256-yt1Z/atE07vt27OdiLHPV1ZSHJ80zkGkcuro7rJxOrc="; # gemini-cli npmDeps
             };
           }
         ))
