@@ -68,8 +68,8 @@
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "3.25.2";
-    sha256 = "03c4cz4rk6jf6sxgj24qpnzknvjvjkv6dxd19cv4fhh0sqcnvz3q";
+    version = "3.25.3";
+    sha256 = "1kgbhxz009ng3m8b21adclkpkzyffj9h2638rms69gblasyi1bpm";
   }
   {
     name = "cmake";
@@ -170,8 +170,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2025.8.1514";
-    sha256 = "06vlx5yqqqx20k9w7w50mw06p9lq71k8qisviqspg4wvw3f81vnk";
+    version = "2025.8.1605";
+    sha256 = "0rnza07rl0gpbr2iq9xpjmymm11mvpp6qr2wzgn4l0a1jc23hgz6";
   }
   {
     name = "haskell";
