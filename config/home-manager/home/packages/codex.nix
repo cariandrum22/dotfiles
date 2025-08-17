@@ -1,21 +1,21 @@
-{ pkgs, ... }:
+{ pkgs, unstable, ... }:
 
-pkgs.rustPlatform.buildRustPackage rec {
+unstable.rustPlatform.buildRustPackage rec {
   pname = "codex-cli";
-  version = "rust-v0.7.0";
+  version = "rust-v0.22.0";
 
   src = pkgs.fetchFromGitHub {
     owner = "openai";
     repo = "codex";
     rev = "${version}";
-    hash = "sha256-EPK7FX7mP6+nhYMs22zjAclZ9067lOo+BoBYckdnq/E=";
+    hash = "sha256-JTwtydW8LLBH/55+8a/BbqlZtkXsFKbT8dGoDEAjk1c=";
   };
 
   sourceRoot = "source/codex-rs";
-  cargoHash = "sha256-69bvdxHdFnWYvCH0PW+KMZI5HDuarFndNlf75Iw5Dno=";
+  cargoHash = "sha256-3PljlyPfDsnjGmR/0iM7Fu1TnyDj31pKVcOU/izsL30=";
 
-  nativeBuildInputs = with pkgs; [ pkg-config ];
-  buildInputs = with pkgs; [ openssl ];
+  nativeBuildInputs = with unstable; [ pkg-config ];
+  buildInputs = with unstable; [ openssl ];
 
   doCheck = false;
 
