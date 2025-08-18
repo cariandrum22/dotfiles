@@ -75,25 +75,7 @@
           }
         ))
         (callPackage ./codex.nix { inherit pkgs unstable; })
-        (unstable.gemini-cli.overrideAttrs (
-          finalAttrs: oldAttrs: {
-            version = "0.1.21"; # gemini-cli version
-            src = pkgs.fetchFromGitHub {
-              owner = "google-gemini";
-              repo = "gemini-cli";
-              tag = "v${finalAttrs.version}";
-              hash = "sha256-4s+mU8BhJQDwLJtKcWTH0ks/W4n/FuEjWzT8aFQAPWI=";
-              postFetch = ''
-                ${lib.getExe pkgs.npm-lockfile-fix} $out/package-lock.json
-              '';
-            };
-
-            npmDeps = pkgs.fetchNpmDeps {
-              inherit (finalAttrs) src;
-              hash = "sha256-yt1Z/atE07vt27OdiLHPV1ZSHJ80zkGkcuro7rJxOrc="; # gemini-cli npmDeps
-            };
-          }
-        ))
+        (callPackage ./gemini-cli.nix { inherit pkgs; })
         claudius
 
         # Development toolchain

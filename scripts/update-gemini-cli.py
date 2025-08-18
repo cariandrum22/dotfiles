@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """Update gemini-cli tool using functional programming style.
 
-This script automatically updates the gemini-cli metadata used by Nix.
-It fetches the latest version from GitHub releases and calculates both
-the source hash and npm dependencies hash.
+This script automatically updates the gemini-cli package by fetching
+the latest prebuilt binary from GitHub releases.
 
 Usage:
     ./update-gemini-cli.py
 
 Files modified:
-    config/home-manager/home/packages/default.nix
+    config/home-manager/home/packages/gemini-cli.nix
 """
 
 import sys
@@ -20,12 +19,9 @@ import update_lib as lib
 # Configuration
 CONFIG = lib.UpdateConfig(
     tool_name="gemini-cli",
-    nix_file=Path("config/home-manager/home/packages/default.nix"),
-    version_pattern=(
-        r'(unstable\.gemini-cli\.overrideAttrs.*?version\s*=\s*")'
-        r'([^"]+)(".*?#\s*gemini-cli version)'
-    ),
-    hash_pattern=r'(unstable\.gemini-cli\.overrideAttrs.*?hash\s*=\s*")([^"]+)(";)',
+    nix_file=Path("config/home-manager/home/packages/gemini-cli.nix"),
+    version_pattern=r'(version\s*=\s*")([^"]+)(";)',
+    hash_pattern=r'(hash\s*=\s*")([^"]+)(";)',
 )
 
 GITHUB_REPO = "google-gemini/gemini-cli"
@@ -33,18 +29,57 @@ GITHUB_REPO = "google-gemini/gemini-cli"
 
 def main() -> int:
     """Main entry point using functional pipeline."""
-    # Create the update pipeline
-    # Note: gemini-cli doesn't use version prefix like "rust-v"
-    update_pipeline = lib.create_github_update_pipeline(CONFIG, GITHUB_REPO, prefix="")
+    # Custom hash calculation for binary file
+    def calculate_binary_hash(version: lib.Version) -> lib.Hash:
+        url = f"https://github.com/{GITHUB_REPO}/releases/download/v{version}/gemini.js"
+        return lib.calculate_hash(url, unpack=False)
 
-    # Execute the pipeline
-    result = update_pipeline()
+    # Use base GitHub pipeline with modifications
+    def pipeline() -> lib.UpdateResult:
+        # Get latest version
+        latest_version = lib.fetch_github_release(GITHUB_REPO, version_prefix="")
 
-    # Display result
+        # Read current file and extract info
+        content = lib.read_file(CONFIG.nix_file)
+        current = lib.extract_current_info(CONFIG, content)
+
+        # Check for update
+        if current.version == latest_version:
+            return lib.UpdateResult(
+                tool_name=CONFIG.tool_name,
+                current=current,
+                latest=None,
+                status=lib.UpdateStatus.UP_TO_DATE,
+                message=f"Already at latest version {latest_version}",
+            )
+
+        # Calculate hash for binary
+        new_hash = calculate_binary_hash(latest_version)
+
+        # Create new package info
+        latest = lib.PackageInfo(
+            name=CONFIG.tool_name,
+            version=latest_version,
+            hash=new_hash,
+        )
+
+        # Apply updates and write
+        updated_content = lib.apply_updates(CONFIG, content, latest)
+        lib.write_file(CONFIG.nix_file, updated_content)
+
+        return lib.UpdateResult(
+            tool_name=CONFIG.tool_name,
+            current=current,
+            latest=latest,
+            status=lib.UpdateStatus.UPDATED,
+            message=f"Updated from {current.version} to {latest_version}",
+        )
+
+    # Execute pipeline
+    result = pipeline()
     lib.print_result(result)
 
-    # Return appropriate exit code
-    return 0 if not result.error else 1
+    return 0 if result.status != lib.UpdateStatus.ERROR else 1
 
 
 if __name__ == "__main__":
