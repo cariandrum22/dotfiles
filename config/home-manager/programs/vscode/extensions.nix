@@ -98,8 +98,8 @@
   {
     name = "copilot";
     publisher = "GitHub";
-    version = "1.356.1735";
-    sha256 = "07536wqy9wg15wfhlqdpray6nkml85i3hj467c6qckgh1dlw6xab";
+    version = "1.357.1739";
+    sha256 = "15jgxplwh898j4nqvslwq7lh1ci5z9ii8l5j8y3dm4gmr8kdlw23";
   }
   {
     name = "copilot-chat";
