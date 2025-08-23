@@ -62,8 +62,8 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "1.0.88";
-    sha256 = "11dq0syhpszymg0pyqc4yn60nx9nira5dw013k7r7ma7acyznz0w";
+    version = "1.0.89";
+    sha256 = "1lk9nhjz723kig0mpdj4w3f38prdgkvra5padj550fxb5m9lzn6c";
   }
   {
     name = "claude-dev";
@@ -104,8 +104,8 @@
   {
     name = "copilot-chat";
     publisher = "GitHub";
-    version = "0.31.2025082201";
-    sha256 = "0n8rmy0crvdbcbxbf8hgyis84r340c67q8h9byf80pajcqz3ximw";
+    version = "0.31.2025082213";
+    sha256 = "0hf9ggaqykhaj991j8bjfq6a264xvb2faqyc62kfrb5xivxy14mz";
   }
   {
     name = "cucumber-official";
@@ -134,8 +134,8 @@
   {
     name = "emacs-mcx";
     publisher = "tuttieee";
-    version = "0.90.0";
-    sha256 = "0bs4vfsdjkywjn96z2jkazr3b9qccy84j7z4ynzvxlnhr5viqvrx";
+    version = "0.90.1";
+    sha256 = "1ya1n5yzbj5qi1j783rgyh5f6l0n0khj1zcg76wrji78cb8kwz90";
   }
   {
     name = "enhanced-toml";
@@ -170,8 +170,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2025.8.2111";
-    sha256 = "1abwpyng0zpb98z5nc4w6s6gzxly2dckjykpc09afjcf42wxm5jy";
+    version = "2025.8.2205";
+    sha256 = "031dq8pafd6hm256y3m88pjflhd8hafyhhkpz157c1jn9j0388nm";
   }
   {
     name = "haskell";
@@ -201,8 +201,8 @@
   {
     name = "jupyter";
     publisher = "ms-toolsai";
-    version = "2025.8.2025082101";
-    sha256 = "1arn5g12sbr060cal8vmd2ahxrfpqcf0p71h7khabki61x1ch1bw";
+    version = "2025.8.2025082201";
+    sha256 = "0ik48qvsd3z3gva4w25dyhsmfc0m81q2xvbnfarz5v9v4k969jd8";
     arch = "linux-x64";
   }
   {
@@ -459,8 +459,8 @@
   {
     name = "vscode-ide";
     publisher = "tlaplus";
-    version = "2025.8.191520";
-    sha256 = "0xi1alh6nl1klgbgdj96wh60476ryy0cjnj9z4gm81ds75sa7ily";
+    version = "2025.8.222312";
+    sha256 = "0vciwfl7935k29pa9sb2w38q9dmncs3mn0l9y72421n03pmx23l2";
   }
   {
     name = "vscode-java-debug";
