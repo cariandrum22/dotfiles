@@ -68,8 +68,8 @@
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "3.26.2";
-    sha256 = "02zcr16w88ai1ma69avid76lhgw8kixa1picn97r63753f7zlflv";
+    version = "3.26.5";
+    sha256 = "02na6bk968lqlkqzqzkgrpx7llrf5s8j87mwq3mlshnn0aza32bf";
   }
   {
     name = "cmake";
@@ -194,8 +194,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.45.2025081408";
-    sha256 = "15936igz5839xmvww52apa2ybrmgf8gij4h91xx1d0id0fvdsi2j";
+    version = "1.45.2025082308";
+    sha256 = "1ss4r51cng1k51zi1d8c3lz52v1jpflzycfsz1yyx1i004kairrx";
     arch = "linux-x64";
   }
   {
