@@ -11,14 +11,19 @@
         recursive = true;
       };
       ".themes/Nordic" = {
-        source = builtins.fetchGit {
-          url = "https://github.com/EliverLara/Nordic";
-          ref = "refs/tags/v2.2.0";
+        source = pkgs.fetchFromGitHub {
+          owner = "EliverLara";
+          repo = "Nordic";
+          rev = "v2.2.0";
+          sha256 = "sha256-3f8YvRzVxpZrSs8LP3H0XlEuGvmD2zpGJX6BeSqQKC4=";
         };
       };
       ".icons/candy-icons" = {
-        source = builtins.fetchGit {
-          url = "https://github.com/EliverLara/candy-icons";
+        source = pkgs.fetchFromGitHub {
+          owner = "EliverLara";
+          repo = "candy-icons";
+          rev = "master";
+          sha256 = "sha256-6aoBT8sFY5REyrJUphN0dQQlLOCJRRGfRrZU/iuOkzk=";
         };
       };
       ".config/gtk-3.0/settings.ini" = {

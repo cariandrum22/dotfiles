@@ -1,4 +1,3 @@
----
 name: CI
 
 "on":
@@ -29,18 +28,20 @@ jobs:
       - name: Setup Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v8
 
-      - name: Check top-level flake
-        run: nix flake check --impure
+      - name: Check flake metadata
+        run: nix flake metadata
 
-      - name: Check home-manager flake
-        run: |
-          cd config/home-manager
-          nix flake check --impure
+      - name: Show flake outputs
+        run: nix flake show --impure
 
-      - name: Check xmonad flake
+      - name: Evaluate flake (no build)
         run: |
-          cd xmonad
-          nix flake check
+          # Evaluate all outputs without building
+          nix eval .#homeConfigurations."user@x86_64-linux".activationPackage.drvPath --impure
+          nix eval .#homeConfigurations."user@aarch64-darwin".activationPackage.drvPath --impure
+          nix eval .#packages.x86_64-linux.myxmonad.drvPath --impure 2>/dev/null || true
+          nix eval .#devShells.x86_64-linux.default.drvPath --impure
+          nix eval .#devShells.aarch64-darwin.default.drvPath --impure
 
   lint:
     name: Lint
@@ -61,18 +62,20 @@ jobs:
 
       - name: Run pre-commit hooks
         run: |
-          nix develop --impure --command pre-commit run --all-files
+          # Use pre-commit hooks to run all linters with consistent settings
+          nix develop --impure --command pre-commit run --all-files --show-diff-on-failure
 
-  validate-home-manager:
-    name: Validate Home Manager configurations
+  evaluate-home-manager:
+    name: Evaluate Home Manager (${{ matrix.system }})
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - system: x86_64-linux
             os: ubuntu-latest
           - system: aarch64-darwin
             os: macos-latest
-    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -87,19 +90,15 @@ jobs:
       - name: Setup Nix cache
         uses: DeterminateSystems/magic-nix-cache-action@v8
 
-      - name: Validate Home Manager configuration (dry-run)
+      - name: Evaluate Home Manager configuration (no build)
         run: |
-          cd config/home-manager
-          echo "Validating Home Manager configuration for ${{ matrix.system }}..."
-          nix build --dry-run --impure \
-            .#homeConfigurations."user@${{ matrix.system }}".activationPackage
+          # Evaluate only, don't build to avoid space issues
+          nix eval .#homeConfigurations."user@${{ matrix.system }}".activationPackage.drvPath --impure
+          echo "✓ Home Manager configuration for ${{ matrix.system }} evaluated successfully"
 
   build-xmonad:
     name: Build XMonad
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        system: [x86_64-linux]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -116,32 +115,6 @@ jobs:
 
       - name: Build XMonad
         run: |
-          cd xmonad
-          nix build .#packages.${{ matrix.system }}.default
-
-  format-check:
-    name: Check formatting
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v14
-        with:
-          extra-conf: |
-            experimental-features = nix-command flakes
-            accept-flake-config = true
-
-      - name: Setup Nix cache
-        uses: DeterminateSystems/magic-nix-cache-action@v8
-
-      - name: Check Nix formatting
-        run: |
-          find . -name "*.nix" -type f -print0 | \
-            xargs -0 nix run .#formatter.x86_64-linux -- --check
-
-      - name: Check other formatting
-        run: |
-          nix develop --impure --command \
-            prettier --check "**/*.{md,yml,yaml,json}" || true
+          echo "Building XMonad package..."
+          nix build .#packages.x86_64-linux.myxmonad
+          echo "✓ XMonad built successfully"

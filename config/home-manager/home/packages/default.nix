@@ -66,7 +66,7 @@
 
         # AI Tools
         (unstable.claude-code.overrideAttrs (
-          finalAttrs: oldAttrs: rec {
+          _finalAttrs: _oldAttrs: rec {
             version = "1.0.83";
             src = fetchzip {
               url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";

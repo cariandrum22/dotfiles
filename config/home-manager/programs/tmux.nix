@@ -1,3 +1,4 @@
+{ pkgs, ... }:
 {
   programs.tmux = {
     enable = true;
@@ -28,6 +29,11 @@
   };
 
   home.file.".tmux/plugins/tpm" = {
-    source = builtins.fetchGit { url = "https://github.com/tmux-plugins/tpm"; };
+    source = pkgs.fetchFromGitHub {
+      owner = "tmux-plugins";
+      repo = "tpm";
+      rev = "master";
+      sha256 = "sha256-hW8mfwB8F9ZkTQ72WQp/1fy8KL1IIYMZBtZYIwZdMQc=";
+    };
   };
 }

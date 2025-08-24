@@ -9,11 +9,11 @@ let
   ws-butler' = pkgs.emacsPackages.trivialBuild {
     pname = "ws-butler";
     version = "20250310.205";
-    src = pkgs.fetchgit {
-      url = "https://github.com/lewang/ws-butler.git";
+    src = pkgs.fetchFromGitHub {
+      owner = "lewang";
+      repo = "ws-butler";
       rev = "e3a38d93e01014cd47bf5af4924459bd145fd7c4";
       sha256 = "sha256-P3G5iEmwK/mijvNRyrqxG4xypnbGh3r6SHOBqZMT89g=";
-      leaveDotGit = true;
     };
   };
 in
@@ -22,6 +22,7 @@ in
     (import (
       builtins.fetchTarball {
         url = "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
+        sha256 = "0myc12nz5xm19qdncx7lpq6jcvwr8m56q6jvr1q07annhni4vh33";
       }
     ))
   ];
@@ -68,7 +69,7 @@ in
         toml-mode
         web-mode
         yaml-mode
-        (melpaPackages.nord-theme.overrideAttrs (old: {
+        (melpaPackages.nord-theme.overrideAttrs (_old: {
           src = nord-theme';
         }))
         all-the-icons

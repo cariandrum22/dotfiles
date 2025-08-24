@@ -105,7 +105,7 @@ check_platform() {
 #   Exits with error if the version string is invalid
 #######################################
 check_version_string() {
-  if [ -z "$input_version" ] || ! [[ "$input_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+.*$ ]]; then
+  if [ -z "$input_version" ] || ! [[ $input_version =~ ^v[0-9]+\.[0-9]+\.[0-9]+.*$ ]]; then
     error "Invalid or missing version argument."
     echo "Usage: $0 v<major>.<minor>.<patch> (e.g., $0 v1.2.3, $0 v1.2.3-rc.1)"
     exit 1
@@ -208,7 +208,7 @@ main() {
   check_version_string
   check_terragrunt_version
 
-  if [[ "$should_update" == "true" ]]; then
+  if [[ $should_update == "true" ]]; then
     run_update
   else
     exit 0
