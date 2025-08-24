@@ -12,21 +12,21 @@ SELECTED="$(echo "$MENU" | rofi \
   -location 3 \
   -xoffset 10 \
   -yoffset 40 \
-  -dmenu -i -p 'System' )"
+  -dmenu -i -p 'System')"
 readonly SELECTED
 
 case "$SELECTED" in
-  *Lock)
-    dm-tool lock
-    ;;
-  *Logout)
-    session=$(loginctl session-status | head -n 1 | awk '{print $1}')
-    loginctl terminate-session "$session"
-    ;;
-  *Reboot)
-    systemctl reboot
-    ;;
-  *Shutdown)
-    systemctl -i poweroff
-    ;;
+*Lock)
+  dm-tool lock
+  ;;
+*Logout)
+  session=$(loginctl session-status | head -n 1 | awk '{print $1}')
+  loginctl terminate-session "$session"
+  ;;
+*Reboot)
+  systemctl reboot
+  ;;
+*Shutdown)
+  systemctl -i poweroff
+  ;;
 esac

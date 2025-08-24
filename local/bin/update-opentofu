@@ -67,7 +67,7 @@ information() {
 #   Writes cleanup information to STDOUT
 #######################################
 cleanup() {
-  if [[ -d "$TMP_DIR" ]]; then
+  if [[ -d $TMP_DIR ]]; then
     information "Cleaning up temporary directory: $TMP_DIR"
     rm -rf "$TMP_DIR"
   fi
@@ -111,7 +111,7 @@ check_platform() {
 #   Exits with error if the version string is invalid
 #######################################
 check_version_string() {
-  if [ -z "$input_version" ] || ! [[ "$input_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+.*$ ]]; then
+  if [ -z "$input_version" ] || ! [[ $input_version =~ ^v[0-9]+\.[0-9]+\.[0-9]+.*$ ]]; then
     error "Invalid or missing version argument."
     echo "Usage: $0 v<major>.<minor>.<patch> (e.g., $0 v1.2.3, $0 v1.2.3-rc.1)"
     exit 1
@@ -135,7 +135,7 @@ check_tofu_version() {
     local -r current_version=$("$TOFU_BINARY" version | awk 'NR==1 {print $2}')
 
     # Compare the versions and determine if an update is needed
-    if [[ "$input_version" == "$current_version" ]]; then
+    if [[ $input_version == "$current_version" ]]; then
       information "The specified \`${input_version}\` is currently installed."
     else
       should_update="true"
@@ -247,7 +247,7 @@ run_update() {
 
   # Verify the SHA256 checksum
   information "Verifying SHA256 checksum..."
-  if [[ "$actual_checksum" == "$expected_checksum" ]]; then
+  if [[ $actual_checksum == "$expected_checksum" ]]; then
     information "SHA256 checksum verification successful."
   else
     error "SHA256 checksum verification failed."
@@ -285,7 +285,7 @@ main() {
   check_version_string
   check_tofu_version
 
-  if [[ "$should_update" == "true" ]]; then
+  if [[ $should_update == "true" ]]; then
     check_gpg_key
     run_update
   else

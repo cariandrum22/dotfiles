@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, ... }:
 let
   pname = "cursor";
   version = "1.4.5";
@@ -37,7 +37,7 @@ appimageTools.wrapType2 {
 
   dieWithParent = false;
 
-  extraPkgs = pkgs: [
+  extraPkgs = _pkgs: [
     unzip
     autoPatchelfHook
     asar
