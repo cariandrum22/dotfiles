@@ -62,8 +62,8 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "1.0.89";
-    sha256 = "1lk9nhjz723kig0mpdj4w3f38prdgkvra5padj550fxb5m9lzn6c";
+    version = "1.0.90";
+    sha256 = "17klz48f5z8yfqibk5rr803dcr5vifdjks188sfx6b33sqfd25hm";
   }
   {
     name = "claude-dev";
@@ -134,8 +134,8 @@
   {
     name = "emacs-mcx";
     publisher = "tuttieee";
-    version = "0.90.1";
-    sha256 = "1ya1n5yzbj5qi1j783rgyh5f6l0n0khj1zcg76wrji78cb8kwz90";
+    version = "0.90.2";
+    sha256 = "0hghijf08kj9lk2xl251jv1wxsxqakiaiqjs3ahg5kl44gj6f708";
   }
   {
     name = "enhanced-toml";
@@ -336,8 +336,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2589";
-    sha256 = "07p0pb1a87cz0x7ymvln66dfvh8ms2wjnh029jjmj298wni36mxp";
+    version = "0.4.2592";
+    sha256 = "1m1gchcv8jv3s21b4slpxx421cyr7ainih5r9kd58dvc972y512v";
     arch = "linux-x64";
   }
   {
