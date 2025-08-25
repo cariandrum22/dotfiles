@@ -13,7 +13,7 @@ let
       owner = "lewang";
       repo = "ws-butler";
       rev = "e3a38d93e01014cd47bf5af4924459bd145fd7c4";
-      sha256 = "sha256-P3G5iEmwK/mijvNRyrqxG4xypnbGh3r6SHOBqZMT89g=";
+      sha256 = "1vcgg8wr5zpkn9ynyx8sad7srmd31dzkc40wnrzs8aan8nsah5bx";
     };
   };
 in
@@ -21,8 +21,8 @@ in
   nixpkgs.overlays = [
     (import (
       builtins.fetchTarball {
-        url = "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
-        sha256 = "0myc12nz5xm19qdncx7lpq6jcvwr8m56q6jvr1q07annhni4vh33";
+        url = "https://github.com/nix-community/emacs-overlay/archive/9e3a5b9a0c79e66b4a1e2490be606a058a6712fe.tar.gz";
+        sha256 = "0sawrpzr6xmvkbg4q1ikmd40mak7z1da6r5w6rjn0xjx3c3f59pr";
       }
     ))
   ];

@@ -15,15 +15,15 @@
           owner = "EliverLara";
           repo = "Nordic";
           rev = "v2.2.0";
-          sha256 = "sha256-3f8YvRzVxpZrSs8LP3H0XlEuGvmD2zpGJX6BeSqQKC4=";
+          sha256 = "02aa1dphzjfy1fi7ln4554di24fa0kcgz8baabm15m9zm9sqfdf1";
         };
       };
       ".icons/candy-icons" = {
         source = pkgs.fetchFromGitHub {
           owner = "EliverLara";
           repo = "candy-icons";
-          rev = "master";
-          sha256 = "sha256-6aoBT8sFY5REyrJUphN0dQQlLOCJRRGfRrZU/iuOkzk=";
+          rev = "278998cb51c68de9d590c84d8fd1625223772792";
+          sha256 = "0mrqv9045rsd0r8rjixf1w6dg6ghzikpdki9sakwfsa4hlpzpmap";
         };
       };
       ".config/gtk-3.0/settings.ini" = {
