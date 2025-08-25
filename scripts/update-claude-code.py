@@ -20,7 +20,7 @@ import update_lib as lib
 CONFIG = lib.UpdateConfig(
     tool_name="claude-code",
     nix_file=Path("config/home-manager/home/packages/default.nix"),
-    version_pattern=r'(unstable\.claude-code\.overrideAttrs\s*\(\s*finalAttrs:\s*oldAttrs:\s*rec\s*\{\s*version\s*=\s*")([^"]+)(")',
+    version_pattern=r'(unstable\.claude-code\.overrideAttrs\s*\(\s*_finalAttrs:\s*_oldAttrs:\s*rec\s*\{\s*version\s*=\s*")([^"]+)(")',
     hash_pattern=r'(unstable\.claude-code\.overrideAttrs.*?hash\s*=\s*")([^"]+)(")',
 )
 
