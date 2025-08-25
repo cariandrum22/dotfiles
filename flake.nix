@@ -86,19 +86,40 @@
       mkHomeConfiguration =
         {
           system,
-          username ? "user",
-          homeDirectory ? "/home/user",
+          username ? null,
+          homeDirectory ? null,
         }:
         let
           pkgs = mkPkgs system;
+          # If not provided, try to get from environment (impure)
+          actualUsername =
+            if username != null then
+              username
+            else if builtins.getEnv "USER" != "" then
+              builtins.getEnv "USER"
+            else
+              "user";
+          actualHomeDirectory =
+            if homeDirectory != null then
+              homeDirectory
+            else if builtins.getEnv "HOME" != "" then
+              builtins.getEnv "HOME"
+            else if system == "aarch64-darwin" || system == "x86_64-darwin" then
+              "/Users/${actualUsername}"
+            else
+              "/home/${actualUsername}";
         in
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
+          extraSpecialArgs = {
+            inherit system;
+          };
           modules = [
             ./config/home-manager/home.nix
             {
               home = {
-                inherit username homeDirectory;
+                username = actualUsername;
+                homeDirectory = actualHomeDirectory;
               };
             }
           ]
@@ -118,16 +139,26 @@
             ./config/home-manager/services/gpg-agent.nix
           ];
         };
+      # Generate home configurations that auto-detect user
+      mkAutoDetectConfigurations = builtins.listToAttrs (
+        map (system: {
+          name = system;
+          value = mkHomeConfiguration { inherit system; };
+        }) systems
+      );
     in
     {
       # Home configurations for each system
-      homeConfigurations = {
+      homeConfigurations = mkAutoDetectConfigurations // {
+        # Also provide fixed configurations for CI/reproducibility
         "user@x86_64-linux" = mkHomeConfiguration {
           system = "x86_64-linux";
+          username = "user";
           homeDirectory = "/home/user";
         };
         "user@aarch64-darwin" = mkHomeConfiguration {
           system = "aarch64-darwin";
+          username = "user";
           homeDirectory = "/Users/user";
         };
       };
@@ -139,8 +170,8 @@
           pkgs = mkPkgs system;
         in
         {
-          default = self.homeConfigurations."user@${system}".activationPackage;
-          home-manager = self.homeConfigurations."user@${system}".activationPackage;
+          default = self.homeConfigurations.${system}.activationPackage;
+          home-manager = self.homeConfigurations.${system}.activationPackage;
         }
         // nixpkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
           myxmonad = mkXMonad pkgs;
@@ -159,20 +190,15 @@
             program = "${self.packages.${system}.default}/activate";
           };
 
-          # Alternative: Use current system
+          # Simplified switch that uses the current system's configuration
           switch = {
             type = "app";
             program = toString (
               pkgs.writeShellScript "switch" ''
                 #!/usr/bin/env bash
                 set -e
-
-                # Detect current system
-                SYSTEM=$(${pkgs.nix}/bin/nix eval --raw --expr 'builtins.currentSystem')
-                echo "Detected system: $SYSTEM"
-
-                # Build and activate for current system
-                ${pkgs.nix}/bin/nix run .#homeConfigurations."user@$SYSTEM".activationPackage
+                echo "Activating Home Manager configuration for ${system}..."
+                exec ${self.packages.${system}.default}/activate
               ''
             );
           };
