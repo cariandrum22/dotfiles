@@ -23,7 +23,7 @@
           owner = "EliverLara";
           repo = "candy-icons";
           rev = "278998cb51c68de9d590c84d8fd1625223772792";
-          sha256 = "0mrqv9045rsd0r8rjixf1w6dg6ghzikpdki9sakwfsa4hlpzpmap";
+          sha256 = "0p12vl9d4avagl4c09nkn7cf7pif6a6qcf11wma51y18y56k0pra";
         };
       };
       ".config/gtk-3.0/settings.ini" = {
