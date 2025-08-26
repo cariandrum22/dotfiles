@@ -10,7 +10,7 @@ let
   rustToolchain = fenix.latest;
 
   # Create custom rustPlatform with newer Rust
-  customRustPlatform = pkgs.makeRustPlatform {
+  customRustPlatform = unstable.makeRustPlatform {
     inherit (rustToolchain) cargo rustc;
   };
 in
@@ -29,8 +29,14 @@ customRustPlatform.buildRustPackage rec {
   sourceRoot = "source/codex-rs";
   cargoHash = "sha256-HbhOiTO7qFp64v+Bb62V1LxPH7qeTnWwkJKPEN4Vx6c=";
 
-  nativeBuildInputs = with unstable; [ pkg-config ];
-  buildInputs = with unstable; [ openssl ];
+  nativeBuildInputs = with unstable; [
+    pkg-config
+    autoPatchelfHook
+  ];
+  buildInputs = with unstable; [
+    openssl
+    stdenv.cc.cc.lib # for libgcc_s.so.1
+  ];
 
   doCheck = false;
 
