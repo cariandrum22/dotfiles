@@ -62,8 +62,8 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "1.0.92";
-    sha256 = "14n3bwnfi57n0hvf6nhgyd1hl4imgd5m68qacqfqb9d182iwdvsm";
+    version = "1.0.93";
+    sha256 = "03375b7ni839gl96mk3k5bz22azfylss0jgl0k1bz9292r59mqjm";
   }
   {
     name = "claude-dev";
@@ -98,14 +98,14 @@
   {
     name = "copilot";
     publisher = "GitHub";
-    version = "1.362.1758";
-    sha256 = "18662632nk2jw8d1k6hm2z0s16ydwpb9w245rcd1svg6gfs0q7hp";
+    version = "1.362.1760";
+    sha256 = "095mkfcajixglhci4a2zjdid83xcl8v4n4xmr3x8s8757v2ppq1j";
   }
   {
     name = "copilot-chat";
     publisher = "GitHub";
-    version = "0.31.2025082502";
-    sha256 = "0p4m6gz20dzgsx46w0cqb48byrzphdc8japsmqnlra78ydw929fc";
+    version = "0.31.2025082602";
+    sha256 = "0lxqzfaiy5dib1dpqqbfdxwvd98x29vw04q5002vdc1078rvrv57";
   }
   {
     name = "cucumber-official";
@@ -170,8 +170,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2025.8.2205";
-    sha256 = "031dq8pafd6hm256y3m88pjflhd8hafyhhkpz157c1jn9j0388nm";
+    version = "2025.8.2613";
+    sha256 = "1r61jw5p4xkdkvk06mrsapsrlwsap6hrpzg8ixn0l803dan3xvp9";
   }
   {
     name = "haskell";
@@ -286,8 +286,8 @@
   {
     name = "python";
     publisher = "ms-python";
-    version = "2025.13.2025082101";
-    sha256 = "1r69066r41da5ck9zkr87i31xi86yip2w65raxa50mjm6wvd8y0x";
+    version = "2025.13.2025082601";
+    sha256 = "1fi1jkqq2r2ff9axl61wy1i2jl4cwkgh8ms0qdqpsba71b3zf7v9";
     arch = "linux-x64";
   }
   {
@@ -336,8 +336,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2594";
-    sha256 = "19jg7mm89y86fh92kj9dcp3zjvl78rrj7ndvjfh4g4j8n5df1r21";
+    version = "0.4.2595";
+    sha256 = "1v555mhj9qfgri1sr8qls39kymp2xnhw2g2pwkjmw1l3ixi9x7hn";
     arch = "linux-x64";
   }
   {
@@ -465,8 +465,8 @@
   {
     name = "vscode-java-debug";
     publisher = "vscjava";
-    version = "0.58.2025081807";
-    sha256 = "12zik52kajva27llpba2vjfdchcpizqnzhzx0lxdqwvj81dk43nz";
+    version = "0.58.2025082105";
+    sha256 = "1dcbwvh4yfy8rrmrb2i752b2gd2pk8zvzajivxhawadgcc9q97nw";
   }
   {
     name = "vscode-markdownlint";
