@@ -139,6 +139,52 @@
             ./config/home-manager/services/gpg-agent.nix
           ];
         };
+      # Function to create a headless home configuration (Linux only)
+      mkHeadlessHomeConfiguration =
+        {
+          system,
+          username ? null,
+          homeDirectory ? null,
+        }:
+        let
+          pkgs = mkPkgs system;
+          # If not provided, try to get from environment (impure)
+          actualUsername =
+            if username != null then
+              username
+            else if builtins.getEnv "USER" != "" then
+              builtins.getEnv "USER"
+            else
+              "user";
+          actualHomeDirectory =
+            if homeDirectory != null then
+              homeDirectory
+            else if builtins.getEnv "HOME" != "" then
+              builtins.getEnv "HOME"
+            else
+              "/home/${actualUsername}";
+        in
+        home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          extraSpecialArgs = {
+            inherit system;
+            isHeadless = true;
+          };
+          modules = [
+            ./config/home-manager/home.nix
+            {
+              home = {
+                username = actualUsername;
+                homeDirectory = actualHomeDirectory;
+              };
+            }
+            # Headless configuration only includes essential services
+            ./config/home-manager/home/packages/linux.nix
+            ./config/home-manager/services/keybase.nix
+            ./config/home-manager/services/vscode-server.nix
+          ];
+        };
+
       # Generate home configurations that auto-detect user
       mkAutoDetectConfigurations = builtins.listToAttrs (
         map (system: {
@@ -150,8 +196,18 @@
     {
       # Home configurations for each system
       homeConfigurations = mkAutoDetectConfigurations // {
+        # Headless Linux configuration (no GUI)
+        "x86_64-linux-headless" = mkHeadlessHomeConfiguration {
+          system = "x86_64-linux";
+        };
+
         # Also provide fixed configurations for CI/reproducibility
         "user@x86_64-linux" = mkHomeConfiguration {
+          system = "x86_64-linux";
+          username = "user";
+          homeDirectory = "/home/user";
+        };
+        "user@x86_64-linux-headless" = mkHeadlessHomeConfiguration {
           system = "x86_64-linux";
           username = "user";
           homeDirectory = "/home/user";
@@ -175,6 +231,7 @@
         }
         // nixpkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
           myxmonad = mkXMonad pkgs;
+          headless = self.homeConfigurations."${system}-headless".activationPackage;
         }
       );
 
