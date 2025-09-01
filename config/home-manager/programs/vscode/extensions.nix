@@ -92,14 +92,14 @@
   {
     name = "code-spell-checker";
     publisher = "streetsidesoftware";
-    version = "4.2.5";
-    sha256 = "04qpcd2mvlb9q354rqrggwlq5hscxyybwz2x5f6ha20f0lqsn3zs";
+    version = "4.2.6";
+    sha256 = "1qipqy9191zgl2sjvgdfsba32pl6ijzblz6zinkahwbgzqdzdqxx";
   }
   {
     name = "copilot";
     publisher = "GitHub";
-    version = "1.364.1768";
-    sha256 = "0lynxszqzxvwihpy3rqwbinv6nwg50vp5k62p6zjgp4wsc381rwj";
+    version = "1.364.1769";
+    sha256 = "0mznj8njgfqsyijbglhjvybsvpqgnf71iy5l3vh8f5iczsxn6jx4";
   }
   {
     name = "copilot-chat";
@@ -423,8 +423,8 @@
   {
     name = "vscode-edit-csv";
     publisher = "janisdd";
-    version = "0.11.5";
-    sha256 = "1mg9nyhxdy5bw9w0mzxcl806hyw90f55vij5yggvfx4wbzhfjcyh";
+    version = "0.11.6";
+    sha256 = "1xrhgm6gq5kqh6j8ay4h4rpavf0n8qr77w0qqppz7kgf3sch7pf3";
   }
   {
     name = "vscode-eslint";
@@ -459,8 +459,8 @@
   {
     name = "vscode-ide";
     publisher = "tlaplus";
-    version = "2025.8.290037";
-    sha256 = "0hkx2jh6x12vvh4v817pzkinqp96ngvvvics3aawzk9vvi2kkcqv";
+    version = "2025.8.311222";
+    sha256 = "1p38j430ddxn1rsmky8i8x7hi1c4gy6d5dp0rf2rfyrqm922sxpw";
   }
   {
     name = "vscode-java-debug";
