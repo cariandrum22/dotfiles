@@ -17,17 +17,17 @@ in
 # Use custom Rust platform with newer compiler
 customRustPlatform.buildRustPackage rec {
   pname = "codex-cli";
-  version = "rust-v0.23.0";
+  version = "rust-v0.30.0";
 
   src = pkgs.fetchFromGitHub {
     owner = "openai";
     repo = "codex";
     rev = "${version}";
-    hash = "sha256-JS2nRh3/MNQ0mfdr2/Q10sAB38yWBLpw2zFf0dJORuM=";
+    hash = "sha256-9dWVf5Q7sDfAbRIGvUqqwEouJRnS//ujlFvqZ/a8zBk=";
   };
 
   sourceRoot = "source/codex-rs";
-  cargoHash = "sha256-HbhOiTO7qFp64v+Bb62V1LxPH7qeTnWwkJKPEN4Vx6c=";
+  cargoHash = "sha256-qJn2oN/9LVLhHnaNp+x9cUEMODrGrgV3SiR0ykIx7B4=";
 
   nativeBuildInputs = with unstable; [
     pkg-config
