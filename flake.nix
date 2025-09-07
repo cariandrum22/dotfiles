@@ -479,5 +479,14 @@
           };
         }
       );
+
+      # Formatter for nix fmt command
+      formatter = forAllSystems (
+        system:
+        let
+          pkgs = mkPkgs system;
+        in
+        pkgs.unstable.nixfmt-rfc-style
+      );
     };
 }
