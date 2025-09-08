@@ -102,7 +102,6 @@ deploy_local_bin_files() {
 main() {
   # List of dotfiles to deploy
   local -a dotfiles=(
-    config/home-manager
     config/fish/fish_plugins
   )
 
@@ -140,9 +139,6 @@ main() {
   # Install Home Manager
   install::home_manager "${NIXPKGS_VERSION}"
 
-  # Delete existing ${HOME}/.config/home-manager directory to replace it with a file under git management
-  rm -rf "${HOME}/.config/home-manager"
-
   # Deploy dotfiles to ${HOME}
   deploy_dotfiles "${dotfiles[@]}"
 
@@ -151,7 +147,42 @@ main() {
 
   # Reflecting the configuration under home-manager management
   add_nix_channels "${nix_channels[@]}"
-  home-manager switch
+  
+  # Detect system architecture and OS
+  local system=""
+  local arch
+  arch="$(uname -m)"
+  local os
+  os="$(uname -s)"
+  
+  if [ "${os}" == "Darwin" ]; then
+    if [ "${arch}" == "arm64" ]; then
+      system="aarch64-darwin"
+    else
+      system="x86_64-darwin"
+    fi
+  elif [ "${os}" == "Linux" ]; then
+    if [ "${arch}" == "aarch64" ]; then
+      system="aarch64-linux"
+    else
+      system="x86_64-linux"
+    fi
+  else
+    echo "Unsupported system: ${os} ${arch}"
+    exit 1
+  fi
+  
+  # Check if this is a headless system (no DISPLAY on Linux)
+  local flake_target="${system}"
+  if [ "${os}" == "Linux" ] && [ -z "${DISPLAY:-}" ]; then
+    flake_target="${system}-headless"
+  fi
+  
+  echo "Detected system: ${system}"
+  echo "Using configuration: ${flake_target}"
+  
+  # Switch to the appropriate home-manager configuration using flake
+  home-manager switch --flake "${abs_path}#${flake_target}" --impure
 
   # Install fisher and fish plugins
   install::fisher
