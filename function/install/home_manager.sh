@@ -33,12 +33,14 @@ install::home_manager() {
   set -e
 
   if [[ "${exists}" -ne 0 ]]; then
-    echo "Start installing Home Manager: using Nix."
+    echo "Start installing Home Manager: using Nix flakes."
     echo
+    # Install home-manager using nix profile (flakes way)
+    nix profile install github:nix-community/home-manager
+    
+    # For compatibility, also add the channel (but it won't be used with flakes)
     nix-channel --add "https://github.com/nix-community/home-manager/archive/release-${nixpkgs_version}.tar.gz" home-manager
     nix-channel --update
-    export NIX_PATH="${HOME}/.nix-defexpr/channels:/nix/var/nix/profiles/per-user/root/channels${NIX_PATH:+:$NIX_PATH}"
-    nix-shell '<home-manager>' -A install
   fi
   echo "Home Manager installed."
   echo

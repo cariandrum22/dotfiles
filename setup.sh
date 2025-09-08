@@ -19,6 +19,8 @@ abs_path="$(
 readonly abs_path
 
 # Import functions
+# shellcheck source=./function/detect_system.sh
+source ./function/detect_system.sh
 # shellcheck source=./function/install/xcode_command_line_tools.sh
 source ./function/install/xcode_command_line_tools.sh
 # shellcheck source=./function/install/homebrew.sh
@@ -102,7 +104,6 @@ deploy_local_bin_files() {
 main() {
   # List of dotfiles to deploy
   local -a dotfiles=(
-    config/home-manager
     config/fish/fish_plugins
   )
 
@@ -110,7 +111,7 @@ main() {
   local -a nix_channels=()
 
   # Run only on macOS
-  if [ "$(uname)" == 'Darwin' ]; then
+  if is_darwin; then
     install::xcode_command_line_tools
     install::homebrew
 
@@ -122,7 +123,7 @@ main() {
     echo "Install a package under homebrew management."
     echo
     # For Apple Silicon devices, applications installed with Homebrew may require Rosetta2, so install it
-    if [ "$(uname -a)" == 'arm64' ]; then
+    if is_apple_silicon; then
       sudo softwareupdate --install-rosetta --agree-to-license
     fi
     brew bundle --file="${abs_path}"/Brewfile
@@ -140,9 +141,6 @@ main() {
   # Install Home Manager
   install::home_manager "${NIXPKGS_VERSION}"
 
-  # Delete existing ${HOME}/.config/home-manager directory to replace it with a file under git management
-  rm -rf "${HOME}/.config/home-manager"
-
   # Deploy dotfiles to ${HOME}
   deploy_dotfiles "${dotfiles[@]}"
 
@@ -151,7 +149,34 @@ main() {
 
   # Reflecting the configuration under home-manager management
   add_nix_channels "${nix_channels[@]}"
-  home-manager switch
+  
+  # Detect system and determine flake target
+  local system
+  system="$(detect_system)" || exit 1
+  
+  local flake_target
+  flake_target="$(get_flake_target)" || exit 1
+  
+  # Show informative messages
+  if [ -n "${DOTFILES_GUI:-}" ]; then
+    if [ "${DOTFILES_GUI}" = "false" ] || [ "${DOTFILES_GUI}" = "0" ]; then
+      echo "Using headless configuration (manually specified)"
+    else
+      echo "Using GUI configuration (manually specified)"
+    fi
+  elif is_linux; then
+    if is_gui_system; then
+      echo "GUI detected, using desktop configuration"
+    else
+      echo "No GUI detected, using headless configuration"
+    fi
+  fi
+  
+  echo "Detected system: ${system}"
+  echo "Using configuration: ${flake_target}"
+  
+  # Switch to the appropriate home-manager configuration using flake
+  home-manager switch --flake "${abs_path}#${flake_target}" --impure
 
   # Install fisher and fish plugins
   install::fisher
