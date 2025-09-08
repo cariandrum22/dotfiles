@@ -1,0 +1,61 @@
+name: Update AI Tools
+
+on:
+  schedule:
+    # Run daily at 6:00 AM UTC (3:00 PM JST)
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-ai-tools:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v30
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Update AI tools
+        run: |
+          ./scripts/update-ai-tools-all.sh
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create Pull Request
+        if: steps.changes.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "chore(ai-tools): update AI tools"
+          title: "chore(ai-tools): update AI tools"
+          body: |
+            ## AI Tools Update
+
+            This PR contains automatic updates for AI development tools:
+            - Claude Code
+            - Codex CLI
+            - Gemini CLI
+
+            Changes were generated automatically by the daily update workflow.
+          branch: update-ai-tools
+          delete-branch: true
