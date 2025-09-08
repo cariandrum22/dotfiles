@@ -29,14 +29,22 @@ customRustPlatform.buildRustPackage rec {
   sourceRoot = "source/codex-rs";
   cargoHash = "sha256-qJn2oN/9LVLhHnaNp+x9cUEMODrGrgV3SiR0ykIx7B4=";
 
-  nativeBuildInputs = with unstable; [
-    pkg-config
-    autoPatchelfHook
-  ];
-  buildInputs = with unstable; [
-    openssl
-    stdenv.cc.cc.lib # for libgcc_s.so.1
-  ];
+  nativeBuildInputs =
+    with unstable;
+    [
+      pkg-config
+    ]
+    ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
+      autoPatchelfHook
+    ];
+  buildInputs =
+    with unstable;
+    [
+      openssl
+    ]
+    ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
+      stdenv.cc.cc.lib # for libgcc_s.so.1
+    ];
 
   doCheck = false;
 
