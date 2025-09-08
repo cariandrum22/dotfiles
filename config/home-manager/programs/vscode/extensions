@@ -20,6 +20,7 @@ esbenp.prettier-vscode
 evilz.vscode-reveal
 figma.figma-vscode-extension
 foxundermoon.shell-format
+FStarLang.fstar-vscode-assistant
 GitHub.copilot
 GitHub.copilot-chat
 golang.go
@@ -74,6 +75,7 @@ styled-components.vscode-styled-components
 stylelint.vscode-stylelint
 svelte.svelte-vscode
 Shellomo.enhanced-toml
+tamarin-prover.tamarin-prover
 timonwong.shellcheck
 tlaplus.vscode-ide
 tuttieee.emacs-mcx

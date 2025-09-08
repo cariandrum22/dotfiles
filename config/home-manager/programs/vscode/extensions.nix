@@ -156,6 +156,12 @@
     sha256 = "10h2mmmb39mbj0gxx2hss4ciyp9x2hhmpsi8v3w3alka2agqp2nr";
   }
   {
+    name = "fstar-vscode-assistant";
+    publisher = "FStarLang";
+    version = "0.20.0";
+    sha256 = "1c42fddpqq8pq2n628sdz5ycbha2hyc3w1w08jq4g6nrlp65fn8r";
+  }
+  {
     name = "geminicodeassist";
     publisher = "Google";
     version = "2.48.0";
@@ -370,6 +376,12 @@
     publisher = "svelte";
     version = "109.11.0";
     sha256 = "0vcbn6z37zad8q63jr9zv01d0fww63br5cn7rsg3qc3i8imj8h4k";
+  }
+  {
+    name = "tamarin-prover";
+    publisher = "tamarin-prover";
+    version = "1.2.0";
+    sha256 = "0l4r6qy8a77vbn6d50vnzgp5m1yvqpiav3s5gbldmq9cix4cfj2h";
   }
   {
     name = "terraform";
