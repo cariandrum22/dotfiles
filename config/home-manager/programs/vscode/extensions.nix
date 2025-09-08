@@ -336,8 +336,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2606";
-    sha256 = "1qd2isywapgwq7p1y8rck4c59xj42g4jim255g42csvri05yihn6";
+    version = "0.4.2607";
+    sha256 = "1p3dcmn5cixymlp7qfqvl2bi31n2ddwpdhmb0k6jjnrnmrkj4hhy";
     arch = "linux-x64";
   }
   {
@@ -441,8 +441,8 @@
   {
     name = "vscode-gradle";
     publisher = "vscjava";
-    version = "3.17.2025082002";
-    sha256 = "1vbx5ggy7aj3z0msmdpm893zhamj439nk0lznh524cidmghzkf5m";
+    version = "3.17.2025090802";
+    sha256 = "05sr0zjdz4k4m468s25q8mzln0n3sfgrv5pnrqqpd83ldfmgs35x";
   }
   {
     name = "vscode-graphql";
