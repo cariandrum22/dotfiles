@@ -19,6 +19,8 @@ abs_path="$(
 readonly abs_path
 
 # Import functions
+# shellcheck source=./function/detect_system.sh
+source ./function/detect_system.sh
 # shellcheck source=./function/install/xcode_command_line_tools.sh
 source ./function/install/xcode_command_line_tools.sh
 # shellcheck source=./function/install/homebrew.sh
@@ -109,7 +111,7 @@ main() {
   local -a nix_channels=()
 
   # Run only on macOS
-  if [ "$(uname)" == 'Darwin' ]; then
+  if is_darwin; then
     install::xcode_command_line_tools
     install::homebrew
 
@@ -121,7 +123,7 @@ main() {
     echo "Install a package under homebrew management."
     echo
     # For Apple Silicon devices, applications installed with Homebrew may require Rosetta2, so install it
-    if [ "$(uname -a)" == 'arm64' ]; then
+    if is_apple_silicon; then
       sudo softwareupdate --install-rosetta --agree-to-license
     fi
     brew bundle --file="${abs_path}"/Brewfile
@@ -148,34 +150,26 @@ main() {
   # Reflecting the configuration under home-manager management
   add_nix_channels "${nix_channels[@]}"
   
-  # Detect system architecture and OS
-  local system=""
-  local arch
-  arch="$(uname -m)"
-  local os
-  os="$(uname -s)"
+  # Detect system and determine flake target
+  local system
+  system="$(detect_system)" || exit 1
   
-  if [ "${os}" == "Darwin" ]; then
-    if [ "${arch}" == "arm64" ]; then
-      system="aarch64-darwin"
-    else
-      system="x86_64-darwin"
-    fi
-  elif [ "${os}" == "Linux" ]; then
-    if [ "${arch}" == "aarch64" ]; then
-      system="aarch64-linux"
-    else
-      system="x86_64-linux"
-    fi
-  else
-    echo "Unsupported system: ${os} ${arch}"
-    exit 1
-  fi
+  local flake_target
+  flake_target="$(get_flake_target)" || exit 1
   
-  # Check if this is a headless system (no DISPLAY on Linux)
-  local flake_target="${system}"
-  if [ "${os}" == "Linux" ] && [ -z "${DISPLAY:-}" ]; then
-    flake_target="${system}-headless"
+  # Show informative messages
+  if [ -n "${DOTFILES_GUI:-}" ]; then
+    if [ "${DOTFILES_GUI}" = "false" ] || [ "${DOTFILES_GUI}" = "0" ]; then
+      echo "Using headless configuration (manually specified)"
+    else
+      echo "Using GUI configuration (manually specified)"
+    fi
+  elif is_linux; then
+    if is_gui_system; then
+      echo "GUI detected, using desktop configuration"
+    else
+      echo "No GUI detected, using headless configuration"
+    fi
   fi
   
   echo "Detected system: ${system}"
