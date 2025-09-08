@@ -38,8 +38,10 @@ jobs:
         run: |
           # Evaluate all outputs without building
           nix eval .#homeConfigurations."user@x86_64-linux".activationPackage.drvPath --impure
+          nix eval .#homeConfigurations."user@x86_64-linux-headless".activationPackage.drvPath --impure
           nix eval .#homeConfigurations."user@aarch64-darwin".activationPackage.drvPath --impure
           nix eval .#packages.x86_64-linux.myxmonad.drvPath --impure 2>/dev/null || true
+          nix eval .#packages.x86_64-linux.headless.drvPath --impure 2>/dev/null || true
           nix eval .#devShells.x86_64-linux.default.drvPath --impure
           nix eval .#devShells.aarch64-darwin.default.drvPath --impure
 
@@ -95,6 +97,12 @@ jobs:
           # Evaluate only, don't build to avoid space issues
           nix eval .#homeConfigurations."user@${{ matrix.system }}".activationPackage.drvPath --impure
           echo "✓ Home Manager configuration for ${{ matrix.system }} evaluated successfully"
+
+          # Also test headless configuration for Linux
+          if [[ "${{ matrix.system }}" == "x86_64-linux" ]]; then
+            nix eval .#homeConfigurations."user@x86_64-linux-headless".activationPackage.drvPath --impure
+            echo "✓ Home Manager headless configuration for x86_64-linux evaluated successfully"
+          fi
 
   build-xmonad:
     name: Build XMonad
