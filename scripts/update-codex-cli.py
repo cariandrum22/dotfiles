@@ -52,14 +52,16 @@ def calculate_cargo_hash(owner: str, repo: str, rev: str) -> str | None:
         # Create a temporary Nix expression to build the package with a fake hash
         # This will fail but give us the correct hash in the error message
         fenix_url = "https://github.com/nix-community/fenix/archive/main.tar.gz"
+        nixpkgs_url = "https://github.com/NixOS/nixpkgs/archive/nixpkgs-unstable.tar.gz"
         nix_expr = f"""
         let
           pkgs = import <nixpkgs> {{}};
+          unstable = import (fetchTarball "{nixpkgs_url}") {{}};
           fenix = import (fetchTarball "{fenix_url}") {{
             inherit (pkgs) system;
           }};
           rustToolchain = fenix.latest;
-          customRustPlatform = pkgs.makeRustPlatform {{
+          customRustPlatform = unstable.makeRustPlatform {{
             inherit (rustToolchain) cargo rustc;
           }};
         in
@@ -74,12 +76,15 @@ def calculate_cargo_hash(owner: str, repo: str, rev: str) -> str | None:
           }};
           sourceRoot = "source/codex-rs";
           cargoHash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
-          buildInputs = with pkgs; [ openssl pkg-config ];
+          nativeBuildInputs = with unstable; [ pkg-config ]
+            ++ pkgs.lib.optionals pkgs.stdenv.isLinux [ unstable.autoPatchelfHook ];
+          buildInputs = with unstable; [ openssl ]
+            ++ pkgs.lib.optionals pkgs.stdenv.isLinux [ unstable.stdenv.cc.cc.lib ];
         }}
         """
 
         # Run nix-build to trigger the hash mismatch error
-        cmd = ["nix-build", "--expr", nix_expr, "--no-out-link"]
+        cmd = ["nix-build", "--expr", nix_expr, "--no-out-link", "--impure"]
         result = subprocess.run(cmd, check=False, capture_output=True, text=True)
 
         if result.returncode != 0:

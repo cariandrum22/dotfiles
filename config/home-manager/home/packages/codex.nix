@@ -27,7 +27,7 @@ customRustPlatform.buildRustPackage rec {
   };
 
   sourceRoot = "source/codex-rs";
-  cargoHash = "sha256-qJn2oN/9LVLhHnaNp+x9cUEMODrGrgV3SiR0ykIx7B4=";
+  cargoHash = "sha256-OMGGgg6hYdZ40vcUxVsWyLentFBj62CYEH3NJ909kYM=";
 
   nativeBuildInputs =
     with unstable;
