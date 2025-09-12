@@ -62,14 +62,14 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "1.0.108";
-    sha256 = "06xryikd6cp30fyz7a235ff6inaclrkkd9n67ajzhazk2yii20ar";
+    version = "1.0.112";
+    sha256 = "1gsiwry27kvxqm8z0kb15m1zw7sw7w8682v2qv19iy6nqgmz02y5";
   }
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "3.27.1";
-    sha256 = "0ibj6z73lcv5pzmfl3jw3q564kg70g6b1d0h77jv48y5kzv9007s";
+    version = "3.28.0";
+    sha256 = "1ji6xvpbnf13y9p3imj11q8sl9ayg0skfhdzwmm1pl6gn7mjcm5q";
   }
   {
     name = "cmake";
@@ -80,8 +80,8 @@
   {
     name = "cmake-tools";
     publisher = "ms-vscode";
-    version = "1.22.8";
-    sha256 = "05j2bcy1j0y7a0cdpjd98yp2ndsxms52jg0vblpyyjvqddh00xhp";
+    version = "1.22.9";
+    sha256 = "1fv9am1316b7ybscjfzvyaaxvx0z9gkl2zcdy3glg67l44jx3p73";
   }
   {
     name = "code-d";
@@ -98,14 +98,14 @@
   {
     name = "copilot";
     publisher = "GitHub";
-    version = "1.367.1777";
-    sha256 = "0nrmnbp4brl1yk34znyfmfa3l1gdc5vg4bnzandjwcz8xhpdbiz9";
+    version = "1.370.1783";
+    sha256 = "10rl7vkk05dbpg933lz11q6gygm5nbd768093czm4x02hbsg915a";
   }
   {
     name = "copilot-chat";
     publisher = "GitHub";
-    version = "0.31.2025090504";
-    sha256 = "1mjfw0bbiv9xrycf832zcv28dhxjv35qbrg514gwa9lsdmwddlmp";
+    version = "0.32.2025091102";
+    sha256 = "0la26n82jyi5fg3j48cpsqnym28b6g64xz9frksqwhpc5cza6abw";
   }
   {
     name = "cucumber-official";
@@ -164,20 +164,20 @@
   {
     name = "geminicodeassist";
     publisher = "Google";
-    version = "2.48.0";
-    sha256 = "199d070ixdl1f00mcl6xv353ykq16kqfj3k38ar4k8p0jwvbrjix";
+    version = "2.49.0";
+    sha256 = "0j2sav3p3zqmp67p039kfj3k97rfb40kf4civdslx5hk2nmi8zs5";
   }
   {
     name = "git-worktree-manager";
     publisher = "jackiotyu";
-    version = "3.9.0";
-    sha256 = "1kyihgb990iyd25ajpxz2x68sqjan3jbgsnvnqclx2syc7y4b081";
+    version = "3.11.0";
+    sha256 = "1jhh8fz5s787sadcsipsa4mw3ziclkb4piwx6p1ymn3qkci0idzw";
   }
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2025.9.405";
-    sha256 = "1zphy2f9rf487fyzbry1rcgs83q0b8cxwp2kk9icry6falvf1pwg";
+    version = "2025.9.1105";
+    sha256 = "1qw9mnlmz4fyqf4ansvinm3wx4n7ngpvqsdq77jm49rizyb0cjny";
   }
   {
     name = "haskell";
@@ -200,8 +200,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.46.2025090608";
-    sha256 = "1cbs72nncyrdrgjay4h9d7h6f5mfm78qsq44rhpv5cakgk8nzpa4";
+    version = "1.46.2025091108";
+    sha256 = "1a11w3rfih9nxlcwjd9hmw9chpa13bicx1av3a6rzsmpf9hdivvx";
     arch = "linux-x64";
   }
   {
@@ -256,8 +256,8 @@
   {
     name = "material-icon-theme";
     publisher = "PKief";
-    version = "5.26.0";
-    sha256 = "00w3h8wnwj0smls1nzzlxcl9v1al4fc66j2kbc2r40k5vnckcx01";
+    version = "5.27.0";
+    sha256 = "0gr18wrcckwpzn91w2flvkfrkvhhkrzlv6plkbaa286c50r67zmw";
   }
   {
     name = "mesonbuild";
@@ -292,8 +292,8 @@
   {
     name = "python";
     publisher = "ms-python";
-    version = "2025.13.2025090201";
-    sha256 = "0d2zsd80z3xl0xi3a9dqpqpaypa3d8aq9kx41gsllzycxcp77hs6";
+    version = "2025.14.0";
+    sha256 = "1vh51cmxwrgilqy5qk8fxxwqsxp9wvl4af8fj11csgqbwxchrwbk";
     arch = "linux-x64";
   }
   {
@@ -305,8 +305,8 @@
   {
     name = "remote-containers";
     publisher = "ms-vscode-remote";
-    version = "0.426.0";
-    sha256 = "1jg5w0ma0qjkpd9fr1r0lywc9lhzqgd842ymwwd5dd7529fr94pg";
+    version = "0.428.0";
+    sha256 = "1gdkbh5vvpkhi4w9wiibdjj97y4fmirlvygcki3nll495hvzwbw4";
   }
   {
     name = "remote-explorer";
@@ -335,15 +335,15 @@
   {
     name = "ruff";
     publisher = "charliermarsh";
-    version = "2025.24.0";
-    sha256 = "08viiz9xpcmjv5d5h1q51zbfpmd5745kcp7m6ba8h9b9hq8q2j7q";
+    version = "2025.26.0";
+    sha256 = "0iha1v1lak6yjgxr0inlwnc3c697jzgc5mcdsz6i78mmaa2gklzf";
     arch = "linux-x64";
   }
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2607";
-    sha256 = "1p3dcmn5cixymlp7qfqvl2bi31n2ddwpdhmb0k6jjnrnmrkj4hhy";
+    version = "0.4.2608";
+    sha256 = "1y2sng5zbq8v32zxaaim7bfb2sdz2akspbahzdr7ggzx3raf9zw3";
     arch = "linux-x64";
   }
   {
@@ -386,8 +386,8 @@
   {
     name = "terraform";
     publisher = "HashiCorp";
-    version = "2.36.0";
-    sha256 = "1ai5jhwm2m49s647m4vi5x3zhplypp919nv4gvy5gml7l2x0h1j6";
+    version = "2.36.2025091112";
+    sha256 = "1py11rn0gw4grflvr38aj9hpy3wswhykrd4gj4jb6akd1svz82lp";
     arch = "linux-x64";
   }
   {
@@ -471,8 +471,8 @@
   {
     name = "vscode-ide";
     publisher = "tlaplus";
-    version = "2025.9.60507";
-    sha256 = "0sm4nsl0v2la3xa96v75a3k29x775304gg7f7w55b0pz88dch4cm";
+    version = "2025.9.110053";
+    sha256 = "1ac2k23fbny6553x7qz1n13js53nyvrl7w7lj2lxm6h1d2linmhw";
   }
   {
     name = "vscode-java-debug";
