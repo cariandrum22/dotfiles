@@ -68,8 +68,8 @@
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "3.28.0";
-    sha256 = "1ji6xvpbnf13y9p3imj11q8sl9ayg0skfhdzwmm1pl6gn7mjcm5q";
+    version = "3.28.3";
+    sha256 = "09fagnq2fyfjm5487b96vgg5zfixjjx1hwjgm2jg8sd8phk3w9yb";
   }
   {
     name = "cmake";
@@ -104,8 +104,8 @@
   {
     name = "copilot-chat";
     publisher = "GitHub";
-    version = "0.32.2025091102";
-    sha256 = "0la26n82jyi5fg3j48cpsqnym28b6g64xz9frksqwhpc5cza6abw";
+    version = "0.32.2025091202";
+    sha256 = "1bwas86z8cwy511nf6qn5bq2rpfxm4mpn77m3xx44flw3xrj0r3b";
   }
   {
     name = "cucumber-official";
@@ -176,8 +176,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2025.9.1105";
-    sha256 = "1qw9mnlmz4fyqf4ansvinm3wx4n7ngpvqsdq77jm49rizyb0cjny";
+    version = "2025.9.1205";
+    sha256 = "0y433vmlkbw05rja2z3cphq0rzww4ckv7lxwkimkd93qh2addgfj";
   }
   {
     name = "haskell";
@@ -292,8 +292,8 @@
   {
     name = "python";
     publisher = "ms-python";
-    version = "2025.14.0";
-    sha256 = "1vh51cmxwrgilqy5qk8fxxwqsxp9wvl4af8fj11csgqbwxchrwbk";
+    version = "2025.15.2025091201";
+    sha256 = "1ziv277c8f5gwcwdrshfjbr1vzqj8c44jg8nbssdlxydlrsajin4";
     arch = "linux-x64";
   }
   {
