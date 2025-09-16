@@ -11,8 +11,10 @@ functional programming principles:
 
 from __future__ import annotations
 
+import contextlib
 import re
 import subprocess  # noqa: S404
+import tempfile
 from dataclasses import dataclass
 from enum import Enum
 from functools import partial, reduce
@@ -23,7 +25,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 from collections.abc import Callable  # noqa: TC003
-from pathlib import Path  # noqa: TC003
+from pathlib import Path
 
 import common
 
@@ -76,6 +78,7 @@ class PackageInfo:
     version: Version
     hash: Hash
     npm_deps_hash: Hash | None = None
+    cargo_hash: Hash | None = None
 
 
 @dataclass(frozen=True)
@@ -86,6 +89,7 @@ class UpdateConfig:
     version_pattern: str
     hash_pattern: str
     npm_hash_pattern: str | None = None
+    cargo_hash_pattern: str | None = None
 
 
 @dataclass(frozen=True)
@@ -176,6 +180,67 @@ def calculate_hash(url: str, *, unpack: bool = True) -> Hash:
     return Hash(sri_result.stdout.strip())
 
 
+def calculate_cargo_hash(nix_file: Path) -> Hash | None:
+    """Calculate cargoHash by building with dummy hash and extract correct one."""
+    # Create a temporary file with dummy cargoHash
+    with tempfile.NamedTemporaryFile(
+        mode='w', suffix='.nix', delete=False, encoding='utf-8',
+    ) as tmp:
+        content = read_file(nix_file)
+        # Replace cargoHash with a dummy value
+        dummy_content = re.sub(
+            r'(cargoHash\s*=\s*")([^"]+)(")',
+            r'\1sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\3',
+            content,
+            flags=re.MULTILINE | re.DOTALL,
+        )
+        tmp.write(dummy_content)
+        tmp_path = tmp.name
+
+    try:
+        # Try to build and capture the error
+        nixpkgs_url = "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz"
+        cmd = [
+            "nix-build", "-E",
+            f'with import <nixpkgs> {{}}; callPackage {tmp_path} '
+            f'{{ unstable = import (fetchTarball "{nixpkgs_url}") {{}}; }}',
+        ]
+        result = subprocess.run(
+            cmd,
+            check=False, capture_output=True,
+            text=True,
+            timeout=60,  # 60 seconds timeout
+        )
+
+        # Look for the correct hash in the error output
+        error_text = result.stderr
+        # Pattern to match: got:    sha256-...
+        match = re.search(r'got:\s+(sha256-[A-Za-z0-9+/=]+)', error_text)
+        if match:
+            return Hash(match.group(1))
+
+        # Also check for the SRI format in error
+        match = re.search(
+            r'specified:\s+(sha256-[A-Za-z0-9+/=]+)\s+got:\s+(sha256-[A-Za-z0-9+/=]+)',
+            error_text,
+        )
+        if match:
+            return Hash(match.group(2))
+
+    except subprocess.TimeoutExpired:
+        # Build took too long, likely a real error
+        pass
+    except subprocess.CalledProcessError:
+        # Expected to fail, check for hash in error
+        pass
+    finally:
+        # Clean up temp file
+        with contextlib.suppress(OSError):
+            Path(tmp_path).unlink()
+
+    return None
+
+
 # ----- Pure Functions for File Operations -----------------------------------------
 
 def read_file(path: Path) -> str:
@@ -240,6 +305,33 @@ def create_github_updater(repo: str) -> Callable[[Version], PackageInfo]:
     return updater
 
 
+def create_rust_github_updater(
+    repo: str,
+    config: UpdateConfig,
+) -> Callable[[Version], PackageInfo]:
+    """Create a GitHub release updater for Rust packages with cargoHash."""
+    def updater(version: Version) -> PackageInfo:
+        url = get_github_download_url(repo, version)
+        hash_val = calculate_hash(url)
+
+        # First update the file with new version and source hash
+        content = read_file(config.nix_file)
+        temp_info = PackageInfo(name=repo, version=version, hash=hash_val)
+        updated_content = apply_updates(config, content, temp_info)
+        write_file(config.nix_file, updated_content)
+
+        # Now calculate the cargoHash with the updated file
+        cargo_hash_val = calculate_cargo_hash(config.nix_file)
+
+        return PackageInfo(
+            name=repo,
+            version=version,
+            hash=hash_val,
+            cargo_hash=cargo_hash_val,
+        )
+    return updater
+
+
 # ----- Main Functional Update Pipeline --------------------------------------------
 
 def extract_current_info(config: UpdateConfig, content: str) -> PackageInfo:
@@ -256,11 +348,17 @@ def extract_current_info(config: UpdateConfig, content: str) -> PackageInfo:
         npm_hash_str = extract_with_pattern(content, config.npm_hash_pattern)
         npm_hash = Hash(npm_hash_str) if npm_hash_str else None
 
+    cargo_hash = None
+    if config.cargo_hash_pattern:
+        cargo_hash_str = extract_with_pattern(content, config.cargo_hash_pattern)
+        cargo_hash = Hash(cargo_hash_str) if cargo_hash_str else None
+
     return PackageInfo(
         name=config.tool_name,
         version=Version(version_str),
         hash=Hash(hash_str),
         npm_deps_hash=npm_hash,
+        cargo_hash=cargo_hash,
     )
 
 
@@ -280,6 +378,12 @@ def apply_updates(config: UpdateConfig, content: str, new_info: PackageInfo) -> 
     if config.npm_hash_pattern and new_info.npm_deps_hash:
         updated = replace_with_pattern(
             updated, config.npm_hash_pattern, str(new_info.npm_deps_hash),
+        )
+
+    # Apply cargo hash update if present
+    if config.cargo_hash_pattern and new_info.cargo_hash:
+        updated = replace_with_pattern(
+            updated, config.cargo_hash_pattern, str(new_info.cargo_hash),
         )
 
     return updated
@@ -408,6 +512,17 @@ def create_github_update_pipeline(
     return partial(update_package, config, version_fetcher, package_updater)
 
 
+def create_rust_github_update_pipeline(
+    config: UpdateConfig,
+    repo: str,
+    prefix: str = "",
+) -> Callable[[], UpdateResult]:
+    """Create a complete GitHub update pipeline for Rust packages."""
+    version_fetcher = partial(fetch_github_release, repo, prefix)
+    package_updater = create_rust_github_updater(repo, config)
+    return partial(update_package, config, version_fetcher, package_updater)
+
+
 # ----- Output Functions ------------------------------------------------------------
 
 def format_result(result: UpdateResult) -> str:
@@ -431,6 +546,11 @@ def format_result(result: UpdateResult) -> str:
             lines.append(
                 f"  NPM Deps: {result.current.npm_deps_hash} → "
                 f"{result.latest.npm_deps_hash}",
+            )
+        if result.current.cargo_hash and result.latest.cargo_hash:
+            lines.append(
+                f"  Cargo Hash: {result.current.cargo_hash} → "
+                f"{result.latest.cargo_hash}",
             )
 
     return "\n".join(lines)
