@@ -62,14 +62,14 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "1.0.113";
-    sha256 = "1lh713mjkqpr16izycj2hkz621pl9pr2vmg1bkkhfwvaypjx0q9j";
+    version = "1.0.115";
+    sha256 = "19p9c90j5fnqjaxcy2c4rcda5fm20a69da7h8z117n93nqfllqv4";
   }
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "3.28.3";
-    sha256 = "09fagnq2fyfjm5487b96vgg5zfixjjx1hwjgm2jg8sd8phk3w9yb";
+    version = "3.28.5";
+    sha256 = "0l0smngimr2jrg1v46y4xal52jpv3fzak7fysc6wpgml6j751b1m";
   }
   {
     name = "cmake";
@@ -98,14 +98,14 @@
   {
     name = "copilot";
     publisher = "GitHub";
-    version = "1.370.1783";
-    sha256 = "10rl7vkk05dbpg933lz11q6gygm5nbd768093czm4x02hbsg915a";
+    version = "1.372.0";
+    sha256 = "0gqp6qj3mkg0wbg2mm9pv1grcx3fhykian68cwsk48hsdh9k7gnl";
   }
   {
     name = "copilot-chat";
     publisher = "GitHub";
-    version = "0.32.2025091202";
-    sha256 = "1bwas86z8cwy511nf6qn5bq2rpfxm4mpn77m3xx44flw3xrj0r3b";
+    version = "0.32.2025091501";
+    sha256 = "01yxqnl29dnv70l3j6x36hrhjqbk57cmy8nk8w6ha8zwckm5pc2c";
   }
   {
     name = "cucumber-official";
@@ -170,8 +170,8 @@
   {
     name = "git-worktree-manager";
     publisher = "jackiotyu";
-    version = "3.11.0";
-    sha256 = "1jhh8fz5s787sadcsipsa4mw3ziclkb4piwx6p1ymn3qkci0idzw";
+    version = "3.12.0";
+    sha256 = "0aa4f2iiq3s1jil3bl536gc6kfbpd9q0l0kdk3l8n2hs1v1kd1ak";
   }
   {
     name = "gitlens";
