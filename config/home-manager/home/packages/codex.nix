@@ -1,12 +1,13 @@
 { pkgs, unstable, ... }:
 
 let
-  # Use fenix to get a newer Rust version
+  # Use fenix to get a newer Rust version with file_lock stabilized
   fenix = import (fetchTarball "https://github.com/nix-community/fenix/archive/main.tar.gz") {
     inherit (pkgs) system;
   };
 
-  # Get Rust nightly which should have all the required features stabilized
+  # Get nightly Rust which has unstable features including file_lock
+  # file_lock is still unstable as of Rust 1.82 - see https://github.com/rust-lang/rust/issues/130994
   rustToolchain = fenix.latest;
 
   # Create custom rustPlatform with newer Rust
@@ -14,20 +15,23 @@ let
     inherit (rustToolchain) cargo rustc;
   };
 in
-# Use custom Rust platform with newer compiler
 customRustPlatform.buildRustPackage rec {
   pname = "codex-cli";
-  version = "rust-v0.36.0";
+  version = "rust-v0.37.0-alpha.1";
 
   src = pkgs.fetchFromGitHub {
     owner = "openai";
     repo = "codex";
     rev = "${version}";
-    hash = "sha256-tqHJx35Y5gxdyjqWV+hCgdHokSINTyUP7pq7GEsnfTk=";
+    hash = "sha256-687lZjZBoIFldNrqXBRTsLFsZSphJtZ8VkaOP66EeZQ=";
   };
 
   sourceRoot = "source/codex-rs";
-  cargoHash = "sha256-/2Qk9sq3id8rKVl2fvIZeI/WhfPhiMTvvnIW+bW9+BU=";
+  cargoHash = "sha256-3M8A1xHTa/e5cKIsIHbmZSCOFyVEwixYiOC/wEv0ljU=";
+
+  # Set nightly Rust channel for unstable features
+  CARGO_BUILD_RUSTC = "${rustToolchain.rustc}/bin/rustc";
+  RUSTC_BOOTSTRAP = "1";
 
   nativeBuildInputs =
     with unstable;
