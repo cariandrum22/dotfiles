@@ -15,8 +15,11 @@
       };
     };
     initExtra = ''
-      eval $(gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)
-      export SSH_AUTH_SOCK
+      # Start gnome-keyring without SSH component (SSH is handled by 1Password)
+      eval $(gnome-keyring-daemon --start --components=pkcs11,secrets)
+
+      # Use 1Password SSH agent
+      export SSH_AUTH_SOCK="$HOME/.1password/agent.sock"
 
       export XMODIFIERS="@im=fcitx"
       export GTK_IM_MODULE="fcitx"
