@@ -28,6 +28,7 @@
       gimp
       gnome-control-center
       tlaplusToolbox
+      discord
 
       # Utility
       trash-cli
