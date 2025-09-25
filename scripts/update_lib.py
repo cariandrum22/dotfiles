@@ -12,8 +12,10 @@ functional programming principles:
 from __future__ import annotations
 
 import contextlib
+import os
 import re
 import subprocess  # noqa: S404
+import sys
 import tempfile
 from dataclasses import dataclass
 from enum import Enum
@@ -180,7 +182,7 @@ def calculate_hash(url: str, *, unpack: bool = True) -> Hash:
     return Hash(sri_result.stdout.strip())
 
 
-def calculate_cargo_hash(nix_file: Path) -> Hash | None:
+def calculate_cargo_hash(nix_file: Path) -> Hash | None:  # noqa: C901, PLR0912, PLR0915
     """Calculate cargoHash by building with dummy hash and extract correct one."""
     # Create a temporary file with dummy cargoHash
     with tempfile.NamedTemporaryFile(
@@ -202,22 +204,38 @@ def calculate_cargo_hash(nix_file: Path) -> Hash | None:
         nixpkgs_url = "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz"
         cmd = [
             "nix-build", "-E",
-            f'with import <nixpkgs> {{}}; callPackage {tmp_path} '
+            f'with import (fetchTarball "{nixpkgs_url}") {{}}; callPackage {tmp_path} '
             f'{{ unstable = import (fetchTarball "{nixpkgs_url}") {{}}; }}',
         ]
+
+        # Print debug info in CI environment
+        if os.getenv('CI'):
+            print("[CI Debug] Calculating cargoHash with nix-build...", file=sys.stderr)
+            print(f"[CI Debug] Command: {' '.join(cmd)}", file=sys.stderr)
+
         result = subprocess.run(
             cmd,
             check=False, capture_output=True,
             text=True,
-            timeout=60,  # 60 seconds timeout
+            timeout=300,  # 5 minutes timeout for CI environments
         )
 
         # Look for the correct hash in the error output
         error_text = result.stderr
+
+        # Debug output in CI
+        if os.getenv('CI') and not error_text:
+            print("[CI Debug] No stderr output from nix-build", file=sys.stderr)
+            if result.stdout:
+                print(f"[CI Debug] stdout: {result.stdout[:500]}", file=sys.stderr)
+
         # Pattern to match: got:    sha256-...
         match = re.search(r'got:\s+(sha256-[A-Za-z0-9+/=]+)', error_text)
         if match:
-            return Hash(match.group(1))
+            hash_val = Hash(match.group(1))
+            if os.getenv('CI'):
+                print(f"[CI Debug] Found cargoHash: {hash_val}", file=sys.stderr)
+            return hash_val
 
         # Also check for the SRI format in error
         match = re.search(
@@ -225,14 +243,34 @@ def calculate_cargo_hash(nix_file: Path) -> Hash | None:
             error_text,
         )
         if match:
-            return Hash(match.group(2))
+            hash_val = Hash(match.group(2))
+            if os.getenv('CI'):
+                print(
+                    f"[CI Debug] Found cargoHash (SRI format): {hash_val}",
+                    file=sys.stderr,
+                )
+            return hash_val
+
+        # If no match found, log the error in CI
+        if os.getenv('CI'):
+            print("[CI Debug] Could not extract cargoHash from output", file=sys.stderr)
+            print(
+                f"[CI Debug] stderr output (first 1000 chars): {error_text[:1000]}",
+                file=sys.stderr,
+            )
 
     except subprocess.TimeoutExpired:
-        # Build took too long, likely a real error
-        pass
-    except subprocess.CalledProcessError:
-        # Expected to fail, check for hash in error
-        pass
+        # Build took too long
+        if os.getenv('CI'):
+            print("[CI Debug] nix-build timed out after 5 minutes", file=sys.stderr)
+    except subprocess.CalledProcessError as e:
+        # Expected to fail, but log in CI
+        if os.getenv('CI'):
+            print(f"[CI Debug] nix-build failed with error: {e}", file=sys.stderr)
+    except Exception as e:  # noqa: BLE001
+        # Unexpected error - catch-all needed for CI debugging
+        if os.getenv('CI'):
+            print(f"[CI Debug] Unexpected error: {e}", file=sys.stderr)
     finally:
         # Clean up temp file
         with contextlib.suppress(OSError):
@@ -402,6 +440,113 @@ def check_for_update(
     return UpdateStatus.UPDATED, new_info
 
 
+def check_for_rust_update(
+    current: PackageInfo,
+    latest_version: Version,
+    updater: Callable[[Version], PackageInfo],
+) -> tuple[UpdateStatus, PackageInfo | None]:
+    """Check if Rust package update is needed, including cargoHash validation."""
+    # Check if cargoHash looks invalid (dummy hash)
+    needs_cargo_update = (
+        current.cargo_hash and
+        "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" in str(current.cargo_hash)
+    )
+
+    # If version is different or cargoHash is invalid, update
+    if current.version != latest_version or needs_cargo_update:
+        new_info = updater(latest_version)
+        return UpdateStatus.UPDATED, new_info
+
+    return UpdateStatus.UP_TO_DATE, None
+
+
+def update_rust_package(
+    config: UpdateConfig,
+    version_fetcher: Callable[[], Version],
+    package_updater: Callable[[Version], PackageInfo],
+) -> UpdateResult:
+    """Main functional update pipeline for Rust packages."""
+    try:
+        # Read current state
+        content = read_file(config.nix_file)
+        current_info = extract_current_info(config, content)
+
+        # Fetch latest version
+        latest_version = version_fetcher()
+
+        # Check for updates (including cargoHash validation)
+        status, new_info = check_for_rust_update(
+            current_info, latest_version, package_updater,
+        )
+
+        # Apply updates if needed
+        if status == UpdateStatus.UPDATED and new_info:
+            updated_content = apply_updates(config, content, new_info)
+            write_file(config.nix_file, updated_content)
+
+            return UpdateResult(
+                tool_name=config.tool_name,
+                current=current_info,
+                latest=new_info,
+                status=UpdateStatus.UPDATED,
+                message=(
+                    f"Updated {config.tool_name} from {current_info.version} "
+                    f"to {new_info.version}"
+                ),
+            )
+
+        return UpdateResult(
+            tool_name=config.tool_name,
+            current=current_info,
+            latest=current_info,
+            status=UpdateStatus.UP_TO_DATE,
+            message=(
+                f"{config.tool_name} is up to date at version "
+                f"{current_info.version}"
+            ),
+        )
+
+    except (OSError, subprocess.CalledProcessError) as e:
+        # File or subprocess errors
+        return UpdateResult(
+            tool_name=config.tool_name,
+            current=PackageInfo(
+                name=config.tool_name,
+                version=Version("unknown"),
+                hash=Hash("unknown"),
+            ),
+            latest=None,
+            status=UpdateStatus.ERROR,
+            message=f"System error updating {config.tool_name}: {e}",
+        )
+    except (ValueError, KeyError, TypeError) as e:
+        # Data parsing or validation errors
+        return UpdateResult(
+            tool_name=config.tool_name,
+            current=PackageInfo(
+                name=config.tool_name,
+                version=Version("unknown"),
+                hash=Hash("unknown"),
+            ),
+            latest=None,
+            status=UpdateStatus.ERROR,
+            message=f"Data error updating {config.tool_name}: {e}",
+        )
+    except Exception as e:  # noqa: BLE001 - Catch-all for unexpected errors
+        # Unexpected errors
+        return UpdateResult(
+            tool_name=config.tool_name,
+            current=PackageInfo(
+                name=config.tool_name,
+                version=Version("unknown"),
+                hash=Hash("unknown"),
+            ),
+            latest=None,
+            status=UpdateStatus.ERROR,
+            message=f"Unexpected error updating {config.tool_name}: {e}",
+        )
+
+
 def update_package(
     config: UpdateConfig,
     version_fetcher: Callable[[], Version],
@@ -520,7 +665,7 @@ def create_rust_github_update_pipeline(
     """Create a complete GitHub update pipeline for Rust packages."""
     version_fetcher = partial(fetch_github_release, repo, prefix)
     package_updater = create_rust_github_updater(repo, config)
-    return partial(update_package, config, version_fetcher, package_updater)
+    return partial(update_rust_package, config, version_fetcher, package_updater)
 
 
 # ----- Output Functions ------------------------------------------------------------
