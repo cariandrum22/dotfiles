@@ -62,14 +62,14 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "1.0.119";
-    sha256 = "1rc1hyn8976bp9d1cgyd4h4bg5r577ik51c5n6a14w5zcn7gdypl";
+    version = "1.0.123";
+    sha256 = "1d2j8swrfsxdpfm0qshb9zv4wyzy9cq20x02cj8gs4dslampl8s8";
   }
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "3.29.2";
-    sha256 = "0v1bsdmjjf8mdniv9i5jsa81m644m61dsyfx7m4x9vvvg3084hi5";
+    version = "3.30.3";
+    sha256 = "0l79v72p2vfbsdinj8c4d4zv1ipds61pdb5q3791fqkgfalyl4yf";
   }
   {
     name = "cmake";
@@ -98,14 +98,14 @@
   {
     name = "copilot";
     publisher = "GitHub";
-    version = "1.373.1788";
-    sha256 = "1cdmabghzvvbsbd3296zbw0ad3phyh1grw1jrchlydkr04s98pcp";
+    version = "1.375.1792";
+    sha256 = "118zish4pia09rhvf4n3xyjq3m3jgf72vzkxpbwm4c2g5n0c417c";
   }
   {
     name = "copilot-chat";
     publisher = "GitHub";
-    version = "0.32.2025091801";
-    sha256 = "0cd9jlzy3vjrf70ra2avqvjqg5dyh28b1rzcxj16k8mlwabmv6ms";
+    version = "0.32.2025092302";
+    sha256 = "0z04x8d20xmnphcqi7pzcd8lfz4k391xmxx1kpcy8rrzlbdi3zf1";
   }
   {
     name = "cucumber-official";
@@ -134,8 +134,8 @@
   {
     name = "emacs-mcx";
     publisher = "tuttieee";
-    version = "0.90.8";
-    sha256 = "19gldrr6r2669xpy9pslkqfyway8iiv615276d6zkw2ss1zj73nh";
+    version = "0.91.0";
+    sha256 = "1ly38dx1isd5s65h61pnd6ns38yrrh4xvazpkg4gbg55d14hixwy";
   }
   {
     name = "enhanced-toml";
@@ -176,8 +176,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2025.9.1813";
-    sha256 = "1vp2fz8ap9ghqhnm6wgpw529w9ij29sc6a2ij1iwgzyd7lcc05kg";
+    version = "2025.9.2305";
+    sha256 = "15ydvynvqljbv49lxnck6zhskyfd4w04x7iigcsqn9fjwglqya14";
   }
   {
     name = "haskell";
@@ -200,15 +200,15 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.46.2025091808";
-    sha256 = "00wfdljpmyr6ib71xyigw0bhflrlnap22sgynrhlg7yq8dj1z6xj";
+    version = "1.46.2025092308";
+    sha256 = "0j22lxyk4hycbdbcpzjg8bjdv6pzj6prn71r9mb7givqapgfx7wz";
     arch = "linux-x64";
   }
   {
     name = "jupyter";
     publisher = "ms-toolsai";
-    version = "2025.8.2025082701";
-    sha256 = "0ld9sf7c81chqzs4g3iaa9iicq6k0zwpb03zvyfkmsiwn88l1p7z";
+    version = "2025.9.2025092201";
+    sha256 = "06a1y03mxkqs7lmspwjf8m55br8h2r4bxgwwq76s4xyx8yqy2pjx";
     arch = "linux-x64";
   }
   {
@@ -292,8 +292,8 @@
   {
     name = "python";
     publisher = "ms-python";
-    version = "2025.15.2025091201";
-    sha256 = "1ziv277c8f5gwcwdrshfjbr1vzqj8c44jg8nbssdlxydlrsajin4";
+    version = "2025.15.2025092201";
+    sha256 = "188vdlln6mydi0hcxm0irzn9481lpvgd3ai4xaqwgh99s47nqcn7";
     arch = "linux-x64";
   }
   {
@@ -342,8 +342,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2618";
-    sha256 = "09i6zznngh4migyl47dkbdwbkp6d983l6vn5k33f1wihji53rfsm";
+    version = "0.4.2623";
+    sha256 = "0ls4xdrvbimls25v2m5gsh4v82j2hdfd1dvpmq5knjikl3f1zil2";
     arch = "linux-x64";
   }
   {
@@ -374,8 +374,8 @@
   {
     name = "svelte-vscode";
     publisher = "svelte";
-    version = "109.11.0";
-    sha256 = "0vcbn6z37zad8q63jr9zv01d0fww63br5cn7rsg3qc3i8imj8h4k";
+    version = "109.11.1";
+    sha256 = "0kl342kqd98vsxw2m3viqfvyvnxwfx4db1v303x3fgfx7apnwb8x";
   }
   {
     name = "tamarin-prover";
@@ -386,8 +386,8 @@
   {
     name = "terraform";
     publisher = "HashiCorp";
-    version = "2.36.2025091112";
-    sha256 = "1py11rn0gw4grflvr38aj9hpy3wswhykrd4gj4jb6akd1svz82lp";
+    version = "2.37.2025092217";
+    sha256 = "1s648ma6yfxnbzjfm7sj0vxqh8p924hmydqf1jpsv1nvmd58v6mc";
     arch = "linux-x64";
   }
   {
