@@ -62,14 +62,14 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "1.0.123";
-    sha256 = "1d2j8swrfsxdpfm0qshb9zv4wyzy9cq20x02cj8gs4dslampl8s8";
+    version = "1.0.124";
+    sha256 = "0x38gb0ng3n9kadm98ig7vfy8kd1n5rf98afchgpymr4qw1vbad6";
   }
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "3.30.3";
-    sha256 = "0l79v72p2vfbsdinj8c4d4zv1ipds61pdb5q3791fqkgfalyl4yf";
+    version = "3.31.0";
+    sha256 = "146l65pdn36brp9acn0miz9kwqss0rqr8jkn0vj7y496rd4z071p";
   }
   {
     name = "cmake";
@@ -164,8 +164,8 @@
   {
     name = "geminicodeassist";
     publisher = "Google";
-    version = "2.50.0";
-    sha256 = "0d4m8wqm79rvxm3yzjpqivmbgrqqpipp76763j8nac54ribp89ck";
+    version = "2.51.0";
+    sha256 = "116928kw3jhjp8bmjmzk8j4sk83n1mmnngxcyfmi12929idbhxnx";
   }
   {
     name = "git-worktree-manager";
@@ -176,8 +176,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2025.9.2305";
-    sha256 = "15ydvynvqljbv49lxnck6zhskyfd4w04x7iigcsqn9fjwglqya14";
+    version = "2025.9.2417";
+    sha256 = "0dy7y0yl4azzwkq97di4b6s60avva64hk423g14mglbrhr3dda1k";
   }
   {
     name = "haskell";
@@ -200,8 +200,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.46.2025092308";
-    sha256 = "0j22lxyk4hycbdbcpzjg8bjdv6pzj6prn71r9mb7givqapgfx7wz";
+    version = "1.46.2025092408";
+    sha256 = "0y9n3hqfngb0l80i8v28fiq690ci60l8qfahm85p3da372vk60dz";
     arch = "linux-x64";
   }
   {
@@ -250,8 +250,8 @@
   {
     name = "markdown-mermaid";
     publisher = "bierner";
-    version = "1.28.0";
-    sha256 = "0vc94jhx77yzixry5lw29sc8idhnf5rl1d7k0gkmswxm6bl0611l";
+    version = "1.29.0";
+    sha256 = "132hygm7r5zd5dwjx3k9lwlg8q930wkslqxq45060frdzbdxjdxa";
   }
   {
     name = "material-icon-theme";
