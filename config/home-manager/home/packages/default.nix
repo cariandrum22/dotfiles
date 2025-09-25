@@ -67,10 +67,10 @@
         # AI Tools
         (unstable.claude-code.overrideAttrs (
           _finalAttrs: _oldAttrs: rec {
-            version = "1.0.119";
+            version = "1.0.123";
             src = fetchzip {
               url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-              hash = "sha256-l6H3IaCIo15OkCR+QBsZJ9lQIxEaAuUOUy/yEQtcvDI=";
+              hash = "sha256-bzI6wYnY3kBA8xKOeQqYpsi672FIrcSj3eAN0nFqz5o=";
             };
           }
         ))

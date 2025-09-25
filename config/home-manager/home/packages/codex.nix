@@ -17,13 +17,13 @@ let
 in
 customRustPlatform.buildRustPackage rec {
   pname = "codex-cli";
-  version = "rust-v0.39.0";
+  version = "rust-v0.40.0";
 
   src = pkgs.fetchFromGitHub {
     owner = "openai";
     repo = "codex";
     rev = "${version}";
-    hash = "sha256-VxfUhPyJRYu6xvrDJRa3BqS/G7gf+J9d+2FbW1Ps4kw=";
+    hash = "sha256-IBYx362R2ueYNg7/vcjGa2kKAfGlPm6JcZ/A4XKtMT4=";
   };
 
   sourceRoot = "source/codex-rs";
