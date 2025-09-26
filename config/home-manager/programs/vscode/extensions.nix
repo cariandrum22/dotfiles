@@ -62,14 +62,14 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "1.0.124";
-    sha256 = "0x38gb0ng3n9kadm98ig7vfy8kd1n5rf98afchgpymr4qw1vbad6";
+    version = "1.0.126";
+    sha256 = "0bqblsmni3qzd7a3x8kq1b3fi6pd1nn5f59wpkm946sr4jd8bx4v";
   }
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "3.31.0";
-    sha256 = "146l65pdn36brp9acn0miz9kwqss0rqr8jkn0vj7y496rd4z071p";
+    version = "3.31.1";
+    sha256 = "1g9icf8m3p9vzj2f0vs91w66ky4wcd6pc0y6hd5nfq0x2bda5qxs";
   }
   {
     name = "cmake";
@@ -104,8 +104,8 @@
   {
     name = "copilot-chat";
     publisher = "GitHub";
-    version = "0.32.2025092302";
-    sha256 = "0z04x8d20xmnphcqi7pzcd8lfz4k391xmxx1kpcy8rrzlbdi3zf1";
+    version = "0.32.2025092509";
+    sha256 = "0dj6rzsp4lkkfzmj0d36zbvpddbfni5500p87j9m4vyi5309xl0r";
   }
   {
     name = "cucumber-official";
@@ -176,8 +176,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2025.9.2417";
-    sha256 = "0dy7y0yl4azzwkq97di4b6s60avva64hk423g14mglbrhr3dda1k";
+    version = "2025.9.2505";
+    sha256 = "14gq1ih7kpx7rlg4k2nzkpd7acn1g5pis9j5nxmyx9hamc4wh0di";
   }
   {
     name = "haskell";
@@ -200,8 +200,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.46.2025092408";
-    sha256 = "0y9n3hqfngb0l80i8v28fiq690ci60l8qfahm85p3da372vk60dz";
+    version = "1.46.2025092508";
+    sha256 = "0d45wg8c2s8fgdlzw62lcp8n90yf3f5k6hkrab928pv4dz0xvn0d";
     arch = "linux-x64";
   }
   {
@@ -342,8 +342,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2623";
-    sha256 = "0ls4xdrvbimls25v2m5gsh4v82j2hdfd1dvpmq5knjikl3f1zil2";
+    version = "0.4.2625";
+    sha256 = "1bwcl0w937nagbdcbdrlxfbfdwsjv43l7h2h92l7vcqsxpsf36fk";
     arch = "linux-x64";
   }
   {
@@ -471,8 +471,8 @@
   {
     name = "vscode-ide";
     publisher = "tlaplus";
-    version = "2025.9.182248";
-    sha256 = "04zhjpx57fc5r5zkb868lg3wc1gyfk7cdz9ba6v9q0a97gjnbg26";
+    version = "2025.9.251809";
+    sha256 = "0ni2n34g34rzrj4n02j6wj6swn6ajiv3w32911kyjp650flbzbdp";
   }
   {
     name = "vscode-java-debug";
