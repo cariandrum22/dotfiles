@@ -17,17 +17,17 @@ let
 in
 customRustPlatform.buildRustPackage rec {
   pname = "codex-cli";
-  version = "rust-v0.41.0";
+  version = "rust-v0.42.0";
 
   src = pkgs.fetchFromGitHub {
     owner = "openai";
     repo = "codex";
     rev = "${version}";
-    hash = "sha256-Dz+RE3Ejr7BcJBJq5+UMP2Pb6v8A2intn3LzozoWovE=";
+    hash = "sha256-YyI4quZ1vcwzDx38EzqycnUQDBOg9SfEemR4zdKYYIw=";
   };
 
   sourceRoot = "source/codex-rs";
-  cargoHash = "sha256-0sCmo3/3kY+nCufATBySAif5Z/T89Le0UedVgCrZiW8=";
+  cargoHash = "sha256-No6/WmaCI+w1cVD+PsLJ1jK0zZDYziGlm9DD9E3hA58=";
 
   # Set nightly Rust channel for unstable features
   CARGO_BUILD_RUSTC = "${rustToolchain.rustc}/bin/rustc";
