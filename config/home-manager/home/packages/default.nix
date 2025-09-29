@@ -37,6 +37,7 @@
         yubikey-personalization
         rlwrap
         pandoc
+        texlive.combined.scheme-full
         lsof
         colordiff
         cosign
