@@ -46,6 +46,7 @@
         unstable.goreleaser
         rclone
         ripgrep
+        scrcpy
         tlaplus
         tlaps
         tree
