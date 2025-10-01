@@ -1,6 +1,10 @@
 { pkgs, lib, ... }:
 
 {
+  imports = [
+    ./azure.nix
+  ];
+
   home = {
     packages = lib.flatten (
       with pkgs;
