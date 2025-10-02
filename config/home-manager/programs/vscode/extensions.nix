@@ -62,14 +62,14 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.0.2";
-    sha256 = "1vflf2hyhlxyfwwjfkz3lhaxk740ia4xp236a4j2b9hpmsbh5pkk";
+    version = "2.0.3";
+    sha256 = "01hkrp1cvm7ry12v11mqp6y77ijpr426jzxf5ij50s4lvll42n3m";
   }
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "3.32.5";
-    sha256 = "0gix8cpn2dywx4z9b4a6d7zvhwgiqwa2jhbgdgp0mfpk4l4ggmp5";
+    version = "3.32.6";
+    sha256 = "1jf3r4hyfhkrjqljsmvsvd70z6fw6x0sfdprq3pj53xs5k0zjkmp";
   }
   {
     name = "cmake";
@@ -104,8 +104,8 @@
   {
     name = "copilot-chat";
     publisher = "GitHub";
-    version = "0.32.2025093001";
-    sha256 = "1kjbag5shzly54xam12dllism2x1jrxnzzqjqxw8b99b978p2z0v";
+    version = "0.32.2025100101";
+    sha256 = "0zh2vwnc0d3asc5a9bs7fqq67ybwabw2l12b3c2kskc4g1ycxvpn";
   }
   {
     name = "cucumber-official";
@@ -176,8 +176,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2025.9.3005";
-    sha256 = "061jk3fdpkw0n5f3cgj06sz7ci0g7p08s46m16z68i8lg2x0i90g";
+    version = "2025.10.105";
+    sha256 = "1c9ssjwbq4817rc3hax23m7m90z45fdkh9cj2wgzck24lva2zidi";
   }
   {
     name = "haskell";
@@ -200,8 +200,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.46.2025093008";
-    sha256 = "00mm1z7bkdgzn2f2an9m61zd7rg03ks3c7z04hycmgamhpxla56g";
+    version = "1.46.2025100108";
+    sha256 = "1zgg0y17xi4zzy7l3kfay6xr0lnmd1aajr54fhfnyfmb8d2nkl1a";
     arch = "linux-x64";
   }
   {
@@ -342,8 +342,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2630";
-    sha256 = "02wgfgv72kgrdlbxfbp4876kmlybjp42p1jy4b6h7srfg71w6mqi";
+    version = "0.4.2631";
+    sha256 = "0c8mwxc0p9pky2xh8vzp4brmkmv6d37gn7sxk7q20xywy5j0lg2k";
     arch = "linux-x64";
   }
   {
