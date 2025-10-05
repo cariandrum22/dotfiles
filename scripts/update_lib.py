@@ -14,9 +14,12 @@ from __future__ import annotations
 import contextlib
 import os
 import re
+import shutil
 import subprocess  # noqa: S404
 import sys
+import tarfile
 import tempfile
+import time
 from dataclasses import dataclass
 from enum import Enum
 from functools import partial, reduce
@@ -35,6 +38,7 @@ import common
 
 NPM_REGISTRY_API = "https://registry.npmjs.org"
 GITHUB_API = "https://api.github.com"
+DEFAULT_RETRIES = 3
 
 # ----- Types -----------------------------------------------------------------------
 
@@ -279,6 +283,97 @@ def calculate_cargo_hash(nix_file: Path) -> Hash | None:  # noqa: C901, PLR0912,
     return None
 
 
+def calculate_npm_deps_hash(  # noqa: C901, PLR0912, PLR0915
+    package_url: str,
+    *,
+    retries: int = DEFAULT_RETRIES,
+) -> Hash | None:
+    """Calculate npmDepsHash using prefetch-npm-deps.
+
+    Args:
+        package_url: URL to the NPM package tarball
+        retries: Number of retry attempts for network operations
+
+    Returns:
+        Hash of npm dependencies or None if calculation fails
+    """
+    temp_dir = None
+    try:
+        # Create temporary directory for extraction
+        temp_dir = tempfile.mkdtemp(prefix='npm-prefetch-')
+        tarball_path = Path(temp_dir) / 'package.tgz'
+
+        # Download the tarball with retries
+        for attempt in range(retries):
+            try:
+                response = common.fetch_with_retry(package_url, retries=1)
+                tarball_path.write_bytes(response.read())
+                break
+            except Exception as e:  # noqa: BLE001
+                if attempt == retries - 1:
+                    print(f"Failed to download {package_url}: {e}", file=sys.stderr)
+                    return None
+                time.sleep(2 ** attempt)
+
+        # Extract tarball
+        with tarfile.open(tarball_path, 'r:gz') as tar:
+            tar.extractall(path=temp_dir)  # noqa: S202
+
+        package_dir = Path(temp_dir) / 'package'
+        lock_file = package_dir / 'package-lock.json'
+
+        # Generate package-lock.json if it doesn't exist
+        if not lock_file.exists():
+            result = subprocess.run(
+                ['npm', 'install', '--package-lock-only', '--ignore-scripts'],
+                cwd=package_dir,
+                capture_output=True,
+                text=True,
+                timeout=60,
+                check=False,
+            )
+            if result.returncode != 0:
+                print(
+                    f"Failed to generate package-lock.json: {result.stderr}",
+                    file=sys.stderr,
+                )
+                return None
+
+        # Calculate hash using prefetch-npm-deps
+        result = subprocess.run(
+            ['prefetch-npm-deps', str(lock_file)],
+            capture_output=True,
+            text=True,
+            timeout=120,
+            check=True,
+        )
+
+        hash_val = result.stdout.strip()
+        if hash_val.startswith('sha256-'):
+            return Hash(hash_val)
+
+        print(
+            f"Unexpected hash format from prefetch-npm-deps: {hash_val}",
+            file=sys.stderr,
+        )
+        return None  # noqa: TRY300
+
+    except subprocess.TimeoutExpired:
+        print("prefetch-npm-deps timed out", file=sys.stderr)
+        return None
+    except subprocess.CalledProcessError as e:
+        print(f"prefetch-npm-deps failed: {e.stderr}", file=sys.stderr)
+        return None
+    except Exception as e:  # noqa: BLE001
+        print(f"Error calculating npm deps hash: {e}", file=sys.stderr)
+        return None
+    finally:
+        # Clean up temp directory
+        if temp_dir:
+            with contextlib.suppress(OSError):
+                shutil.rmtree(temp_dir)
+
+
 # ----- Pure Functions for File Operations -----------------------------------------
 
 def read_file(path: Path) -> str:
@@ -331,6 +426,27 @@ def create_npm_updater(package: str) -> Callable[[Version], PackageInfo]:
         url = get_npm_download_url(package, version)
         hash_val = calculate_hash(url)
         return PackageInfo(name=package, version=version, hash=hash_val)
+    return updater
+
+
+def create_npm_updater_with_deps_hash(
+    package: str,
+    nix_file: Path,  # noqa: ARG001
+) -> Callable[[Version], PackageInfo]:
+    """Create an NPM package updater function that also calculates npmDepsHash."""
+    def updater(version: Version) -> PackageInfo:
+        url = get_npm_download_url(package, version)
+        hash_val = calculate_hash(url)
+
+        # Calculate npmDepsHash using prefetch-npm-deps
+        npm_deps_hash_val = calculate_npm_deps_hash(url)
+
+        return PackageInfo(
+            name=package,
+            version=version,
+            hash=hash_val,
+            npm_deps_hash=npm_deps_hash_val,
+        )
     return updater
 
 
@@ -433,11 +549,18 @@ def check_for_update(
     updater: Callable[[Version], PackageInfo],
 ) -> tuple[UpdateStatus, PackageInfo | None]:
     """Check if update is needed and calculate new info if so."""
-    if current.version == latest_version:
-        return UpdateStatus.UP_TO_DATE, None
+    # Check if npmDepsHash looks invalid (dummy hash)
+    needs_npm_deps_update = (
+        current.npm_deps_hash and
+        "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" in str(current.npm_deps_hash)
+    )
 
-    new_info = updater(latest_version)
-    return UpdateStatus.UPDATED, new_info
+    # If version is different or npmDepsHash is invalid, update
+    if current.version != latest_version or needs_npm_deps_update:
+        new_info = updater(latest_version)
+        return UpdateStatus.UPDATED, new_info
+
+    return UpdateStatus.UP_TO_DATE, None
 
 
 def check_for_rust_update(
@@ -642,7 +765,13 @@ def create_npm_update_pipeline(
 ) -> Callable[[], UpdateResult]:
     """Create a complete NPM update pipeline."""
     version_fetcher = partial(fetch_npm_version, package)
-    package_updater = create_npm_updater(package)
+
+    # Use updater with npmDepsHash if pattern is configured
+    if config.npm_hash_pattern:
+        package_updater = create_npm_updater_with_deps_hash(package, config.nix_file)
+    else:
+        package_updater = create_npm_updater(package)
+
     return partial(update_package, config, version_fetcher, package_updater)
 
 
