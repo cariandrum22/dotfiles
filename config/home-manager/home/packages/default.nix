@@ -18,8 +18,12 @@
         nixd
 
         # Utility
+        atuin
+        zoxide
+        carapace
         ghq
         fzf
+        (callPackage ./rivendell.nix { inherit pkgs; })
         silver-searcher
         nkf
         jq

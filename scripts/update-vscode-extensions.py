@@ -159,7 +159,7 @@ def _payload_for(extension: Extension) -> dict[str, Any]:
                 "criteria": [
                     {"filterType": 8, "value": "Microsoft.VisualStudio.Code"},
                     {
-                        "filterType": 7,
+                        "filterType": 10,  # SearchText - full text search
                         "value": f"{extension['publisher']}.{extension['name']}",
                     },
                 ],
@@ -325,10 +325,10 @@ def process_extensions(
     *,
     workers: int = DEFAULT_WORKERS,
     retries: int = DEFAULT_RETRIES,
-) -> list[QueryResult]:
+) -> list[tuple[QueryResult, Extension]]:
     """Fetch marketplace JSON for all extensions in parallel."""
     print(f"\nQuerying {len(extensions)} extensions with {workers} workers...")
-    results: list[QueryResult] = []
+    results: list[tuple[QueryResult, Extension]] = []
     failed: list[str] = []
 
     with ThreadPoolExecutor(max_workers=workers) as ex:
@@ -342,7 +342,7 @@ def process_extensions(
             try:
                 res = fut.result()
                 print(f"  ✓ {name}")
-                results.append(res)
+                results.append((res, ext))
             except Exception as e:  # noqa: BLE001 - Catch all marketplace API errors to continue processing
                 print(f"  ✗ {name}: {e}")
                 failed.append(name)
@@ -356,10 +356,25 @@ def process_extensions(
 
 
 def extract_prefetch(
-    result: QueryResult, *, retries: int = DEFAULT_RETRIES,
+    result: QueryResult,
+    *,
+    retries: int = DEFAULT_RETRIES,
+    extension_id: str | None = None,
 ) -> PrefetchResult:
     """Extract version/platform, prefetch sha256, and return structured result."""
-    ext = result["body"]["results"][0]["extensions"][0]
+    extensions = result["body"]["results"][0]["extensions"]
+
+    # If extension_id provided, find exact match in search results
+    ext = None
+    if extension_id and len(extensions) > 1:
+        for e in extensions:
+            ext_id = f"{e['publisher']['publisherName']}.{e['extensionName']}"
+            if ext_id.lower() == extension_id.lower():
+                ext = e
+                break
+    if not ext:
+        ext = extensions[0]
+
     publisher = ext["publisher"]["publisherName"]
     name = ext["extensionName"]
     version, arch = _pick_version(ext["versions"])
@@ -384,19 +399,18 @@ def extract_prefetch(
 
 
 def write_nix_output(
-    results: list[QueryResult], output_file: Path, *, retries: int,
+    results: list[tuple[QueryResult, Extension]], output_file: Path, *, retries: int,
 ) -> None:
     """Generate Nix list and write to file; format with nix fmt if available."""
     print("\nGenerating Nix expressions...")
     attrs: list[str] = []
-    for res in results:
+    for res, ext in results:
+        ext_id = f"{ext['publisher']}.{ext['name']}"
         try:
-            pref = extract_prefetch(res, retries=retries)
+            pref = extract_prefetch(res, retries=retries, extension_id=ext_id)
             attrs.append(_nix_attr(pref))
         except (KeyError, IndexError, AttributeError, TypeError, RuntimeError) as e:
-            ext = res["body"]["results"][0]["extensions"][0]
-            ext_name = f"{ext['publisher']['publisherName']}.{ext['extensionName']}"
-            print(f"  ✗ Failed to generate Nix for {ext_name}: {e}")
+            print(f"  ✗ Failed to generate Nix for {ext_id}: {e}")
 
     # Deterministic ordering for stable diffs
     body = "[\n" + "\n".join(sorted(attrs)) + "\n]\n"

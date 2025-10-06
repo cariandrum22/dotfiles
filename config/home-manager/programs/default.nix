@@ -8,6 +8,8 @@
     ./tmux.nix
     ./emacs.nix
     ./direnv.nix
+    ./atuin.nix
+    ./elvish.nix
     ./vscode
   ];
 }

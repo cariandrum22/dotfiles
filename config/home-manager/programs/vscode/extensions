@@ -16,6 +16,7 @@ dhall.dhall-lang
 dhall.vscode-dhall-lsp-server
 eamodio.gitlens
 EditorConfig.EditorConfig
+elves.elvish
 esbenp.prettier-vscode
 evilz.vscode-reveal
 figma.figma-vscode-extension
