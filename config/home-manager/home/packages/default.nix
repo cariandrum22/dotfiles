@@ -71,18 +71,9 @@
         redis
 
         # AI Tools
-        (unstable.claude-code.overrideAttrs (
-          _finalAttrs: oldAttrs: rec {
-            version = "2.0.8";
-            src = fetchzip {
-              url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-              hash = "sha256-WxXkUZs/sQp7PJfSPCv8EwbvUGYgePhouKv/YFzOd14=";
-            };
-            npmDepsHash = "sha256-5AFExga9P8G1J2gTSmXL1UqetRlmNedcWQ8DoFWji8E=";
-          }
-        ))
-        (callPackage ./codex.nix { inherit pkgs unstable; })
-        (callPackage ./gemini-cli.nix { inherit pkgs; })
+        (callPackage ./claude-code.nix { })
+        (callPackage ./codex.nix { })
+        (callPackage ./gemini-cli.nix { })
         claudius
 
         # Development toolchain
