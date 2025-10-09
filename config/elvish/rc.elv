@@ -10,6 +10,11 @@ use rivendell/fun f
 # Setup fzf key bindings
 fzf:setup
 
+# Use GNU readline-style key bindings (like Bash)
+# This provides Ctrl-A (line start), Ctrl-E (line end), Ctrl-B/F (move char),
+# Alt-B/F (move word), and other familiar Emacs-style bindings
+use readline-binding
+
 fn _seg {|label val color|
   if (and (not-eq $val "") (not-eq $val $nil)) {
     put (styled $label dim)" "(styled "⟦" dim)(styled $val $color)(styled "⟧" dim)
