@@ -14,11 +14,11 @@ in
       ''
     );
 
-    # Fetch mellon/atuin module from git.sr.ht (declarative approach)
-    "elvish/lib/atuin.elv".source = pkgs.fetchurl {
-      url = "https://git.sr.ht/~ejri/mellon/blob/main/atuin.elv";
-      sha256 = "1dv8a6fm3cqv2w6m8c7cx56qvih2zp69r30chakb2d75j56gf71z";
-    };
+    # Local Atuin module patched for Elvish 0.21+
+    "elvish/lib/atuin.elv".source = ./../../elvish/lib/atuin.elv;
+
+    # 1Password helpers for Elvish
+    "elvish/lib/onepassword.elv".source = ./../../elvish/lib/onepassword.elv;
 
     # Fetch spinners module from zzamboni/elvish-modules
     "elvish/lib/spinners.elv".source = pkgs.fetchurl {

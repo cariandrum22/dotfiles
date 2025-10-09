@@ -10,6 +10,11 @@ use rivendell/fun f
 # Setup fzf key bindings
 fzf:setup
 
+# Use GNU readline-style key bindings (like Bash)
+# This provides Ctrl-A (line start), Ctrl-E (line end), Ctrl-B/F (move char),
+# Alt-B/F (move word), and other familiar Emacs-style bindings
+use readline-binding
+
 fn _seg {|label val color|
   if (and (not-eq $val "") (not-eq $val $nil)) {
     put (styled $label dim)" "(styled "⟦" dim)(styled $val $color)(styled "⟧" dim)
@@ -386,7 +391,17 @@ if (has-external krew) {
 if (and (has-external op) (has-external gemini)) {
   set E:GOOGLE_CLOUD_PROJECT = "op://Private/Vertex AI - personal/project"
   set E:GOOGLE_CLOUD_LOCATION = "op://Private/Vertex AI - personal/location"
-  set E:GOOGLE_APPLICATION_CREDENTIALS = "op://Private/Vertex AI - personal/credentials"
+  set E:GOOGLE_APPLICATION_CREDENTIALS = "op://Private/Vertex AI - personal/credential"
+}
+
+# 1Password helpers
+use onepassword
+fn op-signin {|@args|
+  if (not (has-external op)) {
+    echo (styled "1Password CLI (op) not found in PATH" red) >&2
+    return
+  }
+  onepassword:signin $@args
 }
 
 # Get secrets from 1Password for AI tools
@@ -398,18 +413,28 @@ if (and (has-external op) (has-external claudius)) {
   set E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN = "op://Private/Personal AI Gateway Credential/credential"
 
   # Base URLs for AI tools with wrapper functions
+  # Note: Use edit:add-var to make functions override external commands
   if (has-external claude) {
     set E:CLAUDIUS_SECRET_ANTHROPIC_BASE_URL = "{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT}}/{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN}}/anthropic"
-    fn claude {|@args| claudius run -- claude $@args }
+    fn -claude-wrapper {|@args|
+      e:claudius run -- claude $@args
+    }
+    edit:add-var claude~ $-claude-wrapper~
   }
   if (has-external gemini) {
     set E:CLAUDIUS_SECRET_GOOGLE_VERTEX_BASE_URL = "{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT}}/{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN}}/google-vertex-ai"
-    fn gemini {|@args| claudius run -- gemini $@args }
+    fn -gemini-wrapper {|@args|
+      e:claudius run -- gemini $@args
+    }
+    edit:add-var gemini~ $-gemini-wrapper~
   }
   if (has-external codex) {
     set E:CLAUDIUS_SECRET_OPENAI_API_KEY = "op://Private/OpenAI Codex CLI/credential"
     set E:CLAUDIUS_SECRET_OPENAI_BASE_URL = "{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT}}/{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN}}/openai"
-    fn codex {|@args| claudius run -- codex $@args }
+    fn -codex-wrapper {|@args|
+      e:claudius run -- codex $@args
+    }
+    edit:add-var codex~ $-codex-wrapper~
   }
 }
 
@@ -431,14 +456,92 @@ if (has-external kitty) {
 # Configure Atuin integration (declaratively managed via Nix)
 if (has-external atuin) {
   try {
-    # Load atuin module (fetched declaratively by Nix)
     use atuin
 
-    # Override fzf bindings with Atuin
-    set edit:insert:binding[Ctrl-R] = { atuin:search }
-    set edit:insert:binding[Up] = { atuin:search-up }
+    fn _atuin-apply-result {|res|
+      if (or (eq $res $nil) (not (eq (kind-of $res) map))) {
+        return
+      }
+      if (not (has-key $res status)) {
+        return
+      }
+      var status = $res[status]
+      if (or (eq $status $nil) (not (eq $status 0))) {
+        return
+      }
+      if (not (has-key $res text)) {
+        return
+      }
+      var text = $res[text]
+      if (eq $text "") {
+        return
+      }
+      try {
+        edit:replace-input $text
+      } catch e {
+        echo $text
+      }
+      try {
+        edit:redraw &full=$true
+      } catch e {
+        # ignore
+      }
+    }
+
+    fn _atuin-search {|@flags|
+      var query = ""
+      try {
+        set query = (edit:current-command)
+      } catch e {
+        set query = ""
+      }
+      var res = (atuin:search $query $@flags)
+      if (and (eq (kind-of $res) map) (has-key $res status)) {
+        var status = $res[status]
+        if (or (eq $status 1) (eq $status 130)) {
+          return
+        }
+        if (not (eq $status 0)) {
+          try {
+            fzf:history-search
+          } catch e {
+            # fallback unavailable
+          }
+          return
+        }
+      }
+      _atuin-apply-result $res
+    }
+
+    fn _atuin-search-up {
+      var line = ""
+      try {
+        set line = (str:trim-space $edit:current-command)
+      } catch e {
+        set line = ""
+      }
+      if (eq $line "") {
+        set line = $pwd
+      }
+      var res = (atuin:search-up $line)
+      if (and (eq (kind-of $res) map) (has-key $res status)) {
+        var status = $res[status]
+        if (or (eq $status 1) (eq $status 130)) {
+          return
+        }
+        if (not (eq $status 0)) {
+          return
+        }
+      }
+      _atuin-apply-result $res
+    }
+
+    set edit:after-readline = [$@edit:after-readline {|line| atuin:begin-record $line }]
+    set edit:after-command = [$@edit:after-command {|m| atuin:finish-record $m }]
+
+    set edit:insert:binding[Ctrl-R] = $_atuin-search~
+    set edit:insert:binding[Up] = $_atuin-search-up~
   } catch e {
-    # If atuin module fails to load, fall back to fzf
     echo "Warning: Failed to load atuin module, using fzf for history search" >&2
   }
 }
