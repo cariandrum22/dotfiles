@@ -128,7 +128,7 @@ end
 if type -q op and type -q gemini
     set -x GOOGLE_CLOUD_PROJECT "op://Private/Vertex AI - personal/project"
     set -x GOOGLE_CLOUD_LOCATION "op://Private/Vertex AI - personal/location"
-    set -x GOOGLE_APPLICATION_CREDENTIALS "op://Private/Vertex AI - personal/credentials"
+    set -x GOOGLE_APPLICATION_CREDENTIALS "op://Private/Vertex AI - personal/credential"
 end
 
 # Get secrets from 1Password

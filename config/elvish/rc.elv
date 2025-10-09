@@ -386,7 +386,17 @@ if (has-external krew) {
 if (and (has-external op) (has-external gemini)) {
   set E:GOOGLE_CLOUD_PROJECT = "op://Private/Vertex AI - personal/project"
   set E:GOOGLE_CLOUD_LOCATION = "op://Private/Vertex AI - personal/location"
-  set E:GOOGLE_APPLICATION_CREDENTIALS = "op://Private/Vertex AI - personal/credentials"
+  set E:GOOGLE_APPLICATION_CREDENTIALS = "op://Private/Vertex AI - personal/credential"
+}
+
+# 1Password helpers
+use onepassword
+fn op-signin {|@args|
+  if (not (has-external op)) {
+    echo (styled "1Password CLI (op) not found in PATH" red) >&2
+    return
+  }
+  onepassword:signin $@args
 }
 
 # Get secrets from 1Password for AI tools
