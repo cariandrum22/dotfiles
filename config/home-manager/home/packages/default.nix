@@ -68,7 +68,7 @@
         kubelogin
         powershell
         certbot
-        unstable.awscli2
+        awscli2
         eksctl
         google-cloud-sdk
         k6
