@@ -431,14 +431,92 @@ if (has-external kitty) {
 # Configure Atuin integration (declaratively managed via Nix)
 if (has-external atuin) {
   try {
-    # Load atuin module (fetched declaratively by Nix)
     use atuin
 
-    # Override fzf bindings with Atuin
-    set edit:insert:binding[Ctrl-R] = { atuin:search }
-    set edit:insert:binding[Up] = { atuin:search-up }
+    fn _atuin-apply-result {|res|
+      if (or (eq $res $nil) (not (eq (kind-of $res) map))) {
+        return
+      }
+      if (not (has-key $res status)) {
+        return
+      }
+      var status = $res[status]
+      if (or (eq $status $nil) (not (eq $status 0))) {
+        return
+      }
+      if (not (has-key $res text)) {
+        return
+      }
+      var text = $res[text]
+      if (eq $text "") {
+        return
+      }
+      try {
+        edit:replace-input $text
+      } catch e {
+        echo $text
+      }
+      try {
+        edit:redraw &full=$true
+      } catch e {
+        # ignore
+      }
+    }
+
+    fn _atuin-search {|@flags|
+      var query = ""
+      try {
+        set query = (edit:current-command)
+      } catch e {
+        set query = ""
+      }
+      var res = (atuin:search $query $@flags)
+      if (and (eq (kind-of $res) map) (has-key $res status)) {
+        var status = $res[status]
+        if (or (eq $status 1) (eq $status 130)) {
+          return
+        }
+        if (not (eq $status 0)) {
+          try {
+            fzf:history-search
+          } catch e {
+            # fallback unavailable
+          }
+          return
+        }
+      }
+      _atuin-apply-result $res
+    }
+
+    fn _atuin-search-up {
+      var line = ""
+      try {
+        set line = (str:trim-space $edit:current-command)
+      } catch e {
+        set line = ""
+      }
+      if (eq $line "") {
+        set line = $pwd
+      }
+      var res = (atuin:search-up $line)
+      if (and (eq (kind-of $res) map) (has-key $res status)) {
+        var status = $res[status]
+        if (or (eq $status 1) (eq $status 130)) {
+          return
+        }
+        if (not (eq $status 0)) {
+          return
+        }
+      }
+      _atuin-apply-result $res
+    }
+
+    set edit:after-readline = [$@edit:after-readline {|line| atuin:begin-record $line }]
+    set edit:after-command = [$@edit:after-command {|m| atuin:finish-record $m }]
+
+    set edit:insert:binding[Ctrl-R] = $_atuin-search~
+    set edit:insert:binding[Up] = $_atuin-search-up~
   } catch e {
-    # If atuin module fails to load, fall back to fzf
     echo "Warning: Failed to load atuin module, using fzf for history search" >&2
   }
 }
