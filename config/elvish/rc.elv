@@ -414,15 +414,16 @@ if (and (has-external op) (has-external claudius)) {
 
   # Base URLs for AI tools with wrapper functions
   # Note: Use edit:add-var to make functions override external commands
+  # Note: Use string concatenation to expand variables inside {{}} for Claudius
   if (has-external claude) {
-    set E:CLAUDIUS_SECRET_ANTHROPIC_BASE_URL = "{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT}}/{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN}}/anthropic"
+    set E:CLAUDIUS_SECRET_ANTHROPIC_BASE_URL = "{{"$E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT"}}/{{"$E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN"}}/anthropic"
     fn -claude-wrapper {|@args|
       e:claudius run -- claude $@args
     }
     edit:add-var claude~ $-claude-wrapper~
   }
   if (has-external gemini) {
-    set E:CLAUDIUS_SECRET_GOOGLE_VERTEX_BASE_URL = "{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT}}/{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN}}/google-vertex-ai"
+    set E:CLAUDIUS_SECRET_GOOGLE_VERTEX_BASE_URL = "{{"$E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT"}}/{{"$E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN"}}/google-vertex-ai"
     fn -gemini-wrapper {|@args|
       e:claudius run -- gemini $@args
     }
@@ -430,7 +431,7 @@ if (and (has-external op) (has-external claudius)) {
   }
   if (has-external codex) {
     set E:CLAUDIUS_SECRET_OPENAI_API_KEY = "op://Private/OpenAI Codex CLI/credential"
-    set E:CLAUDIUS_SECRET_OPENAI_BASE_URL = "{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT}}/{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN}}/openai"
+    set E:CLAUDIUS_SECRET_OPENAI_BASE_URL = "{{"$E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT"}}/{{"$E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN"}}/openai"
     fn -codex-wrapper {|@args|
       e:claudius run -- codex $@args
     }
