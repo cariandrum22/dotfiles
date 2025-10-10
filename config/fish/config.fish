@@ -57,6 +57,11 @@ if type -q fzf
     set -U FZF_LEGACY_KEYBINDINGS 0
 end
 
+# Configure atuin (shell history in SQLite)
+if type -q atuin
+    atuin init fish | source
+end
+
 # Configure direnv
 if type -q direnv
     eval (direnv hook fish)
