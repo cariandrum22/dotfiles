@@ -207,8 +207,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.47.2025101008";
-    sha256 = "02ph2hp63gh06jvmd26c5hwv4hd9qf7w6121y7nc7rfgq0llgx0m";
+    version = "1.47.2025101108";
+    sha256 = "1m4lglk44bs90p6s72lsx22l5y653gn6nqzanwf08f2yagx27d0d";
     arch = "linux-x64";
   }
   {
@@ -349,8 +349,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2641";
-    sha256 = "0nbxnf4y8bx22h4wclwhb10y0bhbnhkdvv71m5pwy1xhc3ds7hb2";
+    version = "0.4.2643";
+    sha256 = "1cd9424ib1q1gd04vvja2a8n0zyl0n3a6ss6cx8gfkvf050q92v7";
     arch = "linux-x64";
   }
   {
@@ -454,8 +454,8 @@
   {
     name = "vscode-fish";
     publisher = "bmalehorn";
-    version = "1.0.39";
-    sha256 = "023iaw66fxsz77yw166rfyy5rd9khzx9nxghvsm79n2hpghh772g";
+    version = "1.0.40";
+    sha256 = "0p1yaqgs5yissflmcqs0smjbpixlr8g3kqbhrspl1401sihxywz7";
   }
   {
     name = "vscode-gradle";
