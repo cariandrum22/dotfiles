@@ -50,7 +50,7 @@ def main() -> int:
                 current=current,
                 latest=None,
                 status=lib.UpdateStatus.UP_TO_DATE,
-                message=f"Already at latest version {latest_version}",
+                message=f"gemini-cli is up to date at version {latest_version}",
             )
 
         # Calculate hash for binary
@@ -72,7 +72,7 @@ def main() -> int:
             current=current,
             latest=latest,
             status=lib.UpdateStatus.UPDATED,
-            message=f"Updated from {current.version} to {latest_version}",
+            message=f"Updated gemini-cli from {current.version} to {latest_version}",
         )
 
     # Execute pipeline
