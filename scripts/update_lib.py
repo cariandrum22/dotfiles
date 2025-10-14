@@ -808,7 +808,7 @@ def format_result(result: UpdateResult) -> str:
     }
 
     lines = [
-        f"\n{status_symbol[result.status]} {result.message}",
+        f"{status_symbol[result.status]} {result.message}",
     ]
 
     if result.status == UpdateStatus.UPDATED and result.latest:
