@@ -100,12 +100,16 @@ def build_request(
     Returns:
         Configured Request object
     """
-    default_headers = {}
+    default_headers: dict[str, str] = {}
     if user_agent:
         default_headers["User-Agent"] = user_agent
     if headers:
         default_headers.update(headers)
-    return Request(url, headers=default_headers or None)  # noqa: S310 - Trusted HTTPS URLs only
+    # urllib.request.Request requires dict with at least one item,
+    # or omit headers entirely
+    if len(default_headers) > 0:
+        return Request(url, headers=default_headers)  # noqa: S310 - Trusted
+    return Request(url)  # noqa: S310 - Trusted HTTPS URLs only
 
 
 def fetch_text(url: str, *, timeout: int = HTTP_TIMEOUT) -> str:

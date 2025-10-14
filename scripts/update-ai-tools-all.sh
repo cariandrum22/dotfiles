@@ -10,6 +10,8 @@ python3 scripts/update-claude-code.py
 echo
 python3 scripts/update-codex-cli.py
 echo
+python3 scripts/update-droid.py
+echo
 python3 scripts/update-gemini-cli.py
 
 echo

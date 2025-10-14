@@ -77,6 +77,7 @@
         # AI Tools
         (callPackage ./claude-code.nix { })
         (callPackage ./codex.nix { })
+        (callPackage ./droid.nix { })
         (callPackage ./gemini-cli.nix { })
         claudius
 
