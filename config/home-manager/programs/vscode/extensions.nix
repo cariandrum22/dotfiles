@@ -60,6 +60,13 @@
     sha256 = "0dxsdahyivx1ghxs6l9b93filfm8vl5q2sa4g21fiklgdnaf7pxl";
   }
   {
+    name = "chatgpt";
+    publisher = "openai";
+    version = "0.5.19";
+    sha256 = "0f8wagxqspm637z1q4wrpd37gcr6zd93vz4mkvnwsnx91s59ar1j";
+    arch = "linux-x64";
+  }
+  {
     name = "claude-code";
     publisher = "anthropic";
     version = "2.0.15";
@@ -155,6 +162,12 @@
     publisher = "usernamehw";
     version = "3.26.0";
     sha256 = "0rmvzr5qsbq8zni9vwg4y6bh8l6s5hci974x676m57hi0pfj82d4";
+  }
+  {
+    name = "factory-vscode-extension";
+    publisher = "Factory";
+    version = "0.1.9";
+    sha256 = "1xk33iynv6yfy0jf4gq5jjs3q4lf3lk002prcjkcnchbkrsbw2wg";
   }
   {
     name = "figma-vscode-extension";

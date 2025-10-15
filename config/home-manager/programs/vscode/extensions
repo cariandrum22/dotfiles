@@ -19,6 +19,7 @@ EditorConfig.EditorConfig
 elves.elvish
 esbenp.prettier-vscode
 evilz.vscode-reveal
+Factory.factory-vscode-extension
 figma.figma-vscode-extension
 foxundermoon.shell-format
 FStarLang.fstar-vscode-assistant
@@ -62,6 +63,7 @@ MustafaHafidi.liquidhaskell-diagnostics
 noku.rails-run-spec-vscode
 nwolverson.ide-purescript
 nwolverson.language-purescript
+openai.chatgpt
 pbkit.vscode-pbkit
 PKief.material-icon-theme
 redhat.java
