@@ -4,6 +4,9 @@ dist-*
 result
 .pre-commit-config.yaml
 
+# Ruby
+bundle/cache/
+
 # Python
 __pycache__/
 *.py[cod]
