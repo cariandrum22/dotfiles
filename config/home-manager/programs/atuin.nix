@@ -14,7 +14,7 @@
 
       # Search settings
       search_mode = "fuzzy"; # Ctrl-R uses fuzzy search
-      search_mode_shell_up_key_binding = "fulltext"; # Up arrow uses substring match (like Fish default)
+      search_mode_shell_up_key_binding = "fuzzy"; # Up arrow uses fuzzy search (same as Ctrl-R)
       filter_mode = "global";
       style = "auto";
       inline_height = 20;
