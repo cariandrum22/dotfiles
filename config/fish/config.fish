@@ -147,16 +147,16 @@ if type -q op and type -q claudius
     # Base URLs
     if type -q claude
         set -x CLAUDIUS_SECRET_ANTHROPIC_BASE_URL "{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT}}/{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN}}/anthropic"
-        alias claude="claudius run -- claude"
+        alias claude="claudius secrets run -- claude"
     end
     if type -q gemini
         set -x CLAUDIUS_SECRET_GOOGLE_VERTEX_BASE_URL "{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT}}/{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN}}/google-vertex-ai"
-        alias gemini="claudius run -- gemini"
+        alias gemini="claudius secrets run -- gemini"
     end
     if type -q codex
         set -x CLAUDIUS_SECRET_OPENAI_API_KEY "op://Private/OpenAI Codex CLI/credential"
         set -x CLAUDIUS_SECRET_OPENAI_BASE_URL "{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT}}/{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN}}/openai"
-        alias codex="claudius run -- codex"
+        alias codex="claudius secrets run -- codex"
     end
 end
 
