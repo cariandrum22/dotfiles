@@ -69,15 +69,15 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.0.15";
-    sha256 = "0v0mw842gyba9mr1a4abvv1wf91bfa5bf0sfjvhg22214v5d8dgs";
+    version = "2.0.19";
+    sha256 = "0y74vz6ks0858ar517v1hpk38jhq55k8lsax4vg3acbnvsxbhxz2";
     arch = "linux-x64";
   }
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "3.32.7";
-    sha256 = "00z3lxfamf3p3qb8kzwahcv3m0wbjz2khh8bkhzb1hwfavzcay3j";
+    version = "3.32.8";
+    sha256 = "1n0fp6aq7qi9md3q1k0a8sq5a8f2yrsyvj861m6s52rhq29q0193";
   }
   {
     name = "cmake";
@@ -112,8 +112,8 @@
   {
     name = "copilot-chat";
     publisher = "GitHub";
-    version = "0.33.2025101402";
-    sha256 = "1212zmjc3dkhgw7xiqddxsa9dp79b73gmp21laych7n3h31mlssi";
+    version = "0.33.2025101503";
+    sha256 = "110pbbmrgnjd2zq16589v0p1d8ngarqm30f8xfk4s3ahq5x4blx3";
   }
   {
     name = "cucumber-official";
@@ -184,8 +184,8 @@
   {
     name = "geminicodeassist";
     publisher = "Google";
-    version = "2.53.0";
-    sha256 = "1p31vz4zy4fyka96swjhrna8p943b1baglh22m83649bgv4cplpl";
+    version = "2.54.0";
+    sha256 = "0jxhi2d08wxkzg0z5q42i85x6s1brp6zr3skk0g6sc6ikr863znz";
   }
   {
     name = "git-worktree-manager";
@@ -220,8 +220,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.47.2025101408";
-    sha256 = "15x4j5z7xfp3bkna5czl3lvqwcaigqws7na5576g966v769splky";
+    version = "1.47.2025101508";
+    sha256 = "0cc381kw9ywjvq2b1w6vrrj7z9wlhr59sh6xyqy6wg354b6ldbys";
     arch = "linux-x64";
   }
   {
@@ -362,8 +362,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2645";
-    sha256 = "1clg9ncpkssi24pw9z3zznjykcvjybyrr6mg459dv5h7w3sz8l6f";
+    version = "0.4.2646";
+    sha256 = "0i8knk9azv45ypxswmw697jfpm4nqz6f8scclc4c1q609cd5chw5";
     arch = "linux-x64";
   }
   {
