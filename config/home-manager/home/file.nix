@@ -59,9 +59,6 @@
       ".npmrc" = {
         source = ../../../npmrc;
       };
-      ".claude/settings.json" = {
-        source = ../../../claude/settings.json;
-      };
     }
     (lib.mkIf pkgs.stdenv.isDarwin {
       ".gnupg/scdaemon.conf".text = ''disable-ccid'';
