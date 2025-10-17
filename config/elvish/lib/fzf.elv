@@ -271,6 +271,64 @@ fn ghq-search {
   }
 }
 
+fn tmux-session-search {
+  if (not (has-external tmux)) {
+    -warn "fzf: tmux not available"
+    return
+  }
+
+  # Check if there are any sessions
+  var session-count = 0
+  try {
+    set session-count = (tmux list-sessions 2>/dev/null | count)
+  } catch e {
+    -warn "fzf: no tmux sessions found"
+    return
+  }
+
+  if (eq $session-count 0) {
+    -warn "fzf: no tmux sessions found"
+    return
+  }
+
+  var result = ""
+  try {
+    set result = (tmux list-sessions -F "#{session_name}#{?session_attached, (attached),}: #{session_windows} windows (created #{session_created_string})" 2>/dev/null |
+      -run-fzf --prompt="Tmux Sessions> " --height=70% --reverse --preview="tmux list-windows -t {1}")
+  } catch e {
+    var status = (-get-exit-status $e)
+    if (or (eq $status 1) (eq $status 130)) {
+      return
+    }
+    -warn (str:fmt "fzf: tmux session search failed (exit %s)" (-status-text $status))
+    return
+  }
+
+  if (eq $result "") {
+    return
+  }
+
+  # Extract session name (before the colon or space)
+  var parts = [(str:split ":" $result)]
+  if (eq (count $parts) 0) {
+    return
+  }
+  var session = (str:trim-space $parts[0])
+
+  # Check if we're inside tmux
+  try {
+    if (has-env TMUX) {
+      # Inside tmux: switch to the session
+      tmux switch-client -t $session
+    } else {
+      # Outside tmux: attach to the session
+      tmux attach-session -t $session
+    }
+  } catch e {
+    -warn (str:fmt "fzf: failed to switch to tmux session %s" $session)
+  }
+}
+
 fn -apply-binding {|key fn|
   if (or (eq $key $nil) (eq $key "")) {
     return
@@ -282,7 +340,7 @@ fn -apply-binding {|key fn|
   }
 }
 
-fn configure-bindings {|&history="Ctrl-R" &files="Ctrl-T" &directory="Alt-C" &git_log="Alt-L" &processes="Alt-P" &variables="Alt-V" &ghq="Ctrl-G"|
+fn configure-bindings {|&history="Ctrl-R" &files="Ctrl-T" &directory="Alt-C" &git_log="Alt-L" &processes="Alt-P" &variables="Alt-V" &ghq="Ctrl-G" &tmux="Alt-T"|
   -apply-binding $history $history-search~
   -apply-binding $files $file-search~
   -apply-binding $directory $dir-search~
@@ -290,6 +348,7 @@ fn configure-bindings {|&history="Ctrl-R" &files="Ctrl-T" &directory="Alt-C" &gi
   -apply-binding $processes $process-search~
   -apply-binding $variables $variable-search~
   -apply-binding $ghq $ghq-search~
+  -apply-binding $tmux $tmux-session-search~
 }
 
 fn setup {
