@@ -85,22 +85,24 @@ in
 {
   programs.git = {
     enable = true;
-    userName = "Takafumi Asano";
-    userEmail = "cariandrum22@gmail.com";
     signing = {
       key = "48F302B631525FA4D5A40106AC7AA4174AC64BA5";
       signByDefault = true;
     };
     lfs.enable = true;
-    aliases = {
-      co = "checkout";
-      br = "branch";
-      cl = "clone";
-      pl = "pull";
-      fc = "fetch";
-      st = "stash";
-    };
-    extraConfig = {
+    settings = {
+      user = {
+        name = "Takafumi Asano";
+        email = "cariandrum22@gmail.com";
+      };
+      alias = {
+        co = "checkout";
+        br = "branch";
+        cl = "clone";
+        pl = "pull";
+        fc = "fetch";
+        st = "stash";
+      };
       core = {
         editor = "emacs";
       };
