@@ -45,11 +45,11 @@ PLATFORMS: dict[str, str] = {
 }
 
 # Precompiled regexes
-RE_VERSION = re.compile(r'version\s*=\s*"([^"]+)"')
+RE_VERSION = re.compile(r'version\s*=\s*"([^"]+)";')
 RE_INSTALL_VERSION = re.compile(r'VER="([^"]+)"')
 RE_HASH_BLOCK = re.compile(
-    r"(  sources = \{[^}]*)(x86_64-linux[^}]+};\s+aarch64-darwin[^}]+};)([^}]*\})",
-    re.DOTALL,
+    r"(  sources = \{\n)((?:    \w+-\w+ = \{.*?\};\n)+)(  \};)",
+    re.DOTALL | re.MULTILINE,
 )
 
 
@@ -173,7 +173,7 @@ def _update_nix_content(content: str, new_version: str, hashes: dict[str, str]) 
     # Update hash block
     hash_block = _generate_hash_block(hashes)
     if RE_HASH_BLOCK.search(content):
-        content = RE_HASH_BLOCK.sub(rf"\1{hash_block}\3", content)
+        content = RE_HASH_BLOCK.sub(rf"\1{hash_block}\n\3", content)
     else:
         msg = "Could not find hash block in droid.nix"
         raise DroidConfigError(msg)
