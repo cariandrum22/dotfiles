@@ -7,6 +7,10 @@ set -x PATH /usr/local/sbin "$HOME/.local/bin" $PATH
 
 if type -q tmux
     set -x TMUX_TMPDIR "/run/user/"(id -u)
+    # Ensure DISPLAY is set for clipboard operations in tmux
+    if test -n "$TMUX" -a -z "$DISPLAY"
+        set -x DISPLAY :0
+    end
 end
 
 if type -q emacs
