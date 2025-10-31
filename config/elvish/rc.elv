@@ -260,6 +260,7 @@ if (has-external code-insiders) {
 
 # Add paths to PATH
 set paths = [
+  $E:HOME/.nix-profile/bin
   $E:HOME/.local/bin
   /usr/local/sbin
   $@paths
