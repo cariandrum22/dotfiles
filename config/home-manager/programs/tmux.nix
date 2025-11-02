@@ -13,18 +13,26 @@
       set -g mouse on
       bind -n WheelUpPane if-shell -F -t = "#{mouse_any_flag}" "send-keys -M" "if -Ft= '#{pane_in_mode}' 'send-keys -M' 'copy-mode -e; send-keys -M'"
 
-      # Clipboard integration using OSC 52 escape sequences
-      # Works over SSH, no X11 dependency, supported by modern terminals
-      # tmux 3.3+ required
+      # Hybrid clipboard integration: OSC 52 + xsel for maximum compatibility
+      # OSC 52 works over SSH and in terminals that support it
+      # xsel provides integration with system clipboard (Chrome, Firefox, etc.)
       set -g set-clipboard on
 
       # Allow OSC 52 to set the clipboard
       set -g allow-passthrough on
 
-      # Simple copy-mode key bindings without external tools
-      bind-key -T copy-mode C-w send-keys -X copy-selection-and-cancel
-      bind-key -T copy-mode M-w send-keys -X copy-selection-and-cancel
-      bind-key -T copy-mode MouseDragEnd1Pane send-keys -X copy-selection-and-cancel
+      # Copy to both tmux buffer and system clipboard using xsel
+      # This ensures clipboard works both in terminal and with GUI apps
+      # Use helper script to dynamically get correct DISPLAY for long-running sessions
+      bind-key -T copy-mode C-w send-keys -X copy-pipe-and-cancel "$HOME/.local/bin/tmux-clipboard-helper xsel -i -p && $HOME/.local/bin/tmux-clipboard-helper xsel -o -p | $HOME/.local/bin/tmux-clipboard-helper xsel -i -b"
+      bind-key -T copy-mode M-w send-keys -X copy-pipe-and-cancel "$HOME/.local/bin/tmux-clipboard-helper xsel -i -p && $HOME/.local/bin/tmux-clipboard-helper xsel -o -p | $HOME/.local/bin/tmux-clipboard-helper xsel -i -b"
+      bind-key -T copy-mode MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel "$HOME/.local/bin/tmux-clipboard-helper xsel -i -p && $HOME/.local/bin/tmux-clipboard-helper xsel -o -p | $HOME/.local/bin/tmux-clipboard-helper xsel -i -b"
+
+      # Paste binding (Emacs-style) - paste from system clipboard
+      # Use helper script to ensure correct DISPLAY even in long-running sessions
+      bind-key C-y run-shell "$HOME/.local/bin/tmux-clipboard-helper xsel -o -b | tmux load-buffer - ; tmux paste-buffer"
+      # Also bind without prefix for convenience
+      bind-key -n C-y run-shell "$HOME/.local/bin/tmux-clipboard-helper xsel -o -b | tmux load-buffer - ; tmux paste-buffer"
 
       # Legacy xsel/xclip configurations (kept for reference)
       # If OSC 52 doesn't work in your terminal, uncomment one of these:
