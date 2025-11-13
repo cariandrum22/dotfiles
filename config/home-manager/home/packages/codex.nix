@@ -2,17 +2,17 @@
 
 unstable.rustPlatform.buildRustPackage rec {
   pname = "codex-cli";
-  version = "rust-v0.56.0";
+  version = "rust-v0.57.0";
 
   src = pkgs.fetchFromGitHub {
     owner = "openai";
     repo = "codex";
     rev = "${version}";
-    hash = "sha256-CIKoOfqZwCCCDFXnRdU7haxfiyvrgGD3vSwXZpE9DUU=";
+    hash = "sha256-Mjn2SesclOTBLiE7hQRtdyI/TpIM5lw2uswYyCMhyGY=";
   };
 
   sourceRoot = "source/codex-rs";
-  cargoHash = "sha256-FN20afqRVdGl17+fbzNoXqF8BY+dPtGi1lvwB6w+ieE=";
+  cargoHash = "sha256-ijXcYBMP63VzeHqVTEebJ83cYQtQgHU62kWklA1NHEA=";
 
   # Enable unstable features (file_lock)
   RUSTC_BOOTSTRAP = "1";
