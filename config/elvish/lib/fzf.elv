@@ -44,7 +44,7 @@ fn -status-text {|status|
 fn history-search {
   var query = ""
   try {
-    set query = (edit:current-command)
+    set query = $edit:current-command
   } catch e {
     # edit module not available yet
   }
