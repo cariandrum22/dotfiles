@@ -59,6 +59,26 @@
       ".npmrc" = {
         source = ../../../npmrc;
       };
+      # tmux clipboard helper script
+      ".local/bin/tmux-clipboard-helper" = {
+        executable = true;
+        text = ''
+          #!/usr/bin/env sh
+          # Dynamic DISPLAY detection for tmux clipboard operations
+
+          # Try to get DISPLAY from systemd (Linux)
+          if command -v systemctl >/dev/null 2>&1; then
+              DISPLAY_VAR=$(systemctl --user show-environment 2>/dev/null | grep '^DISPLAY=' | cut -d= -f2)
+          fi
+
+          # Fallback to environment or :0
+          DISPLAY=''${DISPLAY_VAR:-''${DISPLAY:-:0}}
+          export DISPLAY
+
+          # Execute the command passed as arguments
+          exec "$@"
+        '';
+      };
     }
     (lib.mkIf pkgs.stdenv.isDarwin {
       ".gnupg/scdaemon.conf".text = ''disable-ccid'';
