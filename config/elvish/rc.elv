@@ -276,6 +276,17 @@ if (not (has-external nixos-version)) {
   set E:NIX_PATH = $E:HOME/.nix-defexpr/channels
 }
 
+# Configure Ruby GEM_PATH
+if (has-external ruby) {
+  var ruby-gem-path = $E:HOME/.nix-profile/lib/ruby/gems/3.3.0
+  var system-ruby-path = (ruby -e "puts Gem.default_dir" 2>/dev/null | slurp)
+  if (not-eq $system-ruby-path "") {
+    set E:GEM_PATH = $ruby-gem-path":"(str:trim-space $system-ruby-path)
+  } else {
+    set E:GEM_PATH = $ruby-gem-path
+  }
+}
+
 # Source Nix daemon profile
 if ?(test -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh) {
   # Add Nix paths
@@ -324,11 +335,19 @@ if (has-external rustup) {
 
 # Configure Java
 if (has-external java) {
-  if (eq (uname) Darwin) {
-    set E:JAVA_HOME = (/usr/libexec/java_home)
-  } else {
-    # Linux: find Java home from javac
-    if (has-external javac) {
+  try {
+    # Prefer Nix-based Java
+    set E:JAVA_HOME = (dirname (dirname (readlink -f (which java))))
+  } catch e {
+    # Fallback to system Java on macOS
+    if (eq (uname) Darwin) {
+      try {
+        set E:JAVA_HOME = (/usr/libexec/java_home)
+      } catch {
+        # Ignore if Java setup is incomplete
+      }
+    } elif (has-external javac) {
+      # Linux fallback
       try {
         set E:JAVA_HOME = (dirname (dirname (readlink -f (which javac))))
       } catch {
