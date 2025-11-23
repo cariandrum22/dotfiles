@@ -36,9 +36,20 @@ in
         url = metadata.url.${system} or (throw "No URL for system: ${system}");
         inherit sha256;
       };
-      buildInputs = oldAttrs.buildInputs ++ [ pkgs.krb5 ];
+      buildInputs =
+        oldAttrs.buildInputs
+        ++ [
+          pkgs.krb5
+        ]
+        ++ lib.optionals pkgs.stdenv.isLinux [
+          pkgs.webkitgtk_4_1
+          pkgs.libsoup_3
+        ];
       runtimeDependencies = lib.optionals pkgs.stdenv.isLinux (
-        oldAttrs.runtimeDependencies ++ [ pkgs.libsecret ]
+        oldAttrs.runtimeDependencies
+        ++ [
+          pkgs.libsecret
+        ]
       );
       urlHandlerDesktopItem = pkgs.makeDesktopItem {
         name = "code-insiders-url-handler";
