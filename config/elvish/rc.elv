@@ -497,29 +497,48 @@ if (has-external atuin) {
       if (eq $text "") {
         return
       }
+
+      # Replace input with selected command
       try {
         edit:replace-input $text
+        # Redraw prompt without full refresh to avoid extra characters
+        edit:redraw
       } catch e {
         echo $text
+        return
       }
-      try {
-        edit:redraw &full=$true
-      } catch e {
-        # ignore
+
+      # If execute flag is set, accept the line immediately
+      if (and (has-key $res execute) $res[execute]) {
+        try {
+          edit:accept-line
+        } catch e {
+          # ignore
+        }
       }
     }
 
     fn _atuin-search {|@flags|
       var query = ""
       try {
-        set query = (edit:current-command)
+        set query = $edit:current-command
       } catch e {
         set query = ""
       }
       var res = (atuin:search $query $@flags)
+
+      # Always redraw after atuin to restore terminal state
+      try {
+        print "\e[2J\e[H" >/dev/tty  # Clear screen and move to top
+        edit:redraw &full=$true
+      } catch e {
+        # ignore
+      }
+
       if (and (eq (kind-of $res) map) (has-key $res status)) {
         var status = $res[status]
         if (or (eq $status 1) (eq $status 130)) {
+          # Cancelled or no match
           return
         }
         if (not (eq $status 0)) {
@@ -541,13 +560,21 @@ if (has-external atuin) {
       } catch e {
         set line = ""
       }
-      if (eq $line "") {
-        set line = $pwd
-      }
+      # Empty input: atuin will show chronological history (fish-like behavior)
       var res = (atuin:search-up $line)
+
+      # Always redraw after atuin to restore terminal state
+      try {
+        print "\e[2J\e[H" >/dev/tty  # Clear screen and move to top
+        edit:redraw &full=$true
+      } catch e {
+        # ignore
+      }
+
       if (and (eq (kind-of $res) map) (has-key $res status)) {
         var status = $res[status]
         if (or (eq $status 1) (eq $status 130)) {
+          # Cancelled or no match
           return
         }
         if (not (eq $status 0)) {
@@ -557,11 +584,45 @@ if (has-external atuin) {
       _atuin-apply-result $res
     }
 
+    fn _atuin-accept-suggestion {
+      # Only trigger if cursor is at end of line
+      var current = $edit:current-command
+      var dot-pos = $edit:-dot
+      if (not-eq $dot-pos (count $current)) {
+        # Cursor not at end, perform default right arrow (move cursor right)
+        edit:move-dot-right
+        return
+      }
+
+      # Get current command and search for matching history
+      var prefix = (str:trim-space $current)
+      if (eq $prefix "") {
+        return
+      }
+
+      # Use atuin to search for commands starting with current input
+      var result = ""
+      try {
+        set result = (atuin search --limit 1 --search-mode prefix --cmd-only $prefix 2>/dev/null | slurp)
+      } catch e {
+        # No match found, do nothing
+        return
+      }
+
+      var cmd = (str:trim-space $result)
+      if (and (not-eq $cmd "") (not-eq $cmd $prefix)) {
+        edit:replace-input $cmd
+        # Move cursor to end of line
+        set edit:-dot = (count $cmd)
+      }
+    }
+
     set edit:after-readline = [$@edit:after-readline {|line| atuin:begin-record $line }]
     set edit:after-command = [$@edit:after-command {|m| atuin:finish-record $m }]
 
     set edit:insert:binding[Ctrl-R] = $_atuin-search~
     set edit:insert:binding[Up] = $_atuin-search-up~
+    set edit:insert:binding[Right] = $_atuin-accept-suggestion~
   } catch e {
     echo "Warning: Failed to load atuin module, using fzf for history search" >&2
   }
