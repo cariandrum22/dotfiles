@@ -2,11 +2,11 @@
 
 pkgs.stdenv.mkDerivation rec {
   pname = "gemini-cli";
-  version = "0.19.0-nightly.20251124.e177314a4";
+  version = "0.19.0-nightly.20251125.f6d97d448";
 
   src = pkgs.fetchurl {
     url = "https://github.com/google-gemini/gemini-cli/releases/download/v${version}/gemini.js";
-    hash = "sha256-731KnL8m+pZLKBXvqFkAqicgQfO/yCwG3Kkg3IbXwR0=";
+    hash = "sha256-V/+Utw34+0mF8Tva0vceEg6ghlwvF2rUiH19i1nHCyw=";
   };
 
   dontUnpack = true;
