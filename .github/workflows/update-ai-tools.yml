@@ -20,9 +20,10 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Nix
-        uses: cachix/install-nix-action@v30
+        uses: DeterminateSystems/nix-installer-action@v14
         with:
-          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra-conf: |
+            experimental-features = nix-command flakes
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -59,3 +60,6 @@ jobs:
             Changes were generated automatically by the daily update workflow.
           branch: update-ai-tools
           delete-branch: true
+          labels: |
+            dependencies
+            automated
