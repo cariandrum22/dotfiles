@@ -371,7 +371,6 @@
                   "emacs.d/backup/"
                   "emacs.d/snippets/"
                   "emacs.d/vendor/"
-                  "emacs.d/lisp/"
                   # Version control
                   "\\.git/"
                   # Binary and generated files
@@ -387,9 +386,6 @@
                   "\\.jpg$"
                   "\\.gpg$"
                   "\\.plist$"
-                  # Legacy setup scripts (may be refactored later)
-                  "^function/"
-                  "^setup\\.sh$"
                 ];
               };
               markdownlint = {

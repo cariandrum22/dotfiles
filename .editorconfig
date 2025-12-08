@@ -49,10 +49,9 @@ indent_style = tab
 [.git*]
 indent_size = 4
 
-# Emacs Lisp - uses its own indentation conventions
+# Emacs Lisp
 [*.el]
-indent_style = unset
-indent_size = unset
+indent_size = 2
 
 # macOS plist files use tabs
 [*.plist]

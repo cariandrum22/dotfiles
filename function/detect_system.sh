@@ -17,7 +17,7 @@ detect_system() {
   local os
   os="$(uname -s)"
   local system=""
-  
+
   if [ "${os}" == "Darwin" ]; then
     if [ "${arch}" == "arm64" ]; then
       system="aarch64-darwin"
@@ -34,7 +34,7 @@ detect_system() {
     echo "Unsupported system: ${os} ${arch}" >&2
     return 1
   fi
-  
+
   echo "${system}"
 }
 
@@ -89,37 +89,37 @@ is_apple_silicon() {
 is_gui_system() {
   # Only check on Linux
   if ! is_linux; then
-    return 0  # macOS always has GUI
+    return 0 # macOS always has GUI
   fi
-  
+
   # Allow manual override with DOTFILES_GUI environment variable
   if [ -n "${DOTFILES_GUI:-}" ]; then
     if [ "${DOTFILES_GUI}" = "false" ] || [ "${DOTFILES_GUI}" = "0" ]; then
-      return 1  # Headless
+      return 1 # Headless
     else
-      return 0  # GUI
+      return 0 # GUI
     fi
   fi
-  
+
   # Auto-detect GUI/headless
   # Check if systemd graphical.target is active (most reliable)
   if command -v systemctl >/dev/null 2>&1; then
     if systemctl is-active graphical.target >/dev/null 2>&1; then
-      return 0  # GUI
+      return 0 # GUI
     fi
   fi
-  
+
   # Check for X11 or Wayland processes
   if pgrep -x "Xorg|Xwayland|wayland" >/dev/null 2>&1; then
-    return 0  # GUI
+    return 0 # GUI
   fi
-  
+
   # Check for display environment variables
   if [ -n "${WAYLAND_DISPLAY:-}" ] || [ -n "${DISPLAY:-}" ]; then
-    return 0  # GUI
+    return 0 # GUI
   fi
-  
-  return 1  # Headless
+
+  return 1 # Headless
 }
 
 #######################################
@@ -136,7 +136,7 @@ is_gui_system() {
 get_flake_target() {
   local system
   system="$(detect_system)" || return 1
-  
+
   # Check if headless configuration should be used
   if is_linux && ! is_gui_system; then
     echo "${system}-headless"

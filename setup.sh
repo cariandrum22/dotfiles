@@ -149,14 +149,14 @@ main() {
 
   # Reflecting the configuration under home-manager management
   add_nix_channels "${nix_channels[@]}"
-  
+
   # Detect system and determine flake target
   local system
   system="$(detect_system)" || exit 1
-  
+
   local flake_target
   flake_target="$(get_flake_target)" || exit 1
-  
+
   # Show informative messages
   if [ -n "${DOTFILES_GUI:-}" ]; then
     if [ "${DOTFILES_GUI}" = "false" ] || [ "${DOTFILES_GUI}" = "0" ]; then
@@ -171,10 +171,10 @@ main() {
       echo "No GUI detected, using headless configuration"
     fi
   fi
-  
+
   echo "Detected system: ${system}"
   echo "Using configuration: ${flake_target}"
-  
+
   # Switch to the appropriate home-manager configuration using flake
   home-manager switch --flake "${abs_path}#${flake_target}" --impure
 
