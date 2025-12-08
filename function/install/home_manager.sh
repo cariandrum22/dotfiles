@@ -37,7 +37,7 @@ install::home_manager() {
     echo
     # Install home-manager using nix profile (flakes way)
     nix profile install github:nix-community/home-manager
-    
+
     # For compatibility, also add the channel (but it won't be used with flakes)
     nix-channel --add "https://github.com/nix-community/home-manager/archive/release-${nixpkgs_version}.tar.gz" home-manager
     nix-channel --update

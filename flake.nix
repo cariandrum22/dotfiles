@@ -2,7 +2,7 @@
   description = "Personal dotfiles configuration";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
     home-manager = {
@@ -10,7 +10,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    pre-commit-hooks.url = "github:cachix/git-hooks.nix";
+    pre-commit-hooks = {
+      url = "github:cachix/git-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     claudius = {
       url = "github:cariandrum22/claudius";
@@ -362,12 +365,15 @@
               editorconfig-checker = {
                 enable = true;
                 excludes = [
+                  # Emacs directories (managed by Emacs packages)
                   "emacs.d/elpa/"
                   "emacs.d/auto-save-list/"
                   "emacs.d/backup/"
                   "emacs.d/snippets/"
                   "emacs.d/vendor/"
+                  # Version control
                   "\\.git/"
+                  # Binary and generated files
                   "\\.lock$"
                   "\\.db$"
                   "\\.ico$"
@@ -378,6 +384,8 @@
                   "\\.gif$"
                   "\\.jpeg$"
                   "\\.jpg$"
+                  "\\.gpg$"
+                  "\\.plist$"
                 ];
               };
               markdownlint = {

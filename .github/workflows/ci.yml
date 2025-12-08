@@ -36,14 +36,12 @@ jobs:
 
       - name: Evaluate flake (no build)
         run: |
-          # Evaluate all outputs without building
+          # Evaluate x86_64-linux outputs only (darwin is evaluated in evaluate-home-manager job on macOS)
           nix eval .#homeConfigurations."user@x86_64-linux".activationPackage.drvPath --impure
           nix eval .#homeConfigurations."user@x86_64-linux-headless".activationPackage.drvPath --impure
-          nix eval .#homeConfigurations."user@aarch64-darwin".activationPackage.drvPath --impure
           nix eval .#packages.x86_64-linux.myxmonad.drvPath --impure 2>/dev/null || true
           nix eval .#packages.x86_64-linux.headless.drvPath --impure 2>/dev/null || true
           nix eval .#devShells.x86_64-linux.default.drvPath --impure
-          nix eval .#devShells.aarch64-darwin.default.drvPath --impure
 
   lint:
     name: Lint

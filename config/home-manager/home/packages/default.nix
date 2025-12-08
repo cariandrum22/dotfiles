@@ -29,7 +29,7 @@
         jq
         bat
         lsd
-        du-dust
+        dust
         duf
         tldr
         glances
@@ -85,7 +85,7 @@
         cmake
         pkg-config
         clang-tools
-        gitAndTools.delta
+        delta
         uv
         rustup
         unstable.gradle
@@ -108,7 +108,7 @@
 
         # Database Clients
         sqlite
-        mysql-client
+        mariadb.client
         mongodb-tools
         postgresql_15
 
