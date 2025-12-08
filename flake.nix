@@ -365,12 +365,16 @@
               editorconfig-checker = {
                 enable = true;
                 excludes = [
+                  # Emacs directories (managed by Emacs packages)
                   "emacs.d/elpa/"
                   "emacs.d/auto-save-list/"
                   "emacs.d/backup/"
                   "emacs.d/snippets/"
                   "emacs.d/vendor/"
+                  "emacs.d/lisp/"
+                  # Version control
                   "\\.git/"
+                  # Binary and generated files
                   "\\.lock$"
                   "\\.db$"
                   "\\.ico$"
@@ -381,6 +385,11 @@
                   "\\.gif$"
                   "\\.jpeg$"
                   "\\.jpg$"
+                  "\\.gpg$"
+                  "\\.plist$"
+                  # Legacy setup scripts (may be refactored later)
+                  "^function/"
+                  "^setup\\.sh$"
                 ];
               };
               markdownlint = {
