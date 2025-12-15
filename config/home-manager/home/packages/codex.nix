@@ -1,6 +1,6 @@
-{ pkgs, unstable, ... }:
+{ pkgs, ... }:
 
-unstable.rustPlatform.buildRustPackage rec {
+pkgs.rustPlatform.buildRustPackage rec {
   pname = "codex-cli";
   version = "rust-v0.72.0";
 
@@ -17,8 +17,15 @@ unstable.rustPlatform.buildRustPackage rec {
   # Enable unstable features (file_lock)
   RUSTC_BOOTSTRAP = "1";
 
+  # Disable LTO to work around LLVM 21.1.2 + rustc 1.91.1 ICE during LTO codegen.
+  # The crash occurs in LLVMContextDispose when building with lto=fat.
+  # This affects both binary size and runtime performance (5-20% slower).
+  # TODO: Re-enable LTO ("fat" or "thin") once nixpkgs updates LLVM/rustc.
+  # To test: remove this line and run `nix build .#codex-cli`
+  CARGO_PROFILE_RELEASE_LTO = "off";
+
   nativeBuildInputs =
-    with unstable;
+    with pkgs;
     [
       pkg-config
     ]
@@ -26,7 +33,7 @@ unstable.rustPlatform.buildRustPackage rec {
       autoPatchelfHook
     ];
   buildInputs =
-    with unstable;
+    with pkgs;
     [
       openssl
     ]
