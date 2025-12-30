@@ -121,7 +121,7 @@
         # Integrated Development Environment
         (with jetbrains; [
           datagrip
-          idea-ultimate
+          idea
           ruby-mine
         ])
       ]
