@@ -148,8 +148,8 @@
   {
     name = "emacs-mcx";
     publisher = "tuttieee";
-    version = "0.101.0";
-    sha256 = "0wlzn6wx4wn3wh3hhjz8p5xhpv69vxrbhx465frwp0aq6y6sva75";
+    version = "0.103.0";
+    sha256 = "1nwajald7qv5pafk31chzbbnldq6l4l76klp87cahmf4c9n6y3q7";
   }
   {
     name = "enhanced-toml";
@@ -288,8 +288,8 @@
   {
     name = "nix-ide";
     publisher = "jnoortheen";
-    version = "0.5.0";
-    sha256 = "1nx25y6pzcn25yy836kpg55rms4sbzz6kglaillb799c6d1qcnwd";
+    version = "0.5.5";
+    sha256 = "0zy22r34b3bk0wrs435fz8yf7ii3khwa6zn7bq48sji4y0q495vs";
   }
   {
     name = "nord-visual-studio-code";
@@ -362,8 +362,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2731";
-    sha256 = "1s7mcmdwpd5zidrca3ncvbfl8gxl6hg5krqlidzfgxkd6g1yp76l";
+    version = "0.4.2736";
+    sha256 = "13pi1p4hsvbiiw3b7pwlxd118l6xwav87g0vp8x8fcgypn2pw385";
     arch = "linux-x64";
   }
   {
