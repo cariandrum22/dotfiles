@@ -190,8 +190,8 @@
   {
     name = "git-worktree-manager";
     publisher = "jackiotyu";
-    version = "3.21.1";
-    sha256 = "03mbz8gnbwa5xsjxb7rb35461rfkj31m5rqcc02skm8jr4srhilz";
+    version = "3.22.0";
+    sha256 = "05bfgnlhbvwqvazxwppqj37ixc0khdla91fv7fg5yadh5bfzrh6l";
   }
   {
     name = "gitlens";
@@ -220,8 +220,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.51.2025122008";
-    sha256 = "0lmplqmxd460iga40hh6mjainbxa3wph2spfl9371w4c3x55cibi";
+    version = "1.51.2025123008";
+    sha256 = "1z8qajgd6nvdb2i8six9a9d9hvlmqnc57g0z4lzrklkhk9yhrdgj";
     arch = "linux-x64";
   }
   {
@@ -362,8 +362,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2736";
-    sha256 = "13pi1p4hsvbiiw3b7pwlxd118l6xwav87g0vp8x8fcgypn2pw385";
+    version = "0.4.2737";
+    sha256 = "13lh9lfd9fh52cq3s9szzd9vji11lsg7a8ysq68m6s9biif91l63";
     arch = "linux-x64";
   }
   {
