@@ -4,6 +4,7 @@
   imports = [
     ./home-manager.nix
     ./git.nix
+    ./gpg.nix
     ./kitty.nix
     ./tmux.nix
     ./emacs.nix
