@@ -14,7 +14,7 @@
         any-nix-shell
         nix-prefetch-git
         prefetch-npm-deps
-        unstable.nixfmt-rfc-style
+        nixfmt
         nixd
 
         # Utility

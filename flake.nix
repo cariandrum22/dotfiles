@@ -282,7 +282,7 @@
                 gh
                 gnumake
                 gnupg
-                unstable.nixfmt-rfc-style
+                nixfmt
                 nix-output-monitor
                 deadnix
                 statix
@@ -307,7 +307,7 @@
               gh
               gnumake
               gnupg
-              unstable.nixfmt-rfc-style
+              nixfmt
               nix-output-monitor
               deadnix
               statix
@@ -404,12 +404,9 @@
                   };
                 };
               };
-              nixfmt-rfc-style = {
+              nixfmt = {
                 enable = true;
-                package = pkgs.unstable.nixfmt-rfc-style;
-                # nixfmt-rfc-style's actual binary is "nixfmt", not "nixfmt-rfc-style"
-                # This is needed because the package doesn't define meta.mainProgram
-                entry = "${pkgs.unstable.nixfmt-rfc-style}/bin/nixfmt";
+                package = pkgs.nixfmt;
               };
               prettier = {
                 enable = true;
@@ -494,7 +491,7 @@
         let
           pkgs = mkPkgs system;
         in
-        pkgs.unstable.nixfmt-rfc-style
+        pkgs.nixfmt
       );
     };
 }

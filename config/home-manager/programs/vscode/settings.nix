@@ -123,7 +123,7 @@
     "nix" = {
       "enableLanguageServer" = true;
       "serverPath" = "${pkgs.nixd}/bin/nixd";
-      "formatterPath" = "${pkgs.unstable.nixfmt-rfc-style}/bin/nixfmt";
+      "formatterPath" = "${pkgs.nixfmt}/bin/nixfmt";
     };
     "shellcheck" = {
       "executablePath" = "${pkgs.shellcheck}/bin/shellcheck";

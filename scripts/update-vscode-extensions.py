@@ -416,7 +416,7 @@ def write_nix_output(
     body = "[\n" + "\n".join(sorted(attrs)) + "\n]\n"
     output_file.write_text(body, encoding="utf-8")
 
-    print("  → Formatting with nixfmt-rfc-style...")
+    print("  → Formatting with nixfmt...")
     try:
         project_root = Path(__file__).parent.parent
         subprocess.run(
@@ -428,7 +428,7 @@ def write_nix_output(
         )
         print("  ✓ Formatted successfully")
     except subprocess.CalledProcessError as e:
-        print(f"  ⚠️  Warning: Failed to format with nixfmt-rfc-style: {e}")
+        print(f"  ⚠️  Warning: Failed to format with nixfmt: {e}")
         if e.stderr:
             print(f"     {e.stderr.strip()}")
     except FileNotFoundError:
