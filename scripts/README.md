@@ -73,7 +73,7 @@ Updates VSCode extensions Nix expressions from the marketplace.
 - Reads extension list from file or installed VSCode
 - Queries VS Code marketplace for latest versions in parallel
 - Generates `extensions.nix` with metadata and SHA256 hashes
-- **Automatically formats output with nixfmt-rfc-style** (requires Nix)
+- **Automatically formats output with nixfmt** (requires Nix)
 - Automatic retry with exponential backoff for failed requests
 - Configurable parallelism to avoid overwhelming the marketplace API
 - Run automatically daily via GitHub Actions
