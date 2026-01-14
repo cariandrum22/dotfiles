@@ -53,6 +53,7 @@
               };
               claudius = claudius.packages.${system}.default;
             })
+            (import ./config/home-manager/overlays/darwin-workarounds.nix)
           ];
         };
 
@@ -347,6 +348,7 @@
         {
           pre-commit-check = pre-commit-hooks.lib.${system}.run {
             src = ./.;
+            package = pkgs.pre-commit;
             hooks = {
               commitizen = {
                 enable = true;

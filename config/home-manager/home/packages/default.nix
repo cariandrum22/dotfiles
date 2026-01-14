@@ -56,7 +56,6 @@
         ripgrep
         scrcpy
         tlaplus
-        tlaps
         tree
 
         # DevOps
@@ -93,7 +92,7 @@
 
         # Compiler and Runtime
         unstable.go
-        dotnet-sdk_8
+        dotnet-sdk
         ruby_3_3
         rubocop
         python3
@@ -110,7 +109,7 @@
         sqlite
         mariadb.client
         mongodb-tools
-        postgresql_15
+        postgresql
 
         # GUI Application
         slack
@@ -124,6 +123,10 @@
           idea
           ruby-mine
         ])
+      ]
+      ++ lib.optionals stdenv.isLinux [
+        # tlaps requires vampire which fails to build on macOS (clang compatibility)
+        tlaps
       ]
     );
   };
