@@ -66,6 +66,7 @@ in
         markdown-mode
         mmm-mode
         nix-mode
+        racket-mode
         toml-mode
         web-mode
         yaml-mode

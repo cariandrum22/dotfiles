@@ -40,6 +40,7 @@
 (require 'init-lsp)
 (require 'init-haskell)
 (require 'init-proof-general)
+(require 'init-racket)
 (require 'init-elpy)
 (require 'init-py-isort)
 (require 'init-company)
