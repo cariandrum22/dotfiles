@@ -93,6 +93,7 @@
         # Compiler and Runtime
         unstable.go
         dotnet-sdk
+        elan
         ruby_3_3
         rubocop
         python3
