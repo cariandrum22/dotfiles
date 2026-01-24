@@ -128,6 +128,8 @@
       ++ lib.optionals stdenv.isLinux [
         # tlaps requires vampire which fails to build on macOS (clang compatibility)
         tlaps
+        # racket is marked as badPlatforms for darwin
+        racket
       ]
     );
   };
