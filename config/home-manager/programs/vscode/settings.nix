@@ -143,5 +143,7 @@
       # Explicitly disable formatter to avoid conflicts with taplo
       "editor.defaultFormatter" = null;
     };
+    # Chat settings
+    "chat.tools.terminal.outputLocation" = "chat";
   };
 }
