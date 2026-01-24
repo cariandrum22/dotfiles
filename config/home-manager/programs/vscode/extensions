@@ -14,6 +14,7 @@ DavidAnson.vscode-markdownlint
 dbaeumer.vscode-eslint
 dhall.dhall-lang
 dhall.vscode-dhall-lsp-server
+drblury.protobuf-vsc
 eamodio.gitlens
 EditorConfig.EditorConfig
 elves.elvish
@@ -41,6 +42,7 @@ janisdd.vscode-edit-csv
 jnoortheen.nix-ide
 justusadam.language-haskell
 kamikillerto.vscode-colorize
+leanprover.lean4
 llvm-vs-code-extensions.vscode-clangd
 lokalise.i18n-ally
 mathiasfrohlich.Kotlin
@@ -89,4 +91,3 @@ vscjava.vscode-java-debug
 webfreak.code-d
 wmaurer.change-case
 zjhmale.Idris
-zxh404.vscode-proto3
