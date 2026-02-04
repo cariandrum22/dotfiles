@@ -208,6 +208,7 @@ pkgs.rustPlatform.buildRustPackage rec {
     ]
     ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
       autoPatchelfHook
+      rustPlatform.bindgenHook # for openssl-sys bindgen
     ];
 
   buildInputs =
