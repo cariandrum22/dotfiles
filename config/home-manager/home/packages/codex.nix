@@ -216,6 +216,7 @@ pkgs.rustPlatform.buildRustPackage rec {
       ramaBoringssl
     ]
     ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
+      openssl # for openssl-sys crate
       stdenv.cc.cc.lib # for libgcc_s.so.1
     ];
 
