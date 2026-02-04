@@ -92,7 +92,7 @@
 
         # Compiler and Runtime
         unstable.go
-        dotnet-sdk
+        dotnet-sdk_10
         elan
         ruby_3_3
         rubocop

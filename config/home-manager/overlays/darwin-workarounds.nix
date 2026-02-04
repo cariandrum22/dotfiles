@@ -5,7 +5,7 @@
 # upstream in nixpkgs.
 #
 # Known issues (as of 2026-01):
-# - LLVM 20.1.8: 1 test failure on macOS (blocks clang-tools, dotnet, postgresql)
+# - LLVM 20.1.8: 1 test failure on macOS (blocks clang-tools, postgresql)
 # - nix 2.28.5: nix-shell test failure (blocks cachix)
 # - setproctitle 1.3.7: fork test segfault (blocks azure-cli, glances)
 # - pre-commit 4.3.0: requires dotnet for tests (triggers LLVM build)
@@ -18,7 +18,6 @@ if prev.stdenv.isDarwin && prev.stdenv.hostPlatform.isAarch64 then
     inherit (prev.unstable)
       # Packages with LLVM 20.1.8 test failure dependency
       clang-tools
-      dotnet-sdk
       postgresql
       # Packages with nix 2.28.5 test failure dependency
       cachix
