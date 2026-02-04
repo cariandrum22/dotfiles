@@ -1,0 +1,338 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index 774cb96..8b391fc 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -335,7 +335,6 @@ dependencies = [
+  "codex-app-server-protocol",
+  "codex-core",
+  "codex-protocol",
+- "codex-utils-cargo-bin",
+  "core_test_support",
+  "serde",
+  "serde_json",
+@@ -1126,7 +1125,6 @@ dependencies = [
+  "clap",
+  "codex-protocol",
+  "codex-utils-absolute-path",
+- "codex-utils-cargo-bin",
+  "mcp-types",
+  "pretty_assertions",
+  "schemars 0.8.22",
+@@ -1160,7 +1158,6 @@ dependencies = [
+  "anyhow",
+  "assert_cmd",
+  "assert_matches",
+- "codex-utils-cargo-bin",
+  "pretty_assertions",
+  "similar",
+  "tempfile",
+@@ -1224,7 +1221,6 @@ dependencies = [
+  "codex-common",
+  "codex-core",
+  "codex-git",
+- "codex-utils-cargo-bin",
+  "pretty_assertions",
+  "serde",
+  "serde_json",
+@@ -1258,7 +1254,6 @@ dependencies = [
+  "codex-rmcp-client",
+  "codex-stdio-to-uds",
+  "codex-tui",
+- "codex-utils-cargo-bin",
+  "codex-windows-sandbox",
+  "libc",
+  "owo-colors",
+@@ -1403,7 +1398,6 @@ dependencies = [
+  "codex-rmcp-client",
+  "codex-state",
+  "codex-utils-absolute-path",
+- "codex-utils-cargo-bin",
+  "codex-utils-home-dir",
+  "codex-utils-pty",
+  "codex-utils-readiness",
+@@ -1498,7 +1492,6 @@ dependencies = [
+  "codex-core",
+  "codex-protocol",
+  "codex-utils-absolute-path",
+- "codex-utils-cargo-bin",
+  "core_test_support",
+  "libc",
+  "mcp-types",
+@@ -1528,7 +1521,6 @@ dependencies = [
+  "clap",
+  "codex-core",
+  "codex-execpolicy",
+- "codex-utils-cargo-bin",
+  "exec_server_test_support",
+  "libc",
+  "maplit",
+@@ -1849,7 +1841,6 @@ dependencies = [
+  "axum",
+  "codex-keyring-store",
+  "codex-protocol",
+- "codex-utils-cargo-bin",
+  "codex-utils-home-dir",
+  "futures",
+  "keyring",
+@@ -1899,7 +1890,6 @@ version = "0.0.0"
+ dependencies = [
+  "anyhow",
+  "assert_cmd",
+- "codex-utils-cargo-bin",
+  "pretty_assertions",
+  "tempfile",
+  "uds_windows",
+@@ -1931,7 +1921,6 @@ dependencies = [
+  "codex-protocol",
+  "codex-state",
+  "codex-utils-absolute-path",
+- "codex-utils-cargo-bin",
+  "codex-utils-pty",
+  "codex-windows-sandbox",
+  "color-eyre",
+@@ -2006,15 +1995,6 @@ dependencies = [
+  "tokio",
+ ]
+
+-[[package]]
+-name = "codex-utils-cargo-bin"
+-version = "0.0.0"
+-dependencies = [
+- "assert_cmd",
+- "runfiles",
+- "thiserror 2.0.17",
+-]
+-
+ [[package]]
+ name = "codex-utils-home-dir"
+ version = "0.0.0"
+@@ -2268,7 +2248,6 @@ dependencies = [
+  "codex-core",
+  "codex-protocol",
+  "codex-utils-absolute-path",
+- "codex-utils-cargo-bin",
+  "futures",
+  "notify",
+  "pretty_assertions",
+@@ -3079,7 +3058,6 @@ version = "0.0.0"
+ dependencies = [
+  "anyhow",
+  "codex-core",
+- "codex-utils-cargo-bin",
+  "rmcp",
+  "serde_json",
+  "tokio",
+@@ -4682,7 +4660,6 @@ dependencies = [
+  "anyhow",
+  "codex-core",
+  "codex-mcp-server",
+- "codex-utils-cargo-bin",
+  "core_test_support",
+  "mcp-types",
+  "os_info",
+@@ -6637,11 +6614,6 @@ dependencies = [
+  "zeroize",
+ ]
+
+-[[package]]
+-name = "runfiles"
+-version = "0.1.0"
+-source = "git+https://github.com/dzbarsky/rules_rust?rev=b56cbaa8465e74127f1ea216f813cd377295ad81#b56cbaa8465e74127f1ea216f813cd377295ad81"
+-
+ [[package]]
+ name = "rustc-demangle"
+ version = "0.1.25"
+diff --git a/Cargo.toml b/Cargo.toml
+index f67eb35..4cd7c90 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -38,7 +38,6 @@ members = [
+     "otel",
+     "tui",
+     "utils/absolute-path",
+-    "utils/cargo-bin",
+     "utils/git",
+     "utils/cache",
+     "utils/image",
+@@ -100,7 +99,6 @@ codex-stdio-to-uds = { path = "stdio-to-uds" }
+ codex-tui = { path = "tui" }
+ codex-utils-absolute-path = { path = "utils/absolute-path" }
+ codex-utils-cache = { path = "utils/cache" }
+-codex-utils-cargo-bin = { path = "utils/cargo-bin" }
+ codex-utils-image = { path = "utils/image" }
+ codex-utils-json-to-toml = { path = "utils/json-to-toml" }
+ codex-utils-home-dir = { path = "utils/home-dir" }
+@@ -190,7 +188,6 @@ regex = "1.12.2"
+ regex-lite = "0.1.8"
+ reqwest = "0.12"
+ rmcp = { version = "0.12.0", default-features = false }
+-runfiles = { git = "https://github.com/dzbarsky/rules_rust", rev = "b56cbaa8465e74127f1ea216f813cd377295ad81" }
+ schemars = "0.8.22"
+ seccompiler = "0.5.0"
+ sentry = "0.46.0"
+diff --git a/app-server-protocol/Cargo.toml b/app-server-protocol/Cargo.toml
+index b3fc75b..e14a5aa 100644
+--- a/app-server-protocol/Cargo.toml
++++ b/app-server-protocol/Cargo.toml
+@@ -27,7 +27,6 @@ uuid = { workspace = true, features = ["serde", "v7"] }
+
+ [dev-dependencies]
+ anyhow = { workspace = true }
+-codex-utils-cargo-bin = { workspace = true }
+ pretty_assertions = { workspace = true }
+ similar = { workspace = true }
+ tempfile = { workspace = true }
+diff --git a/app-server/tests/common/Cargo.toml b/app-server/tests/common/Cargo.toml
+index d91ed4e..46bdbd7 100644
+--- a/app-server/tests/common/Cargo.toml
++++ b/app-server/tests/common/Cargo.toml
+@@ -14,7 +14,6 @@ chrono = { workspace = true }
+ codex-app-server-protocol = { workspace = true }
+ codex-core = { workspace = true, features = ["test-support"] }
+ codex-protocol = { workspace = true }
+-codex-utils-cargo-bin = { workspace = true }
+ serde = { workspace = true }
+ serde_json = { workspace = true }
+ tokio = { workspace = true, features = [
+diff --git a/apply-patch/Cargo.toml b/apply-patch/Cargo.toml
+index 2fad46c..1a918ce 100644
+--- a/apply-patch/Cargo.toml
++++ b/apply-patch/Cargo.toml
+@@ -25,6 +25,5 @@ tree-sitter-bash = { workspace = true }
+ [dev-dependencies]
+ assert_cmd = { workspace = true }
+ assert_matches = { workspace = true }
+-codex-utils-cargo-bin = { workspace = true }
+ pretty_assertions = { workspace = true }
+ tempfile = { workspace = true }
+diff --git a/chatgpt/Cargo.toml b/chatgpt/Cargo.toml
+index 3c55878..9cd11c7 100644
+--- a/chatgpt/Cargo.toml
++++ b/chatgpt/Cargo.toml
+@@ -12,7 +12,6 @@ anyhow = { workspace = true }
+ clap = { workspace = true, features = ["derive"] }
+ codex-common = { workspace = true, features = ["cli"] }
+ codex-core = { workspace = true }
+-codex-utils-cargo-bin = { workspace = true }
+ serde = { workspace = true, features = ["derive"] }
+ serde_json = { workspace = true }
+ tokio = { workspace = true, features = ["full"] }
+diff --git a/cli/Cargo.toml b/cli/Cargo.toml
+index 81fcd35..e7b017e 100644
+--- a/cli/Cargo.toml
++++ b/cli/Cargo.toml
+@@ -56,7 +56,6 @@ codex_windows_sandbox = { package = "codex-windows-sandbox", path = "../windows-
+ [dev-dependencies]
+ assert_cmd = { workspace = true }
+ assert_matches = { workspace = true }
+-codex-utils-cargo-bin = { workspace = true }
+ predicates = { workspace = true }
+ pretty_assertions = { workspace = true }
+ tempfile = { workspace = true }
+diff --git a/core/Cargo.toml b/core/Cargo.toml
+index a857da8..ed01124 100644
+--- a/core/Cargo.toml
++++ b/core/Cargo.toml
+@@ -140,7 +140,6 @@ codex-core = { path = ".", default-features = false, features = [
+ codex-otel = { workspace = true, features = [
+     "disable-default-metrics-exporter",
+ ] }
+-codex-utils-cargo-bin = { workspace = true }
+ core_test_support = { workspace = true }
+ ctor = { workspace = true }
+ image = { workspace = true, features = ["jpeg", "png"] }
+diff --git a/core/tests/common/Cargo.toml b/core/tests/common/Cargo.toml
+index 1c76e5a..9cafb9d 100644
+--- a/core/tests/common/Cargo.toml
++++ b/core/tests/common/Cargo.toml
+@@ -14,7 +14,6 @@ base64 = { workspace = true }
+ codex-core = { workspace = true, features = ["test-support"] }
+ codex-protocol = { workspace = true }
+ codex-utils-absolute-path = { workspace = true }
+-codex-utils-cargo-bin = { workspace = true }
+ futures = { workspace = true }
+ notify = { workspace = true }
+ regex-lite = { workspace = true }
+diff --git a/exec-server/Cargo.toml b/exec-server/Cargo.toml
+index 9346db6..737c0ef 100644
+--- a/exec-server/Cargo.toml
++++ b/exec-server/Cargo.toml
+@@ -56,7 +56,6 @@ tracing = { workspace = true }
+ tracing-subscriber = { workspace = true, features = ["env-filter", "fmt"] }
+
+ [dev-dependencies]
+-codex-utils-cargo-bin = { workspace = true }
+ exec_server_test_support = { workspace = true }
+ maplit = { workspace = true }
+ pretty_assertions = { workspace = true }
+diff --git a/exec-server/tests/common/Cargo.toml b/exec-server/tests/common/Cargo.toml
+index 6444b61..cda4639 100644
+--- a/exec-server/tests/common/Cargo.toml
++++ b/exec-server/tests/common/Cargo.toml
+@@ -10,7 +10,6 @@ path = "lib.rs"
+ [dependencies]
+ anyhow = { workspace = true }
+ codex-core = { workspace = true }
+-codex-utils-cargo-bin = { workspace = true }
+ rmcp = { workspace = true }
+ serde_json = { workspace = true }
+ tokio = { workspace = true }
+diff --git a/exec/Cargo.toml b/exec/Cargo.toml
+index 862d8d1..322c02b 100644
+--- a/exec/Cargo.toml
++++ b/exec/Cargo.toml
+@@ -53,7 +53,6 @@ uuid = { workspace = true }
+
+ [dev-dependencies]
+ assert_cmd = { workspace = true }
+-codex-utils-cargo-bin = { workspace = true }
+ core_test_support = { workspace = true }
+ libc = { workspace = true }
+ mcp-types = { workspace = true }
+diff --git a/mcp-server/tests/common/Cargo.toml b/mcp-server/tests/common/Cargo.toml
+index aba984e..fc4b334 100644
+--- a/mcp-server/tests/common/Cargo.toml
++++ b/mcp-server/tests/common/Cargo.toml
+@@ -11,7 +11,6 @@ path = "lib.rs"
+ anyhow = { workspace = true }
+ codex-core = { workspace = true }
+ codex-mcp-server = { workspace = true }
+-codex-utils-cargo-bin = { workspace = true }
+ mcp-types = { workspace = true }
+ os_info = { workspace = true }
+ pretty_assertions = { workspace = true }
+diff --git a/rmcp-client/Cargo.toml b/rmcp-client/Cargo.toml
+index 4b2d696..e10e41b 100644
+--- a/rmcp-client/Cargo.toml
++++ b/rmcp-client/Cargo.toml
+@@ -56,7 +56,6 @@ webbrowser = { workspace = true }
+ which = { workspace = true }
+
+ [dev-dependencies]
+-codex-utils-cargo-bin = { workspace = true }
+ pretty_assertions = { workspace = true }
+ serial_test = { workspace = true }
+ tempfile = { workspace = true }
+diff --git a/stdio-to-uds/Cargo.toml b/stdio-to-uds/Cargo.toml
+index 20e3ade..71ed372 100644
+--- a/stdio-to-uds/Cargo.toml
++++ b/stdio-to-uds/Cargo.toml
+@@ -23,6 +23,5 @@ uds_windows = { workspace = true }
+
+ [dev-dependencies]
+ assert_cmd = { workspace = true }
+-codex-utils-cargo-bin = { workspace = true }
+ pretty_assertions = { workspace = true }
+ tempfile = { workspace = true }
+diff --git a/tui/Cargo.toml b/tui/Cargo.toml
+index d859aa9..e400eb5 100644
+--- a/tui/Cargo.toml
++++ b/tui/Cargo.toml
+@@ -120,7 +120,6 @@ arboard = { workspace = true }
+ [dev-dependencies]
+ codex-cli = { workspace = true }
+ codex-core = { workspace = true, features = ["test-support"] }
+-codex-utils-cargo-bin = { workspace = true }
+ codex-utils-pty = { workspace = true }
+ assert_matches = { workspace = true }
+ chrono = { workspace = true, features = ["serde"] }
