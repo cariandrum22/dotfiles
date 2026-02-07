@@ -4,7 +4,7 @@ let
   # Build BoringSSL from rama-boring-sys source with rama's patches applied
   ramaBoringssl = pkgs.stdenv.mkDerivation rec {
     pname = "rama-boringssl";
-    version = "0.5.9";
+    version = "rust-v0.98.0";
 
     # Download rama-boring-sys from crates.io which includes the BoringSSL source and patches
     src = pkgs.fetchurl {
@@ -100,13 +100,13 @@ in
 pkgs.rustPlatform.buildRustPackage (
   rec {
     pname = "codex-cli";
-    version = "rust-v0.94.0";
+    version = "rust-v0.98.0";
 
     src = pkgs.fetchFromGitHub {
       owner = "openai";
       repo = "codex";
       rev = "${version}";
-      hash = "sha256-E8pQbYnXHOc9sy9bh7Icbwxn3Vz5d0nZvmlwM8RV8BU=";
+      hash = "sha256-rP5Qo70n5lNrdR6ycE63VObLwcMNRlk8sY/kuJ4Qw9Y=";
     };
 
     sourceRoot = "source/codex-rs";
