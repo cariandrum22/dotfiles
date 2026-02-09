@@ -1,14 +1,14 @@
 { pkgs, ... }:
 let
   pname = "cursor";
-  version = "2.4.28";
+  version = "2.4.31";
 
   # Fixed download URL - update this with update-cursor.py script
-  downloadUrl = "https://downloads.cursor.com/production/f3f5cec40024283013878b50c4f9be4002e0b587/linux/x64/Cursor-2.4.28-x86_64.AppImage";
+  downloadUrl = "https://downloads.cursor.com/production/3578107fdf149b00059ddad37048220e4168100f/linux/x64/Cursor-2.4.31-x86_64.AppImage";
 
   src = pkgs.fetchurl {
     url = downloadUrl;
-    hash = "sha256-Vkat7mTge3yDDzWAfwuapuwsUCPBrl41THA1WEAvTyY=";
+    hash = "sha256-4cEa5SsbE2QFfmcndnVI5QQIS9DPjFQ6u/iQO9P8SEk=";
   };
   appimageContents = pkgs.appimageTools.extract { inherit pname version src; };
 in
