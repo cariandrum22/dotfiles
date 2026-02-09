@@ -1,8 +1,8 @@
 diff --git a/Cargo.lock b/Cargo.lock
-index 774cb96..8b391fc 100644
+index ebc7ddd..9ae97e9 100644
 --- a/Cargo.lock
 +++ b/Cargo.lock
-@@ -335,7 +335,6 @@ dependencies = [
+@@ -388,7 +388,6 @@ dependencies = [
   "codex-app-server-protocol",
   "codex-core",
   "codex-protocol",
@@ -10,15 +10,15 @@ index 774cb96..8b391fc 100644
   "core_test_support",
   "serde",
   "serde_json",
-@@ -1126,7 +1125,6 @@ dependencies = [
-  "clap",
+@@ -1261,7 +1260,6 @@ dependencies = [
+  "codex-experimental-api-macros",
   "codex-protocol",
   "codex-utils-absolute-path",
 - "codex-utils-cargo-bin",
-  "mcp-types",
+  "inventory",
   "pretty_assertions",
   "schemars 0.8.22",
-@@ -1160,7 +1158,6 @@ dependencies = [
+@@ -1295,7 +1293,6 @@ dependencies = [
   "anyhow",
   "assert_cmd",
   "assert_matches",
@@ -26,7 +26,7 @@ index 774cb96..8b391fc 100644
   "pretty_assertions",
   "similar",
   "tempfile",
-@@ -1224,7 +1221,6 @@ dependencies = [
+@@ -1359,7 +1356,6 @@ dependencies = [
   "codex-common",
   "codex-core",
   "codex-git",
@@ -34,7 +34,7 @@ index 774cb96..8b391fc 100644
   "pretty_assertions",
   "serde",
   "serde_json",
-@@ -1258,7 +1254,6 @@ dependencies = [
+@@ -1394,7 +1390,6 @@ dependencies = [
   "codex-rmcp-client",
   "codex-stdio-to-uds",
   "codex-tui",
@@ -42,7 +42,7 @@ index 774cb96..8b391fc 100644
   "codex-windows-sandbox",
   "libc",
   "owo-colors",
-@@ -1403,7 +1398,6 @@ dependencies = [
+@@ -1539,7 +1534,6 @@ dependencies = [
   "codex-rmcp-client",
   "codex-state",
   "codex-utils-absolute-path",
@@ -50,15 +50,15 @@ index 774cb96..8b391fc 100644
   "codex-utils-home-dir",
   "codex-utils-pty",
   "codex-utils-readiness",
-@@ -1498,7 +1492,6 @@ dependencies = [
+@@ -1637,7 +1631,6 @@ dependencies = [
   "codex-core",
   "codex-protocol",
   "codex-utils-absolute-path",
 - "codex-utils-cargo-bin",
   "core_test_support",
   "libc",
-  "mcp-types",
-@@ -1528,7 +1521,6 @@ dependencies = [
+  "owo-colors",
+@@ -1667,7 +1660,6 @@ dependencies = [
   "clap",
   "codex-core",
   "codex-execpolicy",
@@ -66,7 +66,7 @@ index 774cb96..8b391fc 100644
   "exec_server_test_support",
   "libc",
   "maplit",
-@@ -1849,7 +1841,6 @@ dependencies = [
+@@ -1999,7 +1991,6 @@ dependencies = [
   "axum",
   "codex-keyring-store",
   "codex-protocol",
@@ -74,7 +74,7 @@ index 774cb96..8b391fc 100644
   "codex-utils-home-dir",
   "futures",
   "keyring",
-@@ -1899,7 +1890,6 @@ version = "0.0.0"
+@@ -2068,7 +2059,6 @@ version = "0.0.0"
  dependencies = [
   "anyhow",
   "assert_cmd",
@@ -82,7 +82,7 @@ index 774cb96..8b391fc 100644
   "pretty_assertions",
   "tempfile",
   "uds_windows",
-@@ -1931,7 +1921,6 @@ dependencies = [
+@@ -2100,7 +2090,6 @@ dependencies = [
   "codex-protocol",
   "codex-state",
   "codex-utils-absolute-path",
@@ -90,23 +90,23 @@ index 774cb96..8b391fc 100644
   "codex-utils-pty",
   "codex-windows-sandbox",
   "color-eyre",
-@@ -2006,15 +1995,6 @@ dependencies = [
+@@ -2175,15 +2164,6 @@ dependencies = [
   "tokio",
  ]
-
+ 
 -[[package]]
 -name = "codex-utils-cargo-bin"
 -version = "0.0.0"
 -dependencies = [
 - "assert_cmd",
 - "runfiles",
-- "thiserror 2.0.17",
+- "thiserror 2.0.18",
 -]
 -
  [[package]]
  name = "codex-utils-home-dir"
  version = "0.0.0"
-@@ -2268,7 +2248,6 @@ dependencies = [
+@@ -2452,7 +2432,6 @@ dependencies = [
   "codex-core",
   "codex-protocol",
   "codex-utils-absolute-path",
@@ -114,7 +114,7 @@ index 774cb96..8b391fc 100644
   "futures",
   "notify",
   "pretty_assertions",
-@@ -3079,7 +3058,6 @@ version = "0.0.0"
+@@ -3265,7 +3244,6 @@ version = "0.0.0"
  dependencies = [
   "anyhow",
   "codex-core",
@@ -122,28 +122,28 @@ index 774cb96..8b391fc 100644
   "rmcp",
   "serde_json",
   "tokio",
-@@ -4682,7 +4660,6 @@ dependencies = [
+@@ -5037,7 +5015,6 @@ dependencies = [
   "anyhow",
   "codex-core",
   "codex-mcp-server",
 - "codex-utils-cargo-bin",
   "core_test_support",
-  "mcp-types",
   "os_info",
-@@ -6637,11 +6614,6 @@ dependencies = [
+  "pretty_assertions",
+@@ -7150,11 +7127,6 @@ dependencies = [
   "zeroize",
  ]
-
+ 
 -[[package]]
 -name = "runfiles"
 -version = "0.1.0"
 -source = "git+https://github.com/dzbarsky/rules_rust?rev=b56cbaa8465e74127f1ea216f813cd377295ad81#b56cbaa8465e74127f1ea216f813cd377295ad81"
 -
  [[package]]
- name = "rustc-demangle"
- version = "0.1.25"
+ name = "rust-embed"
+ version = "8.11.0"
 diff --git a/Cargo.toml b/Cargo.toml
-index f67eb35..4cd7c90 100644
+index 9477e8e..377414f 100644
 --- a/Cargo.toml
 +++ b/Cargo.toml
 @@ -38,7 +38,6 @@ members = [
@@ -154,7 +154,7 @@ index f67eb35..4cd7c90 100644
      "utils/git",
      "utils/cache",
      "utils/image",
-@@ -100,7 +99,6 @@ codex-stdio-to-uds = { path = "stdio-to-uds" }
+@@ -104,7 +103,6 @@ codex-stdio-to-uds = { path = "stdio-to-uds" }
  codex-tui = { path = "tui" }
  codex-utils-absolute-path = { path = "utils/absolute-path" }
  codex-utils-cache = { path = "utils/cache" }
@@ -162,7 +162,7 @@ index f67eb35..4cd7c90 100644
  codex-utils-image = { path = "utils/image" }
  codex-utils-json-to-toml = { path = "utils/json-to-toml" }
  codex-utils-home-dir = { path = "utils/home-dir" }
-@@ -190,7 +188,6 @@ regex = "1.12.2"
+@@ -195,7 +193,6 @@ regex = "1.12.2"
  regex-lite = "0.1.8"
  reqwest = "0.12"
  rmcp = { version = "0.12.0", default-features = false }
@@ -171,11 +171,11 @@ index f67eb35..4cd7c90 100644
  seccompiler = "0.5.0"
  sentry = "0.46.0"
 diff --git a/app-server-protocol/Cargo.toml b/app-server-protocol/Cargo.toml
-index b3fc75b..e14a5aa 100644
+index 7b2b8c5..fd3de99 100644
 --- a/app-server-protocol/Cargo.toml
 +++ b/app-server-protocol/Cargo.toml
-@@ -27,7 +27,6 @@ uuid = { workspace = true, features = ["serde", "v7"] }
-
+@@ -28,7 +28,6 @@ uuid = { workspace = true, features = ["serde", "v7"] }
+ 
  [dev-dependencies]
  anyhow = { workspace = true }
 -codex-utils-cargo-bin = { workspace = true }
@@ -218,22 +218,21 @@ index 3c55878..9cd11c7 100644
  serde_json = { workspace = true }
  tokio = { workspace = true, features = ["full"] }
 diff --git a/cli/Cargo.toml b/cli/Cargo.toml
-index 81fcd35..e7b017e 100644
+index 77344df..9f8ec80 100644
 --- a/cli/Cargo.toml
 +++ b/cli/Cargo.toml
-@@ -56,7 +56,6 @@ codex_windows_sandbox = { package = "codex-windows-sandbox", path = "../windows-
+@@ -58,6 +58,5 @@ codex_windows_sandbox = { package = "codex-windows-sandbox", path = "../windows-
  [dev-dependencies]
  assert_cmd = { workspace = true }
  assert_matches = { workspace = true }
 -codex-utils-cargo-bin = { workspace = true }
  predicates = { workspace = true }
  pretty_assertions = { workspace = true }
- tempfile = { workspace = true }
 diff --git a/core/Cargo.toml b/core/Cargo.toml
-index a857da8..ed01124 100644
+index d686343..4604433 100644
 --- a/core/Cargo.toml
 +++ b/core/Cargo.toml
-@@ -140,7 +140,6 @@ codex-core = { path = ".", default-features = false, features = [
+@@ -148,7 +148,6 @@ codex-core = { path = ".", default-features = false, features = [
  codex-otel = { workspace = true, features = [
      "disable-default-metrics-exporter",
  ] }
@@ -259,7 +258,7 @@ index 9346db6..737c0ef 100644
 +++ b/exec-server/Cargo.toml
 @@ -56,7 +56,6 @@ tracing = { workspace = true }
  tracing-subscriber = { workspace = true, features = ["env-filter", "fmt"] }
-
+ 
  [dev-dependencies]
 -codex-utils-cargo-bin = { workspace = true }
  exec_server_test_support = { workspace = true }
@@ -278,19 +277,19 @@ index 6444b61..cda4639 100644
  serde_json = { workspace = true }
  tokio = { workspace = true }
 diff --git a/exec/Cargo.toml b/exec/Cargo.toml
-index 862d8d1..322c02b 100644
+index 860f403..722cbbd 100644
 --- a/exec/Cargo.toml
 +++ b/exec/Cargo.toml
-@@ -53,7 +53,6 @@ uuid = { workspace = true }
-
+@@ -52,7 +52,6 @@ uuid = { workspace = true }
+ 
  [dev-dependencies]
  assert_cmd = { workspace = true }
 -codex-utils-cargo-bin = { workspace = true }
  core_test_support = { workspace = true }
  libc = { workspace = true }
- mcp-types = { workspace = true }
+ predicates = { workspace = true }
 diff --git a/mcp-server/tests/common/Cargo.toml b/mcp-server/tests/common/Cargo.toml
-index aba984e..fc4b334 100644
+index 1dec2d0..8231e83 100644
 --- a/mcp-server/tests/common/Cargo.toml
 +++ b/mcp-server/tests/common/Cargo.toml
 @@ -11,7 +11,6 @@ path = "lib.rs"
@@ -298,16 +297,16 @@ index aba984e..fc4b334 100644
  codex-core = { workspace = true }
  codex-mcp-server = { workspace = true }
 -codex-utils-cargo-bin = { workspace = true }
- mcp-types = { workspace = true }
+ rmcp = { workspace = true }
  os_info = { workspace = true }
  pretty_assertions = { workspace = true }
 diff --git a/rmcp-client/Cargo.toml b/rmcp-client/Cargo.toml
-index 4b2d696..e10e41b 100644
+index 2b8752f..780e1b1 100644
 --- a/rmcp-client/Cargo.toml
 +++ b/rmcp-client/Cargo.toml
-@@ -56,7 +56,6 @@ webbrowser = { workspace = true }
+@@ -55,7 +55,6 @@ webbrowser = { workspace = true }
  which = { workspace = true }
-
+ 
  [dev-dependencies]
 -codex-utils-cargo-bin = { workspace = true }
  pretty_assertions = { workspace = true }
@@ -318,14 +317,14 @@ index 20e3ade..71ed372 100644
 --- a/stdio-to-uds/Cargo.toml
 +++ b/stdio-to-uds/Cargo.toml
 @@ -23,6 +23,5 @@ uds_windows = { workspace = true }
-
+ 
  [dev-dependencies]
  assert_cmd = { workspace = true }
 -codex-utils-cargo-bin = { workspace = true }
  pretty_assertions = { workspace = true }
  tempfile = { workspace = true }
 diff --git a/tui/Cargo.toml b/tui/Cargo.toml
-index d859aa9..e400eb5 100644
+index 8bdd473..f169d8a 100644
 --- a/tui/Cargo.toml
 +++ b/tui/Cargo.toml
 @@ -120,7 +120,6 @@ arboard = { workspace = true }

@@ -4,12 +4,13 @@ let
   # Build BoringSSL from rama-boring-sys source with rama's patches applied
   ramaBoringssl = pkgs.stdenv.mkDerivation rec {
     pname = "rama-boringssl";
-    version = "rust-v0.98.0";
+    # rama-boring-sys version from codex's Cargo.lock (not the codex git tag)
+    version = "0.5.10";
 
     # Download rama-boring-sys from crates.io which includes the BoringSSL source and patches
     src = pkgs.fetchurl {
       url = "https://crates.io/api/v1/crates/rama-boring-sys/${version}/download";
-      sha256 = "sha256-Qh67QERKbXQPhnpQVacQpz5810ubOJWDtF6bKdEzBGU=";
+      sha256 = "sha256-1b/j6G1x6bkdrnVh1c7qzrN6fU/AeKskGv16q3d/YG8=";
     };
 
     nativeBuildInputs = with pkgs; [
@@ -117,7 +118,8 @@ pkgs.rustPlatform.buildRustPackage (
     # which causes nixpkgs 25.11's cargo vendor utility to fail when parsing.
     cargoPatches = [ ./remove-cargo-bin.patch ];
 
-    cargoHash = "sha256-tV6ubCVQJKOo/7AUfwfpgy4nlUPZ0B6U3Vq28IUbUf4=";
+    cargoHash = "sha256-wDarXzl0v+y1seK7ja5xWAGDcWoZ62v0UUZm9c2hyk8=";
+    # cargoPatches hash: d931c67814296a62
 
     # Remove ALL codex_utils_cargo_bin references from source files.
     # Tests are disabled (doCheck = false) so stub implementations work fine.
