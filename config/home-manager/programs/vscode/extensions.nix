@@ -69,8 +69,8 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.34";
-    sha256 = "0sakyy2km6jahsqqwssnkil8mb0jvfig9znfn6haig4nl4020bwn";
+    version = "2.1.37";
+    sha256 = "0inrmchvrpfy71ij8583ix66vgqvzpwr7y0d0nmxww5vx4px4k4x";
     arch = "linux-x64";
   }
   {
@@ -100,8 +100,8 @@
   {
     name = "code-spell-checker";
     publisher = "streetsidesoftware";
-    version = "4.5.3";
-    sha256 = "1vr4715nzp7nswc4pzj0mmwnsfna92hxadka098zl4w79mfq247i";
+    version = "4.5.4";
+    sha256 = "0dy2w4bzdlmbnnwka6g3533bw1bijsvl4swb870cmg90iplpipvg";
   }
   {
     name = "copilot";
@@ -112,8 +112,8 @@
   {
     name = "copilot-chat";
     publisher = "GitHub";
-    version = "0.38.2026020604";
-    sha256 = "0aixg2hchhkr3q824yhdasjfhbsml94rn4ffwl2486bis0gnwxpa";
+    version = "0.38.2026020704";
+    sha256 = "119sdj2111m1988khxhvca9m2fx8bgjizfwrlw8vfz78k7xph6fk";
   }
   {
     name = "cucumber-official";
@@ -202,8 +202,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.2.613";
-    sha256 = "0gz6ndgjsa1wa8i3wpdwksh0qxbvg6lixlqc3rs4r9404mrvbp74";
+    version = "2026.2.704";
+    sha256 = "198ckj09vx4g1g25qmmadplbjvi6ppigvqx9smk4jxpjx4hzrr4k";
   }
   {
     name = "haskell";
@@ -380,8 +380,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2782";
-    sha256 = "1dk9c4anjlhf6cgp2i5cqhd2zmaw3z91jf5fhdabyfx5j8dg6rz1";
+    version = "0.4.2784";
+    sha256 = "0v15rkjbmxyj9shh780nfrw397n58jqqjpgpgwr8g9kh4f681yrg";
     arch = "linux-x64";
   }
   {
