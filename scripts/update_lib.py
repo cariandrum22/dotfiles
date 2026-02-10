@@ -12,6 +12,7 @@ functional programming principles:
 from __future__ import annotations
 
 import contextlib
+import hashlib
 import os
 import re
 import shutil
@@ -39,6 +40,10 @@ import common
 NPM_REGISTRY_API = "https://registry.npmjs.org"
 GITHUB_API = "https://api.github.com"
 DEFAULT_RETRIES = 3
+
+# Pattern for stored patch hash comment in nix files
+PATCH_HASH_PATTERN = r'#\s*cargoPatches\s+hash:\s*([a-f0-9]+)'
+PATCH_HASH_COMMENT_TEMPLATE = "# cargoPatches hash: {}"
 
 # ----- Types -----------------------------------------------------------------------
 
@@ -85,6 +90,7 @@ class PackageInfo:
     hash: Hash
     npm_deps_hash: Hash | None = None
     cargo_hash: Hash | None = None
+    patch_hash: str | None = None  # Hash of cargo patches for change detection
 
 
 @dataclass(frozen=True)
@@ -96,6 +102,8 @@ class UpdateConfig:
     hash_pattern: str
     npm_hash_pattern: str | None = None
     cargo_hash_pattern: str | None = None
+    # Patch files to track for cargoHash recalculation
+    cargo_patches: tuple[Path, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -184,6 +192,25 @@ def calculate_hash(url: str, *, unpack: bool = True) -> Hash:
     sri_cmd = ["nix", "hash", "to-sri", "--type", "sha256", hash_value]
     sri_result = subprocess.run(sri_cmd, capture_output=True, text=True, check=True)
     return Hash(sri_result.stdout.strip())
+
+
+def calculate_patch_hash(patch_files: tuple[Path, ...]) -> str | None:
+    """Calculate combined hash of patch files for change detection.
+
+    Returns a short hash string if patches exist, None otherwise.
+    """
+    if not patch_files:
+        return None
+
+    hasher = hashlib.sha256()
+    for patch_file in sorted(patch_files):  # Sort for deterministic ordering
+        if patch_file.exists():
+            hasher.update(patch_file.read_bytes())
+        else:
+            # Include filename even if missing to detect removal
+            hasher.update(f"MISSING:{patch_file}".encode())
+
+    return hasher.hexdigest()[:16]
 
 
 def calculate_cargo_hash(nix_file: Path) -> Hash | None:  # noqa: C901, PLR0912, PLR0915
@@ -468,9 +495,14 @@ def create_rust_github_updater(
         url = get_github_download_url(repo, version)
         hash_val = calculate_hash(url)
 
+        # Calculate current patch hash
+        patch_hash = calculate_patch_hash(config.cargo_patches)
+
         # First update the file with new version and source hash
         content = read_file(config.nix_file)
-        temp_info = PackageInfo(name=repo, version=version, hash=hash_val)
+        temp_info = PackageInfo(
+            name=repo, version=version, hash=hash_val, patch_hash=patch_hash,
+        )
         updated_content = apply_updates(config, content, temp_info)
         write_file(config.nix_file, updated_content)
 
@@ -482,6 +514,7 @@ def create_rust_github_updater(
             version=version,
             hash=hash_val,
             cargo_hash=cargo_hash_val,
+            patch_hash=patch_hash,
         )
     return updater
 
@@ -507,12 +540,16 @@ def extract_current_info(config: UpdateConfig, content: str) -> PackageInfo:
         cargo_hash_str = extract_with_pattern(content, config.cargo_hash_pattern)
         cargo_hash = Hash(cargo_hash_str) if cargo_hash_str else None
 
+    # Calculate patch hash for change detection
+    patch_hash = calculate_patch_hash(config.cargo_patches)
+
     return PackageInfo(
         name=config.tool_name,
         version=Version(version_str),
         hash=Hash(hash_str),
         npm_deps_hash=npm_hash,
         cargo_hash=cargo_hash,
+        patch_hash=patch_hash,
     )
 
 
@@ -539,6 +576,26 @@ def apply_updates(config: UpdateConfig, content: str, new_info: PackageInfo) -> 
         updated = replace_with_pattern(
             updated, config.cargo_hash_pattern, str(new_info.cargo_hash),
         )
+
+    # Update or add patch hash comment if patches are configured
+    if config.cargo_patches and new_info.patch_hash:
+        new_comment = PATCH_HASH_COMMENT_TEMPLATE.format(new_info.patch_hash)
+
+        if re.search(PATCH_HASH_PATTERN, updated):
+            # Replace existing comment
+            updated = re.sub(
+                r'#\s*cargoPatches\s+hash:\s*[a-f0-9]+',
+                new_comment,
+                updated,
+            )
+        else:
+            # Add comment after cargoHash line
+            # Match the full line: cargoHash = "...";
+            updated = re.sub(
+                r'(cargoHash\s*=\s*"[^"]+";)',
+                rf'\1\n    {new_comment}',
+                updated,
+            )
 
     return updated
 
@@ -567,16 +624,38 @@ def check_for_rust_update(
     current: PackageInfo,
     latest_version: Version,
     updater: Callable[[Version], PackageInfo],
+    *,
+    stored_patch_hash: str | None = None,
 ) -> tuple[UpdateStatus, PackageInfo | None]:
-    """Check if Rust package update is needed, including cargoHash validation."""
+    """Check if Rust package update is needed, including cargoHash validation.
+
+    Args:
+        current: Current package info including calculated patch hash
+        latest_version: Latest available version
+        updater: Function to fetch new package info
+        stored_patch_hash: Previously stored patch hash (from nix file comment)
+    """
     # Check if cargoHash looks invalid (dummy hash)
     needs_cargo_update = (
         current.cargo_hash and
         "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" in str(current.cargo_hash)
     )
 
-    # If version is different or cargoHash is invalid, update
-    if current.version != latest_version or needs_cargo_update:
+    # Check if patch files have changed since last cargoHash calculation
+    patches_changed = (
+        current.patch_hash is not None and
+        current.patch_hash != stored_patch_hash
+    )
+
+    if patches_changed:
+        old_hash = stored_patch_hash or "none"
+        print(
+            f"Patch files changed: {old_hash} -> {current.patch_hash}",
+            file=sys.stderr,
+        )
+
+    # If version is different, cargoHash is invalid, or patches changed, update
+    if current.version != latest_version or needs_cargo_update or patches_changed:
         new_info = updater(latest_version)
         return UpdateStatus.UPDATED, new_info
 
@@ -594,12 +673,18 @@ def update_rust_package(
         content = read_file(config.nix_file)
         current_info = extract_current_info(config, content)
 
+        # Extract stored patch hash from nix file comment
+        stored_patch_hash = extract_with_pattern(content, PATCH_HASH_PATTERN, group=1)
+
         # Fetch latest version
         latest_version = version_fetcher()
 
-        # Check for updates (including cargoHash validation)
+        # Check for updates (including cargoHash and patch validation)
         status, new_info = check_for_rust_update(
-            current_info, latest_version, package_updater,
+            current_info,
+            latest_version,
+            package_updater,
+            stored_patch_hash=stored_patch_hash,
         )
 
         # Apply updates if needed
@@ -607,15 +692,25 @@ def update_rust_package(
             updated_content = apply_updates(config, content, new_info)
             write_file(config.nix_file, updated_content)
 
+            # Build update message
+            if current_info.version != new_info.version:
+                message = (
+                    f"Updated {config.tool_name} from {current_info.version} "
+                    f"to {new_info.version}"
+                )
+            elif current_info.patch_hash != stored_patch_hash:
+                message = (
+                    f"Updated {config.tool_name} cargoHash due to patch changes"
+                )
+            else:
+                message = f"Updated {config.tool_name} cargoHash"
+
             return UpdateResult(
                 tool_name=config.tool_name,
                 current=current_info,
                 latest=new_info,
                 status=UpdateStatus.UPDATED,
-                message=(
-                    f"Updated {config.tool_name} from {current_info.version} "
-                    f"to {new_info.version}"
-                ),
+                message=message,
             )
 
         return UpdateResult(
@@ -826,6 +921,8 @@ def format_result(result: UpdateResult) -> str:
                 f"  Cargo Hash: {result.current.cargo_hash} → "
                 f"{result.latest.cargo_hash}",
             )
+        if result.latest.patch_hash:
+            lines.append(f"  Patch Hash: {result.latest.patch_hash}")
 
     return "\n".join(lines)
 
