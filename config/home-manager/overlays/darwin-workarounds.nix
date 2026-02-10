@@ -9,6 +9,7 @@
 # - nix 2.28.5: nix-shell test failure (blocks cachix)
 # - setproctitle 1.3.7: fork test segfault (blocks azure-cli, glances)
 # - pre-commit 4.3.0: requires dotnet for tests (triggers LLVM build)
+# - inetutils 2.7: clang format string error on macOS (blocks home-manager)
 #
 # Note: tlaps is excluded on macOS via lib.optionals in default.nix
 # (vampire-5.0.0 build fails with clang on macOS)
@@ -27,6 +28,8 @@ if prev.stdenv.isDarwin && prev.stdenv.hostPlatform.isAarch64 then
       glances
       # pre-commit requires dotnet for tests, which triggers LLVM build
       pre-commit
+      # inetutils has clang format string errors on macOS
+      inetutils
       ;
   }
 else
