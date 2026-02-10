@@ -53,6 +53,7 @@
               };
               claudius = claudius.packages.${system}.default;
             })
+            (import ./config/home-manager/overlays/hm-compat.nix)
             (import ./config/home-manager/overlays/darwin-workarounds.nix)
           ];
         };
