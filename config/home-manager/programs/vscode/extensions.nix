@@ -100,8 +100,8 @@
   {
     name = "code-spell-checker";
     publisher = "streetsidesoftware";
-    version = "4.5.4";
-    sha256 = "0dy2w4bzdlmbnnwka6g3533bw1bijsvl4swb870cmg90iplpipvg";
+    version = "4.5.6";
+    sha256 = "19263pshqi7bbafyr7xvp96vhy9ij92ik6qshvj92dx1w1js81h0";
   }
   {
     name = "copilot";
@@ -112,8 +112,8 @@
   {
     name = "copilot-chat";
     publisher = "GitHub";
-    version = "0.38.2026020704";
-    sha256 = "119sdj2111m1988khxhvca9m2fx8bgjizfwrlw8vfz78k7xph6fk";
+    version = "0.38.2026020913";
+    sha256 = "1ss2v273fwmcdkpzrfidlm150qj94z80234whc0nqpdbhm0lmgwr";
   }
   {
     name = "cucumber-official";
@@ -264,8 +264,8 @@
   {
     name = "lean4";
     publisher = "leanprover";
-    version = "0.0.222";
-    sha256 = "1icsy13jvfc6b3l80js8jq9fkg2bd1z2s0hy6mayl3zmj91pk91j";
+    version = "0.0.223";
+    sha256 = "13djdvlzr2ry22p90jlj6hr0dpqq5vdpc4i2g0bdwnhj8h05pxv9";
   }
   {
     name = "liquidhaskell-diagnostics";
@@ -276,8 +276,8 @@
   {
     name = "makefile-tools";
     publisher = "ms-vscode";
-    version = "0.13.18";
-    sha256 = "025gpznp3cyrglblw5jdw4shkrm5my7ns98qwij699y8nnqhyii8";
+    version = "0.13.19";
+    sha256 = "1xx6blbhj4zwyvviykkm25j5vzjsj7c7ibj21ipqqz39cl9fkgr8";
   }
   {
     name = "markdown-mermaid";
@@ -330,8 +330,8 @@
   {
     name = "python";
     publisher = "ms-python";
-    version = "2026.1.2026020601";
-    sha256 = "066xxmki8743wqgl37lhwfvrlivzw5q4hxdran90mkpwigh6s45s";
+    version = "2026.1.2026020901";
+    sha256 = "1bzja7v3sn0d31z35axnxk6b1yda2hgb88k1bla8lvzhvbpiz48y";
     arch = "linux-x64";
   }
   {
@@ -380,8 +380,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2784";
-    sha256 = "0v15rkjbmxyj9shh780nfrw397n58jqqjpgpgwr8g9kh4f681yrg";
+    version = "0.4.2785";
+    sha256 = "14nkgicda137qn305fa32j54ay7nnqs6mi1m8bz4a09dxrkq83q0";
     arch = "linux-x64";
   }
   {
@@ -424,8 +424,8 @@
   {
     name = "terraform";
     publisher = "HashiCorp";
-    version = "2.37.2025092217";
-    sha256 = "1s648ma6yfxnbzjfm7sj0vxqh8p924hmydqf1jpsv1nvmd58v6mc";
+    version = "2.38.2026020917";
+    sha256 = "00585yk71jwy9ixzfzl9ib6ajn54zykm686yq3hmvrj1gyn9fsvi";
     arch = "linux-x64";
   }
   {
