@@ -122,6 +122,9 @@ pkgs.rustPlatform.buildRustPackage (
     sourceRoot = "source/codex-rs";
 
     cargoHash = cargoHashes.${pkgs.stdenv.system};
+    cargoPatches = [
+      ./remove-cargo-bin.patch
+    ];
 
     # Remove codex-utils-cargo-bin references from manifests/lockfile and
     # then stub any remaining callsites in code. Tests are disabled
