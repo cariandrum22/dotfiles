@@ -116,7 +116,7 @@ pkgs.rustPlatform.buildRustPackage (
     # The utils/cargo-bin crate depends on 'runfiles' which comes from
     # dzbarsky/rules_rust. That repo contains examples using -Z bindeps,
     # which causes nixpkgs 25.11's cargo vendor utility to fail when parsing.
-    cargoHash = "sha256-kBg8LAI01QcWnX9oSEhYRsMP3sFmEiSa5B0tey8CnbM=";
+    cargoHash = "sha256-oOcQv3NFd45WRdn2QtDMxVZwf3KjGWaSDBCjCk0ik/U=";
 
     # Remove codex-utils-cargo-bin references from manifests/lockfile and
     # then stub any remaining callsites in code. Tests are disabled
@@ -244,6 +244,11 @@ pkgs.rustPlatform.buildRustPackage (
       license = licenses.asl20;
       mainProgram = "codex";
     };
+  }
+  // pkgs.lib.optionalAttrs pkgs.stdenv.isDarwin {
+    # NOTE: cargo vendor hash differs on Darwin; keep this override in sync
+    # when updating codex-cli.
+    cargoHash = "sha256-kBg8LAI01QcWnX9oSEhYRsMP3sFmEiSa5B0tey8CnbM=";
   }
   // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
     # Point openssl-sys to system OpenSSL on Linux (avoid BoringSSL detection)
