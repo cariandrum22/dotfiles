@@ -97,6 +97,15 @@ let
   };
 
   opensslPkg = pkgs.openssl;
+
+  # Remove utils/cargo-bin from workspace to avoid rules_rust git dependency.
+  # The utils/cargo-bin crate depends on 'runfiles' which comes from
+  # dzbarsky/rules_rust. That repo contains examples using -Z bindeps,
+  # which causes nixpkgs 25.11's cargo vendor utility to fail when parsing.
+  cargoHashes = {
+    x86_64-linux = "sha256-oOcQv3NFd45WRdn2QtDMxVZwf3KjGWaSDBCjCk0ik/U=";
+    aarch64-darwin = "sha256-kBg8LAI01QcWnX9oSEhYRsMP3sFmEiSa5B0tey8CnbM=";
+  };
 in
 pkgs.rustPlatform.buildRustPackage (
   rec {
@@ -111,15 +120,6 @@ pkgs.rustPlatform.buildRustPackage (
     };
 
     sourceRoot = "source/codex-rs";
-
-    # Remove utils/cargo-bin from workspace to avoid rules_rust git dependency.
-    # The utils/cargo-bin crate depends on 'runfiles' which comes from
-    # dzbarsky/rules_rust. That repo contains examples using -Z bindeps,
-    # which causes nixpkgs 25.11's cargo vendor utility to fail when parsing.
-    cargoHashes = {
-      x86_64-linux = "sha256-oOcQv3NFd45WRdn2QtDMxVZwf3KjGWaSDBCjCk0ik/U=";
-      aarch64-darwin = "sha256-kBg8LAI01QcWnX9oSEhYRsMP3sFmEiSa5B0tey8CnbM=";
-    };
 
     cargoHash = cargoHashes.${pkgs.stdenv.system};
 
