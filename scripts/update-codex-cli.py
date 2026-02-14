@@ -5,9 +5,6 @@ This script automatically updates the codex-cli metadata used by Nix.
 It fetches the latest version from GitHub releases and generates the appropriate hashes.
 This includes both the source hash and the cargoHash for Rust dependencies.
 
-The script also tracks changes to cargoPatches files. If patch files change,
-the cargoHash will be recalculated even if the version remains the same.
-
 Usage:
     ./update-codex-cli.py
 
@@ -33,7 +30,6 @@ CONFIG = lib.UpdateConfig(
     # Match hash inside fetchFromGitHub block (with newlines)
     hash_pattern=r'(repo\s*=\s*"codex";\n\s*rev[^;]+;\n\s*hash\s*=\s*")([^"]+)(")',
     cargo_hash_pattern=r'(cargoHash\s*=\s*")([^"]+)(")',
-    cargo_patches=(NIX_FILE.parent / "remove-cargo-bin.patch",),
 )
 
 GITHUB_REPO = "openai/codex"
