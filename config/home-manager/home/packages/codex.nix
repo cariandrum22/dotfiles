@@ -112,19 +112,21 @@ pkgs.rustPlatform.buildRustPackage (
     pname = "codex-cli";
     version = "rust-v0.101.0";
 
-    src = pkgs.fetchFromGitHub {
-      owner = "openai";
-      repo = "codex";
-      rev = "${version}";
-      hash = "sha256-m2Jq7fbSXQ/O3bNBr6zbnQERhk2FZXb+AlGZsHn8GuQ=";
+    src = pkgs.applyPatches {
+      src = pkgs.fetchFromGitHub {
+        owner = "openai";
+        repo = "codex";
+        rev = "${version}";
+        hash = "sha256-m2Jq7fbSXQ/O3bNBr6zbnQERhk2FZXb+AlGZsHn8GuQ=";
+      };
+      patches = [
+        ./remove-cargo-bin.patch
+      ];
     };
 
     sourceRoot = "source/codex-rs";
 
     cargoHash = cargoHashes.${pkgs.stdenv.system};
-    cargoPatches = [
-      ./remove-cargo-bin.patch
-    ];
 
     # Remove codex-utils-cargo-bin references from manifests/lockfile and
     # then stub any remaining callsites in code. Tests are disabled
