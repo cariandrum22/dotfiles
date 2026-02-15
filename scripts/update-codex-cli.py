@@ -131,7 +131,11 @@ def _calculate_cargo_hash(content: str) -> lib.Hash:
         flags=re.MULTILINE,
     )
     with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".nix", delete=False, encoding="utf-8",
+        mode="w",
+        suffix=".nix",
+        delete=False,
+        encoding="utf-8",
+        dir=NIX_FILE.parent,
     ) as tmp:
         tmp.write(temp_content)
         tmp_path = Path(tmp.name)
