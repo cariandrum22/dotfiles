@@ -112,19 +112,18 @@ pkgs.rustPlatform.buildRustPackage (
     pname = "codex-cli";
     version = "rust-v0.101.0";
 
-    src = pkgs.applyPatches {
-      src = pkgs.fetchFromGitHub {
-        owner = "openai";
-        repo = "codex";
-        rev = "${version}";
-        hash = "sha256-m2Jq7fbSXQ/O3bNBr6zbnQERhk2FZXb+AlGZsHn8GuQ=";
-      };
-      patches = [
-        ./remove-cargo-bin.patch
-      ];
+    src = pkgs.fetchFromGitHub {
+      owner = "openai";
+      repo = "codex";
+      rev = "${version}";
+      hash = "sha256-m2Jq7fbSXQ/O3bNBr6zbnQERhk2FZXb+AlGZsHn8GuQ=";
     };
 
     sourceRoot = "source/codex-rs";
+
+    cargoPatches = [
+      ./remove-cargo-bin.patch
+    ];
 
     cargoHash = cargoHashes.${pkgs.stdenv.system};
 
