@@ -97,6 +97,15 @@ let
   };
 
   opensslPkg = pkgs.openssl;
+
+  # Remove utils/cargo-bin from workspace to avoid rules_rust git dependency.
+  # The utils/cargo-bin crate depends on 'runfiles' which comes from
+  # dzbarsky/rules_rust. That repo contains examples using -Z bindeps,
+  # which causes nixpkgs 25.11's cargo vendor utility to fail when parsing.
+  cargoHashes = {
+    x86_64-linux = "sha256-oOcQv3NFd45WRdn2QtDMxVZwf3KjGWaSDBCjCk0ik/U=";
+    aarch64-darwin = "sha256-kBg8LAI01QcWnX9oSEhYRsMP3sFmEiSa5B0tey8CnbM=";
+  };
 in
 pkgs.rustPlatform.buildRustPackage (
   rec {
@@ -112,17 +121,28 @@ pkgs.rustPlatform.buildRustPackage (
 
     sourceRoot = "source/codex-rs";
 
-    # Remove utils/cargo-bin from workspace to avoid rules_rust git dependency.
-    # The utils/cargo-bin crate depends on 'runfiles' which comes from
-    # dzbarsky/rules_rust. That repo contains examples using -Z bindeps,
-    # which causes nixpkgs 25.11's cargo vendor utility to fail when parsing.
-    cargoPatches = [ ./remove-cargo-bin.patch ];
+    cargoHash = cargoHashes.${pkgs.stdenv.system};
 
-    cargoHash = "sha256-wDarXzl0v+y1seK7ja5xWAGDcWoZ62v0UUZm9c2hyk8=";
-    # cargoPatches hash: d931c67814296a62
+    cargoPatches = [
+      ./remove-cargo-bin.patch
+    ];
 
-    # Remove ALL codex_utils_cargo_bin references from source files.
-    # Tests are disabled (doCheck = false) so stub implementations work fine.
+    cargoBinFixes = ''
+      # Drop codex-utils-cargo-bin/runfiles from manifests and lockfile
+      perl -i -ne 'print unless /"utils\/cargo-bin"/ || /^\s*runfiles\s*=\s*{ git = "https:\/\/github.com\/dzbarsky\/rules_rust"/' Cargo.toml
+      find . -name "Cargo.toml" -exec perl -i -ne 'print unless /codex-utils-cargo-bin/' {} \;
+      if [ -f Cargo.lock ]; then
+        perl -0pi -e '
+          s/\n\[\[package\]\]\nname = "codex-utils-cargo-bin".*?(?=\n\[\[package\]\]|\n\z)//s;
+          s/\n\[\[package\]\]\nname = "runfiles".*?(?=\n\[\[package\]\]|\n\z)//s;
+          s/^\s*"codex-utils-cargo-bin",\n//mg;
+        ' Cargo.lock
+      fi
+    '';
+
+    # Remove codex-utils-cargo-bin references from manifests/lockfile and
+    # then stub any remaining callsites in code. Tests are disabled
+    # (doCheck = false) so stub implementations work fine.
     postPatch =
       let
         # Perl script to replace all codex_utils_cargo_bin references
@@ -145,6 +165,8 @@ pkgs.rustPlatform.buildRustPackage (
         '';
       in
       ''
+        ${cargoBinFixes}
+
         # Apply global replacements to all Rust files
         find . -name "*.rs" -exec perl -i -p ${perlScript} {} \;
 
@@ -220,6 +242,7 @@ pkgs.rustPlatform.buildRustPackage (
     buildInputs =
       with pkgs;
       pkgs.lib.optionals pkgs.stdenv.isLinux [
+        libcap
         opensslPkg # for openssl-sys crate
         stdenv.cc.cc.lib # for libgcc_s.so.1
       ];
