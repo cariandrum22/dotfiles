@@ -242,6 +242,7 @@ pkgs.rustPlatform.buildRustPackage (
     buildInputs =
       with pkgs;
       pkgs.lib.optionals pkgs.stdenv.isLinux [
+        libcap
         opensslPkg # for openssl-sys crate
         stdenv.cc.cc.lib # for libgcc_s.so.1
       ];
