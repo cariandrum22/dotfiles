@@ -121,11 +121,22 @@ pkgs.rustPlatform.buildRustPackage (
 
     sourceRoot = "source/codex-rs";
 
-    cargoPatches = [
-      ./remove-cargo-bin.patch
-    ];
-
     cargoHash = cargoHashes.${pkgs.stdenv.system};
+
+    cargoBinFixes = ''
+      # Drop codex-utils-cargo-bin/runfiles from manifests and lockfile
+      perl -i -ne 'print unless /"utils\/cargo-bin"/ || /^\s*runfiles\s*=\s*{ git = "https:\/\/github.com\/dzbarsky\/rules_rust"/' Cargo.toml
+      find . -name "Cargo.toml" -exec perl -i -ne 'print unless /codex-utils-cargo-bin/' {} \;
+      if [ -f Cargo.lock ]; then
+        perl -0pi -e '
+          s/\n\[\[package\]\]\nname = "codex-utils-cargo-bin".*?(?=\n\[\[package\]\]|\n\z)//s;
+          s/\n\[\[package\]\]\nname = "runfiles".*?(?=\n\[\[package\]\]|\n\z)//s;
+          s/^\s*"codex-utils-cargo-bin",\n//mg;
+        ' Cargo.lock
+      fi
+    '';
+
+    postUnpack = cargoBinFixes;
 
     # Remove codex-utils-cargo-bin references from manifests/lockfile and
     # then stub any remaining callsites in code. Tests are disabled
@@ -152,16 +163,7 @@ pkgs.rustPlatform.buildRustPackage (
         '';
       in
       ''
-        # Drop codex-utils-cargo-bin/runfiles from manifests and lockfile
-        perl -i -ne 'print unless /"utils\/cargo-bin"/ || /^\s*runfiles\s*=\s*{ git = "https:\/\/github.com\/dzbarsky\/rules_rust"/' Cargo.toml
-        find . -name "Cargo.toml" -exec perl -i -ne 'print unless /codex-utils-cargo-bin/' {} \;
-        if [ -f Cargo.lock ]; then
-          perl -0pi -e '
-            s/\n\[\[package\]\]\nname = "codex-utils-cargo-bin".*?(?=\n\[\[package\]\]|\n\z)//s;
-            s/\n\[\[package\]\]\nname = "runfiles".*?(?=\n\[\[package\]\]|\n\z)//s;
-            s/^\s*"codex-utils-cargo-bin",\n//mg;
-          ' Cargo.lock
-        fi
+        ${cargoBinFixes}
 
         # Apply global replacements to all Rust files
         find . -name "*.rs" -exec perl -i -p ${perlScript} {} \;
