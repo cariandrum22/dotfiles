@@ -123,6 +123,10 @@ pkgs.rustPlatform.buildRustPackage (
 
     cargoHash = cargoHashes.${pkgs.stdenv.system};
 
+    cargoPatches = [
+      ./remove-cargo-bin.patch
+    ];
+
     cargoBinFixes = ''
       # Drop codex-utils-cargo-bin/runfiles from manifests and lockfile
       perl -i -ne 'print unless /"utils\/cargo-bin"/ || /^\s*runfiles\s*=\s*{ git = "https:\/\/github.com\/dzbarsky\/rules_rust"/' Cargo.toml
@@ -135,8 +139,6 @@ pkgs.rustPlatform.buildRustPackage (
         ' Cargo.lock
       fi
     '';
-
-    postUnpack = cargoBinFixes;
 
     # Remove codex-utils-cargo-bin references from manifests/lockfile and
     # then stub any remaining callsites in code. Tests are disabled
