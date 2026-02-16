@@ -216,8 +216,13 @@ def calculate_patch_hash(patch_files: tuple[Path, ...]) -> str | None:
 def calculate_cargo_hash(nix_file: Path) -> Hash | None:  # noqa: C901, PLR0912, PLR0915
     """Calculate cargoHash by building with dummy hash and extract correct one."""
     # Create a temporary file with dummy cargoHash
+    nix_file = Path(nix_file)
     with tempfile.NamedTemporaryFile(
-        mode='w', suffix='.nix', delete=False, encoding='utf-8',
+        mode='w',
+        suffix='.nix',
+        delete=False,
+        encoding='utf-8',
+        dir=nix_file.parent,
     ) as tmp:
         content = read_file(nix_file)
         # Replace cargoHash with a dummy value
