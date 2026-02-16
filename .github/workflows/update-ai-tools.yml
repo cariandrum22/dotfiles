@@ -63,3 +63,67 @@ jobs:
           labels: |
             dependencies
             automated
+
+  update-ai-tools-macos:
+    runs-on: macos-latest
+    needs: update-ai-tools
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Fetch update branch if exists
+        run: |
+          if git ls-remote --exit-code --heads origin update-ai-tools; then
+            git fetch origin update-ai-tools:update-ai-tools
+            git checkout update-ai-tools
+          fi
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v14
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Update Codex CLI (macOS cargoHash)
+        env:
+          CODEX_FORCE_CARGO_HASH: "1"
+        run: |
+          python3 scripts/update-codex-cli.py
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create Pull Request
+        if: steps.changes.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: "chore(ai-tools): update AI tools"
+          title: "chore(ai-tools): update AI tools"
+          body: |
+            ## AI Tools Update
+
+            This PR contains automatic updates for AI development tools:
+            - Claude Code
+            - Codex CLI
+            - Gemini CLI
+
+            Changes were generated automatically by the daily update workflow.
+          branch: update-ai-tools
+          delete-branch: true
+          labels: |
+            dependencies
+            automated
