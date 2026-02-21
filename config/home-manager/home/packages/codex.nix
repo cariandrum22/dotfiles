@@ -103,20 +103,20 @@ let
   # dzbarsky/rules_rust. That repo contains examples using -Z bindeps,
   # which causes nixpkgs 25.11's cargo vendor utility to fail when parsing.
   cargoHashes = {
-    x86_64-linux = "sha256-oOcQv3NFd45WRdn2QtDMxVZwf3KjGWaSDBCjCk0ik/U=";
+    x86_64-linux = "sha256-beuNqeetNviC83LFSV3lWi3nuw/oxW0O8QXHZCJK34o=";
     aarch64-darwin = "sha256-kBg8LAI01QcWnX9oSEhYRsMP3sFmEiSa5B0tey8CnbM=";
   };
 in
 pkgs.rustPlatform.buildRustPackage (
   rec {
     pname = "codex-cli";
-    version = "rust-v0.101.0";
+    version = "rust-v0.104.0";
 
     src = pkgs.fetchFromGitHub {
       owner = "openai";
       repo = "codex";
       rev = "${version}";
-      hash = "sha256-m2Jq7fbSXQ/O3bNBr6zbnQERhk2FZXb+AlGZsHn8GuQ=";
+      hash = "sha256-spWb/msjl9am7E4UkZfEoH0diFbvAfydJKJQM1N1aoI=";
     };
 
     sourceRoot = "source/codex-rs";
