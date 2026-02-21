@@ -104,7 +104,7 @@ let
   # which causes nixpkgs 25.11's cargo vendor utility to fail when parsing.
   cargoHashes = {
     x86_64-linux = "sha256-beuNqeetNviC83LFSV3lWi3nuw/oxW0O8QXHZCJK34o=";
-    aarch64-darwin = "sha256-kBg8LAI01QcWnX9oSEhYRsMP3sFmEiSa5B0tey8CnbM=";
+    aarch64-darwin = "sha256-beuNqeetNviC83LFSV3lWi3nuw/oxW0O8QXHZCJK34o=";
   };
 in
 pkgs.rustPlatform.buildRustPackage (
@@ -157,6 +157,10 @@ pkgs.rustPlatform.buildRustPackage (
           s/codex_utils_cargo_bin::cargo_bin\("[^"]+"\)\.context\([^)]+\)\?/std::path::PathBuf::from("stub-binary")/g;
           # Replace bare cargo_bin() - use direct PathBuf (not Ok-wrapped to avoid type inference issues)
           s/codex_utils_cargo_bin::cargo_bin\("[^"]+"\)/std::path::PathBuf::from("stub-binary")/g;
+          # Replace repo_root()? calls with a direct stub PathBuf
+          s/codex_utils_cargo_bin::repo_root\(\)\?/std::path::PathBuf::from(".")/g;
+          # Replace repo_root() calls with explicit Ok type to preserve .ok() chaining
+          s/codex_utils_cargo_bin::repo_root\(\)/Ok::<std::path::PathBuf, std::io::Error>(std::path::PathBuf::from("."))/g;
           # Replace find_resource! macro calls - use direct PathBuf
           s/codex_utils_cargo_bin::find_resource!\([^)]+\)\?/std::path::PathBuf::from("stub-resource")/g;
           s/codex_utils_cargo_bin::find_resource!\([^)]+\)/std::path::PathBuf::from("stub-resource")/g;
