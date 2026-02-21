@@ -104,7 +104,7 @@ let
   # which causes nixpkgs 25.11's cargo vendor utility to fail when parsing.
   cargoHashes = {
     x86_64-linux = "sha256-beuNqeetNviC83LFSV3lWi3nuw/oxW0O8QXHZCJK34o=";
-    aarch64-darwin = "sha256-kBg8LAI01QcWnX9oSEhYRsMP3sFmEiSa5B0tey8CnbM=";
+    aarch64-darwin = "sha256-beuNqeetNviC83LFSV3lWi3nuw/oxW0O8QXHZCJK34o=";
   };
 in
 pkgs.rustPlatform.buildRustPackage (
