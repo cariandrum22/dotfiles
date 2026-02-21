@@ -157,6 +157,10 @@ pkgs.rustPlatform.buildRustPackage (
           s/codex_utils_cargo_bin::cargo_bin\("[^"]+"\)\.context\([^)]+\)\?/std::path::PathBuf::from("stub-binary")/g;
           # Replace bare cargo_bin() - use direct PathBuf (not Ok-wrapped to avoid type inference issues)
           s/codex_utils_cargo_bin::cargo_bin\("[^"]+"\)/std::path::PathBuf::from("stub-binary")/g;
+          # Replace repo_root()? calls with a direct stub PathBuf
+          s/codex_utils_cargo_bin::repo_root\(\)\?/std::path::PathBuf::from(".")/g;
+          # Replace repo_root() calls with explicit Ok type to preserve .ok() chaining
+          s/codex_utils_cargo_bin::repo_root\(\)/Ok::<std::path::PathBuf, std::io::Error>(std::path::PathBuf::from("."))/g;
           # Replace find_resource! macro calls - use direct PathBuf
           s/codex_utils_cargo_bin::find_resource!\([^)]+\)\?/std::path::PathBuf::from("stub-resource")/g;
           s/codex_utils_cargo_bin::find_resource!\([^)]+\)/std::path::PathBuf::from("stub-resource")/g;
