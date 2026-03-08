@@ -14,6 +14,7 @@ Environment:
 
 Files modified:
     config/home-manager/home/packages/codex.nix
+    config/home-manager/home/packages/remove-cargo-bin.patch
 """
 
 from __future__ import annotations
@@ -21,14 +22,24 @@ from __future__ import annotations
 import os
 import platform
 import re
+import shutil
+import subprocess  # noqa: S404
 import sys
+import tarfile
 import tempfile
 from pathlib import Path
+from typing import TYPE_CHECKING
+from urllib.request import urlopen
 
+import common
 import update_lib as lib
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 # Path to the nix file
 NIX_FILE = Path("config/home-manager/home/packages/codex.nix")
+PATCH_FILE = NIX_FILE.parent / "remove-cargo-bin.patch"
 
 # Configuration
 # Use specific patterns to match only the main package, not ramaBoringssl
@@ -39,6 +50,7 @@ CONFIG = lib.UpdateConfig(
     version_pattern=r'(pname\s*=\s*"codex-cli";\n\s*version\s*=\s*")([^"]+)(")',
     # Match hash inside fetchFromGitHub block (with newlines)
     hash_pattern=r'(repo\s*=\s*"codex";\n\s*rev[^;]+;\n\s*hash\s*=\s*")([^"]+)(")',
+    cargo_patches=(PATCH_FILE,),
 )
 
 GITHUB_REPO = "openai/codex"
@@ -54,6 +66,137 @@ _SYSTEM_MAP = {
     ("darwin", "arm64"): "aarch64-darwin",
     ("darwin", "aarch64"): "aarch64-darwin",
 }
+
+_WORKSPACE_CARGO_BIN_PATTERN = re.compile(r'^\s*"utils/cargo-bin",\s*$')
+_CARGO_BIN_DEP_PATTERN = re.compile(
+    r'^\s*codex-utils-cargo-bin\s*=\s*\{.*\}\s*$',
+)
+_RUNFILES_DEP_PATTERN = re.compile(
+    r'^\s*runfiles\s*=\s*\{[^}]*github\.com/dzbarsky/rules_rust[^}]*\}\s*$',
+)
+_CARGO_LOCK_DEP_PATTERN = re.compile(r'^\s*"codex-utils-cargo-bin",\n', re.MULTILINE)
+
+
+def _with_original_newline(content: str, updated: str) -> str:
+    if content.endswith("\n") or not updated:
+        return updated
+    return updated.removesuffix("\n")
+
+
+def _rewrite_cargo_toml(content: str) -> str:
+    kept_lines = [
+        line for line in content.splitlines()
+        if not _WORKSPACE_CARGO_BIN_PATTERN.match(line)
+        and not _CARGO_BIN_DEP_PATTERN.match(line)
+        and not _RUNFILES_DEP_PATTERN.match(line)
+    ]
+    updated = "\n".join(kept_lines)
+    if content.endswith("\n"):
+        updated += "\n"
+    return updated
+
+
+def _remove_cargo_lock_package(content: str, package_name: str) -> str:
+    return re.sub(
+        rf'^\[\[package\]\]\nname = "{re.escape(package_name)}"\n.*?'
+        rf'(?=^\[\[package\]\]\n|\Z)',
+        '',
+        content,
+        flags=re.MULTILINE | re.DOTALL,
+    )
+
+
+def _rewrite_cargo_lock(content: str) -> str:
+    updated = _CARGO_LOCK_DEP_PATTERN.sub('', content)
+    updated = _remove_cargo_lock_package(updated, "codex-utils-cargo-bin")
+    updated = _remove_cargo_lock_package(updated, "runfiles")
+    return _with_original_newline(content, updated)
+
+
+def _rewrite_if_changed(path: Path, transform: Callable[[str], str]) -> None:
+    content = path.read_text(encoding="utf-8")
+    updated = transform(content)
+    if updated != content:
+        path.write_text(updated, encoding="utf-8")
+
+
+def _prepare_patch_tree(tree: Path) -> None:
+    for cargo_toml in tree.rglob("Cargo.toml"):
+        _rewrite_if_changed(cargo_toml, _rewrite_cargo_toml)
+
+    cargo_lock = tree / "Cargo.lock"
+    if cargo_lock.exists():
+        _rewrite_if_changed(cargo_lock, _rewrite_cargo_lock)
+
+
+def _download_release_tarball(version: lib.Version, destination: Path) -> Path:
+    tarball_url = lib.get_github_download_url(GITHUB_REPO, version)
+    tarball_path = destination / "codex.tar.gz"
+
+    def _fetch_tarball() -> bytes:
+        request = common.build_request(tarball_url)
+        with urlopen(request, timeout=120) as response:  # noqa: S310
+            return response.read()
+
+    tarball_path.write_bytes(
+        common.retry_with_backoff(_fetch_tarball, retries=lib.DEFAULT_RETRIES),
+    )
+    return tarball_path
+
+
+def _extract_codex_source_tree(tarball_path: Path, destination: Path) -> Path:
+    extract_dir = destination / "extract"
+    extract_dir.mkdir()
+
+    with tarfile.open(tarball_path, "r:gz") as archive:
+        archive.extractall(path=extract_dir, filter="data")
+
+    extracted_roots = [path for path in extract_dir.iterdir() if path.is_dir()]
+    if len(extracted_roots) != 1:
+        msg = f"Unexpected archive layout for {tarball_path}"
+        raise RuntimeError(msg)
+
+    source_dir = extracted_roots[0] / "codex-rs"
+    if not source_dir.is_dir():
+        msg = f"Could not find codex-rs in extracted archive for {tarball_path}"
+        raise RuntimeError(msg)
+
+    return source_dir
+
+
+def _regenerate_remove_cargo_bin_patch(version: lib.Version) -> bool:
+    with tempfile.TemporaryDirectory(prefix="codex-patch-") as temp_dir:
+        temp_root = Path(temp_dir)
+        tarball_path = _download_release_tarball(version, temp_root)
+        source_dir = _extract_codex_source_tree(tarball_path, temp_root)
+
+        orig_dir = temp_root / "orig"
+        mod_dir = temp_root / "mod"
+        shutil.copytree(source_dir, orig_dir)
+        shutil.copytree(source_dir, mod_dir)
+        _prepare_patch_tree(mod_dir)
+
+        result = subprocess.run(
+            ["diff", "-urN", "orig", "mod"],
+            cwd=temp_root,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode not in {0, 1}:
+            msg = result.stderr.strip() or "Failed to generate remove-cargo-bin.patch"
+            raise RuntimeError(msg)
+
+        patch_content = result.stdout
+
+    current_patch = (
+        PATCH_FILE.read_text(encoding="utf-8") if PATCH_FILE.exists() else None
+    )
+    if current_patch == patch_content:
+        return False
+
+    PATCH_FILE.write_text(patch_content, encoding="utf-8")
+    return True
 
 
 def _detect_system() -> str:
@@ -179,8 +322,9 @@ def main() -> int:
 
     updated_content = content
     latest_hash = current.hash
+    version_updated = current.version != latest_version
 
-    if current.version != latest_version:
+    if version_updated:
         latest_hash = lib.calculate_hash(
             lib.get_github_download_url(GITHUB_REPO, latest_version),
         )
@@ -193,12 +337,13 @@ def main() -> int:
                 hash=latest_hash,
             ),
         )
+        _regenerate_remove_cargo_bin_patch(latest_version)
 
     if _needs_cargo_update(
         updated_content,
         system,
         force=force_cargo,
-        version_updated=current.version != latest_version,
+        version_updated=version_updated,
     ):
         new_cargo_hash = _calculate_cargo_hash(updated_content)
         updated_content = _update_cargo_hashes(
