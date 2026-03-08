@@ -1,0 +1,36 @@
+module.exports = {
+  extends: ['@commitlint/config-conventional'],
+  ignores: [
+    (message) => /^Merge /.test(message),
+    (message) => /^initial commit$/i.test(message.trim()),
+  ],
+  rules: {
+    'type-enum': [
+      2,
+      'always',
+      [
+        'build',
+        'bump',
+        'chore',
+        'ci',
+        'docs',
+        'feat',
+        'fix',
+        'perf',
+        'refactor',
+        'revert',
+        'style',
+        'test',
+      ],
+    ],
+    'scope-empty': [0],
+    'scope-case': [0],
+    'subject-case': [0],
+    'subject-full-stop': [2, 'never', '.'],
+    'header-max-length': [2, 'always', 100],
+    'body-max-line-length': [2, 'always', 100],
+    'footer-max-line-length': [2, 'always', 100],
+    'body-leading-blank': [1, 'always'],
+    'footer-leading-blank': [1, 'always'],
+  },
+};
