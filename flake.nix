@@ -19,6 +19,11 @@
       url = "github:cariandrum22/claudius";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nixos-vscode-server = {
+      url = "github:msteen/nixos-vscode-server";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -29,6 +34,7 @@
       home-manager,
       pre-commit-hooks,
       claudius,
+      nixos-vscode-server,
       ...
     }:
     let
@@ -117,7 +123,7 @@
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
           extraSpecialArgs = {
-            inherit system;
+            inherit system nixos-vscode-server;
           };
           modules = [
             ./config/home-manager/home.nix
@@ -172,7 +178,7 @@
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
           extraSpecialArgs = {
-            inherit system;
+            inherit system nixos-vscode-server;
             isHeadless = true;
           };
           modules = [

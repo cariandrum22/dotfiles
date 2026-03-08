@@ -1,6 +1,8 @@
+{ nixos-vscode-server, ... }:
+
 {
   imports = [
-    "${fetchTarball "https://github.com/msteen/nixos-vscode-server/tarball/master"}/modules/vscode-server/home.nix"
+    nixos-vscode-server.homeModules.default
   ];
 
   services.vscode-server = {
