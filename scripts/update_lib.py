@@ -40,6 +40,7 @@ import common
 NPM_REGISTRY_API = "https://registry.npmjs.org"
 GITHUB_API = "https://api.github.com"
 DEFAULT_RETRIES = 3
+CI_DEBUG_PREVIEW = 1000
 
 # Pattern for stored patch hash comment in nix files
 PATCH_HASH_PATTERN = r'#\s*cargoPatches\s+hash:\s*([a-f0-9]+)'
@@ -213,6 +214,47 @@ def calculate_patch_hash(patch_files: tuple[Path, ...]) -> str | None:
     return hasher.hexdigest()[:16]
 
 
+def _convert_sha256_to_sri(hash_value: str) -> Hash | None:
+    """Convert a non-SRI SHA256 hash into SRI format if needed."""
+    if hash_value.startswith("sha256-"):
+        return Hash(hash_value)
+
+    result = subprocess.run(
+        ["nix", "hash", "to-sri", "--type", "sha256", hash_value],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        return None
+
+    sri_hash = result.stdout.strip()
+    return Hash(sri_hash) if sri_hash.startswith("sha256-") else None
+
+
+def _extract_cargo_hash_from_output(output: str) -> Hash | None:
+    """Extract a cargo hash from nix-build output."""
+    patterns = (
+        r'got:\s+(sha256-[A-Za-z0-9+/=]+)',
+        r'specified:\s+(?:sha256-[A-Za-z0-9+/=]+|[0-9a-z]{52})\s+got:\s+'
+        r'(sha256-[A-Za-z0-9+/=]+)',
+        r'got:\s+([0-9a-z]{52})',
+        r'specified:\s+(?:sha256-[A-Za-z0-9+/=]+|[0-9a-z]{52})\s+got:\s+'
+        r'([0-9a-z]{52})',
+    )
+
+    for pattern in patterns:
+        match = re.search(pattern, output)
+        if not match:
+            continue
+
+        hash_val = _convert_sha256_to_sri(match.group(1))
+        if hash_val is not None:
+            return hash_val
+
+    return None
+
+
 def calculate_cargo_hash(nix_file: Path) -> Hash | None:  # noqa: C901, PLR0912, PLR0915
     """Calculate cargoHash by building with dummy hash and extract correct one."""
     # Create a temporary file with dummy cargoHash
@@ -256,44 +298,53 @@ def calculate_cargo_hash(nix_file: Path) -> Hash | None:  # noqa: C901, PLR0912,
             timeout=300,  # 5 minutes timeout for CI environments
         )
 
-        # Look for the correct hash in the error output
+        # Look for the correct hash in the build output
         error_text = result.stderr
+        combined_output = "\n".join(
+            part for part in (result.stderr, result.stdout) if part
+        )
 
         # Debug output in CI
         if os.getenv('CI') and not error_text:
             print("[CI Debug] No stderr output from nix-build", file=sys.stderr)
             if result.stdout:
-                print(f"[CI Debug] stdout: {result.stdout[:500]}", file=sys.stderr)
-
-        # Pattern to match: got:    sha256-...
-        match = re.search(r'got:\s+(sha256-[A-Za-z0-9+/=]+)', error_text)
-        if match:
-            hash_val = Hash(match.group(1))
-            if os.getenv('CI'):
-                print(f"[CI Debug] Found cargoHash: {hash_val}", file=sys.stderr)
-            return hash_val
-
-        # Also check for the SRI format in error
-        match = re.search(
-            r'specified:\s+(sha256-[A-Za-z0-9+/=]+)\s+got:\s+(sha256-[A-Za-z0-9+/=]+)',
-            error_text,
-        )
-        if match:
-            hash_val = Hash(match.group(2))
-            if os.getenv('CI'):
                 print(
-                    f"[CI Debug] Found cargoHash (SRI format): {hash_val}",
+                    f"[CI Debug] stdout: {result.stdout[:CI_DEBUG_PREVIEW // 2]}",
                     file=sys.stderr,
                 )
+
+        hash_val = _extract_cargo_hash_from_output(combined_output)
+        if hash_val is not None:
+            if os.getenv('CI'):
+                print(f"[CI Debug] Found cargoHash: {hash_val}", file=sys.stderr)
             return hash_val
 
         # If no match found, log the error in CI
         if os.getenv('CI'):
             print("[CI Debug] Could not extract cargoHash from output", file=sys.stderr)
             print(
-                f"[CI Debug] stderr output (first 1000 chars): {error_text[:1000]}",
+                f"[CI Debug] nix-build exit code: {result.returncode}",
                 file=sys.stderr,
             )
+            print(
+                "[CI Debug] stderr output "
+                f"(first {CI_DEBUG_PREVIEW} chars): {error_text[:CI_DEBUG_PREVIEW]}",
+                file=sys.stderr,
+            )
+            if result.stdout:
+                stdout_preview = result.stdout[:CI_DEBUG_PREVIEW]
+                print(
+                    "[CI Debug] stdout output "
+                    f"(first {CI_DEBUG_PREVIEW} chars): {stdout_preview}",
+                    file=sys.stderr,
+                )
+            if len(combined_output) > CI_DEBUG_PREVIEW:
+                combined_tail = combined_output[-CI_DEBUG_PREVIEW:]
+                print(
+                    "[CI Debug] combined output tail "
+                    f"(last {CI_DEBUG_PREVIEW} chars): {combined_tail}",
+                    file=sys.stderr,
+                )
 
     except subprocess.TimeoutExpired:
         # Build took too long

@@ -1,7 +1,7 @@
 diff -urN orig/Cargo.lock mod/Cargo.lock
---- orig/Cargo.lock	2026-02-15 10:03:20
-+++ mod/Cargo.lock	2026-02-15 10:03:21
-@@ -388,7 +388,6 @@
+--- orig/Cargo.lock	2026-03-09 04:47:46.000000000 +0900
++++ mod/Cargo.lock	2026-03-09 07:55:50.537060381 +0900
+@@ -410,7 +410,6 @@
   "codex-app-server-protocol",
   "codex-core",
   "codex-protocol",
@@ -9,23 +9,23 @@ diff -urN orig/Cargo.lock mod/Cargo.lock
   "core_test_support",
   "serde",
   "serde_json",
-@@ -1362,7 +1361,6 @@
-  "codex-protocol",
-  "codex-rmcp-client",
+@@ -1433,7 +1432,6 @@
+  "codex-shell-command",
+  "codex-state",
   "codex-utils-absolute-path",
 - "codex-utils-cargo-bin",
   "codex-utils-cli",
   "codex-utils-json-to-toml",
   "core_test_support",
-@@ -1395,7 +1393,6 @@
+@@ -1466,7 +1464,6 @@
   "codex-experimental-api-macros",
   "codex-protocol",
   "codex-utils-absolute-path",
 - "codex-utils-cargo-bin",
   "inventory",
   "pretty_assertions",
-  "schemars 0.8.22",
-@@ -1429,7 +1426,6 @@
+  "rmcp",
+@@ -1512,7 +1509,6 @@
   "anyhow",
   "assert_cmd",
   "assert_matches",
@@ -33,7 +33,7 @@ diff -urN orig/Cargo.lock mod/Cargo.lock
   "pretty_assertions",
   "similar",
   "tempfile",
-@@ -1492,7 +1488,6 @@
+@@ -1595,7 +1591,6 @@
   "clap",
   "codex-core",
   "codex-git",
@@ -41,39 +41,31 @@ diff -urN orig/Cargo.lock mod/Cargo.lock
   "codex-utils-cli",
   "pretty_assertions",
   "serde",
-@@ -1527,7 +1522,6 @@
-  "codex-rmcp-client",
+@@ -1632,7 +1627,6 @@
+  "codex-state",
   "codex-stdio-to-uds",
   "codex-tui",
 - "codex-utils-cargo-bin",
   "codex-utils-cli",
   "codex-windows-sandbox",
   "libc",
-@@ -1688,7 +1682,6 @@
-  "codex-shell-command",
-  "codex-state",
+@@ -1803,7 +1797,6 @@
+  "codex-test-macros",
   "codex-utils-absolute-path",
+  "codex-utils-cache",
 - "codex-utils-cargo-bin",
   "codex-utils-home-dir",
+  "codex-utils-image",
   "codex-utils-pty",
-  "codex-utils-readiness",
-@@ -1783,7 +1776,6 @@
-  "codex-core",
+@@ -1903,7 +1896,6 @@
+  "codex-otel",
   "codex-protocol",
   "codex-utils-absolute-path",
 - "codex-utils-cargo-bin",
   "codex-utils-cli",
   "codex-utils-elapsed",
   "codex-utils-oss",
-@@ -1817,7 +1809,6 @@
-  "clap",
-  "codex-core",
-  "codex-execpolicy",
-- "codex-utils-cargo-bin",
-  "exec_server_test_support",
-  "libc",
-  "maplit",
-@@ -2164,7 +2155,6 @@
+@@ -2288,7 +2280,6 @@
   "axum",
   "codex-keyring-store",
   "codex-protocol",
@@ -81,7 +73,7 @@ diff -urN orig/Cargo.lock mod/Cargo.lock
   "codex-utils-home-dir",
   "codex-utils-pty",
   "futures",
-@@ -2254,7 +2244,6 @@
+@@ -2409,7 +2400,6 @@
  dependencies = [
   "anyhow",
   "assert_cmd",
@@ -89,7 +81,7 @@ diff -urN orig/Cargo.lock mod/Cargo.lock
   "pretty_assertions",
   "tempfile",
   "uds_windows",
-@@ -2286,7 +2275,6 @@
+@@ -2451,7 +2441,6 @@
   "codex-state",
   "codex-utils-absolute-path",
   "codex-utils-approval-presets",
@@ -97,7 +89,7 @@ diff -urN orig/Cargo.lock mod/Cargo.lock
   "codex-utils-cli",
   "codex-utils-elapsed",
   "codex-utils-fuzzy-match",
-@@ -2375,15 +2363,6 @@
+@@ -2544,15 +2533,6 @@
  ]
  
  [[package]]
@@ -113,7 +105,7 @@ diff -urN orig/Cargo.lock mod/Cargo.lock
  name = "codex-utils-cli"
  version = "0.0.0"
  dependencies = [
-@@ -2712,7 +2691,6 @@
+@@ -2892,7 +2872,6 @@
   "codex-core",
   "codex-protocol",
   "codex-utils-absolute-path",
@@ -121,15 +113,7 @@ diff -urN orig/Cargo.lock mod/Cargo.lock
   "ctor 0.6.3",
   "futures",
   "notify",
-@@ -3581,7 +3559,6 @@
- dependencies = [
-  "anyhow",
-  "codex-core",
-- "codex-utils-cargo-bin",
-  "rmcp",
-  "serde_json",
-  "tokio",
-@@ -5359,7 +5336,6 @@
+@@ -5624,7 +5603,6 @@
   "anyhow",
   "codex-core",
   "codex-mcp-server",
@@ -137,22 +121,22 @@ diff -urN orig/Cargo.lock mod/Cargo.lock
   "core_test_support",
   "os_info",
   "pretty_assertions",
-@@ -7468,11 +7444,6 @@
-  "subtle",
-  "zeroize",
+@@ -7850,11 +7828,6 @@
  ]
--
--[[package]]
+ 
+ [[package]]
 -name = "runfiles"
 -version = "0.1.0"
 -source = "git+https://github.com/dzbarsky/rules_rust?rev=b56cbaa8465e74127f1ea216f813cd377295ad81#b56cbaa8465e74127f1ea216f813cd377295ad81"
- 
- [[package]]
+-
+-[[package]]
  name = "rust-embed"
+ version = "8.11.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
 diff -urN orig/Cargo.toml mod/Cargo.toml
---- orig/Cargo.toml	2026-02-15 10:03:20
-+++ mod/Cargo.toml	2026-02-15 10:03:21
-@@ -40,7 +40,6 @@
+--- orig/Cargo.toml	2026-03-09 04:47:46.000000000 +0900
++++ mod/Cargo.toml	2026-03-09 07:55:50.521302244 +0900
+@@ -41,7 +41,6 @@
      "otel",
      "tui",
      "utils/absolute-path",
@@ -160,7 +144,7 @@ diff -urN orig/Cargo.toml mod/Cargo.toml
      "utils/git",
      "utils/cache",
      "utils/image",
-@@ -118,7 +117,6 @@
+@@ -128,7 +127,6 @@
  codex-utils-absolute-path = { path = "utils/absolute-path" }
  codex-utils-approval-presets = { path = "utils/approval-presets" }
  codex-utils-cache = { path = "utils/cache" }
@@ -168,7 +152,7 @@ diff -urN orig/Cargo.toml mod/Cargo.toml
  codex-utils-cli = { path = "utils/cli" }
  codex-utils-elapsed = { path = "utils/elapsed" }
  codex-utils-fuzzy-match = { path = "utils/fuzzy-match" }
-@@ -217,7 +215,6 @@
+@@ -231,7 +229,6 @@
  regex-lite = "0.1.8"
  reqwest = "0.12"
  rmcp = { version = "0.15.0", default-features = false }
@@ -177,19 +161,19 @@ diff -urN orig/Cargo.toml mod/Cargo.toml
      "ring",
      "std",
 diff -urN orig/app-server/Cargo.toml mod/app-server/Cargo.toml
---- orig/app-server/Cargo.toml	2026-02-15 10:03:21
-+++ mod/app-server/Cargo.toml	2026-02-15 10:03:21
-@@ -63,7 +63,6 @@
+--- orig/app-server/Cargo.toml	2026-03-09 04:47:46.000000000 +0900
++++ mod/app-server/Cargo.toml	2026-03-09 07:55:50.521941738 +0900
+@@ -66,7 +66,6 @@
+ ] }
  base64 = { workspace = true }
- codex-execpolicy = { workspace = true }
  core_test_support = { workspace = true }
 -codex-utils-cargo-bin = { workspace = true }
- os_info = { workspace = true }
  pretty_assertions = { workspace = true }
  rmcp = { workspace = true, default-features = false, features = [
+     "elicitation",
 diff -urN orig/app-server/tests/common/Cargo.toml mod/app-server/tests/common/Cargo.toml
---- orig/app-server/tests/common/Cargo.toml	2026-02-15 10:03:21
-+++ mod/app-server/tests/common/Cargo.toml	2026-02-15 10:03:21
+--- orig/app-server/tests/common/Cargo.toml	2026-03-09 04:47:46.000000000 +0900
++++ mod/app-server/tests/common/Cargo.toml	2026-03-09 07:55:50.529509750 +0900
 @@ -14,7 +14,6 @@
  codex-app-server-protocol = { workspace = true }
  codex-core = { workspace = true }
@@ -199,9 +183,9 @@ diff -urN orig/app-server/tests/common/Cargo.toml mod/app-server/tests/common/Ca
  serde_json = { workspace = true }
  tokio = { workspace = true, features = [
 diff -urN orig/app-server-protocol/Cargo.toml mod/app-server-protocol/Cargo.toml
---- orig/app-server-protocol/Cargo.toml	2026-02-15 10:03:20
-+++ mod/app-server-protocol/Cargo.toml	2026-02-15 10:03:21
-@@ -28,7 +28,6 @@
+--- orig/app-server-protocol/Cargo.toml	2026-03-09 04:47:46.000000000 +0900
++++ mod/app-server-protocol/Cargo.toml	2026-03-09 07:55:50.522253193 +0900
+@@ -37,7 +37,6 @@
  
  [dev-dependencies]
  anyhow = { workspace = true }
@@ -210,8 +194,8 @@ diff -urN orig/app-server-protocol/Cargo.toml mod/app-server-protocol/Cargo.toml
  similar = { workspace = true }
  tempfile = { workspace = true }
 diff -urN orig/apply-patch/Cargo.toml mod/apply-patch/Cargo.toml
---- orig/apply-patch/Cargo.toml	2026-02-15 10:03:21
-+++ mod/apply-patch/Cargo.toml	2026-02-15 10:03:21
+--- orig/apply-patch/Cargo.toml	2026-03-09 04:47:46.000000000 +0900
++++ mod/apply-patch/Cargo.toml	2026-03-09 07:55:50.522125389 +0900
 @@ -25,6 +25,5 @@
  [dev-dependencies]
  assert_cmd = { workspace = true }
@@ -220,8 +204,8 @@ diff -urN orig/apply-patch/Cargo.toml mod/apply-patch/Cargo.toml
  pretty_assertions = { workspace = true }
  tempfile = { workspace = true }
 diff -urN orig/chatgpt/Cargo.toml mod/chatgpt/Cargo.toml
---- orig/chatgpt/Cargo.toml	2026-02-15 10:03:21
-+++ mod/chatgpt/Cargo.toml	2026-02-15 10:03:21
+--- orig/chatgpt/Cargo.toml	2026-03-09 04:47:46.000000000 +0900
++++ mod/chatgpt/Cargo.toml	2026-03-09 07:55:50.522897933 +0900
 @@ -12,7 +12,6 @@
  clap = { workspace = true, features = ["derive"] }
  codex-core = { workspace = true }
@@ -231,29 +215,30 @@ diff -urN orig/chatgpt/Cargo.toml mod/chatgpt/Cargo.toml
  serde_json = { workspace = true }
  tokio = { workspace = true, features = ["full"] }
 diff -urN orig/cli/Cargo.toml mod/cli/Cargo.toml
---- orig/cli/Cargo.toml	2026-02-15 10:03:20
-+++ mod/cli/Cargo.toml	2026-02-15 10:03:21
-@@ -58,6 +58,5 @@
+--- orig/cli/Cargo.toml	2026-03-09 04:47:46.000000000 +0900
++++ mod/cli/Cargo.toml	2026-03-09 07:55:50.521598923 +0900
+@@ -60,7 +60,6 @@
  [dev-dependencies]
  assert_cmd = { workspace = true }
  assert_matches = { workspace = true }
 -codex-utils-cargo-bin = { workspace = true }
  predicates = { workspace = true }
  pretty_assertions = { workspace = true }
+ sqlx = { workspace = true }
 diff -urN orig/core/Cargo.toml mod/core/Cargo.toml
---- orig/core/Cargo.toml	2026-02-15 10:03:20
-+++ mod/core/Cargo.toml	2026-02-15 10:03:21
-@@ -148,7 +148,6 @@
- codex-otel = { workspace = true, features = [
+--- orig/core/Cargo.toml	2026-03-09 04:47:46.000000000 +0900
++++ mod/core/Cargo.toml	2026-03-09 07:55:50.522583058 +0900
+@@ -155,7 +155,6 @@
      "disable-default-metrics-exporter",
  ] }
+ codex-test-macros = { workspace = true }
 -codex-utils-cargo-bin = { workspace = true }
  core_test_support = { workspace = true }
  ctor = { workspace = true }
- image = { workspace = true, features = ["jpeg", "png"] }
+ insta = { workspace = true }
 diff -urN orig/core/tests/common/Cargo.toml mod/core/tests/common/Cargo.toml
---- orig/core/tests/common/Cargo.toml	2026-02-15 10:03:20
-+++ mod/core/tests/common/Cargo.toml	2026-02-15 10:03:21
+--- orig/core/tests/common/Cargo.toml	2026-03-09 04:47:46.000000000 +0900
++++ mod/core/tests/common/Cargo.toml	2026-03-09 07:55:50.527518910 +0900
 @@ -14,7 +14,6 @@
  codex-core = { workspace = true }
  codex-protocol = { workspace = true }
@@ -263,41 +248,19 @@ diff -urN orig/core/tests/common/Cargo.toml mod/core/tests/common/Cargo.toml
  futures = { workspace = true }
  notify = { workspace = true }
 diff -urN orig/exec/Cargo.toml mod/exec/Cargo.toml
---- orig/exec/Cargo.toml	2026-02-15 10:03:21
-+++ mod/exec/Cargo.toml	2026-02-15 10:03:21
-@@ -51,7 +51,6 @@
- 
+--- orig/exec/Cargo.toml	2026-03-09 04:47:46.000000000 +0900
++++ mod/exec/Cargo.toml	2026-03-09 07:55:50.523509681 +0900
+@@ -53,7 +53,6 @@
  [dev-dependencies]
  assert_cmd = { workspace = true }
+ codex-apply-patch = { workspace = true }
 -codex-utils-cargo-bin = { workspace = true }
  core_test_support = { workspace = true }
  libc = { workspace = true }
- predicates = { workspace = true }
-diff -urN orig/exec-server/Cargo.toml mod/exec-server/Cargo.toml
---- orig/exec-server/Cargo.toml	2026-02-15 10:03:20
-+++ mod/exec-server/Cargo.toml	2026-02-15 10:03:21
-@@ -56,7 +56,6 @@
- tracing-subscriber = { workspace = true, features = ["env-filter", "fmt"] }
- 
- [dev-dependencies]
--codex-utils-cargo-bin = { workspace = true }
- exec_server_test_support = { workspace = true }
- maplit = { workspace = true }
- pretty_assertions = { workspace = true }
-diff -urN orig/exec-server/tests/common/Cargo.toml mod/exec-server/tests/common/Cargo.toml
---- orig/exec-server/tests/common/Cargo.toml	2026-02-15 10:03:20
-+++ mod/exec-server/tests/common/Cargo.toml	2026-02-15 10:03:21
-@@ -10,7 +10,6 @@
- [dependencies]
- anyhow = { workspace = true }
- codex-core = { workspace = true }
--codex-utils-cargo-bin = { workspace = true }
- rmcp = { workspace = true }
- serde_json = { workspace = true }
- tokio = { workspace = true }
+ opentelemetry = { workspace = true }
 diff -urN orig/mcp-server/tests/common/Cargo.toml mod/mcp-server/tests/common/Cargo.toml
---- orig/mcp-server/tests/common/Cargo.toml	2026-02-15 10:03:20
-+++ mod/mcp-server/tests/common/Cargo.toml	2026-02-15 10:03:21
+--- orig/mcp-server/tests/common/Cargo.toml	2026-03-09 04:47:46.000000000 +0900
++++ mod/mcp-server/tests/common/Cargo.toml	2026-03-09 07:55:50.526608862 +0900
 @@ -11,7 +11,6 @@
  anyhow = { workspace = true }
  codex-core = { workspace = true }
@@ -307,8 +270,8 @@ diff -urN orig/mcp-server/tests/common/Cargo.toml mod/mcp-server/tests/common/Ca
  os_info = { workspace = true }
  pretty_assertions = { workspace = true }
 diff -urN orig/rmcp-client/Cargo.toml mod/rmcp-client/Cargo.toml
---- orig/rmcp-client/Cargo.toml	2026-02-15 10:03:20
-+++ mod/rmcp-client/Cargo.toml	2026-02-15 10:03:21
+--- orig/rmcp-client/Cargo.toml	2026-03-09 04:47:46.000000000 +0900
++++ mod/rmcp-client/Cargo.toml	2026-03-09 07:55:50.523953282 +0900
 @@ -56,7 +56,6 @@
  which = { workspace = true }
  
@@ -318,8 +281,8 @@ diff -urN orig/rmcp-client/Cargo.toml mod/rmcp-client/Cargo.toml
  serial_test = { workspace = true }
  tempfile = { workspace = true }
 diff -urN orig/stdio-to-uds/Cargo.toml mod/stdio-to-uds/Cargo.toml
---- orig/stdio-to-uds/Cargo.toml	2026-02-15 10:03:21
-+++ mod/stdio-to-uds/Cargo.toml	2026-02-15 10:03:21
+--- orig/stdio-to-uds/Cargo.toml	2026-03-09 04:47:46.000000000 +0900
++++ mod/stdio-to-uds/Cargo.toml	2026-03-09 07:55:50.524028113 +0900
 @@ -23,6 +23,5 @@
  
  [dev-dependencies]
@@ -328,9 +291,9 @@ diff -urN orig/stdio-to-uds/Cargo.toml mod/stdio-to-uds/Cargo.toml
  pretty_assertions = { workspace = true }
  tempfile = { workspace = true }
 diff -urN orig/tui/Cargo.toml mod/tui/Cargo.toml
---- orig/tui/Cargo.toml	2026-02-15 10:03:20
-+++ mod/tui/Cargo.toml	2026-02-15 10:03:21
-@@ -122,7 +122,6 @@
+--- orig/tui/Cargo.toml	2026-03-09 04:47:46.000000000 +0900
++++ mod/tui/Cargo.toml	2026-03-09 07:55:50.521759516 +0900
+@@ -131,7 +131,6 @@
  [dev-dependencies]
  codex-cli = { workspace = true }
  codex-core = { workspace = true }
