@@ -253,21 +253,28 @@ def _detect_system() -> str:
     return _SYSTEM_MAP[key]
 
 
-def _extract_cargo_hash(content: str, system: str) -> str | None:
+def _extract_cargo_hashes(content: str) -> dict[str, str]:
     match = re.search(
         r'cargoHashes\s*=\s*{\n(?P<body>.*?)};',
         content,
         re.DOTALL,
     )
     if not match:
-        return None
+        return {}
+
     body = match.group("body")
-    line_match = re.search(
-        rf'^\s*{re.escape(system)}\s*=\s*"([^"]+)";',
-        body,
-        re.MULTILINE,
-    )
-    return line_match.group(1) if line_match else None
+    return {
+        entry.group(1): entry.group(2)
+        for entry in re.finditer(
+            r'^\s*([A-Za-z0-9_-]+)\s*=\s*"([^"]+)";',
+            body,
+            re.MULTILINE,
+        )
+    }
+
+
+def _extract_cargo_hash(content: str, system: str) -> str | None:
+    return _extract_cargo_hashes(content).get(system)
 
 
 def _update_cargo_hashes(content: str, system: str, new_hash: str) -> str:
@@ -281,19 +288,14 @@ def _update_cargo_hashes(content: str, system: str, new_hash: str) -> str:
         raise ValueError(msg)
 
     body = match.group("body")
-    lines = body.splitlines()
+    updated_body, replacements = re.subn(
+        r'^(\s*)([A-Za-z0-9_-]+)\s*=\s*"[^"]+";',
+        rf'\1\2 = "{new_hash}";',
+        body,
+        flags=re.MULTILINE,
+    )
 
-    entry_re = re.compile(rf'^(\s*){re.escape(system)}\s*=')
-    for idx, line in enumerate(lines):
-        if entry_re.match(line):
-            lines[idx] = re.sub(
-                r'=\s*"[^"]+";',
-                f'= "{new_hash}";',
-                line,
-            )
-            break
-    else:
-        # Insert a new entry before closing brace
+    if replacements == 0:
         indent_match = re.search(
             r'^\s*cargoHashes\s*=\s*{', content, re.MULTILINE,
         )
@@ -301,10 +303,17 @@ def _update_cargo_hashes(content: str, system: str, new_hash: str) -> str:
             indent_match.group(0).split("cargoHashes")[0] if indent_match else ""
         )
         entry_indent = f"{base_indent}  "
-        lines.append(f'{entry_indent}{system} = "{new_hash}";')
+        updated_body = f'{entry_indent}{system} = "{new_hash}";'
+    elif system not in _extract_cargo_hashes(content):
+        indent_match = re.search(
+            r'^(\s*)[A-Za-z0-9_-]+\s*=\s*"[^"]+";',
+            body,
+            re.MULTILINE,
+        )
+        entry_indent = indent_match.group(1) if indent_match else "  "
+        updated_body = f'{updated_body}\n{entry_indent}{system} = "{new_hash}";'
 
-    new_body = "\n".join(lines)
-    return content[:match.start("body")] + new_body + content[match.end("body"):]
+    return content[:match.start("body")] + updated_body + content[match.end("body"):]
 
 
 def _calculate_cargo_hash(content: str) -> lib.Hash:
@@ -340,12 +349,19 @@ def _needs_cargo_update(
     force: bool,
     version_updated: bool,
 ) -> bool:
-    existing = _extract_cargo_hash(content, system)
+    hashes = _extract_cargo_hashes(content)
+    existing = hashes.get(system)
+    has_placeholder = any(
+        "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" in hash_value
+        for hash_value in hashes.values()
+    )
+    has_mismatch = len(set(hashes.values())) > 1
     return (
         force
         or version_updated
         or existing is None
-        or "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" in existing
+        or has_placeholder
+        or has_mismatch
     )
 
 

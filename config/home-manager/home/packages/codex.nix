@@ -104,7 +104,7 @@ let
   # and tests are disabled for this package, so the stub is sufficient.
   cargoHashes = {
     x86_64-linux = "sha256-Bmg272yDX6j/9jQAtzkTG0mmyQiIflZIIHGdJPTE/bQ=";
-    aarch64-darwin = "sha256-beuNqeetNviC83LFSV3lWi3nuw/oxW0O8QXHZCJK34o=";
+    aarch64-darwin = "sha256-Bmg272yDX6j/9jQAtzkTG0mmyQiIflZIIHGdJPTE/bQ=";
   };
 in
 pkgs.rustPlatform.buildRustPackage (
