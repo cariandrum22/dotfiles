@@ -98,12 +98,12 @@ let
 
   opensslPkg = pkgs.openssl;
 
-  # Remove utils/cargo-bin from workspace to avoid rules_rust git dependency.
-  # The utils/cargo-bin crate depends on 'runfiles' which comes from
-  # dzbarsky/rules_rust. That repo contains examples using -Z bindeps,
-  # which causes nixpkgs 25.11's cargo vendor utility to fail when parsing.
+  # Replace the upstream runfiles git dependency with a tiny local stub.
+  # rules_rust ships examples that use -Z bindeps, which breaks nixpkgs'
+  # cargo vendor utility. codex-utils-cargo-bin is only used by test helpers,
+  # and tests are disabled for this package, so the stub is sufficient.
   cargoHashes = {
-    x86_64-linux = "sha256-FGfJS+H10ULBrREKYBv/POvpEegLP3R7L7q/3Zw/ZH0=";
+    x86_64-linux = "sha256-Bmg272yDX6j/9jQAtzkTG0mmyQiIflZIIHGdJPTE/bQ=";
     aarch64-darwin = "sha256-beuNqeetNviC83LFSV3lWi3nuw/oxW0O8QXHZCJK34o=";
   };
 in
@@ -124,91 +124,8 @@ pkgs.rustPlatform.buildRustPackage (
     cargoHash = cargoHashes.${pkgs.stdenv.system};
 
     cargoPatches = [
-      ./remove-cargo-bin.patch
+      ./stub-runfiles.patch
     ];
-
-    cargoBinFixes = ''
-      # Drop codex-utils-cargo-bin/runfiles from manifests and lockfile
-      perl -i -ne 'print unless /"utils\/cargo-bin"/ || /^\s*runfiles\s*=\s*{ git = "https:\/\/github.com\/dzbarsky\/rules_rust"/' Cargo.toml
-      find . -name "Cargo.toml" -exec perl -i -ne 'print unless /codex-utils-cargo-bin/' {} \;
-      if [ -f Cargo.lock ]; then
-        perl -0pi -e '
-          s/\n\[\[package\]\]\nname = "codex-utils-cargo-bin".*?(?=\n\[\[package\]\]|\n\z)//s;
-          s/\n\[\[package\]\]\nname = "runfiles".*?(?=\n\[\[package\]\]|\n\z)//s;
-          s/^\s*"codex-utils-cargo-bin",\n//mg;
-        ' Cargo.lock
-      fi
-    '';
-
-    # Remove codex-utils-cargo-bin references from manifests/lockfile and
-    # then stub any remaining callsites in code. Tests are disabled
-    # (doCheck = false) so stub implementations work fine.
-    postPatch =
-      let
-        # Perl script to replace all codex_utils_cargo_bin references
-        perlScript = pkgs.writeText "fix-cargo-bin.pl" ''
-          # Comment out use statements first
-          s/^(\s*use codex_utils_cargo_bin.*)$/\/\/ REMOVED: $1/g;
-          # Replace cargo_bin() calls with ? operator - direct PathBuf
-          s/codex_utils_cargo_bin::cargo_bin\("[^"]+"\)\?/std::path::PathBuf::from("stub-binary")/g;
-          # Replace cargo_bin().expect() on same line - direct PathBuf
-          s/codex_utils_cargo_bin::cargo_bin\("[^"]+"\)\.expect\([^)]+\)/std::path::PathBuf::from("stub-binary")/g;
-          # Replace cargo_bin().context()? - direct PathBuf
-          s/codex_utils_cargo_bin::cargo_bin\("[^"]+"\)\.context\([^)]+\)\?/std::path::PathBuf::from("stub-binary")/g;
-          # Replace bare cargo_bin() - use direct PathBuf (not Ok-wrapped to avoid type inference issues)
-          s/codex_utils_cargo_bin::cargo_bin\("[^"]+"\)/std::path::PathBuf::from("stub-binary")/g;
-          # Replace repo_root()? calls with a direct stub PathBuf
-          s/codex_utils_cargo_bin::repo_root\(\)\?/std::path::PathBuf::from(".")/g;
-          # Replace repo_root() calls with explicit Ok type to preserve .ok() chaining
-          s/codex_utils_cargo_bin::repo_root\(\)/Ok::<std::path::PathBuf, std::io::Error>(std::path::PathBuf::from("."))/g;
-          # Replace find_resource! macro calls - use direct PathBuf
-          s/codex_utils_cargo_bin::find_resource!\([^)]+\)\?/std::path::PathBuf::from("stub-resource")/g;
-          s/codex_utils_cargo_bin::find_resource!\([^)]+\)/std::path::PathBuf::from("stub-resource")/g;
-          s/find_resource!\([^)]+\)\?/std::path::PathBuf::from("stub-resource")/g;
-          s/find_resource!\([^)]+\)/std::path::PathBuf::from("stub-resource")/g;
-        '';
-      in
-      ''
-        ${cargoBinFixes}
-
-        # Apply global replacements to all Rust files
-        find . -name "*.rs" -exec perl -i -p ${perlScript} {} \;
-
-        # Fix CargoBinError type reference (the use statement is now commented out)
-        substituteInPlace core/tests/common/lib.rs \
-          --replace-fail 'Result<String, CargoBinError>' 'Result<String, std::io::Error>'
-
-        # Fix stdio_server_bin - replace the entire function body with a proper stub
-        # Original: cargo_bin("test_stdio_server").map(|p| p.to_string_lossy().to_string())
-        # After perl: PathBuf::from("stub-binary").map(...) - but PathBuf has no map method
-        substituteInPlace core/tests/common/lib.rs \
-          --replace-fail 'std::path::PathBuf::from("stub-binary").map(|p| p.to_string_lossy().to_string())' \
-          'Err(std::io::Error::new(std::io::ErrorKind::NotFound, "test binary discovery disabled"))'
-
-        # Fix test_codex.rs - remove the if let Ok block entirely (tests disabled)
-        sed -i '/if let Ok(path) = std::path::PathBuf::from/,/}/d' core/tests/common/test_codex.rs
-
-        # Fix test_codex_exec.rs - remove .expect() on next line after PathBuf
-        sed -i 'N; s/std::path::PathBuf::from("stub-binary")\n[[:space:]]*\.expect([^)]*),/std::path::PathBuf::from("stub-binary"),/g; P; D' core/tests/common/test_codex_exec.rs
-
-        # Fix lib.rs - replace match on PathBuf with direct assignment
-        sed -i 's/let full_path = match std::path::PathBuf::from("stub-resource") {/let full_path = std::path::PathBuf::from("stub-resource"); \/\/ stub/g' core/tests/common/lib.rs
-        # Remove the Ok/Err match arms that follow
-        sed -i '/Ok(p) => p,/d' core/tests/common/lib.rs
-        sed -i '/Err(err) => panic!/,/),/d' core/tests/common/lib.rs
-        sed -i '/^[[:space:]]*};$/d' core/tests/common/lib.rs || true
-
-        # Fix all test files with multiline .context() calls on PathBuf
-        # Pattern: PathBuf::from("stub-binary")\n.context(...)?  ->  PathBuf::from("stub-binary");
-        for f in mcp-server/tests/common/mcp_process.rs app-server/tests/common/mcp_process.rs; do
-          if [ -f "$f" ]; then
-            sed -i 'N; s/std::path::PathBuf::from("stub-binary")\n[[:space:]]*\.context([^)]*)?;/std::path::PathBuf::from("stub-binary");/g; P; D' "$f"
-          fi
-        done
-
-        # Also fix any .expect() on next line patterns in all test files
-        find . -path "*/tests/*" -name "*.rs" -exec sed -i 'N; s/std::path::PathBuf::from("stub-binary")\n[[:space:]]*\.expect([^)]*),/std::path::PathBuf::from("stub-binary"),/g; P; D' {} \;
-      '';
 
     # Enable unstable features (file_lock)
     RUSTC_BOOTSTRAP = "1";

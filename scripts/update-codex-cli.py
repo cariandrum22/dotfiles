@@ -14,7 +14,7 @@ Environment:
 
 Files modified:
     config/home-manager/home/packages/codex.nix
-    config/home-manager/home/packages/remove-cargo-bin.patch
+    config/home-manager/home/packages/stub-runfiles.patch
 """
 
 from __future__ import annotations
@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 
 # Path to the nix file
 NIX_FILE = Path("config/home-manager/home/packages/codex.nix")
-PATCH_FILE = NIX_FILE.parent / "remove-cargo-bin.patch"
+PATCH_FILE = NIX_FILE.parent / "stub-runfiles.patch"
 
 # Configuration
 # Use specific patterns to match only the main package, not ramaBoringssl
@@ -67,14 +67,47 @@ _SYSTEM_MAP = {
     ("darwin", "aarch64"): "aarch64-darwin",
 }
 
-_WORKSPACE_CARGO_BIN_PATTERN = re.compile(r'^\s*"utils/cargo-bin",\s*$')
-_CARGO_BIN_DEP_PATTERN = re.compile(
-    r'^\s*codex-utils-cargo-bin\s*=\s*\{.*\}\s*$',
-)
 _RUNFILES_DEP_PATTERN = re.compile(
-    r'^\s*runfiles\s*=\s*\{[^}]*github\.com/dzbarsky/rules_rust[^}]*\}\s*$',
+    r'^(?P<indent>\s*)runfiles\s*=\s*\{[^}]*github\.com/dzbarsky/rules_rust[^}]*\}\s*$',
+    re.MULTILINE,
 )
-_CARGO_LOCK_DEP_PATTERN = re.compile(r'^\s*"codex-utils-cargo-bin",\n', re.MULTILINE)
+_RUNFILES_LOCK_SOURCE_PATTERN = re.compile(
+    r'(^\[\[package\]\]\nname = "runfiles"\nversion = "[^"]+"\n)'
+    r'source = "git\+https://github\.com/dzbarsky/rules_rust[^"\n]*"\n',
+    re.MULTILINE,
+)
+_RUNFILES_STUB_CARGO_TOML = """[package]
+name = "runfiles"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+
+[lib]
+path = "src/lib.rs"
+"""
+_RUNFILES_STUB_LIB_RS = """use std::path::{Path, PathBuf};
+
+#[derive(Debug, Clone, Default)]
+pub struct Runfiles;
+
+impl Runfiles {
+    pub fn create() -> Result<Self, std::io::Error> {
+        Ok(Self)
+    }
+
+    pub fn rlocation<P: AsRef<Path>>(&self, path: P) -> Option<PathBuf> {
+        Some(path.as_ref().to_path_buf())
+    }
+}
+
+#[macro_export]
+macro_rules! rlocation {
+    ($runfiles:expr, $path:expr) => {{
+        let _ = &$runfiles;
+        Some(std::path::PathBuf::from($path))
+    }};
+}
+"""
 
 
 def _with_original_newline(content: str, updated: str) -> str:
@@ -84,32 +117,15 @@ def _with_original_newline(content: str, updated: str) -> str:
 
 
 def _rewrite_cargo_toml(content: str) -> str:
-    kept_lines = [
-        line for line in content.splitlines()
-        if not _WORKSPACE_CARGO_BIN_PATTERN.match(line)
-        and not _CARGO_BIN_DEP_PATTERN.match(line)
-        and not _RUNFILES_DEP_PATTERN.match(line)
-    ]
-    updated = "\n".join(kept_lines)
-    if content.endswith("\n"):
-        updated += "\n"
-    return updated
-
-
-def _remove_cargo_lock_package(content: str, package_name: str) -> str:
-    return re.sub(
-        rf'^\[\[package\]\]\nname = "{re.escape(package_name)}"\n.*?'
-        rf'(?=^\[\[package\]\]\n|\Z)',
-        '',
+    updated = _RUNFILES_DEP_PATTERN.sub(
+        r'\g<indent>runfiles = { path = "utils/runfiles-stub" }',
         content,
-        flags=re.MULTILINE | re.DOTALL,
     )
+    return _with_original_newline(content, updated)
 
 
 def _rewrite_cargo_lock(content: str) -> str:
-    updated = _CARGO_LOCK_DEP_PATTERN.sub('', content)
-    updated = _remove_cargo_lock_package(updated, "codex-utils-cargo-bin")
-    updated = _remove_cargo_lock_package(updated, "runfiles")
+    updated = _RUNFILES_LOCK_SOURCE_PATTERN.sub(r'\1', content)
     return _with_original_newline(content, updated)
 
 
@@ -120,6 +136,17 @@ def _rewrite_if_changed(path: Path, transform: Callable[[str], str]) -> None:
         path.write_text(updated, encoding="utf-8")
 
 
+def _write_runfiles_stub(tree: Path) -> None:
+    stub_dir = tree / "utils" / "runfiles-stub"
+    src_dir = stub_dir / "src"
+    src_dir.mkdir(parents=True, exist_ok=True)
+    (stub_dir / "Cargo.toml").write_text(
+        _RUNFILES_STUB_CARGO_TOML,
+        encoding="utf-8",
+    )
+    (src_dir / "lib.rs").write_text(_RUNFILES_STUB_LIB_RS, encoding="utf-8")
+
+
 def _prepare_patch_tree(tree: Path) -> None:
     for cargo_toml in tree.rglob("Cargo.toml"):
         _rewrite_if_changed(cargo_toml, _rewrite_cargo_toml)
@@ -127,6 +154,8 @@ def _prepare_patch_tree(tree: Path) -> None:
     cargo_lock = tree / "Cargo.lock"
     if cargo_lock.exists():
         _rewrite_if_changed(cargo_lock, _rewrite_cargo_lock)
+
+    _write_runfiles_stub(tree)
 
 
 def _download_release_tarball(version: lib.Version, destination: Path) -> Path:
@@ -164,7 +193,7 @@ def _extract_codex_source_tree(tarball_path: Path, destination: Path) -> Path:
     return source_dir
 
 
-def _regenerate_remove_cargo_bin_patch(version: lib.Version) -> bool:
+def _regenerate_stub_runfiles_patch(version: lib.Version) -> bool:
     with tempfile.TemporaryDirectory(prefix="codex-patch-") as temp_dir:
         temp_root = Path(temp_dir)
         tarball_path = _download_release_tarball(version, temp_root)
@@ -184,10 +213,22 @@ def _regenerate_remove_cargo_bin_patch(version: lib.Version) -> bool:
             text=True,
         )
         if result.returncode not in {0, 1}:
-            msg = result.stderr.strip() or "Failed to generate remove-cargo-bin.patch"
+            msg = result.stderr.strip() or "Failed to generate stub-runfiles.patch"
             raise RuntimeError(msg)
 
         patch_content = result.stdout
+        patch_content = re.sub(
+            r'^(--- [^\t\n]+)\t.*$',
+            r'\1',
+            patch_content,
+            flags=re.MULTILINE,
+        )
+        patch_content = re.sub(
+            r'^(\+\+\+ [^\t\n]+)\t.*$',
+            r'\1',
+            patch_content,
+            flags=re.MULTILINE,
+        )
 
     current_patch = (
         PATCH_FILE.read_text(encoding="utf-8") if PATCH_FILE.exists() else None
@@ -337,7 +378,7 @@ def main() -> int:
                 hash=latest_hash,
             ),
         )
-        _regenerate_remove_cargo_bin_patch(latest_version)
+        _regenerate_stub_runfiles_patch(latest_version)
 
     if _needs_cargo_update(
         updated_content,
