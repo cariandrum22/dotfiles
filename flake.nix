@@ -43,6 +43,7 @@
         "aarch64-darwin"
       ];
       forAllSystems = nixpkgs.lib.genAttrs systems;
+      inherit (nixpkgs) lib;
 
       # Create pkgs with overlays for a specific system
       mkPkgs =
@@ -93,107 +94,118 @@
         else
           null;
 
+      resolveEnv =
+        name: fallback:
+        let
+          value = builtins.getEnv name;
+        in
+        if value != "" then value else fallback;
+
+      isDarwinSystem = system: lib.hasSuffix "-darwin" system;
+      isLinuxSystem = system: lib.hasSuffix "-linux" system;
+
+      resolveUsername = username: if username != null then username else resolveEnv "USER" "user";
+
+      resolveHomeDirectory =
+        {
+          system,
+          username,
+          homeDirectory ? null,
+        }:
+        if homeDirectory != null then
+          homeDirectory
+        else
+          resolveEnv "HOME" (if isDarwinSystem system then "/Users/${username}" else "/home/${username}");
+
+      baseHomeModules =
+        {
+          username,
+          homeDirectory,
+        }:
+        [
+          ./config/home-manager/home.nix
+          {
+            home = {
+              inherit username homeDirectory;
+            };
+          }
+        ];
+
+      darwinHomeModules = [
+        ./config/home-manager/darwin-specific.nix
+        ./config/home-manager/home/packages/darwin.nix
+      ];
+
+      linuxDesktopHomeModules = [
+        ./config/home-manager/xsession.nix
+        ./config/home-manager/home/packages/linux.nix
+        ./config/home-manager/home/packages/linux-desktop.nix
+        ./config/home-manager/programs/rofi.nix
+        ./config/home-manager/services/picom.nix
+        ./config/home-manager/services/dunst.nix
+        ./config/home-manager/services/keybase.nix
+        ./config/home-manager/services/vscode-server.nix
+        ./config/home-manager/services/gpg-agent.nix
+      ];
+
+      linuxHeadlessHomeModules = [
+        ./config/home-manager/home/packages/linux.nix
+        ./config/home-manager/services/keybase.nix
+        ./config/home-manager/services/vscode-server.nix
+      ];
+
+      platformHomeModules =
+        {
+          system,
+          headless ? false,
+        }:
+        lib.optionals (isDarwinSystem system) darwinHomeModules
+        ++ lib.optionals (isLinuxSystem system && headless) linuxHeadlessHomeModules
+        ++ lib.optionals (isLinuxSystem system && !headless) linuxDesktopHomeModules;
+
       # Function to create a home configuration for a specific system
       mkHomeConfiguration =
         {
           system,
           username ? null,
           homeDirectory ? null,
+          headless ? false,
         }:
         let
           pkgs = mkPkgs system;
-          # If not provided, try to get from environment (impure)
-          actualUsername =
-            if username != null then
-              username
-            else if builtins.getEnv "USER" != "" then
-              builtins.getEnv "USER"
-            else
-              "user";
-          actualHomeDirectory =
-            if homeDirectory != null then
-              homeDirectory
-            else if builtins.getEnv "HOME" != "" then
-              builtins.getEnv "HOME"
-            else if system == "aarch64-darwin" || system == "x86_64-darwin" then
-              "/Users/${actualUsername}"
-            else
-              "/home/${actualUsername}";
-        in
-        home-manager.lib.homeManagerConfiguration {
-          inherit pkgs;
-          extraSpecialArgs = {
-            inherit system nixos-vscode-server;
+          actualUsername = resolveUsername username;
+          actualHomeDirectory = resolveHomeDirectory {
+            inherit system homeDirectory;
+            username = actualUsername;
           };
-          modules = [
-            ./config/home-manager/home.nix
-            {
-              home = {
-                username = actualUsername;
-                homeDirectory = actualHomeDirectory;
-              };
-            }
-          ]
-          ++ nixpkgs.lib.optionals (system == "x86_64-darwin" || system == "aarch64-darwin") [
-            ./config/home-manager/darwin-specific.nix
-            ./config/home-manager/home/packages/darwin.nix
-          ]
-          ++ nixpkgs.lib.optionals (system == "x86_64-linux" || system == "aarch64-linux") [
-            ./config/home-manager/xsession.nix
-            ./config/home-manager/home/packages/linux.nix
-            ./config/home-manager/home/packages/linux-desktop.nix
-            ./config/home-manager/programs/rofi.nix
-            ./config/home-manager/services/picom.nix
-            ./config/home-manager/services/dunst.nix
-            ./config/home-manager/services/keybase.nix
-            ./config/home-manager/services/vscode-server.nix
-            ./config/home-manager/services/gpg-agent.nix
-          ];
-        };
-      # Function to create a headless home configuration (Linux only)
-      mkHeadlessHomeConfiguration =
-        {
-          system,
-          username ? null,
-          homeDirectory ? null,
-        }:
-        let
-          pkgs = mkPkgs system;
-          # If not provided, try to get from environment (impure)
-          actualUsername =
-            if username != null then
-              username
-            else if builtins.getEnv "USER" != "" then
-              builtins.getEnv "USER"
-            else
-              "user";
-          actualHomeDirectory =
-            if homeDirectory != null then
-              homeDirectory
-            else if builtins.getEnv "HOME" != "" then
-              builtins.getEnv "HOME"
-            else
-              "/home/${actualUsername}";
         in
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
           extraSpecialArgs = {
             inherit system nixos-vscode-server;
+          }
+          // lib.optionalAttrs headless {
             isHeadless = true;
           };
-          modules = [
-            ./config/home-manager/home.nix
-            {
-              home = {
-                username = actualUsername;
-                homeDirectory = actualHomeDirectory;
-              };
+          modules =
+            baseHomeModules {
+              username = actualUsername;
+              homeDirectory = actualHomeDirectory;
             }
-            # Headless configuration only includes essential services
-            ./config/home-manager/home/packages/linux.nix
-            ./config/home-manager/services/keybase.nix
-            ./config/home-manager/services/vscode-server.nix
-          ];
+            ++ platformHomeModules {
+              inherit system headless;
+            };
+        };
+
+      mkFixedHomeConfiguration =
+        {
+          system,
+          headless ? false,
+        }:
+        mkHomeConfiguration {
+          inherit system headless;
+          username = "user";
+          homeDirectory = if isDarwinSystem system then "/Users/user" else "/home/user";
         };
 
       # Generate home configurations that auto-detect user
@@ -208,25 +220,21 @@
       # Home configurations for each system
       homeConfigurations = mkAutoDetectConfigurations // {
         # Headless Linux configuration (no GUI)
-        "x86_64-linux-headless" = mkHeadlessHomeConfiguration {
+        "x86_64-linux-headless" = mkHomeConfiguration {
           system = "x86_64-linux";
+          headless = true;
         };
 
         # Also provide fixed configurations for CI/reproducibility
-        "user@x86_64-linux" = mkHomeConfiguration {
+        "user@x86_64-linux" = mkFixedHomeConfiguration {
           system = "x86_64-linux";
-          username = "user";
-          homeDirectory = "/home/user";
         };
-        "user@x86_64-linux-headless" = mkHeadlessHomeConfiguration {
+        "user@x86_64-linux-headless" = mkFixedHomeConfiguration {
           system = "x86_64-linux";
-          username = "user";
-          homeDirectory = "/home/user";
+          headless = true;
         };
-        "user@aarch64-darwin" = mkHomeConfiguration {
+        "user@aarch64-darwin" = mkFixedHomeConfiguration {
           system = "aarch64-darwin";
-          username = "user";
-          homeDirectory = "/Users/user";
         };
       };
 
@@ -278,63 +286,46 @@
         system:
         let
           pkgs = mkPkgs system;
+          pythonLintPackages = ps: [
+            ps.ruff
+            ps.mypy
+          ];
+          commonDevShellPackages = with pkgs; [
+            git
+            gh
+            commitlint
+            gnumake
+            gnupg
+            nixfmt
+            nix-output-monitor
+            deadnix
+            statix
+            shfmt
+            shellcheck
+            python3
+            (python3.withPackages pythonLintPackages)
+            act
+          ];
         in
         {
           default = pkgs.mkShell {
             inherit (self.checks.${system}.pre-commit-check) shellHook;
-
-            packages =
-              with pkgs;
-              [
-                git
-                gh
-                commitlint
-                gnumake
-                gnupg
-                nixfmt
-                nix-output-monitor
-                deadnix
-                statix
-                shfmt
-                shellcheck
-                pre-commit
-                python3
-                (python3.withPackages (ps: [
-                  ps.pre-commit-hooks
-                  ps.ruff
-                  ps.mypy
-                ]))
-                act
-              ]
-              ++ self.checks.${system}.pre-commit-check.enabledPackages;
+            packages = [
+              pkgs.pre-commit
+            ]
+            ++ commonDevShellPackages
+            ++ self.checks.${system}.pre-commit-check.enabledPackages;
           };
 
           # CI shell without shellHook to avoid pre-commit setup issues
           ci = pkgs.mkShell {
-            packages = with pkgs; [
-              git
-              gh
-              commitlint
-              gnumake
-              gnupg
-              nixfmt
-              nix-output-monitor
-              deadnix
-              statix
-              shfmt
-              shellcheck
-              yamllint
-              actionlint
-              python3
-              (python3.withPackages (ps: [
-                ps.ruff
-                ps.mypy
-              ]))
-              act
+            packages = commonDevShellPackages ++ [
+              pkgs.yamllint
+              pkgs.actionlint
             ];
           };
         }
-        // nixpkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
+        // lib.optionalAttrs pkgs.stdenv.isLinux {
           xmonad = pkgs.haskellPackages.shellFor {
             packages = _ps: [ (mkXMonad pkgs) ];
             buildInputs = with pkgs.haskellPackages; [

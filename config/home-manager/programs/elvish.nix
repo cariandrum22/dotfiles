@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }:
+{ pkgs, ... }:
 
 let
   rivendell = pkgs.callPackage ../home/packages/rivendell.nix { };
