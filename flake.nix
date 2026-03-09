@@ -288,6 +288,7 @@
               [
                 git
                 gh
+                commitlint
                 gnumake
                 gnupg
                 nixfmt
@@ -313,6 +314,7 @@
             packages = with pkgs; [
               git
               gh
+              commitlint
               gnumake
               gnupg
               nixfmt
@@ -351,145 +353,169 @@
         system:
         let
           pkgs = mkPkgs system;
+          markdownlintConfig = builtins.fromJSON (builtins.readFile ./.markdownlint.json);
+          markdownAndDataTypes = [
+            "markdown"
+            "yaml"
+            "json"
+          ];
+          shellTypes = [
+            "bash"
+            "sh"
+          ];
+          mkSystemHook =
+            {
+              name,
+              entry,
+              stages ? [ "pre-commit" ],
+              pass_filenames ? false,
+            }:
+            {
+              enable = true;
+              inherit
+                name
+                entry
+                stages
+                pass_filenames
+                ;
+              language = "system";
+            };
+          mkBashHook =
+            {
+              name,
+              script,
+              stages ? [ "pre-commit" ],
+              pass_filenames ? false,
+            }:
+            mkSystemHook {
+              inherit name stages pass_filenames;
+              entry = "${pkgs.bash}/bin/bash -c '${script}'";
+            };
+          hygieneHooks = {
+            check-case-conflicts.enable = true;
+            check-executables-have-shebangs.enable = true;
+            check-merge-conflicts.enable = true;
+            check-shebang-scripts-are-executable.enable = true;
+            check-symlinks.enable = true;
+            check-vcs-permalinks.enable = true;
+          };
+          lintHooks = {
+            actionlint.enable = true;
+            deadnix = {
+              enable = true;
+              settings = {
+                noLambdaArg = true;
+                noLambdaPatternNames = true;
+                noUnderscore = true;
+                quiet = false;
+              };
+            };
+            editorconfig-checker = {
+              enable = true;
+              excludes = [
+                # Emacs directories (managed by Emacs packages)
+                "emacs.d/elpa/"
+                "emacs.d/auto-save-list/"
+                "emacs.d/backup/"
+                "emacs.d/snippets/"
+                "emacs.d/vendor/"
+                # Version control
+                "\\.git/"
+                # Binary and generated files
+                "\\.lock$"
+                "\\.db$"
+                "\\.ico$"
+                "\\.png$"
+                "\\.otf$"
+                "\\.ttf$"
+                "\\.pdf$"
+                "\\.gif$"
+                "\\.jpeg$"
+                "\\.jpg$"
+                "\\.gpg$"
+                "\\.plist$"
+              ];
+            };
+            fish = {
+              enable = true;
+              entry = "${pkgs.fish}/bin/fish --no-execute";
+              files = "\\.fish$";
+            };
+            markdownlint = {
+              enable = true;
+              settings.configuration = markdownlintConfig;
+            };
+            nixfmt = {
+              enable = true;
+              package = pkgs.nixfmt;
+            };
+            prettier = {
+              enable = true;
+              types_or = markdownAndDataTypes;
+              excludes = [ "^.pre-commit-config\\.yaml$" ];
+            };
+            ruff = {
+              enable = true;
+              excludes = [
+                "emacs\\.d/snippets/.*\\.py$"
+              ];
+            };
+            shellcheck = {
+              enable = true;
+              types_or = shellTypes;
+              excludes = [ "\\.envrc" ];
+            };
+            shfmt = {
+              enable = true;
+              types_or = shellTypes;
+              entry = "${pkgs.shfmt}/bin/shfmt -i 2 -w";
+            };
+            statix = {
+              enable = true;
+              settings = {
+                format = "stderr";
+              };
+            };
+            taplo.enable = true;
+            yamllint = {
+              enable = true;
+              excludes = [
+                ".github/labeler.yml"
+                "^\\.pre-commit-config\\.yaml$"
+              ];
+              settings = {
+                preset = "default";
+                configuration = ''
+                  extends: default
+                  rules:
+                    line-length:
+                      max: 120
+                      level: warning
+                    document-start:
+                      present: false
+                    truthy:
+                      allowed-values: ["true", "false", "on", "off"]
+                '';
+              };
+            };
+          };
+          commitHooks = {
+            commitizen = {
+              enable = true;
+              stages = [ "commit-msg" ];
+            };
+            commitlint-pre-push = mkBashHook {
+              name = "commitlint-pre-push";
+              stages = [ "pre-push" ];
+              script = "COMMITLINT_BIN=${pkgs.commitlint}/bin/commitlint ./scripts/commitlint-pre-push.sh";
+            };
+          };
         in
         {
           pre-commit-check = pre-commit-hooks.lib.${system}.run {
             src = ./.;
             package = pkgs.pre-commit;
-            hooks = {
-              commitizen = {
-                enable = true;
-                stages = [ "commit-msg" ];
-              };
-              actionlint.enable = true;
-              deadnix = {
-                enable = true;
-                settings = {
-                  noLambdaArg = true;
-                  noLambdaPatternNames = true;
-                  noUnderscore = true;
-                  quiet = false;
-                };
-              };
-              editorconfig-checker = {
-                enable = true;
-                excludes = [
-                  # Emacs directories (managed by Emacs packages)
-                  "emacs.d/elpa/"
-                  "emacs.d/auto-save-list/"
-                  "emacs.d/backup/"
-                  "emacs.d/snippets/"
-                  "emacs.d/vendor/"
-                  # Version control
-                  "\\.git/"
-                  # Binary and generated files
-                  "\\.lock$"
-                  "\\.db$"
-                  "\\.ico$"
-                  "\\.png$"
-                  "\\.otf$"
-                  "\\.ttf$"
-                  "\\.pdf$"
-                  "\\.gif$"
-                  "\\.jpeg$"
-                  "\\.jpg$"
-                  "\\.gpg$"
-                  "\\.plist$"
-                ];
-              };
-              markdownlint = {
-                enable = true;
-                settings.configuration = {
-                  MD013 = {
-                    line_length = 100; # Match prettier's print-width
-                    code_blocks = false;
-                    tables = false;
-                  };
-                  MD033 = {
-                    allowed_elements = [
-                      "div"
-                      "img"
-                    ];
-                  };
-                };
-              };
-              nixfmt = {
-                enable = true;
-                package = pkgs.nixfmt;
-              };
-              prettier = {
-                enable = true;
-                types_or = [
-                  "markdown"
-                  "yaml"
-                  "json"
-                ];
-                excludes = [ "^.pre-commit-config\\.yaml$" ];
-                settings = {
-                  prose-wrap = "always";
-                  print-width = 100;
-                  tab-width = 2;
-                  use-tabs = false;
-                  trailing-comma = "all";
-                };
-              };
-              ruff = {
-                enable = true;
-                excludes = [
-                  "emacs\\.d/snippets/.*\\.py$"
-                ];
-              };
-              shellcheck = {
-                enable = true;
-                types_or = [
-                  "bash"
-                  "sh"
-                ];
-                excludes = [ "\\.envrc" ];
-              };
-              shfmt = {
-                enable = true;
-                types_or = [
-                  "bash"
-                  "sh"
-                ];
-                entry = "${pkgs.shfmt}/bin/shfmt -i 2 -w";
-              };
-              # Fish shell syntax check
-              fish = {
-                enable = true;
-                entry = "${pkgs.fish}/bin/fish --no-execute";
-                files = "\\.fish$";
-              };
-              statix = {
-                enable = true;
-                settings = {
-                  format = "stderr";
-                };
-              };
-              taplo.enable = true;
-              yamllint = {
-                enable = true;
-                excludes = [
-                  ".github/labeler.yml"
-                  "^\\.pre-commit-config\\.yaml$"
-                ];
-                settings = {
-                  preset = "default";
-                  configuration = ''
-                    extends: default
-                    rules:
-                      line-length:
-                        max: 120
-                        level: warning
-                      document-start:
-                        present: false
-                      truthy:
-                        allowed-values: ["true", "false", "on", "off"]
-                  '';
-                };
-              };
-            };
+            hooks = hygieneHooks // lintHooks // commitHooks;
           };
         }
       );

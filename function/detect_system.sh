@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 
 #######################################
 # Detect system architecture and OS

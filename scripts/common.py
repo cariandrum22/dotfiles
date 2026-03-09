@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Common utilities for dotfiles update scripts.
 
 This module provides shared functionality for various update scripts including:

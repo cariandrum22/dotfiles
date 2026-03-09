@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 #######################################
 # Checked the Gatekeeper quarantine flag
 # Globals:
