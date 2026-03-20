@@ -103,20 +103,20 @@ let
   # cargo vendor utility. codex-utils-cargo-bin is only used by test helpers,
   # and tests are disabled for this package, so the stub is sufficient.
   cargoHashes = {
-    x86_64-linux = "sha256-c15CaWMbY9YMsk0l3CyDOue6NOBZHwESfvD2UGwo+eg=";
-    aarch64-darwin = "sha256-c15CaWMbY9YMsk0l3CyDOue6NOBZHwESfvD2UGwo+eg=";
+    x86_64-linux = "sha256-I60qoQNMctKEWUPY7d2TiJV/tQX+Ogj9BqRTmVeRIh0=";
+    aarch64-darwin = "sha256-I60qoQNMctKEWUPY7d2TiJV/tQX+Ogj9BqRTmVeRIh0=";
   };
 in
 pkgs.rustPlatform.buildRustPackage (
   rec {
     pname = "codex-cli";
-    version = "rust-v0.114.0";
+    version = "rust-v0.116.0";
 
     src = pkgs.fetchFromGitHub {
       owner = "openai";
       repo = "codex";
       rev = "${version}";
-      hash = "sha256-7t+mVwP4+YrG1ciI+OLqsK7TUM9SrDbPsJNrt26iy9c=";
+      hash = "sha256-PTsKphg3gPlBUs5oMM34RhJJ4jxvD6hand5aVjXcuZ4=";
     };
 
     sourceRoot = "source/codex-rs";
