@@ -7,8 +7,8 @@ if super.stdenv.isLinux then
         hself: hsuper: {
           xmonad = super.haskell.lib.doJailbreak (
             hsuper.xmonad.overrideAttrs (_oldAttrs: rec {
-              version = "v0.18.0";
-              sha256 = "sha256-bM2pHSelf0hVhKbYwYatnAo92NNsh9rl6ywrWSwwjEo=";
+              version = "v0.18.1";
+              sha256 = "sha256-Le6CanUisUmcIK2wN8AyoLECMSWOq5DBsRZuqwVWd68=";
               src = super.fetchFromGitHub {
                 owner = "xmonad";
                 repo = "xmonad";
@@ -18,8 +18,8 @@ if super.stdenv.isLinux then
             })
           );
           xmonad-contrib = hsuper.xmonad-contrib.overrideAttrs (_oldAttrs: rec {
-            version = "ec5c751b35c1c9b07bd4361617f7c4076aeaa85f";
-            sha256 = "sha256-S9IivsvYeWD/AtAgKUHH0amVfug0qOAPXjNvXbafXag=";
+            version = "v0.18.2";
+            sha256 = "sha256-xRhtmKHdUk66tg+13qJdPFMgIByUTIq8bSS5eIkOToo=";
             src = super.fetchFromGitHub {
               owner = "xmonad";
               repo = "xmonad-contrib";
@@ -28,8 +28,8 @@ if super.stdenv.isLinux then
             };
           });
           xmonad-extras = hsuper.xmonad-extras.overrideAttrs (_oldAttrs: rec {
-            version = "14e1c4ce9759b959c05b03aac1bb718abc50f762";
-            sha256 = "sha256-9J6hfsAU8oH4l5mJ/W1p57yTxnLUh0dPkv6CXh3X9EA=";
+            version = "v0.17.3";
+            sha256 = "sha256-SuxoAiXf0hyRqeexoFoga/UfkLInzFe3rf0BUoDC8XE=";
             src = super.fetchFromGitHub {
               owner = "xmonad";
               repo = "xmonad-extras";
@@ -46,10 +46,6 @@ if super.stdenv.isLinux then
             isExecutable = true;
             executableHaskellDepends = with hself; [
               base
-              Cabal
-              containers
-              unordered-containers
-              utf8-string
               X11
               xmonad
               xmonad-contrib
