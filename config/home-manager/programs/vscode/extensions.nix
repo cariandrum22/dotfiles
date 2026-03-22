@@ -69,15 +69,15 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.79";
-    sha256 = "1nj8mnlcxy6q1zb1jv7jxm3wppzrjwnja7v6q9q7lda8srwp4ciq";
+    version = "2.1.81";
+    sha256 = "07b76y46sczjbbaj93bhgbidlvc5fp9xdjj06j9b8sdqyzfnrgp3";
     arch = "linux-x64";
   }
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "3.74.0";
-    sha256 = "0sjifjc8wmiwb5bddg3f98nqkmkd06pgvqdmyh04dfhf49p173sp";
+    version = "3.75.0";
+    sha256 = "1ndp1f1kzgj32snsxnaznc5kgqg35vp7p2gak2a08j4nsr9syhvj";
   }
   {
     name = "cmake";
@@ -112,8 +112,8 @@
   {
     name = "copilot-chat";
     publisher = "GitHub";
-    version = "0.41.2026031903";
-    sha256 = "0ap7qf73akz73cg07lr7ihb85hfas9y3ds2pvv2f1i3vmz3hwsyh";
+    version = "0.41.2026032002";
+    sha256 = "14xm4nksknf9xl9j2lbhlkvq5cnd5nfh0fvw5a9md1gclaw9ajz4";
   }
   {
     name = "cucumber-official";
@@ -148,8 +148,8 @@
   {
     name = "emacs-mcx";
     publisher = "tuttieee";
-    version = "0.109.1";
-    sha256 = "0s3ywyzn97vmykala1gjaxxfgf606k33vhz9ndry6w1lv01lin4x";
+    version = "0.109.2";
+    sha256 = "1gg6h06fv72lrz6a8rqy0lzi9a1zxk586aym8q88mw793kzwrd5f";
   }
   {
     name = "enhanced-toml";
@@ -226,8 +226,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.54.2026031908";
-    sha256 = "13db6h3wjmk9avmh8wihd64yyypl2h4yky1zbgkjqppsiskd9kl4";
+    version = "1.54.2026032008";
+    sha256 = "18zsgsij7aq6q9gng9r38455cp6jv25xfd27z7nqqvn46b3vm6vm";
     arch = "linux-x64";
   }
   {
@@ -380,8 +380,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2832";
-    sha256 = "019x60hd0c5068ali09v8zcmwx1l49kxsxfcskf2a2hqnv7v3wgn";
+    version = "0.4.2834";
+    sha256 = "0s133696fjvb0aa0why4gck4pw2ybdbrd0v4p7443kx22scxc9ir";
     arch = "linux-x64";
   }
   {
@@ -509,8 +509,8 @@
   {
     name = "vscode-ide";
     publisher = "tlaplus";
-    version = "2026.3.190014";
-    sha256 = "1x24v9hys8srhq8w8fzl82nib22i4h2zbq5i3lr2rffn7v9xd4ps";
+    version = "2026.3.202141";
+    sha256 = "0967d524ynlv7qyhmxghbwlvxpdq92fjcl2w9a31d5hja8jm4y2r";
   }
   {
     name = "vscode-java-debug";
@@ -557,8 +557,8 @@
   {
     name = "vscode-stylelint";
     publisher = "stylelint";
-    version = "2.1.0";
-    sha256 = "1a8jphwd8ri12240x9krp9b0l218xs9vrdnz6pmdn0l7zld3mgvh";
+    version = "2.2.0";
+    sha256 = "0mk01sp382f2kkixlcw6qfnr852y986b4wdvbxg16w1l0b6ffv9p";
   }
   {
     name = "vscode-tailwindcss";
