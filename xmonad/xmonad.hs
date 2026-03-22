@@ -1,5 +1,3 @@
-import Data.HashMap.Strict (HashMap, fromList, (!?))
-import Data.Maybe (fromMaybe)
 import System.IO (hClose)
 import XMonad
   ( Default (def),
@@ -134,37 +132,26 @@ type Identifier = String
 
 type Hex = String
 
--- NordTheme
--- https://www.nordtheme.com/
-nordTheme :: HashMap Identifier Hex
-nordTheme =
-  fromList
-    [ -- Polar Night
-      ("nord0", "#2E3440"),
-      ("nord1", "#3B4252"),
-      ("nord2", "#434C5E"),
-      ("nord3", "#4C566A"),
-      -- Snow Storm
-      ("nord4", "#D8DEE9"),
-      ("nord5", "#E5E9F0"),
-      ("nord6", "#ECEFF4"),
-      -- Frost
-      ("nord7", "#8FBCBB"),
-      ("nord8", "#88C0D0"),
-      ("nord9", "#81A1C1"),
-      ("nord10", "#5E81AC"),
-      -- Aurora
-      ("nord11", "#BF616A"),
-      ("nord12", "#D08770"),
-      ("nord13", "#EBCB8B"),
-      ("nord14", "#A3BE8C")
-    ]
-
 defaultColor :: Hex
 defaultColor = "#000000"
 
 nord :: Identifier -> Hex
-nord = fromMaybe defaultColor . (!?) nordTheme
+nord "nord0" = "#2E3440"
+nord "nord1" = "#3B4252"
+nord "nord2" = "#434C5E"
+nord "nord3" = "#4C566A"
+nord "nord4" = "#D8DEE9"
+nord "nord5" = "#E5E9F0"
+nord "nord6" = "#ECEFF4"
+nord "nord7" = "#8FBCBB"
+nord "nord8" = "#88C0D0"
+nord "nord9" = "#81A1C1"
+nord "nord10" = "#5E81AC"
+nord "nord11" = "#BF616A"
+nord "nord12" = "#D08770"
+nord "nord13" = "#EBCB8B"
+nord "nord14" = "#A3BE8C"
+nord _ = defaultColor
 
 --------------------------------------------------------------------------------
 -- Workspaces                                                                 --
@@ -234,66 +221,41 @@ myMT3GS = myMirrorTall ||| my3Col ||| myGrid ||| mySpiral
 
 myAll = myTall ||| myMirrorTall ||| my3Col ||| myMultiCol ||| myGrid ||| mySpiral ||| myFull
 
-myTall = spacing mySpacing $ Tall 1 (3 / 100) (1 / 2)
+spaced = spacing mySpacing
 
-myMirrorTall = spacing mySpacing $ Mirror (Tall 1 (3 / 100) (3 / 5))
+myTall = spaced $ Tall 1 (3 / 100) (1 / 2)
 
-my3Col = spacing mySpacing $ ThreeColMid 1 (3 / 100) (1 / 2)
+myMirrorTall = spaced $ Mirror (Tall 1 (3 / 100) (3 / 5))
 
-myMultiCol = spacing mySpacing $ multiCol [1] 1 0.01 (-0.5)
+my3Col = spaced $ ThreeColMid 1 (3 / 100) (1 / 2)
 
-myGrid = spacing mySpacing Grid
+myMultiCol = spaced $ multiCol [1] 1 0.01 (-0.5)
 
-mySpiral = spacing mySpacing $ spiral (6 / 7)
+myGrid = spaced Grid
 
-myFull = spacing 0 $ noBorders Full
+mySpiral = spaced $ spiral (6 / 7)
+
+myFull = noBorders Full
 
 --------------------------------------------------------------------------------
 -- Dynamic Projects                                                           --
 --------------------------------------------------------------------------------
 projects :: [Project]
 projects =
-  [ Project
-      { projectName = "Workspace",
-        projectDirectory = "~/Workspace",
-        projectStartHook = Just $ do
-          spawn myTerminal
-      },
-    Project
-      { projectName = "Study",
-        projectDirectory = "~/Documents/Books",
-        projectStartHook = Just $ do
-          spawn "nemo ."
-          spawn myTerminal
-      },
-    Project
-      { projectName = "NixOS",
-        projectDirectory = "~/Codex/github.com/cariandrum22/configuration.nix",
-        projectStartHook = Just $ do
-          spawn "code ."
-      },
-    Project
-      { projectName = "dotfiles",
-        projectDirectory = "~/Codex/github.com/cariandrum22/dotfiles",
-        projectStartHook = Just $ do
-          spawn "code ."
-          spawn $ myTerminal <> " tmux"
-      },
-    Project
-      { projectName = "xmonad",
-        projectDirectory = "~/Codex/github.com/cariandrum22/dotfiles/xmonad",
-        projectStartHook = Just $ do
-          spawn "code ."
-          spawn $ myTerminal <> " tmux"
-      },
-    Project
-      { projectName = "System",
-        projectDirectory = "~/Documents/",
-        projectStartHook = Just $ do
-          spawn $ myTerminal <> " htop"
-          spawn $ myTerminal <> " dstat"
-      }
+  [ mkProject "Workspace" "~/Workspace" [myTerminal],
+    mkProject "Study" "~/Documents/Books" ["nemo .", myTerminal],
+    mkProject "NixOS" "~/Codex/github.com/cariandrum22/configuration.nix" ["code ."],
+    mkProject "dotfiles" "~/Codex/github.com/cariandrum22/dotfiles" ["code .", myNewTmux],
+    mkProject "xmonad" "~/Codex/github.com/cariandrum22/dotfiles/xmonad" ["code .", myNewTmux],
+    mkProject "System" "~/Documents/" [myTerminal <> " htop", myTerminal <> " dstat"]
   ]
+  where
+    mkProject name directory commands =
+      Project
+        { projectName = name,
+          projectDirectory = directory,
+          projectStartHook = Just $ mapM_ spawn commands
+        }
 
 --------------------------------------------------------------------------------
 -- Keybindings                                                                --
@@ -310,7 +272,7 @@ myKeys :: XConfig l -> [((KeyMask, KeySym), NamedAction)]
 myKeys XConfig {XMonad.modMask = modm} =
   keySet
     "Launchers"
-    [ key "Open Terminal" (modm .|. shiftMask, xK_Return) $ spawn $ myTerminal <> " tmux",
+    [ key "Open Terminal" (modm .|. shiftMask, xK_Return) $ spawn myNewTmux,
       key "Open rofi" (modm, xK_p) $ spawn myLauncher,
       key "Lock screen" (modm .|. controlMask, xK_l) $ spawn myScreenLocker,
       key "Sleep" (modm .|. controlMask, xK_s) $ spawn "systemctl suspend"
@@ -324,6 +286,9 @@ myKeys XConfig {XMonad.modMask = modm} =
     keySet s ks = subtitle s : ks
     key n k a = (k, addName n a)
 
+myNewTmux :: String
+myNewTmux = myTerminal <> " tmux new-session"
+
 --------------------------------------------------------------------------------
 -- ManageHooks                                                                --
 --------------------------------------------------------------------------------
@@ -334,11 +299,9 @@ myManageHook =
       role =? "pop-up" --> doFloat,
       className =? "feh" --> doFloat
     ]
+    <+> composeOne [isFullscreen -?> doFullFloat]
   where
     role = stringProperty "WM_WINDOW_ROLE"
-
-myManageHook' :: ManageHook
-myManageHook' = composeOne [isFullscreen -?> doFullFloat]
 
 --------------------------------------------------------------------------------
 -- StartupHooks                                                               --
@@ -356,12 +319,11 @@ myStartupHook = do
 myConfig =
   def
     { terminal = myTerminal,
-      layoutHook = avoidStruts $ myLayouts,
+      layoutHook = avoidStruts myLayouts,
       manageHook =
         placeHook (smart (0.5, 0.5))
           <+> manageDocks
-          <+> myManageHook
-          <+> myManageHook',
+          <+> myManageHook,
       handleEventHook = fixSteamFlicker <+> minimizeEventHook,
       startupHook = myStartupHook,
       focusFollowsMouse = False,

@@ -80,10 +80,6 @@
             isExecutable = true;
             executableHaskellDepends = with haskellPackages; [
               base
-              Cabal
-              containers
-              unordered-containers
-              utf8-string
               X11
               xmonad
               xmonad-contrib
