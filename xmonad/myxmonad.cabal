@@ -11,10 +11,6 @@ executable myxmonad
   main-is:          xmonad.hs
   build-depends:
     , base
-    , Cabal
-    , containers
-    , unordered-containers
-    , utf8-string
     , X11
     , xmonad
     , xmonad-contrib
