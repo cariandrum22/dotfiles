@@ -48,6 +48,14 @@
       # Update environment variables when attaching
       set -g update-environment "DISPLAY SSH_ASKPASS SSH_AUTH_SOCK SSH_AGENT_PID SSH_CONNECTION WINDOWID XAUTHORITY"
 
+      # Window navigation
+      set -g renumber-windows on
+      bind Tab last-window
+      bind h previous-window
+      bind l next-window
+      bind s choose-tree -Zs
+      bind w choose-tree -Zw
+
       # Managing plugins
       set -g @plugin 'tmux-plugins/tpm'
       set -g @plugin 'tmux-plugins/tmux-sensible'
