@@ -106,6 +106,29 @@ let
     x86_64-linux = "sha256-F53k63oSpXoC2FHiEjbBRbtaMzNH82xpU/g86ZfoWuo=";
     aarch64-darwin = "sha256-F53k63oSpXoC2FHiEjbBRbtaMzNH82xpU/g86ZfoWuo=";
   };
+
+  rustyV8Version = "146.4.0";
+
+  rustyV8Targets = {
+    x86_64-linux = "x86_64-unknown-linux-gnu";
+    aarch64-linux = "aarch64-unknown-linux-gnu";
+    x86_64-darwin = "x86_64-apple-darwin";
+    aarch64-darwin = "aarch64-apple-darwin";
+  };
+
+  rustyV8ArchiveHashes = {
+    x86_64-linux = "sha256-5ktNmeSuKTouhGJEqJuAF4uhA4LBP7WRwfppaPUpEVM=";
+    aarch64-linux = "sha256-2/FlsHyBvbBUvARrQ9I+afz3vMGkwbW0d2mDpxBi7Ng=";
+    x86_64-darwin = "sha256-YwzSQPG77NsHFBfcGDh6uBz2fFScHFFaC0/Pnrpke7c=";
+    aarch64-darwin = "sha256-v+LJvjKlbChUbw+WWCXuaPv2BkBfMQzE4XtEilaM+Yo=";
+  };
+
+  rustyV8Archive = pkgs.fetchurl {
+    url = "https://github.com/denoland/rusty_v8/releases/download/v${rustyV8Version}/librusty_v8_release_${
+      rustyV8Targets.${pkgs.stdenv.system}
+    }.a.gz";
+    hash = rustyV8ArchiveHashes.${pkgs.stdenv.system};
+  };
 in
 pkgs.rustPlatform.buildRustPackage (
   rec {
@@ -139,6 +162,9 @@ pkgs.rustPlatform.buildRustPackage (
 
     # Show backtrace for build failures
     RUST_BACKTRACE = "1";
+
+    # Keep rusty_v8 fully offline inside the Nix sandbox.
+    RUSTY_V8_ARCHIVE = "${rustyV8Archive}";
 
     # Point rama-boring-sys to our pre-built patched BoringSSL
     BORING_BSSL_PATH = "${ramaBoringssl}";

@@ -13,6 +13,8 @@ permissions:
 jobs:
   update-ai-tools:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -67,6 +69,8 @@ jobs:
   update-ai-tools-macos:
     runs-on: macos-latest
     needs: update-ai-tools
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
