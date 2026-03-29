@@ -98,12 +98,22 @@ let
 
   opensslPkg = pkgs.openssl;
 
+  rustPlatform =
+    if pkgs.stdenv.isLinux then
+      pkgs.makeRustPlatform {
+        inherit (pkgs.unstable) cargo rustc;
+      }
+    else
+      pkgs.rustPlatform;
+
   # Replace the upstream runfiles git dependency with a tiny local stub.
   # rules_rust ships examples that use -Z bindeps, which breaks nixpkgs'
   # cargo vendor utility. codex-utils-cargo-bin is only used by test helpers,
   # and tests are disabled for this package, so the stub is sufficient.
   cargoHashes = {
     x86_64-linux = "sha256-F53k63oSpXoC2FHiEjbBRbtaMzNH82xpU/g86ZfoWuo=";
+    aarch64-linux = "sha256-F53k63oSpXoC2FHiEjbBRbtaMzNH82xpU/g86ZfoWuo=";
+    x86_64-darwin = "sha256-F53k63oSpXoC2FHiEjbBRbtaMzNH82xpU/g86ZfoWuo=";
     aarch64-darwin = "sha256-F53k63oSpXoC2FHiEjbBRbtaMzNH82xpU/g86ZfoWuo=";
   };
 
@@ -130,7 +140,7 @@ let
     hash = rustyV8ArchiveHashes.${pkgs.stdenv.system};
   };
 in
-pkgs.rustPlatform.buildRustPackage (
+rustPlatform.buildRustPackage (
   rec {
     pname = "codex-cli";
     version = "rust-v0.117.0";
@@ -150,6 +160,27 @@ pkgs.rustPlatform.buildRustPackage (
       ./stub-runfiles.patch
     ];
 
+    postPatch = ''
+      mapfile -t vendored_v8_dirs < <(
+        find "$cargoDepsCopy" -maxdepth 1 -mindepth 1 -type d \
+          \( -name 'v8' -o -name 'v8-*' \) | sort
+      )
+
+      if [ "''${#vendored_v8_dirs[@]}" -ne 1 ]; then
+        echo "Expected exactly one vendored v8 crate, found ''${#vendored_v8_dirs[@]}" >&2
+        printf '%s\n' "''${vendored_v8_dirs[@]}" >&2
+        exit 1
+      fi
+
+      # Match upstream Codex's rusty_v8 prebuilt archive handling.
+      patch -d "''${vendored_v8_dirs[0]}" -p1 < ${./rusty-v8-prebuilt-out-dir.patch}
+    ''
+    + pkgs.lib.optionalString pkgs.stdenv.isLinux ''
+      # LLVM 21 / rustc 1.91.1 currently crashes in release optimization passes
+      # for this workspace. Lower Linux release optimization until nixpkgs updates.
+      perl -0pi -e 's/\\[profile\\.release\\]\\n/[profile.release]\\nopt-level = 2\\n/' Cargo.toml
+    '';
+
     # Enable unstable features (file_lock)
     RUSTC_BOOTSTRAP = "1";
 
@@ -159,6 +190,11 @@ pkgs.rustPlatform.buildRustPackage (
     # TODO: Re-enable LTO ("fat" or "thin") once nixpkgs updates LLVM/rustc.
     # To test: remove this line and run `nix build .#codex-cli`
     CARGO_PROFILE_RELEASE_LTO = "off";
+
+    # Upstream pins codegen-units=1 for smaller binaries, but that currently
+    # triggers an LLVM 21 / rustc 1.91.1 SIGSEGV while compiling `image` on Linux.
+    # Use multiple codegen units until nixpkgs moves past the buggy toolchain.
+    CARGO_PROFILE_RELEASE_CODEGEN_UNITS = "16";
 
     # Show backtrace for build failures
     RUST_BACKTRACE = "1";

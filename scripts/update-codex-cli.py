@@ -14,6 +14,7 @@ Environment:
 
 Files modified:
     config/home-manager/home/packages/codex.nix
+    config/home-manager/home/packages/rusty-v8-prebuilt-out-dir.patch
     config/home-manager/home/packages/stub-runfiles.patch
 """
 
@@ -40,7 +41,8 @@ if TYPE_CHECKING:
 
 # Path to the nix file
 NIX_FILE = Path("config/home-manager/home/packages/codex.nix")
-PATCH_FILE = NIX_FILE.parent / "stub-runfiles.patch"
+RUNFILES_PATCH_FILE = NIX_FILE.parent / "stub-runfiles.patch"
+RUSTY_V8_PATCH_FILE = NIX_FILE.parent / "rusty-v8-prebuilt-out-dir.patch"
 
 # Configuration
 # Use specific patterns to match only the main package, not ramaBoringssl
@@ -51,7 +53,7 @@ CONFIG = lib.UpdateConfig(
     version_pattern=r'(pname\s*=\s*"codex-cli";\n\s*version\s*=\s*")([^"]+)(")',
     # Match hash inside fetchFromGitHub block (with newlines)
     hash_pattern=r'(repo\s*=\s*"codex";\n\s*rev[^;]+;\n\s*hash\s*=\s*")([^"]+)(")',
-    cargo_patches=(PATCH_FILE,),
+    cargo_patches=(RUNFILES_PATCH_FILE,),
 )
 
 GITHUB_REPO = "openai/codex"
@@ -74,6 +76,7 @@ _RUSTY_V8_TARGETS = {
     "x86_64-darwin": "x86_64-apple-darwin",
     "aarch64-darwin": "aarch64-apple-darwin",
 }
+_SUPPORTED_SYSTEMS = tuple(_RUSTY_V8_TARGETS)
 
 _RUSTY_V8_VERSION_PATTERN = re.compile(
     r'(^\s*rustyV8Version\s*=\s*")([^"]+)(";\s*$)',
@@ -160,6 +163,12 @@ def _write_runfiles_stub(tree: Path) -> None:
     (src_dir / "lib.rs").write_text(_RUNFILES_STUB_LIB_RS, encoding="utf-8")
 
 
+def _download_text(url: str) -> str:
+    request = common.build_request(url)
+    with urlopen(request, timeout=120) as response:  # noqa: S310
+        return response.read().decode("utf-8")
+
+
 def _prepare_patch_tree(tree: Path) -> None:
     for cargo_toml in tree.rglob("Cargo.toml"):
         _rewrite_if_changed(cargo_toml, _rewrite_cargo_toml)
@@ -244,12 +253,33 @@ def _regenerate_stub_runfiles_patch(version: lib.Version) -> bool:
         )
 
     current_patch = (
-        PATCH_FILE.read_text(encoding="utf-8") if PATCH_FILE.exists() else None
+        RUNFILES_PATCH_FILE.read_text(encoding="utf-8")
+        if RUNFILES_PATCH_FILE.exists()
+        else None
     )
     if current_patch == patch_content:
         return False
 
-    PATCH_FILE.write_text(patch_content, encoding="utf-8")
+    RUNFILES_PATCH_FILE.write_text(patch_content, encoding="utf-8")
+    return True
+
+
+def _regenerate_rusty_v8_patch(version: lib.Version) -> bool:
+    patch_url = (
+        "https://raw.githubusercontent.com/openai/codex/"
+        f"{version}/patches/rusty_v8_prebuilt_out_dir.patch"
+    )
+    patch_content = _download_text(patch_url)
+
+    current_patch = (
+        RUSTY_V8_PATCH_FILE.read_text(encoding="utf-8")
+        if RUSTY_V8_PATCH_FILE.exists()
+        else None
+    )
+    if current_patch == patch_content:
+        return False
+
+    RUSTY_V8_PATCH_FILE.write_text(patch_content, encoding="utf-8")
     return True
 
 
@@ -400,7 +430,7 @@ def _extract_cargo_hash(content: str, system: str) -> str | None:
     return _extract_cargo_hashes(content).get(system)
 
 
-def _update_cargo_hashes(content: str, system: str, new_hash: str) -> str:
+def _update_cargo_hashes(content: str, new_hash: str) -> str:
     match = re.search(
         r'cargoHashes\s*=\s*{\n(?P<body>.*?)};',
         content,
@@ -411,30 +441,26 @@ def _update_cargo_hashes(content: str, system: str, new_hash: str) -> str:
         raise ValueError(msg)
 
     body = match.group("body")
-    updated_body, replacements = re.subn(
-        r'^(\s*)([A-Za-z0-9_-]+)\s*=\s*"[^"]+";',
-        rf'\1\2 = "{new_hash}";',
+    indent_match = re.search(
+        r'^(\s*)[A-Za-z0-9_-]+\s*=\s*"[^"]+";',
         body,
-        flags=re.MULTILINE,
+        re.MULTILINE,
     )
-
-    if replacements == 0:
-        indent_match = re.search(
-            r'^\s*cargoHashes\s*=\s*{', content, re.MULTILINE,
-        )
-        base_indent = (
-            indent_match.group(0).split("cargoHashes")[0] if indent_match else ""
-        )
-        entry_indent = f"{base_indent}  "
-        updated_body = f'{entry_indent}{system} = "{new_hash}";'
-    elif system not in _extract_cargo_hashes(content):
-        indent_match = re.search(
-            r'^(\s*)[A-Za-z0-9_-]+\s*=\s*"[^"]+";',
-            body,
+    if indent_match:
+        entry_indent = indent_match.group(1)
+    else:
+        block_indent_match = re.search(
+            r'^(\s*)cargoHashes\s*=\s*{',
+            content,
             re.MULTILINE,
         )
-        entry_indent = indent_match.group(1) if indent_match else "  "
-        updated_body = f'{updated_body}\n{entry_indent}{system} = "{new_hash}";'
+        block_indent = block_indent_match.group(1) if block_indent_match else ""
+        entry_indent = f"{block_indent}  "
+
+    updated_body = "\n".join(
+        f'{entry_indent}{supported_system} = "{new_hash}";'
+        for supported_system in _SUPPORTED_SYSTEMS
+    )
 
     return content[:match.start("body")] + updated_body + content[match.end("body"):]
 
@@ -485,6 +511,10 @@ def _needs_cargo_update(
         or existing is None
         or has_placeholder
         or has_mismatch
+        or any(
+            supported_system not in hashes
+            for supported_system in _SUPPORTED_SYSTEMS
+        )
     )
 
 
@@ -513,11 +543,14 @@ def _refresh_release_metadata(
             ),
         )
         _regenerate_stub_runfiles_patch(latest_version)
+        _regenerate_rusty_v8_patch(latest_version)
         with tempfile.TemporaryDirectory(prefix="codex-rusty-v8-") as temp_dir:
             temp_root = Path(temp_dir)
             tarball_path = _download_release_tarball(latest_version, temp_root)
             source_dir = _extract_codex_source_tree(tarball_path, temp_root)
             rusty_v8_version = _extract_upstream_rusty_v8_version(source_dir)
+    elif not RUSTY_V8_PATCH_FILE.exists():
+        _regenerate_rusty_v8_patch(latest_version)
 
     if rusty_v8_version is None:
         msg = "Could not determine rusty_v8 version"
@@ -568,9 +601,7 @@ def main() -> int:
         version_updated=version_updated,
     ):
         new_cargo_hash = _calculate_cargo_hash(updated_content)
-        updated_content = _update_cargo_hashes(
-            updated_content, system, str(new_cargo_hash),
-        )
+        updated_content = _update_cargo_hashes(updated_content, str(new_cargo_hash))
 
     if updated_content != content:
         lib.write_file(NIX_FILE, updated_content)
