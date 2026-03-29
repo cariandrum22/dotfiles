@@ -2,8 +2,8 @@
 """Update codex-cli tool using functional programming style.
 
 This script updates codex-cli metadata in Nix and maintains per-platform
-cargoHashes. It fetches the latest version from GitHub releases and
-generates the appropriate hashes.
+cargoHashes and rusty_v8 archive hashes. It fetches the latest version from
+GitHub releases and generates the appropriate hashes.
 
 Usage:
     ./update-codex-cli.py
@@ -19,6 +19,7 @@ Files modified:
 
 from __future__ import annotations
 
+import json
 import os
 import platform
 import re
@@ -66,6 +67,18 @@ _SYSTEM_MAP = {
     ("darwin", "arm64"): "aarch64-darwin",
     ("darwin", "aarch64"): "aarch64-darwin",
 }
+
+_RUSTY_V8_TARGETS = {
+    "x86_64-linux": "x86_64-unknown-linux-gnu",
+    "aarch64-linux": "aarch64-unknown-linux-gnu",
+    "x86_64-darwin": "x86_64-apple-darwin",
+    "aarch64-darwin": "aarch64-apple-darwin",
+}
+
+_RUSTY_V8_VERSION_PATTERN = re.compile(
+    r'(^\s*rustyV8Version\s*=\s*")([^"]+)(";\s*$)',
+    re.MULTILINE,
+)
 
 _RUNFILES_DEP_PATTERN = re.compile(
     r'^(?P<indent>\s*)runfiles\s*=\s*\{[^}]*github\.com/dzbarsky/rules_rust[^}]*\}\s*$',
@@ -240,6 +253,116 @@ def _regenerate_stub_runfiles_patch(version: lib.Version) -> bool:
     return True
 
 
+def _extract_upstream_rusty_v8_version(source_dir: Path) -> str:
+    cargo_toml = source_dir / "Cargo.toml"
+    match = re.search(
+        r'^\s*v8\s*=\s*"=([^"]+)"\s*$',
+        cargo_toml.read_text(encoding="utf-8"),
+        re.MULTILINE,
+    )
+    if not match:
+        msg = f"Could not find v8 version in {cargo_toml}"
+        raise RuntimeError(msg)
+    return match.group(1)
+
+
+def _extract_rusty_v8_version(content: str) -> str | None:
+    match = _RUSTY_V8_VERSION_PATTERN.search(content)
+    return match.group(2) if match else None
+
+
+def _update_rusty_v8_version(content: str, version: str) -> str:
+    updated, replacements = _RUSTY_V8_VERSION_PATTERN.subn(
+        rf'\1{version}\3',
+        content,
+        count=1,
+    )
+    if replacements != 1:
+        msg = "Could not find rustyV8Version assignment in codex.nix"
+        raise ValueError(msg)
+    return updated
+
+
+def _extract_rusty_v8_archive_hashes(content: str) -> dict[str, str]:
+    match = re.search(
+        r'rustyV8ArchiveHashes\s*=\s*{\n(?P<body>.*?)};',
+        content,
+        re.DOTALL,
+    )
+    if not match:
+        return {}
+
+    body = match.group("body")
+    return {
+        entry.group(1): entry.group(2)
+        for entry in re.finditer(
+            r'^\s*([A-Za-z0-9_-]+)\s*=\s*"([^"]+)";',
+            body,
+            re.MULTILINE,
+        )
+    }
+
+
+def _update_rusty_v8_archive_hashes(
+    content: str, hashes: dict[str, str],
+) -> str:
+    match = re.search(
+        r'rustyV8ArchiveHashes\s*=\s*{\n(?P<body>.*?)};',
+        content,
+        re.DOTALL,
+    )
+    if not match:
+        msg = "Could not find rustyV8ArchiveHashes block in codex.nix"
+        raise ValueError(msg)
+
+    body = match.group("body")
+    indent_match = re.search(
+        r'^(\s*)[A-Za-z0-9_-]+\s*=\s*"[^"]+";',
+        body,
+        re.MULTILINE,
+    )
+    entry_indent = indent_match.group(1) if indent_match else "    "
+    updated_body = "\n".join(
+        f'{entry_indent}{system} = "{hashes[system]}";'
+        for system in _RUSTY_V8_TARGETS
+    )
+    return content[:match.start("body")] + updated_body + content[match.end("body"):]
+
+
+def _rusty_v8_archive_url(version: str, system: str) -> str:
+    target = _RUSTY_V8_TARGETS[system]
+    return (
+        "https://github.com/denoland/rusty_v8/releases/download/"
+        f"v{version}/librusty_v8_release_{target}.a.gz"
+    )
+
+
+def _prefetch_file_hash(url: str) -> str:
+    result = common.run_command(
+        ["nix", "store", "prefetch-file", "--json", url],
+        timeout=300,
+    )
+    try:
+        return json.loads(result.stdout)["hash"]
+    except (KeyError, json.JSONDecodeError) as exc:
+        msg = f"Failed to parse nix prefetch output for {url}"
+        raise RuntimeError(msg) from exc
+
+
+def _calculate_rusty_v8_archive_hashes(version: str) -> dict[str, str]:
+    return {
+        system: _prefetch_file_hash(_rusty_v8_archive_url(version, system))
+        for system in _RUSTY_V8_TARGETS
+    }
+
+
+def _needs_rusty_v8_update(content: str, version: str) -> bool:
+    if _extract_rusty_v8_version(content) != version:
+        return True
+    hashes = _extract_rusty_v8_archive_hashes(content)
+    return any(system not in hashes for system in _RUSTY_V8_TARGETS)
+
+
 def _detect_system() -> str:
     override = os.getenv("CODEX_SYSTEM")
     if override:
@@ -365,21 +488,16 @@ def _needs_cargo_update(
     )
 
 
-def main() -> int:
-    """Main entry point."""
-    system = _detect_system()
-    force_cargo = (
-        os.getenv("CODEX_FORCE_CARGO_HASH", "").lower() in {"1", "true", "yes"}
-    )
-
-    content = lib.read_file(NIX_FILE)
-    current = lib.extract_current_info(CONFIG, content)
-
-    latest_version = lib.fetch_github_release(GITHUB_REPO, VERSION_PREFIX)
-
+def _refresh_release_metadata(
+    content: str,
+    current_hash: lib.Hash,
+    latest_version: lib.Version,
+    *,
+    version_updated: bool,
+) -> tuple[str, lib.Hash, str]:
     updated_content = content
-    latest_hash = current.hash
-    version_updated = current.version != latest_version
+    latest_hash = current_hash
+    rusty_v8_version = _extract_rusty_v8_version(updated_content)
 
     if version_updated:
         latest_hash = lib.calculate_hash(
@@ -395,6 +513,53 @@ def main() -> int:
             ),
         )
         _regenerate_stub_runfiles_patch(latest_version)
+        with tempfile.TemporaryDirectory(prefix="codex-rusty-v8-") as temp_dir:
+            temp_root = Path(temp_dir)
+            tarball_path = _download_release_tarball(latest_version, temp_root)
+            source_dir = _extract_codex_source_tree(tarball_path, temp_root)
+            rusty_v8_version = _extract_upstream_rusty_v8_version(source_dir)
+
+    if rusty_v8_version is None:
+        msg = "Could not determine rusty_v8 version"
+        raise RuntimeError(msg)
+
+    return updated_content, latest_hash, rusty_v8_version
+
+
+def _refresh_rusty_v8_metadata(content: str, rusty_v8_version: str) -> str:
+    if not _needs_rusty_v8_update(content, rusty_v8_version):
+        return content
+
+    updated_content = _update_rusty_v8_version(content, rusty_v8_version)
+    return _update_rusty_v8_archive_hashes(
+        updated_content,
+        _calculate_rusty_v8_archive_hashes(rusty_v8_version),
+    )
+
+
+def main() -> int:
+    """Main entry point."""
+    system = _detect_system()
+    force_cargo = (
+        os.getenv("CODEX_FORCE_CARGO_HASH", "").lower() in {"1", "true", "yes"}
+    )
+
+    content = lib.read_file(NIX_FILE)
+    current = lib.extract_current_info(CONFIG, content)
+
+    latest_version = lib.fetch_github_release(GITHUB_REPO, VERSION_PREFIX)
+
+    version_updated = current.version != latest_version
+    updated_content, latest_hash, rusty_v8_version = _refresh_release_metadata(
+        content,
+        current.hash,
+        latest_version,
+        version_updated=version_updated,
+    )
+    updated_content = _refresh_rusty_v8_metadata(
+        updated_content,
+        rusty_v8_version,
+    )
 
     if _needs_cargo_update(
         updated_content,

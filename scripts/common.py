@@ -49,6 +49,10 @@ HTTP_TIMEOUT = 30
 SUBPROCESS_TIMEOUT = 60
 
 
+def _github_token() -> str | None:
+    return os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+
+
 # ----- Base Errors -----------------------------------------------------------------
 
 
@@ -104,6 +108,12 @@ def build_request(
         default_headers["User-Agent"] = user_agent
     if headers:
         default_headers.update(headers)
+    if (
+        url.startswith("https://api.github.com/")
+        and "Authorization" not in default_headers
+        and (token := _github_token())
+    ):
+        default_headers["Authorization"] = f"Bearer {token}"
     # urllib.request.Request requires dict with at least one item,
     # or omit headers entirely
     if len(default_headers) > 0:
