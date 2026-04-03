@@ -2,11 +2,11 @@
 
 pkgs.stdenv.mkDerivation rec {
   pname = "claude-code";
-  version = "2.1.88";
+  version = "2.1.91";
 
   src = pkgs.fetchzip {
     url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-    hash = "sha256-LwTZaxp1Wq6BYQ/Los5aMHufGKb3NM7BuuW0Kaxo2QA=";
+    hash = "sha256-u7jdM6hTYN05ZLPz630Yj7gI0PeCSArg4O6ItQRAMy4=";
   };
 
   nativeBuildInputs = [ pkgs.makeWrapper ];
