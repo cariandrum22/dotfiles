@@ -235,6 +235,10 @@ rustPlatform.buildRustPackage (
 
     doCheck = false;
 
+    # Keep Darwin builds unstripped. A full Home Manager switch on macOS produced
+    # unusable Codex binaries during fixup, while Linux benefits from normal strip.
+    dontStrip = pkgs.stdenv.isDarwin;
+
     meta = with pkgs.lib; {
       description = "Lightweight coding agent that runs in your terminal";
       homepage = "https://github.com/openai/codex";
