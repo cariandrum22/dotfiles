@@ -116,23 +116,10 @@ def _prefetch_hash_for(version: str, system: str) -> PlatformHash:
     url = _download_url(version, system)
 
     try:
-        # Get base32 hash from nix-prefetch-url
-        base32_hash = common.run_nix_prefetch(url)
-
-        # Convert to SRI format using nix hash convert
-        result = common.run_command([
-            "nix",
-            "hash",
-            "convert",
-            "--hash-algo",
-            "sha256",
-            "--to",
-            "sri",
-            base32_hash,
-        ])
-        sri_hash = result.stdout.strip()
-
-        return PlatformHash(system=system, hash=sri_hash)
+        return PlatformHash(
+            system=system,
+            hash=common.convert_nix_hash_to_sri(common.run_nix_prefetch(url)),
+        )
     except common.SubprocessError as exc:
         msg = f"Failed to prefetch hash for {system}"
         raise common.SubprocessError(msg, exc.error) from exc
