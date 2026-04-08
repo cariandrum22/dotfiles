@@ -36,6 +36,10 @@ jobs:
         run: |
           ./scripts/update-ai-tools-all.sh
 
+      - name: Build AI tools
+        run: |
+          ./scripts/build-ai-tools.sh
+
       - name: Check for changes
         id: changes
         run: |
@@ -101,6 +105,10 @@ jobs:
           CODEX_FORCE_CARGO_HASH: "1"
         run: |
           python3 scripts/update-codex-cli.py
+
+      - name: Build AI tools
+        run: |
+          ./scripts/build-ai-tools.sh
 
       - name: Check for changes
         id: changes

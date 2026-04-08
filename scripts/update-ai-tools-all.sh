@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Update all AI tools
 
-set -e
+set -euo pipefail
 
 echo "Updating AI tools..."
 echo
