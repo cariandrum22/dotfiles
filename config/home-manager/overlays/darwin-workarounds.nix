@@ -9,6 +9,7 @@
 # - nix 2.28.5: nix-shell test failure (blocks cachix)
 # - setproctitle 1.3.7: fork test segfault (blocks azure-cli, glances)
 # - pre-commit: test-only dotnet dependency triggers LLVM build
+# - direnv 2.37.1: fish test is killed on macOS (blocks direnv-elvish-hook)
 # - inetutils 2.7: clang format string error on macOS (blocks home-manager)
 #
 # Note: tlaps is excluded on macOS via lib.optionals in default.nix
@@ -24,6 +25,11 @@ if prev.stdenv.isDarwin && prev.stdenv.hostPlatform.isAarch64 then
       postCheck = "";
       pytestFlags = [ ];
       disabledTests = [ ];
+    });
+    direnvNoCheck = prev.direnv.overrideAttrs (_old: {
+      doCheck = false;
+      nativeCheckInputs = [ ];
+      checkPhase = "";
     });
   in
   {
@@ -43,6 +49,9 @@ if prev.stdenv.isDarwin && prev.stdenv.hostPlatform.isAarch64 then
 
     # pre-commit's test-only dotnet dependency is unnecessary for use here.
     pre-commit = preCommitNoCheck;
+
+    # direnv's fish tests are flaky on macOS and block elvish hook generation.
+    direnv = direnvNoCheck;
   }
 else
   { }
