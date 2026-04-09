@@ -189,10 +189,7 @@ def calculate_hash(url: str, *, unpack: bool = True) -> Hash:
     result = subprocess.run(cmd, capture_output=True, text=True, check=True)
     hash_value = result.stdout.strip()
 
-    # Convert to SRI format
-    sri_cmd = ["nix", "hash", "to-sri", "--type", "sha256", hash_value]
-    sri_result = subprocess.run(sri_cmd, capture_output=True, text=True, check=True)
-    return Hash(sri_result.stdout.strip())
+    return Hash(common.convert_nix_hash_to_sri(hash_value))
 
 
 def calculate_patch_hash(patch_files: tuple[Path, ...]) -> str | None:
@@ -219,16 +216,11 @@ def _convert_sha256_to_sri(hash_value: str) -> Hash | None:
     if hash_value.startswith("sha256-"):
         return Hash(hash_value)
 
-    result = subprocess.run(
-        ["nix", "hash", "to-sri", "--type", "sha256", hash_value],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode != 0:
+    try:
+        sri_hash = common.convert_nix_hash_to_sri(hash_value)
+    except common.SubprocessError:
         return None
 
-    sri_hash = result.stdout.strip()
     return Hash(sri_hash) if sri_hash.startswith("sha256-") else None
 
 

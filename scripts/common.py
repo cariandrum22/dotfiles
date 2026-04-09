@@ -266,6 +266,41 @@ def run_nix_prefetch(url: str, *, timeout: int = SUBPROCESS_TIMEOUT) -> str:
     return result.stdout.strip()
 
 
+def convert_nix_hash_to_sri(
+    hash_value: str,
+    *,
+    hash_algo: str = "sha256",
+    timeout: int = SUBPROCESS_TIMEOUT,
+) -> str:
+    """Convert a Nix hash to SRI format across old and new Nix CLIs."""
+    commands = [
+        ["nix", "hash", "to-sri", "--type", hash_algo, hash_value],
+        [
+            "nix",
+            "hash",
+            "convert",
+            "--hash-algo",
+            hash_algo,
+            "--to",
+            "sri",
+            hash_value,
+        ],
+    ]
+
+    last_exc: SubprocessError | None = None
+    for cmd in commands:
+        try:
+            result = run_command(cmd, timeout=timeout)
+            return result.stdout.strip()
+        except SubprocessError as exc:
+            last_exc = exc
+
+    if last_exc is None:
+        msg = "No nix hash conversion command was attempted"
+        raise RuntimeError(msg)
+    raise last_exc
+
+
 # ----- Retry Logic -----------------------------------------------------------------
 
 

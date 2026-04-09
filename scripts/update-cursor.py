@@ -140,16 +140,9 @@ def _prefetch_sri_hash(url: str) -> str:
 
     # Convert to SRI format
     try:
-        result = common.run_command(
-            [
-                "nix", "hash", "convert",
-                "--hash-algo", "sha256", "--to", "sri", nix32_hash,
-            ],
-            check=True,
-        )
-        return result.stdout.strip()
+        return common.convert_nix_hash_to_sri(nix32_hash)
     except common.SubprocessError as e:
-        msg = "nix hash convert"
+        msg = "nix hash to-sri/convert"
         raise common.SubprocessError(msg, e.error) from e
 
 

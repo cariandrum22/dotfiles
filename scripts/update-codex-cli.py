@@ -430,7 +430,7 @@ def _extract_cargo_hash(content: str, system: str) -> str | None:
     return _extract_cargo_hashes(content).get(system)
 
 
-def _update_cargo_hashes(content: str, new_hash: str) -> str:
+def _update_cargo_hashes(content: str, system: str, new_hash: str) -> str:
     match = re.search(
         r'cargoHashes\s*=\s*{\n(?P<body>.*?)};',
         content,
@@ -457,10 +457,24 @@ def _update_cargo_hashes(content: str, new_hash: str) -> str:
         block_indent = block_indent_match.group(1) if block_indent_match else ""
         entry_indent = f"{block_indent}  "
 
-    updated_body = "\n".join(
-        f'{entry_indent}{supported_system} = "{new_hash}";'
+    hashes = _extract_cargo_hashes(content)
+    hashes[system] = new_hash
+
+    ordered_systems = [
+        supported_system
         for supported_system in _SUPPORTED_SYSTEMS
-    )
+        if supported_system in hashes
+    ]
+    remaining_systems = [
+        supported_system
+        for supported_system in hashes
+        if supported_system not in _SUPPORTED_SYSTEMS
+    ]
+
+    updated_body = "\n".join(
+        f'{entry_indent}{supported_system} = "{hashes[supported_system]}";'
+        for supported_system in [*ordered_systems, *remaining_systems]
+    ) + "\n"
 
     return content[:match.start("body")] + updated_body + content[match.end("body"):]
 
@@ -500,21 +514,15 @@ def _needs_cargo_update(
 ) -> bool:
     hashes = _extract_cargo_hashes(content)
     existing = hashes.get(system)
-    has_placeholder = any(
-        "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" in hash_value
-        for hash_value in hashes.values()
+    has_placeholder = (
+        existing is not None
+        and "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" in existing
     )
-    has_mismatch = len(set(hashes.values())) > 1
     return (
         force
         or version_updated
         or existing is None
         or has_placeholder
-        or has_mismatch
-        or any(
-            supported_system not in hashes
-            for supported_system in _SUPPORTED_SYSTEMS
-        )
     )
 
 
@@ -601,7 +609,11 @@ def main() -> int:
         version_updated=version_updated,
     ):
         new_cargo_hash = _calculate_cargo_hash(updated_content)
-        updated_content = _update_cargo_hashes(updated_content, str(new_cargo_hash))
+        updated_content = _update_cargo_hashes(
+            updated_content,
+            system,
+            str(new_cargo_hash),
+        )
 
     if updated_content != content:
         lib.write_file(NIX_FILE, updated_content)

@@ -111,10 +111,10 @@ let
   # cargo vendor utility. codex-utils-cargo-bin is only used by test helpers,
   # and tests are disabled for this package, so the stub is sufficient.
   cargoHashes = {
-    x86_64-linux = "sha256-F53k63oSpXoC2FHiEjbBRbtaMzNH82xpU/g86ZfoWuo=";
-    aarch64-linux = "sha256-F53k63oSpXoC2FHiEjbBRbtaMzNH82xpU/g86ZfoWuo=";
-    x86_64-darwin = "sha256-F53k63oSpXoC2FHiEjbBRbtaMzNH82xpU/g86ZfoWuo=";
-    aarch64-darwin = "sha256-F53k63oSpXoC2FHiEjbBRbtaMzNH82xpU/g86ZfoWuo=";
+    x86_64-linux = "sha256-ldBYkXlnC/h5HUhPC/CGwL6S0dxJzQsDEXA2DgJeDRE=";
+    aarch64-linux = "sha256-ldBYkXlnC/h5HUhPC/CGwL6S0dxJzQsDEXA2DgJeDRE=";
+    x86_64-darwin = "sha256-ldBYkXlnC/h5HUhPC/CGwL6S0dxJzQsDEXA2DgJeDRE=";
+    aarch64-darwin = "sha256-ldBYkXlnC/h5HUhPC/CGwL6S0dxJzQsDEXA2DgJeDRE=";
   };
 
   rustyV8Version = "146.4.0";
@@ -143,13 +143,13 @@ in
 rustPlatform.buildRustPackage (
   rec {
     pname = "codex-cli";
-    version = "rust-v0.117.0";
+    version = "rust-v0.118.0";
 
     src = pkgs.fetchFromGitHub {
       owner = "openai";
       repo = "codex";
       rev = "${version}";
-      hash = "sha256-Ezd8KaEMVeJPKC74CSPhecPLZghm0v6JkQTCPhr/2nY=";
+      hash = "sha256-FdtV+CIqTInnegcXrXBxw4aE0JnNDh4GdYKwUDjSk9Y=";
     };
 
     sourceRoot = "source/codex-rs";
@@ -162,8 +162,12 @@ rustPlatform.buildRustPackage (
 
     postPatch = ''
       mapfile -t vendored_v8_dirs < <(
-        find "$cargoDepsCopy" -maxdepth 1 -mindepth 1 -type d \
-          \( -name 'v8' -o -name 'v8-*' \) | sort
+        while IFS= read -r cargo_toml; do
+          dirname "$cargo_toml"
+        done < <(
+          find "$cargoDepsCopy" -type f -name Cargo.toml \
+            -path '*/v8*/Cargo.toml' -print
+        ) | sort -u
       )
 
       if [ "''${#vendored_v8_dirs[@]}" -ne 1 ]; then
