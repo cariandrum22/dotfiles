@@ -11,6 +11,7 @@
       inotify-tools
       zip
       squashfsTools
+      cryptsetup
       wirelesstools
       iw
     ];
