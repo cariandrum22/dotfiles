@@ -159,7 +159,6 @@ if type -q op and type -q claudius
     end
     if type -q codex
         set -x CLAUDIUS_SECRET_OPENAI_API_KEY "op://Private/OpenAI Codex CLI/credential"
-        set -x CLAUDIUS_SECRET_OPENAI_BASE_URL "{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT}}/{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN}}/openai"
         alias codex="claudius secrets run -- codex"
     end
 end

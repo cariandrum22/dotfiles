@@ -451,7 +451,6 @@ if (and (has-external op) (has-external claudius)) {
   }
   if (has-external codex) {
     set E:CLAUDIUS_SECRET_OPENAI_API_KEY = "op://Private/OpenAI Codex CLI/credential"
-    set E:CLAUDIUS_SECRET_OPENAI_BASE_URL = "{{"$E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT"}}/{{"$E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN"}}/openai"
     fn -codex-wrapper {|@args|
       e:claudius secrets run -- codex $@args
     }
