@@ -16,12 +16,18 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v14
         with:
           extra-conf: |
             experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Setup Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v8
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -29,9 +35,24 @@ jobs:
           python-version: "3.11"
 
       - name: Update Cursor
-        run: python scripts/update-cursor.py
+        run: python3 scripts/update-cursor.py
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build Cursor package
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          nix build --impure .#packages.x86_64-linux.cursor --print-build-logs
 
       - name: Create Pull Request
+        if: steps.changes.outputs.has_changes == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -41,7 +62,7 @@ jobs:
             Automated update of Cursor AppImage.
 
             This PR updates Cursor to the latest version with new sha256 hashes.
-            Please ensure the build succeeds before merging.
+            The workflow verified the updated Cursor package builds successfully before opening this PR.
           branch: update-cursor
           delete-branch: true
           labels: |

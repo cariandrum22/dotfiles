@@ -84,6 +84,16 @@ class SubprocessError(UpdateScriptError):
         self.error = error
 
 
+class PrefetchError(UpdateScriptError):
+    """Error prefetching remote files with Nix."""
+
+    def __init__(self, url: str, error: Exception | str) -> None:
+        """Initialize with URL and underlying error."""
+        super().__init__(f"Failed to prefetch {url}: {error}")
+        self.url = url
+        self.error = error
+
+
 # ----- HTTP Utilities --------------------------------------------------------------
 
 
@@ -264,6 +274,42 @@ def run_nix_prefetch(url: str, *, timeout: int = SUBPROCESS_TIMEOUT) -> str:
     """
     result = run_command(["nix-prefetch-url", url], timeout=timeout)
     return result.stdout.strip()
+
+
+def run_nix_prefetch_sri(url: str, *, timeout: int = SUBPROCESS_TIMEOUT) -> str:
+    """Prefetch URL and return an SRI sha256 hash.
+
+    Prefer `nix store prefetch-file --json` because it returns the SRI hash directly.
+    Fall back to `nix-prefetch-url` plus hash conversion for older Nix versions.
+
+    Args:
+        url: URL to prefetch
+        timeout: Command timeout in seconds
+
+    Returns:
+        SHA256 hash in SRI format
+
+    Raises:
+        PrefetchError: If hash output cannot be parsed
+        SubprocessError: If all supported prefetch commands fail
+    """
+    try:
+        result = run_command(
+            ["nix", "store", "prefetch-file", "--json", "--hash-type", "sha256", url],
+            timeout=timeout,
+        )
+        data = json.loads(result.stdout)
+        hash_value = data["hash"]
+        if not isinstance(hash_value, str) or not hash_value:
+            raise PrefetchError(url, "missing hash field in nix prefetch output")
+    except SubprocessError:
+        # Fall back to nix-prefetch-url for environments without prefetch-file.
+        nix32_hash = run_nix_prefetch(url, timeout=timeout)
+        return convert_nix_hash_to_sri(nix32_hash, timeout=timeout)
+    except (json.JSONDecodeError, KeyError, TypeError) as exc:
+        raise PrefetchError(url, exc) from exc
+    else:
+        return hash_value
 
 
 def convert_nix_hash_to_sri(

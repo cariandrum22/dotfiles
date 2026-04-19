@@ -245,6 +245,7 @@
           home-manager = self.homeConfigurations.${system}.activationPackage;
         }
         // nixpkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
+          cursor = pkgs.callPackage ./config/home-manager/home/packages/cursor.nix { };
           myxmonad = mkXMonad pkgs;
           headless = self.homeConfigurations."${system}-headless".activationPackage;
         }

@@ -35,6 +35,7 @@ import sys
 from typing import TYPE_CHECKING, NamedTuple
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from pathlib import Path
 
 import common
@@ -45,6 +46,8 @@ RE_VERSION = re.compile(r'version = "([^"]+)"')
 RE_DOWNLOAD_URL = re.compile(r'downloadUrl = "([^"]+)"')
 RE_HASH = re.compile(r'hash = "([^"]+)"')
 RE_VERSION_IN_URL = re.compile(r'[Cc]ursor-(\d+\.\d+\.\d+)')
+RE_COMMIT_IN_URL = re.compile(r"/production/([0-9a-f]{40})/")
+RETRY_ATTEMPTS = 3
 
 
 class CursorConfigError(common.ConfigError):
@@ -63,12 +66,21 @@ class CursorVersionError(common.UpdateScriptError):
         super().__init__(f"Could not extract version from URL: {url}")
 
 
+class CursorApiError(common.UpdateScriptError):
+    """Error validating Cursor API metadata."""
+
+    def __init__(self, message: str) -> None:
+        """Initialize with message."""
+        super().__init__(message)
+
+
 class CursorInfo(NamedTuple):
     """Cursor metadata."""
 
     download_url: str
     download_hash: str
     version: str
+    commit_sha: str
 
 
 # ----- Pure helpers ----------------------------------------------------------------
@@ -96,6 +108,43 @@ def _extract_version_from_url(url: str) -> str:
     return match.group(1)
 
 
+def _extract_commit_from_url(url: str) -> str:
+    """Extract commit SHA from download URL."""
+    if (match := RE_COMMIT_IN_URL.search(url)) is None:
+        msg = f"Could not extract commit SHA from URL: {url}"
+        raise CursorApiError(msg)
+    return match.group(1)
+
+
+def _extract_api_string(
+    payload: dict[str, object], field_name: str, *, required: bool = True,
+) -> str | None:
+    """Extract a string field from the Cursor API payload."""
+    value = payload.get(field_name)
+    if value is None:
+        if required:
+            msg = f"Cursor API response is missing '{field_name}'"
+            raise CursorApiError(msg)
+        return None
+    if not isinstance(value, str) or not value:
+        msg = f"Cursor API field '{field_name}' must be a non-empty string"
+        raise CursorApiError(msg)
+    return value
+
+
+def _validate_download_url(download_url: str, version: str, commit_sha: str) -> None:
+    """Validate that the download URL matches the reported Cursor metadata."""
+    url_version = _extract_version_from_url(download_url)
+    if url_version != version:
+        msg = f"Cursor API version mismatch: response={version}, url={url_version}"
+        raise CursorApiError(msg)
+
+    url_commit = _extract_commit_from_url(download_url)
+    if url_commit != commit_sha:
+        msg = f"Cursor API commit mismatch: response={commit_sha}, url={url_commit}"
+        raise CursorApiError(msg)
+
+
 def _generate_nix_content(
     content: str, version: str, download_url: str, download_hash: str,
 ) -> str:
@@ -111,39 +160,66 @@ def _generate_nix_content(
 # ----- API interaction -------------------------------------------------------------
 
 
-def fetch_latest_cursor_info() -> CursorInfo:
+def _retry_logger(
+    action: str, *, verbose: bool,
+) -> Callable[[int, Exception], None] | None:
+    """Build a retry callback for common.retry_with_backoff."""
+    if not verbose:
+        return None
+
+    def log_retry(retry_number: int, exc: Exception) -> None:
+        next_attempt = retry_number + 1
+        print(
+            f"  Retrying {action} ({next_attempt}/{RETRY_ATTEMPTS}) after error: {exc}",
+        )
+
+    return log_retry
+
+
+def fetch_latest_cursor_info(*, verbose: bool = True) -> CursorInfo:
     """Fetch latest Cursor information from API."""
-    print(f"Fetching Cursor API response from {CURSOR_API_URL}...")
+    if verbose:
+        print(f"Fetching Cursor API response from {CURSOR_API_URL}...")
 
-    # Fetch download URL from API
-    data = common.fetch_json(CURSOR_API_URL)
-    download_url = data["downloadUrl"]
+    data = common.retry_with_backoff(
+        lambda: common.fetch_json(CURSOR_API_URL),
+        retries=RETRY_ATTEMPTS,
+        exceptions=(common.FetchError,),
+        on_retry=_retry_logger("Cursor API metadata", verbose=verbose),
+    )
 
-    # Extract version from URL
-    version = _extract_version_from_url(download_url)
+    download_url = _extract_api_string(data, "downloadUrl")
+    if download_url is None:
+        msg = "Cursor API response is missing 'downloadUrl'"
+        raise CursorApiError(msg)
 
-    print(f"  Version: {version}")
-    print(f"  Download URL: {download_url}")
+    version = _extract_api_string(data, "version", required=False)
+    if version is None:
+        version = _extract_version_from_url(download_url)
 
-    # Get the download hash (SRI format for hash field)
-    print("Fetching download hash...")
-    download_hash = _prefetch_sri_hash(download_url)
-    print(f"  Download hash: {download_hash}")
+    commit_sha = _extract_api_string(data, "commitSha", required=False)
+    if commit_sha is None:
+        commit_sha = _extract_commit_from_url(download_url)
 
-    return CursorInfo(download_url, download_hash, version)
+    _validate_download_url(download_url, version, commit_sha)
 
+    if verbose:
+        print(f"  Version: {version}")
+        print(f"  Commit: {commit_sha}")
+        print(f"  Download URL: {download_url}")
+        print("Fetching download hash...")
 
-def _prefetch_sri_hash(url: str) -> str:
-    """Prefetch URL and convert to SRI format hash."""
-    # Get nix32 hash
-    nix32_hash = common.run_nix_prefetch(url)
+    download_hash = common.retry_with_backoff(
+        lambda: common.run_nix_prefetch_sri(download_url),
+        retries=RETRY_ATTEMPTS,
+        exceptions=(common.SubprocessError, common.PrefetchError),
+        on_retry=_retry_logger("Cursor download hash", verbose=verbose),
+    )
 
-    # Convert to SRI format
-    try:
-        return common.convert_nix_hash_to_sri(nix32_hash)
-    except common.SubprocessError as e:
-        msg = "nix hash to-sri/convert"
-        raise common.SubprocessError(msg, e.error) from e
+    if verbose:
+        print(f"  Download hash: {download_hash}")
+
+    return CursorInfo(download_url, download_hash, version, commit_sha)
 
 
 # ----- File operations -------------------------------------------------------------
@@ -209,7 +285,7 @@ def update_cursor(*, verbose: bool = True) -> bool:  # noqa: C901 - Clear sequen
     # Get latest info
     if verbose:
         print("\nFetching latest Cursor information...")
-    latest_info = fetch_latest_cursor_info()
+    latest_info = fetch_latest_cursor_info(verbose=verbose)
 
     # Check if update is needed
     if (
@@ -229,6 +305,7 @@ def update_cursor(*, verbose: bool = True) -> bool:  # noqa: C901 - Clear sequen
         if verbose:
             print("\n✅ Successfully updated Cursor")
             print(f"  Version: {current_version} → {latest_info.version}")
+            print(f"  Commit: {latest_info.commit_sha}")
             print(f"  URL: {current_url} → {latest_info.download_url}")
             print(f"  Hash: {current_hash} → {latest_info.download_hash}")
         return True
@@ -246,6 +323,7 @@ def main() -> None:
     except (
         CursorConfigError,
         CursorVersionError,
+        CursorApiError,
         common.UpdateScriptError,
         FileNotFoundError,
     ) as e:
