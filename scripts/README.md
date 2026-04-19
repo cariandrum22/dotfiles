@@ -30,8 +30,10 @@ Updates Cursor editor AppImage metadata for Nix.
 ```
 
 - Fetches the latest version from Cursor's API
-- Downloads and calculates SHA256 hash for the AppImage
+- Validates the API metadata against the download URL
+- Prefetches the AppImage with Nix and records the SHA256 hash in SRI format
 - Updates `config/home-manager/home/packages/cursor.nix`
+- The GitHub Actions workflow builds `.#packages.x86_64-linux.cursor` before opening a PR
 - Linux x86_64 only (AppImage format)
 
 ## update-vscode-insiders.py
