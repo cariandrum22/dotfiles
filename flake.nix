@@ -148,6 +148,7 @@
         ./config/home-manager/home/packages/linux.nix
         ./config/home-manager/services/keybase.nix
         ./config/home-manager/services/vscode-server.nix
+        ./config/home-manager/services/gpg-agent.nix
       ];
 
       platformHomeModules =
