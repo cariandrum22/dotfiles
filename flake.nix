@@ -257,22 +257,51 @@
         system:
         let
           pkgs = mkPkgs system;
+          defaultActivate = "${self.packages.${system}.default}/activate";
+          headlessActivate =
+            if pkgs.stdenv.isLinux then "${self.packages.${system}.headless}/activate" else defaultActivate;
         in
         {
           default = {
             type = "app";
-            program = "${self.packages.${system}.default}/activate";
+            program = defaultActivate;
           };
 
-          # Simplified switch that uses the current system's configuration
+          # Switch using the current system's configuration and auto-detect
+          # whether Linux should use the headless profile.
           switch = {
             type = "app";
             program = toString (
               pkgs.writeShellScript "switch" ''
                 #!/usr/bin/env bash
-                set -e
-                echo "Activating Home Manager configuration for ${system}..."
-                exec ${self.packages.${system}.default}/activate
+                set -euo pipefail
+
+                activate="${defaultActivate}"
+                profile="default"
+
+                if [[ "${system}" == *-linux ]]; then
+                  case "''${DOTFILES_HEADLESS:-auto}" in
+                    1|true|yes|on)
+                      activate="${headlessActivate}"
+                      profile="headless"
+                      ;;
+                    0|false|no|off)
+                      ;;
+                    auto|"")
+                      if [[ -z "''${DISPLAY:-}" && -z "''${WAYLAND_DISPLAY:-}" && "''${XDG_SESSION_TYPE:-}" != "x11" && "''${XDG_SESSION_TYPE:-}" != "wayland" ]]; then
+                        activate="${headlessActivate}"
+                        profile="headless"
+                      fi
+                      ;;
+                    *)
+                      echo "Invalid DOTFILES_HEADLESS value: ''${DOTFILES_HEADLESS}" >&2
+                      exit 1
+                      ;;
+                  esac
+                fi
+
+                echo "Activating Home Manager configuration for ${system} (''${profile})..."
+                exec "''${activate}"
               ''
             );
           };
