@@ -73,6 +73,7 @@
         "remotePlatform" = {
           eto = "linux";
           "eto.stultitia.me" = "linux";
+          "chetter.stultitia.me" = "linux";
           heilwig = "macOS";
           chroe = "macOS";
         };
