@@ -33,10 +33,6 @@ if type -q bass
 end
 
 function __claudius_import_hm_session_vars
-    if set -q __HM_SESS_VARS_SOURCED
-        return
-    end
-
     function __claudius_import_hm_session_var
         set -l name $argv[1]
         set -l value $argv[2]
@@ -66,7 +62,8 @@ function __claudius_import_hm_session_vars
         return
     end
 
-    for line in (bash -lc 'source "$1" >/dev/null 2>&1
+    for line in (bash -lc 'unset __HM_SESS_VARS_SOURCED
+source "$1" >/dev/null 2>&1
 printf "__HM_SESS_VARS_SOURCED=%s\n" "$__HM_SESS_VARS_SOURCED"
 printf "CLAUDIUS_1PASSWORD_MODE=%s\n" "$CLAUDIUS_1PASSWORD_MODE"
 printf "CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH=%s\n" "$CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH"
