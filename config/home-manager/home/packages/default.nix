@@ -60,6 +60,7 @@
 
         # DevOps
         docker-compose
+        cloudflared
         etcd_3_5
         kubectl
         kubernetes-helm
