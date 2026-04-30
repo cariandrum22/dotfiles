@@ -73,6 +73,12 @@ fn _account-from-args {|@args|
   }
 }
 
+fn _unset-env-if-set {|name|
+  if (has-env $name) {
+    unset-env $name
+  }
+}
+
 fn _set-session {|session account|
   set-env OP_SESSION $session
   echo (styled "✓ set " green) OP_SESSION
@@ -130,7 +136,86 @@ fn _parse-legacy-signin-output {|output account|
   }
 }
 
+fn use-desktop-integration {
+  _unset-env-if-set OP_SERVICE_ACCOUNT_TOKEN
+  _unset-env-if-set OP_SESSION
+  _unset-env-if-set OP_ACCOUNT
+  _unset-env-if-set OP_CONNECT_HOST
+  _unset-env-if-set OP_CONNECT_TOKEN
+}
+
+fn use-manual-signin {
+  _unset-env-if-set OP_SERVICE_ACCOUNT_TOKEN
+  _unset-env-if-set OP_CONNECT_HOST
+  _unset-env-if-set OP_CONNECT_TOKEN
+
+  if (eq $E:OP_SESSION "") {
+    fail "1Password manual session is not set. Run op-signin first."
+  }
+}
+
+fn _read-service-account-token {|token-path|
+  if (eq $token-path "") {
+    fail "1Password service account token path is empty."
+  }
+
+  if (not ?(test -r $token-path)) {
+    fail "1Password service account token is not readable: "$token-path
+  }
+
+  var token = (str:trim-space (slurp < $token-path))
+  if (eq $token "") {
+    fail "1Password service account token file is empty: "$token-path
+  }
+
+  put $token
+}
+
+fn use-service-account {|token-path|
+  _unset-env-if-set OP_SESSION
+  _unset-env-if-set OP_ACCOUNT
+  _unset-env-if-set OP_CONNECT_HOST
+  _unset-env-if-set OP_CONNECT_TOKEN
+  _unset-env-if-set OP_SERVICE_ACCOUNT_TOKEN
+
+  var token = [(_read-service-account-token $token-path)][0]
+  set-env OP_SERVICE_ACCOUNT_TOKEN $token
+  echo (styled "✓ set " green) OP_SERVICE_ACCOUNT_TOKEN
+}
+
+fn apply-shell-mode {|mode token-path|
+  if (eq $mode "desktop") {
+    use-desktop-integration
+    return
+  }
+
+  if (eq $mode "manual") {
+    _unset-env-if-set OP_SERVICE_ACCOUNT_TOKEN
+    _unset-env-if-set OP_CONNECT_HOST
+    _unset-env-if-set OP_CONNECT_TOKEN
+    return
+  }
+
+  if (eq $mode "service-account") {
+    _unset-env-if-set OP_SESSION
+    _unset-env-if-set OP_ACCOUNT
+    _unset-env-if-set OP_CONNECT_HOST
+    _unset-env-if-set OP_CONNECT_TOKEN
+    _unset-env-if-set OP_SERVICE_ACCOUNT_TOKEN
+
+    var token = [(_read-service-account-token $token-path)][0]
+    set-env OP_SERVICE_ACCOUNT_TOKEN $token
+    return
+  }
+
+  fail "Unsupported 1Password mode: "$mode
+}
+
 fn signin {|@args|
+  _unset-env-if-set OP_SERVICE_ACCOUNT_TOKEN
+  _unset-env-if-set OP_CONNECT_HOST
+  _unset-env-if-set OP_CONNECT_TOKEN
+
   var account = ""
   var parsed-account = [(_account-from-args $@args)]
   if (> (count $parsed-account) 0) {

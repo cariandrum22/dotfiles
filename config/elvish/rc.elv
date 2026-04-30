@@ -296,6 +296,65 @@ if ?(test -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh) {
   ]
 }
 
+fn _import-hm-session-vars {
+  if (or (has-env __HM_SESS_VARS_SOURCED) (not (has-external bash))) {
+    return
+  }
+
+  var hm-session-vars = $E:HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
+  if (not ?(test -f $hm-session-vars)) {
+    return
+  }
+
+  try {
+    var exported = (bash -lc '
+source "$1" >/dev/null 2>&1
+printf "__HM_SESS_VARS_SOURCED=%s\n" "$__HM_SESS_VARS_SOURCED"
+printf "CLAUDIUS_1PASSWORD_MODE=%s\n" "$CLAUDIUS_1PASSWORD_MODE"
+printf "CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH=%s\n" "$CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH"
+printf "CLAUDIUS_1PASSWORD_VAULT=%s\n" "$CLAUDIUS_1PASSWORD_VAULT"
+' bash $hm-session-vars | slurp)
+
+    fn import-line {|name value|
+      if (eq $name "__HM_SESS_VARS_SOURCED") {
+        set-env $name $value
+        return
+      }
+
+      if (eq $name "CLAUDIUS_1PASSWORD_MODE") {
+        if (or (has-env CLAUDIUS_1PASSWORD_MODE) (has-env CLAUDIUS_OP_MODE)) {
+          return
+        }
+      } elif (eq $name "CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH") {
+        if (or
+          (has-env CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH)
+          (has-env CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH)
+        ) {
+          return
+        }
+      } elif (eq $name "CLAUDIUS_1PASSWORD_VAULT") {
+        if (or (has-env CLAUDIUS_1PASSWORD_VAULT) (has-env CLAUDIUS_OP_VAULT)) {
+          return
+        }
+      }
+
+      set-env $name $value
+    }
+
+    each {|line|
+      if (not (eq $line "")) {
+        var parts = [(str:split "=" $line)]
+        if (>= (count $parts) 2) {
+          import-line $parts[0] $parts[1]
+        }
+      }
+    } [(str:split "\n" (str:trim-space $exported))]
+  } catch {
+  }
+}
+
+_import-hm-session-vars
+
 # Configure XDG Base Directory
 set E:XDG_CONFIG_HOME = $E:HOME/.config
 
@@ -407,11 +466,31 @@ if (has-external krew) {
   ]
 }
 
-# For Gemini-CLI with 1Password
-if (and (has-external op) (has-external gemini)) {
-  set E:GOOGLE_CLOUD_PROJECT = "op://Private/Vertex AI - personal/project"
-  set E:GOOGLE_CLOUD_LOCATION = "op://Private/Vertex AI - personal/location"
-  set E:GOOGLE_APPLICATION_CREDENTIALS = "op://Private/Vertex AI - personal/credential"
+# Home Manager owns CLAUDIUS_1PASSWORD_* defaults.
+# Legacy CLAUDIUS_OP_* names are accepted only as migration fallbacks.
+if (eq $E:CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH "") {
+  if (not (eq $E:CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH "")) {
+    set E:CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH = $E:CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH
+  }
+}
+if (has-env CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH) {
+  unset-env CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH
+}
+if (eq $E:CLAUDIUS_1PASSWORD_MODE "") {
+  if (not (eq $E:CLAUDIUS_OP_MODE "")) {
+    set E:CLAUDIUS_1PASSWORD_MODE = $E:CLAUDIUS_OP_MODE
+  }
+}
+if (has-env CLAUDIUS_OP_MODE) {
+  unset-env CLAUDIUS_OP_MODE
+}
+if (eq $E:CLAUDIUS_1PASSWORD_VAULT "") {
+  if (not (eq $E:CLAUDIUS_OP_VAULT "")) {
+    set E:CLAUDIUS_1PASSWORD_VAULT = $E:CLAUDIUS_OP_VAULT
+  }
+}
+if (has-env CLAUDIUS_OP_VAULT) {
+  unset-env CLAUDIUS_OP_VAULT
 }
 
 # 1Password helpers
@@ -424,35 +503,75 @@ fn op-signin {|@args|
   onepassword:signin $@args
 }
 
+if (and (has-external op) (not (eq $E:CLAUDIUS_1PASSWORD_MODE ""))) {
+  try {
+    onepassword:apply-shell-mode $E:CLAUDIUS_1PASSWORD_MODE $E:CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH
+  } catch e {
+    echo (styled "1Password auth initialization failed:" red) $e >&2
+  }
+}
+
+fn op-sa {|@args|
+  if (not (has-external op)) {
+    echo (styled "1Password CLI (op) not found in PATH" red) >&2
+    return
+  }
+
+  onepassword:use-service-account $E:CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH
+  e:op $@args
+}
+
 # Get secrets from 1Password for AI tools
 if (and (has-external op) (has-external claudius)) {
-  set E:CLAUDIUS_SECRET_CF_AIG_ACCOUNT_ID = "op://Private/CLOUDFLARE AI Gateway/Account ID"
-  set E:CLAUDIUS_SECRET_CF_AIG_GATEWAY_ID = "op://Private/CLOUDFLARE AI Gateway/Gateway ID"
-  set E:CLAUDIUS_SECRET_CF_AIG_TOKEN = "op://Private/CLOUDFLARE AI Gateway/credential"
-  set E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT = "op://Private/Personal AI Gateway Credential/endpoint"
-  set E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN = "op://Private/Personal AI Gateway Credential/credential"
+  fn -current-op-vault {
+    if (not (eq $E:CLAUDIUS_1PASSWORD_VAULT "")) {
+      put $E:CLAUDIUS_1PASSWORD_VAULT
+      return
+    }
+
+    put Automation
+  }
+
+  fn -configure-claudius-secrets {
+    var ai-vault = [(-current-op-vault)][0]
+    set E:CLAUDIUS_SECRET_CF_AIG_ACCOUNT_ID = "op://"$ai-vault"/CLOUDFLARE AI Gateway/Account ID"
+    set E:CLAUDIUS_SECRET_CF_AIG_GATEWAY_ID = "op://"$ai-vault"/CLOUDFLARE AI Gateway/Gateway ID"
+    set E:CLAUDIUS_SECRET_CF_AIG_TOKEN = "op://"$ai-vault"/CLOUDFLARE AI Gateway/credential"
+    set E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT = "op://"$ai-vault"/Personal AI Gateway Credential/endpoint"
+    set E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN = "op://"$ai-vault"/Personal AI Gateway Credential/credential"
+    set E:CLAUDIUS_SECRET_GOOGLE_CLOUD_PROJECT = "op://"$ai-vault"/Vertex AI - personal/project"
+    set E:CLAUDIUS_SECRET_GOOGLE_CLOUD_LOCATION = "op://"$ai-vault"/Vertex AI - personal/location"
+    set E:CLAUDIUS_SECRET_GOOGLE_APPLICATION_CREDENTIALS = "op://"$ai-vault"/Vertex AI - personal/credential"
+    set E:CLAUDIUS_SECRET_OPENAI_API_KEY = "op://"$ai-vault"/OpenAI Codex CLI/credential"
+  }
 
   # Base URLs for AI tools with wrapper functions
   # Note: Use edit:add-var to make functions override external commands
   # Note: Use string concatenation to expand variables inside {{}} for Claudius
+  fn -claudius-tool-wrapper {|tool @args|
+    -configure-claudius-secrets
+    e:claudius secrets run -- $tool $@args
+  }
+
+  -configure-claudius-secrets
+
   if (has-external claude) {
     set E:CLAUDIUS_SECRET_ANTHROPIC_BASE_URL = "{{"$E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT"}}/{{"$E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN"}}/anthropic"
     fn -claude-wrapper {|@args|
-      e:claudius secrets run -- claude $@args
+      -claudius-tool-wrapper claude $@args
     }
     edit:add-var claude~ $-claude-wrapper~
   }
   if (has-external gemini) {
     set E:CLAUDIUS_SECRET_GOOGLE_VERTEX_BASE_URL = "{{"$E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT"}}/{{"$E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN"}}/google-vertex-ai"
     fn -gemini-wrapper {|@args|
-      e:claudius secrets run -- gemini $@args
+      -claudius-tool-wrapper gemini $@args
     }
     edit:add-var gemini~ $-gemini-wrapper~
   }
   if (has-external codex) {
-    set E:CLAUDIUS_SECRET_OPENAI_API_KEY = "op://Private/OpenAI Codex CLI/credential"
     fn -codex-wrapper {|@args|
-      e:claudius secrets run -- codex $@args
+      -claudius-tool-wrapper codex $@args
     }
     edit:add-var codex~ $-codex-wrapper~
   }

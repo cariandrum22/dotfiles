@@ -13,6 +13,7 @@
   imports = [
     ./home/file.nix
     ./home/packages/default.nix
+    ./home/sessionVariables.nix
     ./programs
   ];
 
