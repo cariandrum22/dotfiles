@@ -183,16 +183,11 @@ if type -q krew
     set_path "$HOME/.krew/bin"
 end
 
-# 1Password auth mode for AI tools.
-# desktop: rely on 1Password CLI app integration (macOS default)
-# manual: run `op-signin` first for GUI Linux sessions
-# service-account: load token from disk for headless Linux
+# Home Manager owns CLAUDIUS_1PASSWORD_* defaults.
 # Legacy CLAUDIUS_OP_* names are accepted only as migration fallbacks.
 if not set -q CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH
     if set -q CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH
         set -gx CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH "$CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH"
-    else
-        set -gx CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH "$HOME/.config/op/service-accounts/headless-linux-cli.token"
     end
 end
 if set -q CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH
@@ -201,23 +196,6 @@ end
 if not set -q CLAUDIUS_1PASSWORD_MODE
     if set -q CLAUDIUS_OP_MODE
         set -gx CLAUDIUS_1PASSWORD_MODE "$CLAUDIUS_OP_MODE"
-    else
-        set -l claudius_platform (uname -s)
-        set -l claudius_headless 0
-
-        if test -z "$DISPLAY"; and test -z "$WAYLAND_DISPLAY"; and not contains -- "$XDG_SESSION_TYPE" x11 wayland
-            set claudius_headless 1
-        end
-
-        if test "$claudius_platform" = Linux
-            if test "$claudius_headless" = 1; and test -r "$CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH"
-                set -gx CLAUDIUS_1PASSWORD_MODE service-account
-            else
-                set -gx CLAUDIUS_1PASSWORD_MODE manual
-            end
-        else
-            set -gx CLAUDIUS_1PASSWORD_MODE desktop
-        end
     end
 end
 if set -q CLAUDIUS_OP_MODE
@@ -226,10 +204,6 @@ end
 if not set -q CLAUDIUS_1PASSWORD_VAULT
     if set -q CLAUDIUS_OP_VAULT
         set -gx CLAUDIUS_1PASSWORD_VAULT "$CLAUDIUS_OP_VAULT"
-    else if test "$CLAUDIUS_1PASSWORD_MODE" = "service-account"
-        set -gx CLAUDIUS_1PASSWORD_VAULT Automation
-    else
-        set -gx CLAUDIUS_1PASSWORD_VAULT Private
     end
 end
 if set -q CLAUDIUS_OP_VAULT
@@ -262,10 +236,8 @@ end
 function __claudius_current_op_vault
     if set -q CLAUDIUS_1PASSWORD_VAULT
         echo "$CLAUDIUS_1PASSWORD_VAULT"
-    else if test "$CLAUDIUS_1PASSWORD_MODE" = "service-account"
-        echo Automation
     else
-        echo Private
+        echo Automation
     end
 end
 
@@ -291,24 +263,39 @@ function __claudius_run_tool
 end
 
 function op-sa --description 'Run op using the configured 1Password service account'
-    set -l previous_mode $CLAUDIUS_1PASSWORD_MODE
+    set -l had_previous_mode 0
+    set -l previous_mode
+
+    if set -q CLAUDIUS_1PASSWORD_MODE
+        set had_previous_mode 1
+        set previous_mode "$CLAUDIUS_1PASSWORD_MODE"
+    end
+
     set -gx CLAUDIUS_1PASSWORD_MODE service-account
 
     __claudius_apply_default_op_auth
     or begin
         set -l prepare_status $status
-        set -gx CLAUDIUS_1PASSWORD_MODE $previous_mode
+        if test $had_previous_mode -eq 1
+            set -gx CLAUDIUS_1PASSWORD_MODE "$previous_mode"
+        else
+            set -e CLAUDIUS_1PASSWORD_MODE
+        end
         return $prepare_status
     end
 
     command op $argv
     set -l status_code $status
-    set -gx CLAUDIUS_1PASSWORD_MODE $previous_mode
+    if test $had_previous_mode -eq 1
+        set -gx CLAUDIUS_1PASSWORD_MODE "$previous_mode"
+    else
+        set -e CLAUDIUS_1PASSWORD_MODE
+    end
     return $status_code
 end
 
 # Get secrets from 1Password
-if type -q op
+if type -q op; and set -q CLAUDIUS_1PASSWORD_MODE
     __claudius_apply_default_op_auth
 end
 

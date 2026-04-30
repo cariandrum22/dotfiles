@@ -19,13 +19,7 @@ let
       "manual"
     else
       null;
-  onepasswordVault =
-    if isLinux && isHeadless then
-      "Automation"
-    else if onepasswordMode != null then
-      "Private"
-    else
-      null;
+  onepasswordVault = if onepasswordMode != null then "Automation" else null;
   claudiusConfigText = lib.concatStrings [
     ''
       # Managed by Home Manager. Edit dotfiles instead of this file.
@@ -45,14 +39,11 @@ let
   ];
 in
 {
-  home.sessionVariables =
-    lib.optionalAttrs (onepasswordMode != null) {
-      CLAUDIUS_1PASSWORD_MODE = onepasswordMode;
-      CLAUDIUS_1PASSWORD_VAULT = onepasswordVault;
-    }
-    // lib.optionalAttrs (isLinux && isHeadless) {
-      CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH = serviceAccountTokenEnvPath;
-    };
+  home.sessionVariables = lib.optionalAttrs (onepasswordMode != null) {
+    CLAUDIUS_1PASSWORD_MODE = onepasswordMode;
+    CLAUDIUS_1PASSWORD_VAULT = onepasswordVault;
+    CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH = serviceAccountTokenEnvPath;
+  };
 
   xdg.configFile = lib.optionalAttrs (onepasswordMode != null) {
     "claudius/config.toml" = {

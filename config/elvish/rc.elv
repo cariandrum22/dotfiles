@@ -466,16 +466,11 @@ if (has-external krew) {
   ]
 }
 
-# 1Password auth mode for AI tools.
-# desktop: rely on 1Password CLI app integration (macOS default)
-# manual: run `op-signin` first for GUI Linux sessions
-# service-account: load token from disk for headless Linux
+# Home Manager owns CLAUDIUS_1PASSWORD_* defaults.
 # Legacy CLAUDIUS_OP_* names are accepted only as migration fallbacks.
 if (eq $E:CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH "") {
   if (not (eq $E:CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH "")) {
     set E:CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH = $E:CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH
-  } else {
-    set E:CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH = $E:HOME/.config/op/service-accounts/headless-linux-cli.token
   }
 }
 if (has-env CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH) {
@@ -484,21 +479,6 @@ if (has-env CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH) {
 if (eq $E:CLAUDIUS_1PASSWORD_MODE "") {
   if (not (eq $E:CLAUDIUS_OP_MODE "")) {
     set E:CLAUDIUS_1PASSWORD_MODE = $E:CLAUDIUS_OP_MODE
-  } else {
-    var platform = [(uname -s)][0]
-    if (and
-      (eq $platform "Linux")
-      (eq $E:DISPLAY "")
-      (eq $E:WAYLAND_DISPLAY "")
-      (not (or (eq $E:XDG_SESSION_TYPE "x11") (eq $E:XDG_SESSION_TYPE "wayland")))
-      ?(test -r $E:CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH)
-    ) {
-      set E:CLAUDIUS_1PASSWORD_MODE = "service-account"
-    } elif (eq $platform "Linux") {
-      set E:CLAUDIUS_1PASSWORD_MODE = "manual"
-    } else {
-      set E:CLAUDIUS_1PASSWORD_MODE = "desktop"
-    }
   }
 }
 if (has-env CLAUDIUS_OP_MODE) {
@@ -507,10 +487,6 @@ if (has-env CLAUDIUS_OP_MODE) {
 if (eq $E:CLAUDIUS_1PASSWORD_VAULT "") {
   if (not (eq $E:CLAUDIUS_OP_VAULT "")) {
     set E:CLAUDIUS_1PASSWORD_VAULT = $E:CLAUDIUS_OP_VAULT
-  } elif (eq $E:CLAUDIUS_1PASSWORD_MODE "service-account") {
-    set E:CLAUDIUS_1PASSWORD_VAULT = Automation
-  } else {
-    set E:CLAUDIUS_1PASSWORD_VAULT = Private
   }
 }
 if (has-env CLAUDIUS_OP_VAULT) {
@@ -527,7 +503,7 @@ fn op-signin {|@args|
   onepassword:signin $@args
 }
 
-if (has-external op) {
+if (and (has-external op) (not (eq $E:CLAUDIUS_1PASSWORD_MODE ""))) {
   try {
     onepassword:apply-shell-mode $E:CLAUDIUS_1PASSWORD_MODE $E:CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH
   } catch e {
@@ -553,12 +529,7 @@ if (and (has-external op) (has-external claudius)) {
       return
     }
 
-    if (eq $E:CLAUDIUS_1PASSWORD_MODE "service-account") {
-      put Automation
-      return
-    }
-
-    put Private
+    put Automation
   }
 
   fn -configure-claudius-secrets {
