@@ -297,7 +297,7 @@ if ?(test -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh) {
 }
 
 fn _import-hm-session-vars {
-  if (or (has-env __HM_SESS_VARS_SOURCED) (not (has-external bash))) {
+  if (not (has-external bash)) {
     return
   }
 
@@ -308,6 +308,7 @@ fn _import-hm-session-vars {
 
   try {
     var exported = (bash -lc '
+unset __HM_SESS_VARS_SOURCED
 source "$1" >/dev/null 2>&1
 printf "__HM_SESS_VARS_SOURCED=%s\n" "$__HM_SESS_VARS_SOURCED"
 printf "CLAUDIUS_1PASSWORD_MODE=%s\n" "$CLAUDIUS_1PASSWORD_MODE"
