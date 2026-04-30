@@ -32,6 +32,56 @@ if type -q bass
     end
 end
 
+function __claudius_import_hm_session_vars
+    if set -q __HM_SESS_VARS_SOURCED
+        return
+    end
+
+    function __claudius_import_hm_session_var
+        set -l name $argv[1]
+        set -l value $argv[2]
+
+        switch "$name"
+            case __HM_SESS_VARS_SOURCED
+                set -gx -- $name "$value"
+            case CLAUDIUS_1PASSWORD_MODE
+                if not set -q CLAUDIUS_1PASSWORD_MODE; and not set -q CLAUDIUS_OP_MODE
+                    set -gx -- $name "$value"
+                end
+            case CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH
+                if not set -q CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH; and not set -q CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH
+                    set -gx -- $name "$value"
+                end
+            case CLAUDIUS_1PASSWORD_VAULT
+                if not set -q CLAUDIUS_1PASSWORD_VAULT; and not set -q CLAUDIUS_OP_VAULT
+                    set -gx -- $name "$value"
+                end
+            case '*'
+                set -gx -- $name "$value"
+        end
+    end
+
+    set -l hm_session_vars "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+    if not test -f "$hm_session_vars"
+        return
+    end
+
+    for line in (bash -lc 'source "$1" >/dev/null 2>&1
+printf "__HM_SESS_VARS_SOURCED=%s\n" "$__HM_SESS_VARS_SOURCED"
+printf "CLAUDIUS_1PASSWORD_MODE=%s\n" "$CLAUDIUS_1PASSWORD_MODE"
+printf "CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH=%s\n" "$CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH"
+printf "CLAUDIUS_1PASSWORD_VAULT=%s\n" "$CLAUDIUS_1PASSWORD_VAULT"' bash "$hm_session_vars")
+        if test -n "$line"
+            set -l parts (string split -m 1 '=' -- "$line")
+            if test (count $parts) -eq 2
+                __claudius_import_hm_session_var $parts[1] "$parts[2]"
+            end
+        end
+    end
+end
+
+__claudius_import_hm_session_vars
+
 # Configure any-nix-shell
 if type -q any-nix-shell
     any-nix-shell fish --info-right | source
@@ -133,33 +183,155 @@ if type -q krew
     set_path "$HOME/.krew/bin"
 end
 
-# For Gemini-CLI
-if type -q op and type -q gemini
-    set -x GOOGLE_CLOUD_PROJECT "op://Private/Vertex AI - personal/project"
-    set -x GOOGLE_CLOUD_LOCATION "op://Private/Vertex AI - personal/location"
-    set -x GOOGLE_APPLICATION_CREDENTIALS "op://Private/Vertex AI - personal/credential"
+# 1Password auth mode for AI tools.
+# desktop: rely on 1Password CLI app integration (macOS default)
+# manual: run `op-signin` first for GUI Linux sessions
+# service-account: load token from disk for headless Linux
+# Legacy CLAUDIUS_OP_* names are accepted only as migration fallbacks.
+if not set -q CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH
+    if set -q CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH
+        set -gx CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH "$CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH"
+    else
+        set -gx CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH "$HOME/.config/op/service-accounts/headless-linux-cli.token"
+    end
+end
+if set -q CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH
+    set -e CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH
+end
+if not set -q CLAUDIUS_1PASSWORD_MODE
+    if set -q CLAUDIUS_OP_MODE
+        set -gx CLAUDIUS_1PASSWORD_MODE "$CLAUDIUS_OP_MODE"
+    else
+        set -l claudius_platform (uname -s)
+        set -l claudius_headless 0
+
+        if test -z "$DISPLAY"; and test -z "$WAYLAND_DISPLAY"; and not contains -- "$XDG_SESSION_TYPE" x11 wayland
+            set claudius_headless 1
+        end
+
+        if test "$claudius_platform" = Linux
+            if test "$claudius_headless" = 1; and test -r "$CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH"
+                set -gx CLAUDIUS_1PASSWORD_MODE service-account
+            else
+                set -gx CLAUDIUS_1PASSWORD_MODE manual
+            end
+        else
+            set -gx CLAUDIUS_1PASSWORD_MODE desktop
+        end
+    end
+end
+if set -q CLAUDIUS_OP_MODE
+    set -e CLAUDIUS_OP_MODE
+end
+if not set -q CLAUDIUS_1PASSWORD_VAULT
+    if set -q CLAUDIUS_OP_VAULT
+        set -gx CLAUDIUS_1PASSWORD_VAULT "$CLAUDIUS_OP_VAULT"
+    else if test "$CLAUDIUS_1PASSWORD_MODE" = "service-account"
+        set -gx CLAUDIUS_1PASSWORD_VAULT Automation
+    else
+        set -gx CLAUDIUS_1PASSWORD_VAULT Private
+    end
+end
+if set -q CLAUDIUS_OP_VAULT
+    set -e CLAUDIUS_OP_VAULT
+end
+
+function __claudius_apply_default_op_auth
+    switch "$CLAUDIUS_1PASSWORD_MODE"
+        case desktop
+            set -e OP_SERVICE_ACCOUNT_TOKEN OP_SESSION OP_ACCOUNT OP_CONNECT_HOST OP_CONNECT_TOKEN
+        case manual
+            set -e OP_SERVICE_ACCOUNT_TOKEN OP_CONNECT_HOST OP_CONNECT_TOKEN
+        case service-account
+            set -e OP_SESSION OP_ACCOUNT OP_CONNECT_HOST OP_CONNECT_TOKEN OP_SERVICE_ACCOUNT_TOKEN
+            if not test -r "$CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH"
+                echo "1Password service account token is not readable: $CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH" >&2
+                return 1
+            end
+            set -gx OP_SERVICE_ACCOUNT_TOKEN (string trim -- (cat "$CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH"))
+            if test -z "$OP_SERVICE_ACCOUNT_TOKEN"
+                echo "1Password service account token file is empty: $CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH" >&2
+                return 1
+            end
+        case '*'
+            echo "Unsupported CLAUDIUS_1PASSWORD_MODE: $CLAUDIUS_1PASSWORD_MODE" >&2
+            return 1
+    end
+end
+
+function __claudius_current_op_vault
+    if set -q CLAUDIUS_1PASSWORD_VAULT
+        echo "$CLAUDIUS_1PASSWORD_VAULT"
+    else if test "$CLAUDIUS_1PASSWORD_MODE" = "service-account"
+        echo Automation
+    else
+        echo Private
+    end
+end
+
+function __claudius_export_secrets
+    set -l ai_vault (__claudius_current_op_vault)
+    set -gx CLAUDIUS_SECRET_CF_AIG_ACCOUNT_ID "op://$ai_vault/CLOUDFLARE AI Gateway/Account ID"
+    set -gx CLAUDIUS_SECRET_CF_AIG_GATEWAY_ID "op://$ai_vault/CLOUDFLARE AI Gateway/Gateway ID"
+    set -gx CLAUDIUS_SECRET_CF_AIG_TOKEN "op://$ai_vault/CLOUDFLARE AI Gateway/credential"
+    set -gx CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT "op://$ai_vault/Personal AI Gateway Credential/endpoint"
+    set -gx CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN "op://$ai_vault/Personal AI Gateway Credential/credential"
+    set -gx CLAUDIUS_SECRET_GOOGLE_CLOUD_PROJECT "op://$ai_vault/Vertex AI - personal/project"
+    set -gx CLAUDIUS_SECRET_GOOGLE_CLOUD_LOCATION "op://$ai_vault/Vertex AI - personal/location"
+    set -gx CLAUDIUS_SECRET_GOOGLE_APPLICATION_CREDENTIALS "op://$ai_vault/Vertex AI - personal/credential"
+    set -gx CLAUDIUS_SECRET_OPENAI_API_KEY "op://$ai_vault/OpenAI Codex CLI/credential"
+end
+
+function __claudius_run_tool
+    set -l tool $argv[1]
+    set -e argv[1]
+
+    __claudius_export_secrets
+    command claudius secrets run -- $tool $argv
+end
+
+function op-sa --description 'Run op using the configured 1Password service account'
+    set -l previous_mode $CLAUDIUS_1PASSWORD_MODE
+    set -gx CLAUDIUS_1PASSWORD_MODE service-account
+
+    __claudius_apply_default_op_auth
+    or begin
+        set -l prepare_status $status
+        set -gx CLAUDIUS_1PASSWORD_MODE $previous_mode
+        return $prepare_status
+    end
+
+    command op $argv
+    set -l status_code $status
+    set -gx CLAUDIUS_1PASSWORD_MODE $previous_mode
+    return $status_code
 end
 
 # Get secrets from 1Password
+if type -q op
+    __claudius_apply_default_op_auth
+end
+
 if type -q op and type -q claudius
-    set -x CLAUDIUS_SECRET_CF_AIG_ACCOUNT_ID "op://Private/CLOUDFLARE AI Gateway/Account ID"
-    set -x CLAUDIUS_SECRET_CF_AIG_GATEWAY_ID "op://Private/CLOUDFLARE AI Gateway/Gateway ID"
-    set -x CLAUDIUS_SECRET_CF_AIG_TOKEN "op://Private/CLOUDFLARE AI Gateway/credential"
-    set -x CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT "op://Private/Personal AI Gateway Credential/endpoint"
-    set -x CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN "op://Private/Personal AI Gateway Credential/credential"
+    __claudius_export_secrets
 
     # Base URLs
     if type -q claude
         set -x CLAUDIUS_SECRET_ANTHROPIC_BASE_URL "{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT}}/{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN}}/anthropic"
-        alias claude="claudius secrets run -- claude"
+        function claude --wraps claude
+            __claudius_run_tool claude $argv
+        end
     end
     if type -q gemini
         set -x CLAUDIUS_SECRET_GOOGLE_VERTEX_BASE_URL "{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT}}/{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN}}/google-vertex-ai"
-        alias gemini="claudius secrets run -- gemini"
+        function gemini --wraps gemini
+            __claudius_run_tool gemini $argv
+        end
     end
     if type -q codex
-        set -x CLAUDIUS_SECRET_OPENAI_API_KEY "op://Private/OpenAI Codex CLI/credential"
-        alias codex="claudius secrets run -- codex"
+        function codex --wraps codex
+            __claudius_run_tool codex $argv
+        end
     end
 end
 
