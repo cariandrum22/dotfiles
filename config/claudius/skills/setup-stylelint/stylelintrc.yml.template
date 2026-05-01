@@ -1,0 +1,172 @@
+---
+extends:
+  - stylelint-config-standard-scss
+
+plugins:
+  - stylelint-order
+  - stylelint-declaration-strict-value
+
+rules:
+  # ── Specificity & Selectors ──────────────────────────
+  # Keep specificity flat — no IDs, no overly complex selectors
+  selector-max-id: 0
+  selector-max-compound-selectors: 3
+  selector-no-qualifying-type: true
+  selector-max-specificity: "0,3,3"
+
+  # ── Nesting ──────────────────────────────────────────
+  max-nesting-depth: 3
+
+  # ── Values & Units ──────────────────────────────────
+  # No magic numbers — use variables/functions for colors, fonts, sizes
+  scale-unlimited/declaration-strict-value:
+    - - /color$/
+      - /^font/
+      - z-index
+      - border-radius
+    - ignoreValues:
+        "": ["currentColor", "inherit", "transparent", "initial", "none", "0"]
+      expandShorthandProperties: true
+
+  # Disallow redundant values
+  shorthand-property-no-redundant-values: true
+  declaration-no-important: true
+  number-max-precision: 4
+
+  # ── Functional / Compositional Patterns ──────────────
+  # Prefer @mixin/@use over @extend (functional composition)
+  at-rule-disallowed-list:
+    - extend
+  scss/at-extend-no-missing-placeholder: null
+
+  # Enforce @use over @import (modern SCSS modules)
+  scss/at-import-no-partial-leading-underscore: true
+  scss/no-global-function-names: true
+
+  # ── Naming ──────────────────────────────────────────
+  # BEM-like pattern or simple kebab-case
+  selector-class-pattern: "^[a-z][a-z0-9]*(-[a-z0-9]+)*(__[a-z0-9]+(-[a-z0-9]+)*)*(--[a-z0-9]+(-[a-z0-9]+)*)?$"
+
+  # ── Property Order ──────────────────────────────────
+  order/properties-order:
+    - - groupName: "Layout"
+        properties:
+          - display
+          - position
+          - top
+          - right
+          - bottom
+          - left
+          - z-index
+          - float
+          - clear
+
+      - groupName: "Box Model"
+        properties:
+          - width
+          - min-width
+          - max-width
+          - height
+          - min-height
+          - max-height
+          - margin
+          - margin-top
+          - margin-right
+          - margin-bottom
+          - margin-left
+          - padding
+          - padding-top
+          - padding-right
+          - padding-bottom
+          - padding-left
+          - overflow
+          - overflow-x
+          - overflow-y
+
+      - groupName: "Flexbox / Grid"
+        properties:
+          - flex
+          - flex-grow
+          - flex-shrink
+          - flex-basis
+          - flex-direction
+          - flex-flow
+          - flex-wrap
+          - align-items
+          - align-content
+          - align-self
+          - justify-content
+          - justify-items
+          - justify-self
+          - gap
+          - grid
+          - grid-template
+          - grid-template-columns
+          - grid-template-rows
+          - grid-template-areas
+          - grid-area
+          - grid-column
+          - grid-row
+          - grid-gap
+          - order
+
+      - groupName: "Typography"
+        properties:
+          - font
+          - font-family
+          - font-size
+          - font-weight
+          - font-style
+          - line-height
+          - letter-spacing
+          - text-align
+          - text-decoration
+          - text-transform
+          - text-overflow
+          - white-space
+          - word-break
+          - word-wrap
+          - color
+
+      - groupName: "Visual"
+        properties:
+          - background
+          - background-color
+          - background-image
+          - background-position
+          - background-repeat
+          - background-size
+          - border
+          - border-top
+          - border-right
+          - border-bottom
+          - border-left
+          - border-radius
+          - border-color
+          - box-shadow
+          - outline
+          - opacity
+          - visibility
+
+      - groupName: "Animation"
+        properties:
+          - transition
+          - transform
+          - animation
+          - will-change
+
+    - unspecified: bottomAlphabetical
+      emptyLineBeforeUnspecified: always
+      emptyLineMinimumPropertyThreshold: 5
+
+  # ── Misc ────────────────────────────────────────────
+  no-descending-specificity: true
+  no-duplicate-selectors: true
+  declaration-block-no-duplicate-properties: true
+  block-no-empty: true
+  comment-no-empty: true
+  no-empty-source: true
+  rule-empty-line-before:
+    - always
+    - except: [first-nested]
+      ignore: [after-comment]

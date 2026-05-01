@@ -1,0 +1,8 @@
+- repo: local
+  hooks:
+    - id: tftpl-validate
+      name: tftpl validate
+      entry: ./scripts/tftpl-validate.sh
+      language: system
+      files: \.tftpl$
+      pass_filenames: true

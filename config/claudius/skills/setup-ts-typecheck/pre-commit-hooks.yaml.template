@@ -1,0 +1,8 @@
+- repo: local
+  hooks:
+    - id: tsc-noEmit
+      name: TypeScript type check
+      entry: tsc --noEmit
+      language: system
+      files: \.tsx?$
+      pass_filenames: false

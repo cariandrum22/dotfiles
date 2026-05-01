@@ -1,0 +1,10 @@
+if ! has nix; then
+  log_error "Nix is not installed. See https://nixos.org/download.html"
+  return 1
+fi
+
+use flake
+
+# Load local overrides if they exist
+# shellcheck disable=SC1091
+[ -f .envrc.local ] && source_env .envrc.local

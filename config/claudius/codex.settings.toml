@@ -1,0 +1,48 @@
+model = "gpt-5.4"
+review_model = "gpt-5.4"
+model_provider = "cloudflare_openai"
+model_reasoning_effort = "xhigh"
+model_reasoning_summary = "auto"
+approval_policy = "never"
+sandbox_mode = "workspace-write"
+
+[sandbox_workspace_write]
+writable_roots = ["/tmp", "/var/tmp"]
+network_access = false
+exclude_tmpdir_env_var = false
+exclude_slash_tmp = false
+
+[shell_environment_policy]
+inherit = "all"
+set = { SHELL = "/bin/bash" }
+exclude = [
+    "SHELL",
+    "AWS_ACCESS_KEY_ID",
+    "AWS_SECRET_ACCESS_KEY",
+    "AWS_SESSION_TOKEN",
+    "AZURE_OPENAI_API_KEY",
+    "CLAUDE_API_KEY",
+    "OPENAI_API_KEY",
+    "OPENAI_ORG_ID",
+    "OPENAI_PROJECT_ID",
+    "ANTHROPIC_API_KEY",
+    "GITHUB_PERSONAL_ACCESS_TOKEN",
+    "PERPLEXITY_API_KEY",
+    "FIGMA_API_KEY",
+    "GEMINI_API_KEY",
+    "GOOGLE_API_KEY",
+    "GOOGLE_APPLICATION_CREDENTIALS",
+    "GOOGLE_OAUTH_CREDENTIALS",
+    "API_KEY",
+    "CF_AIG_TOKEN",
+    "CLAUDIUS_SECRET_*",
+]
+
+[model_providers.cloudflare_openai]
+name = "Cloudflare AI Gateway (OpenAI)"
+base_url = "https://gateway.ai.cloudflare.com/v1/aaea332100166e675dff4a9ed4012efb/cariandrum22/openai"
+env_key = "OPENAI_API_KEY"
+wire_api = "responses"
+
+[model_providers.cloudflare_openai.env_http_headers]
+cf-aig-authorization = "CF_AIG_TOKEN"

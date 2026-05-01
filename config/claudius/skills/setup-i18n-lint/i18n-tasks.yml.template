@@ -1,0 +1,37 @@
+base_locale: ja
+locales: [ja, en]
+
+data:
+  adapter: file
+  read:
+    - config/locales/%{locale}.yml
+    - config/locales/**/*.%{locale}.yml
+  write:
+    - ['*', 'config/locales/%{locale}.yml']
+
+search:
+  paths:
+    - app
+    - lib
+  relative_roots:
+    - app/controllers
+    - app/helpers
+    - app/mailers
+    - app/models
+    - app/views
+  exclude:
+    - app/assets
+    - vendor
+
+ignore_missing:
+  - 'errors.messages.*'
+  - 'activerecord.errors.*'
+
+ignore_unused:
+  - 'activerecord.*'
+  - 'errors.*'
+  - 'helpers.*'
+  - 'number.*'
+  - 'date.*'
+  - 'time.*'
+  - 'support.*'

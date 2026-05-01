@@ -1,0 +1,45 @@
+# justfile — __PROJECT_NAME__
+# vim: set ft=just :
+
+# ---------------------------------------------------------------------------
+# Safety settings (do not modify)
+# ---------------------------------------------------------------------------
+
+set shell := ["bash", "-euo", "pipefail", "-c"]
+set positional-arguments := true
+set export := true
+
+# ---------------------------------------------------------------------------
+# Project metadata
+# ---------------------------------------------------------------------------
+
+project_name := "__PROJECT_NAME__"
+
+# =========================================================================
+# Mandatory Recipes
+# =========================================================================
+
+# Default recipe — list available tasks
+default:
+    @just --list --unsorted
+
+# Display project help
+help:
+    @echo "{{project_name}}"
+    @echo ""
+    @just --list --unsorted
+
+# Install everything
+install: install-deps install-tools install-hooks
+
+# Install project dependencies
+install-deps:
+    @echo "install-deps: not configured — add project-specific logic here"
+
+# Install development tools
+install-tools:
+    @echo "install-tools: not configured — add project-specific logic here"
+
+# Install git hooks
+install-hooks:
+    @echo "install-hooks: not configured — add project-specific logic here"

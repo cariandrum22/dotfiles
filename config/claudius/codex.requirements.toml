@@ -1,0 +1,13 @@
+# Codex requirements.toml
+# Admin-enforced constraints that users cannot override.
+#
+# This file mirrors Codex CLI's `requirements.toml` schema.
+# See the configuration reference for the latest options:
+# https://developers.openai.com/codex/config-reference/
+#
+# Recommended baseline:
+# - Disallow `danger-full-access` in enforced environments.
+# - Permit `approval_policy = "never"` only if you accept automatic execution risk.
+
+allowed_approval_policies = ["untrusted", "on-failure", "on-request", "never"]
+allowed_sandbox_modes = ["read-only", "workspace-write"]

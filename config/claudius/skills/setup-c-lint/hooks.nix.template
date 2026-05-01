@@ -1,0 +1,2 @@
+clang-format-check = mkHook "clang-format-check" "clang-format --dry-run --Werror";
+clang-tidy-check = mkHook "clang-tidy-check" "./scripts/clang-tidy-check.sh";

@@ -1,0 +1,1 @@
+tftpl-validate = mkHook "tftpl-validate" "./scripts/tftpl-validate.sh";

@@ -1,0 +1,14 @@
+- repo: local
+  hooks:
+    - id: just-fmt-check
+      name: Check justfile formatting
+      entry: just --fmt --check --unstable
+      language: system
+      files: (^|/)justfile$|\.just$
+      pass_filenames: false
+    - id: just-evaluate
+      name: Validate justfile syntax
+      entry: just --evaluate
+      language: system
+      files: (^|/)justfile$|\.just$
+      pass_filenames: false

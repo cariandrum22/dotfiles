@@ -1,0 +1,45 @@
+tofu-format = {
+  enable = true;
+  name = "tofu-format";
+  package = pkgs.opentofu;
+  entry = "${pkgs.opentofu}/bin/tofu fmt";
+  files = "\\.(tf|tfvars)$";
+};
+tflint.enable = true;
+terraform-validate.enable = false;
+tofu-validate-no-backend = {
+  enable = true;
+  name = "tofu-validate-no-backend";
+  package = pkgs.opentofu;
+  entry =
+    let
+      tofu-validate = pkgs.writeScriptBin "tofu-validate-no-backend" ''
+        #!/usr/bin/env bash
+        set -euo pipefail
+        temp_cli_config="$(mktemp)"
+        trap 'rm -f "$temp_cli_config"' EXIT
+        export TF_CLI_CONFIG_FILE="$temp_cli_config"
+        export AWS_EC2_METADATA_DISABLED=true
+        for arg in "$@"; do
+          dirname "$arg"
+        done \
+          | sort \
+          | uniq \
+          | while read -r dir; do
+              ${pkgs.opentofu}/bin/tofu -chdir="$dir" init -backend=false
+              ${pkgs.opentofu}/bin/tofu -chdir="$dir" validate
+            done
+      '';
+    in
+    "${tofu-validate}/bin/tofu-validate-no-backend";
+  files = "\\.(tf(vars)?|terraform\\.lock\\.hcl)$";
+  excludes = [ "\\.terraform/.*$" ];
+  require_serial = true;
+};
+hclfmt = {
+  enable = true;
+  name = "hclfmt";
+  package = pkgs.hclfmt;
+  entry = "${pkgs.hclfmt}/bin/hclfmt -w";
+  files = "\\.hcl$";
+};

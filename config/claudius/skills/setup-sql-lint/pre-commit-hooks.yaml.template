@@ -1,0 +1,8 @@
+- repo: local
+  hooks:
+    - id: sqlfluff-lint
+      name: SQLFluff lint
+      entry: sqlfluff lint
+      language: system
+      files: \.sql$
+      pass_filenames: true

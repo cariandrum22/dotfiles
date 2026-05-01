@@ -1,0 +1,1 @@
+tsc-noEmit = mkHook "tsc-noEmit" "bash -c 'tsc --noEmit'";

@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+build_dir="${CLANG_TIDY_BUILD_DIR:-build}"
+compile_commands="${build_dir}/compile_commands.json"
+
+if [[ ! -f "${compile_commands}" ]]; then
+  echo "Missing compile_commands.json at ${compile_commands}." >&2
+  echo "Set CLANG_TIDY_BUILD_DIR or generate a compilation database." >&2
+  exit 1
+fi
+
+if [[ "$#" -eq 0 ]]; then
+  echo "No input files provided to clang-tidy." >&2
+  exit 1
+fi
+
+exec clang-tidy -p "${build_dir}" "$@"

@@ -1,0 +1,129 @@
+# Justfile - Claudius configuration repository automation
+# vim: set ft=just :
+
+set dotenv-load := true
+set export := true
+set positional-arguments := true
+set shell := ["bash", "-euo", "pipefail", "-c"]
+
+project_name := "claudius-config"
+
+# Display available commands
+default:
+    @just --list --unsorted
+
+# Display detailed help
+help:
+    @echo "{{project_name}}"
+    @echo ""
+    @just --list --unsorted
+
+# Install dependencies, tools, and hooks
+install: install-deps install-tools install-hooks
+
+# Validate required dependencies are present
+install-deps:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    required=(
+        "claudius"
+        "jq"
+        "python3"
+    )
+
+    missing=()
+    for cmd in "${required[@]}"; do
+        if ! command -v "$cmd" >/dev/null 2>&1; then
+            missing+=("$cmd")
+        fi
+    done
+
+    if [ "${#missing[@]}" -ne 0 ]; then
+        echo "Missing required tools: ${missing[*]}" >&2
+        exit 1
+    fi
+
+    echo "[OK] Dependencies are present"
+
+# Install optional developer tools (no-op by default)
+install-tools:
+    @echo "[INFO] No tools are installed automatically. Use Nix/Home Manager if desired."
+
+# Install git hooks for local validation
+install-hooks:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    if [ ! -d ".git" ]; then
+        echo "Not a git repository: .git directory not found" >&2
+        exit 1
+    fi
+
+    hook_path=".git/hooks/pre-commit"
+    if [ -e "$hook_path" ]; then
+        echo "[INFO] pre-commit hook already exists: $hook_path"
+        exit 0
+    fi
+
+    cat > "$hook_path" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+
+just check
+EOF
+
+    chmod +x "$hook_path"
+    echo "[OK] Installed pre-commit hook: $hook_path"
+
+# Format the justfile
+fmt:
+    @just --fmt --unstable
+
+# Check justfile formatting without modifying files
+fmt-check:
+    @just --fmt --check --unstable
+
+# Validate JSON/TOML syntax for configuration files
+lint:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    jq -e . claude.settings.json >/dev/null
+    jq -e . gemini.settings.json >/dev/null
+    jq -e . mcpServers.json >/dev/null
+
+    if [ -f settings.json ]; then
+        jq -e . settings.json >/dev/null
+    fi
+
+    python3 - <<'PY'
+import pathlib
+import tomllib
+
+paths = [
+    "config.toml",
+    "codex.settings.toml",
+    "codex.requirements.toml",
+    "codex.managed_config.toml",
+]
+
+for p in paths:
+    path = pathlib.Path(p)
+    if not path.exists():
+        continue
+    tomllib.loads(path.read_text(encoding="utf-8"))
+PY
+
+    echo "[OK] Configuration files are syntactically valid"
+
+# Run formatting and linting checks
+check: fmt-check lint
+
+# Regenerate legacy settings.json from claude.settings.json
+sync-legacy-settings:
+    #!/usr/bin/env bash
+    set -euo pipefail
+
+    cp -f claude.settings.json settings.json
+    echo "[OK] Updated settings.json from claude.settings.json"

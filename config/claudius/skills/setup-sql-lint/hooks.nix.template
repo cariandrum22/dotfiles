@@ -1,0 +1,1 @@
+sqlfluff-lint = mkHook "sqlfluff-lint" "sqlfluff lint";

@@ -1,0 +1,88 @@
+# Credentials and sensitive data
+credentials/
+*.key
+*.pem
+*.cert
+*.token
+*_token
+*_key
+.env
+.env.*
+
+# API keys and tokens (additional safety)
+*api_key*
+*secret*
+*.credentials
+
+# Temporary files and artifacts
+.agents/products/tmp/
+*.tmp
+*.temp
+*.log
+*.cache
+*.pid
+*.lock
+
+# Editor and IDE files
+*.swp
+*.swo
+*~
+.*.sw[a-z]
+.netrwhist
+\#*\#
+.#*
+*.bak
+*.backup
+*.backup.*
+
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Build artifacts
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+*.so
+*.dylib
+*.dll
+*.class
+*.jar
+
+# Coverage and test reports
+.coverage
+htmlcov/
+*.lcov
+coverage/
+.nyc_output/
+
+# Nix-related (when managed by Home Manager)
+result
+result-*
+
+# Local overrides
+*.local
+*.override
+.envrc
+.envrc.local
+.direnv/
+
+# Session and state files
+*.session
+*.state
+.agents/products/scripts/*.log
+.agents/products/reports/*-draft.*
+
+# Keep directory structure
+!.agents/products/tmp/.gitkeep
+!.agents/products/scripts/.gitkeep
+!.agents/products/reports/.gitkeep
+!.agents/products/docs/design/.gitkeep
+!credentials/.gitkeep

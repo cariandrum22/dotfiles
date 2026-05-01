@@ -1,0 +1,2 @@
+just-fmt-check = mkHook "just-fmt-check" "just --fmt --check --unstable";
+just-evaluate = mkHook "just-evaluate" "just --evaluate --justfile";
