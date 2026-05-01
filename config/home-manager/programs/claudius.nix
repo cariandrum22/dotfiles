@@ -1,0 +1,82 @@
+{
+  lib,
+  pkgs,
+  system,
+  ...
+}@args:
+
+let
+  isHeadless = args ? isHeadless && args.isHeadless;
+  claudiusConfig = import ../lib/claudius.nix {
+    inherit lib system isHeadless;
+  };
+  claudiusSource = ../../claudius;
+  jsonFormat = pkgs.formats.json { };
+  baseMcpServers = builtins.fromJSON (builtins.readFile (claudiusSource + "/mcpServers.json"));
+  playwrightArgs = [
+    "@playwright/mcp@latest"
+  ]
+  ++ lib.optionals (claudiusConfig.isLinux && !isHeadless) [
+    "--executable-path=${pkgs.google-chrome}/bin/google-chrome-stable"
+  ];
+  managedMcpServers = baseMcpServers // {
+    mcpServers = baseMcpServers.mcpServers // {
+      playwright = baseMcpServers.mcpServers.playwright // {
+        args = playwrightArgs;
+      };
+    };
+  };
+  mutableClaudiusDirs = [
+    "$HOME/.config/claudius/.claude"
+    "$HOME/.config/claudius/.agents/products/tmp"
+    "$HOME/.config/claudius/.agents/products/scripts"
+    "$HOME/.config/claudius/.agents/products/reports"
+    "$HOME/.config/claudius/.agents/products/docs/design"
+    "$HOME/.config/claudius/credentials/google"
+    "$HOME/.config/claudius/credentials/mcp"
+  ];
+in
+{
+  xdg.configFile = {
+    "claudius/.gitignore".source = claudiusSource + "/.gitignore";
+    "claudius/AGENTS.md".source = claudiusSource + "/AGENTS.md";
+    "claudius/CLAUDE.md".source = claudiusSource + "/AGENTS.md";
+    "claudius/README.md".source = claudiusSource + "/README.md";
+    "claudius/justfile".source = claudiusSource + "/justfile";
+
+    "claudius/bin" = {
+      source = claudiusSource + "/bin";
+      recursive = true;
+    };
+    "claudius/commands" = {
+      source = claudiusSource + "/commands";
+      recursive = true;
+    };
+    "claudius/rules" = {
+      source = claudiusSource + "/rules";
+      recursive = true;
+    };
+    "claudius/skills" = {
+      source = claudiusSource + "/skills";
+      recursive = true;
+    };
+
+    "claudius/claude.settings.json".source = claudiusSource + "/claude.settings.json";
+    "claudius/settings.json".source = claudiusSource + "/settings.json";
+    "claudius/codex.settings.toml".source = claudiusSource + "/codex.settings.toml";
+    "claudius/codex.managed_config.toml".source = claudiusSource + "/codex.managed_config.toml";
+    "claudius/codex.requirements.toml".source = claudiusSource + "/codex.requirements.toml";
+    "claudius/gemini.settings.json".source = claudiusSource + "/gemini.settings.json";
+    "claudius/mcpServers.json".source =
+      jsonFormat.generate "claudius-mcpServers.json" managedMcpServers;
+    "claudius/config.toml".text = claudiusConfig.claudiusConfigText;
+  };
+
+  home.activation.ensureClaudiusStateDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    mkdir -p ${lib.concatStringsSep " " (map lib.escapeShellArg mutableClaudiusDirs)}
+    chmod 700 \
+      "$HOME/.config/claudius/credentials" \
+      "$HOME/.config/claudius/credentials/google" \
+      "$HOME/.config/claudius/credentials/mcp"
+  '';
+}
