@@ -30,11 +30,10 @@
     },
     "figma": {
       "args": [
-        "-y",
-        "mcp-remote@latest",
-        "https://mcp.figma.com/mcp"
+        "-lc",
+        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server figma -- bash -lc 'exec npx -y figma-developer-mcp --figma-api-key=\"$FIGMA_API_KEY\" --stdio'"
       ],
-      "command": "npx",
+      "command": "bash",
       "env": {}
     },
     "filesystem": {
@@ -62,13 +61,10 @@
       "env": {}
     },
     "notion": {
-      "args": [
-        "-y",
-        "mcp-remote@latest",
-        "https://mcp.notion.com/mcp"
-      ],
-      "command": "npx",
-      "env": {}
+      "args": [],
+      "env": {},
+      "startup_timeout_sec": 120,
+      "url": "https://mcp.notion.com/mcp"
     },
     "perplexity-ask": {
       "args": [
@@ -86,13 +82,10 @@
       "env": {}
     },
     "todoist": {
-      "args": [
-        "-y",
-        "mcp-remote@latest",
-        "https://ai.todoist.net/mcp"
-      ],
-      "command": "npx",
-      "env": {}
+      "args": [],
+      "env": {},
+      "startup_timeout_sec": 120,
+      "url": "https://ai.todoist.net/mcp"
     }
   }
 }
