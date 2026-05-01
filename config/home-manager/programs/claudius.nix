@@ -38,12 +38,6 @@ let
 in
 {
   xdg.configFile = {
-    "claudius/.gitignore".source = claudiusSource + "/.gitignore";
-    "claudius/AGENTS.md".source = claudiusSource + "/AGENTS.md";
-    "claudius/CLAUDE.md".source = claudiusSource + "/AGENTS.md";
-    "claudius/README.md".source = claudiusSource + "/README.md";
-    "claudius/justfile".source = claudiusSource + "/justfile";
-
     "claudius/bin" = {
       source = claudiusSource + "/bin";
       recursive = true;
