@@ -30,10 +30,11 @@
     },
     "figma": {
       "args": [
-        "-lc",
-        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server figma -- bash -lc 'exec npx -y figma-developer-mcp --figma-api-key=\"$FIGMA_API_KEY\" --stdio'"
+        "-y",
+        "mcp-remote@latest",
+        "https://mcp.figma.com/mcp"
       ],
-      "command": "bash",
+      "command": "npx",
       "env": {}
     },
     "filesystem": {
@@ -47,7 +48,7 @@
     "github": {
       "args": [
         "-lc",
-        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server github -- docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN ghcr.io/github/github-mcp-server"
+        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server github -- bash -lc 'exec npx -y mcp-remote@latest https://api.githubcopilot.com/mcp/ --header \"Authorization:Bearer $GITHUB_PERSONAL_ACCESS_TOKEN\"'"
       ],
       "command": "bash",
       "env": {}
@@ -58,6 +59,15 @@
         "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server google-calendar -- npx -y @cocal/google-calendar-mcp"
       ],
       "command": "bash",
+      "env": {}
+    },
+    "notion": {
+      "args": [
+        "-y",
+        "mcp-remote@latest",
+        "https://mcp.notion.com/mcp"
+      ],
+      "command": "npx",
       "env": {}
     },
     "perplexity-ask": {
@@ -77,10 +87,11 @@
     },
     "todoist": {
       "args": [
-        "-lc",
-        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server todoist -- npx -y todoist-mcp"
+        "-y",
+        "mcp-remote@latest",
+        "https://ai.todoist.net/mcp"
       ],
-      "command": "bash",
+      "command": "npx",
       "env": {}
     }
   }

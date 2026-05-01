@@ -13,6 +13,19 @@ let
   claudiusSource = ../../claudius;
   jsonFormat = pkgs.formats.json { };
   baseMcpServers = builtins.fromJSON (builtins.readFile (claudiusSource + "/mcpServers.json"));
+  interactiveRemoteMcpServerNames = [
+    "figma"
+    "notion"
+    "todoist"
+  ];
+  # These hosted servers rely on browser-based OAuth, so do not publish them on headless hosts.
+  filteredMcpServers =
+    if isHeadless then
+      lib.filterAttrs (
+        name: _: !(lib.elem name interactiveRemoteMcpServerNames)
+      ) baseMcpServers.mcpServers
+    else
+      baseMcpServers.mcpServers;
   playwrightArgs = [
     "@playwright/mcp@latest"
   ]
@@ -20,8 +33,8 @@ let
     "--executable-path=${pkgs.google-chrome}/bin/google-chrome-stable"
   ];
   managedMcpServers = baseMcpServers // {
-    mcpServers = baseMcpServers.mcpServers // {
-      playwright = baseMcpServers.mcpServers.playwright // {
+    mcpServers = filteredMcpServers // {
+      playwright = filteredMcpServers.playwright // {
         args = playwrightArgs;
       };
     };
