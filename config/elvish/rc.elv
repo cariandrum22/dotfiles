@@ -323,18 +323,24 @@ printf "CLAUDIUS_1PASSWORD_VAULT=%s\n" "$CLAUDIUS_1PASSWORD_VAULT"
       }
 
       if (eq $name "CLAUDIUS_1PASSWORD_MODE") {
-        if (or (has-env CLAUDIUS_1PASSWORD_MODE) (has-env CLAUDIUS_OP_MODE)) {
+        if (or
+          (not (eq $E:CLAUDIUS_1PASSWORD_MODE ""))
+          (not (eq $E:CLAUDIUS_OP_MODE ""))
+        ) {
           return
         }
       } elif (eq $name "CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH") {
         if (or
-          (has-env CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH)
-          (has-env CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH)
+          (not (eq $E:CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH ""))
+          (not (eq $E:CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH ""))
         ) {
           return
         }
       } elif (eq $name "CLAUDIUS_1PASSWORD_VAULT") {
-        if (or (has-env CLAUDIUS_1PASSWORD_VAULT) (has-env CLAUDIUS_OP_VAULT)) {
+        if (or
+          (not (eq $E:CLAUDIUS_1PASSWORD_VAULT ""))
+          (not (eq $E:CLAUDIUS_OP_VAULT ""))
+        ) {
           return
         }
       }
