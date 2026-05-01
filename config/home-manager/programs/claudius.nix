@@ -39,10 +39,11 @@ let
       };
     };
   };
-  mutableClaudiusDirs = [
-    "$HOME/.config/claudius/.claude"
-    "$HOME/.config/claudius/credentials/google"
-    "$HOME/.config/claudius/credentials/mcp"
+  mutableClaudiusRelativeDirs = [
+    ".claude"
+    "credentials"
+    "credentials/google"
+    "credentials/mcp"
   ];
 in
 {
@@ -76,10 +77,15 @@ in
   };
 
   home.activation.ensureClaudiusStateDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    mkdir -p ${lib.concatStringsSep " " (map lib.escapeShellArg mutableClaudiusDirs)}
+    claudius_config_dir="$HOME/.config/claudius"
+
+    for relative_dir in ${lib.concatStringsSep " " (map lib.escapeShellArg mutableClaudiusRelativeDirs)}; do
+      mkdir -p "$claudius_config_dir/$relative_dir"
+    done
+
     chmod 700 \
-      "$HOME/.config/claudius/credentials" \
-      "$HOME/.config/claudius/credentials/google" \
-      "$HOME/.config/claudius/credentials/mcp"
+      "$claudius_config_dir/credentials" \
+      "$claudius_config_dir/credentials/google" \
+      "$claudius_config_dir/credentials/mcp"
   '';
 }
