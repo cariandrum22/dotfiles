@@ -28,10 +28,6 @@ let
   };
   mutableClaudiusDirs = [
     "$HOME/.config/claudius/.claude"
-    "$HOME/.config/claudius/.agents/products/tmp"
-    "$HOME/.config/claudius/.agents/products/scripts"
-    "$HOME/.config/claudius/.agents/products/reports"
-    "$HOME/.config/claudius/.agents/products/docs/design"
     "$HOME/.config/claudius/credentials/google"
     "$HOME/.config/claudius/credentials/mcp"
   ];
