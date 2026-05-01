@@ -41,16 +41,22 @@ function __claudius_import_hm_session_vars
             case __HM_SESS_VARS_SOURCED
                 set -gx -- $name "$value"
             case CLAUDIUS_1PASSWORD_MODE
-                if not set -q CLAUDIUS_1PASSWORD_MODE; and not set -q CLAUDIUS_OP_MODE
-                    set -gx -- $name "$value"
+                if not set -q CLAUDIUS_1PASSWORD_MODE; or test -z "$CLAUDIUS_1PASSWORD_MODE"
+                    if not set -q CLAUDIUS_OP_MODE; or test -z "$CLAUDIUS_OP_MODE"
+                        set -gx -- $name "$value"
+                    end
                 end
             case CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH
-                if not set -q CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH; and not set -q CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH
-                    set -gx -- $name "$value"
+                if not set -q CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH; or test -z "$CLAUDIUS_1PASSWORD_SERVICE_ACCOUNT_TOKEN_PATH"
+                    if not set -q CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH; or test -z "$CLAUDIUS_OP_SERVICE_ACCOUNT_TOKEN_PATH"
+                        set -gx -- $name "$value"
+                    end
                 end
             case CLAUDIUS_1PASSWORD_VAULT
-                if not set -q CLAUDIUS_1PASSWORD_VAULT; and not set -q CLAUDIUS_OP_VAULT
-                    set -gx -- $name "$value"
+                if not set -q CLAUDIUS_1PASSWORD_VAULT; or test -z "$CLAUDIUS_1PASSWORD_VAULT"
+                    if not set -q CLAUDIUS_OP_VAULT; or test -z "$CLAUDIUS_OP_VAULT"
+                        set -gx -- $name "$value"
+                    end
                 end
             case '*'
                 set -gx -- $name "$value"
