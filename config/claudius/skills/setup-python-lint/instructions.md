@@ -1,20 +1,24 @@
----
-name: setup-python-lint
-description: Set up Ruff (linter + formatter) and mypy (type checker) with strict rules encouraging functional style. Use when adding code quality checks to a Python project.
-disable-model-invocation: true
-argument-hint: [package name and Python target version, e.g. "myapp 3.12"]
----
-
 # Setup Python Lint
 
-Add Ruff as the unified linter and formatter, and mypy as the strict type checker. The configuration enforces a **functional-first style**: immutability, pure functions, comprehensions over loops, explicit types, and minimal side effects.
+Add Ruff as the unified linter and formatter, and mypy as the strict type
+checker. The configuration enforces a **functional-first style**: immutability,
+pure functions, comprehensions over loops, explicit types, and minimal side
+effects.
 
-**The argument `$ARGUMENTS` is the package name and Python target version** (e.g. `myapp 3.12`). The package name is used for isort `known-first-party`. The Python version sets `target-version` for Ruff and `python_version` for mypy. If no argument is given, infer the package name from the project directory and detect the Python version from `pyproject.toml` `[project] requires-python`, `.python-version`, or `runtime.txt`. If none can be detected, ask the user.
+**The argument `$ARGUMENTS` is the package name and Python target version**
+(e.g. `myapp 3.12`). The package name is used for isort `known-first-party`.
+The Python version sets `target-version` for Ruff and `python_version` for
+mypy. If no argument is given, infer the package name from the project
+directory and detect the Python version from `pyproject.toml` `[project]`
+`requires-python`, `.python-version`, or `runtime.txt`. If none can be
+detected, ask the user.
 
 ## Prerequisites
 
-- The project must have a `pyproject.toml` in the root. If not, tell the user to create one first (`uv init`, `poetry init`, or manually).
-- For Nix Flake projects: the project must have `git-hooks.nix` integrated in `flake.nix`. If not, tell the user to run `/setup-git-hooks` first.
+- The project must have a `pyproject.toml` in the root. If not, tell the user
+  to create one first (`uv init`, `poetry init`, or manually).
+- For Nix Flake projects: the project must have `git-hooks.nix` integrated in
+  `flake.nix`. If not, tell the user to run the `setup-git-hooks` skill first.
 - For non-Nix projects: `pre-commit` must be installed.
 
 ## Steps
@@ -23,11 +27,14 @@ Add Ruff as the unified linter and formatter, and mypy as the strict type checke
 
 #### Nix Flake projects
 
-Verify that `pkgs.ruff` and `pkgs.mypy` are listed in `devShells.default.packages` (or `buildInputs`). If absent, add them.
+Verify that `pkgs.ruff` and `pkgs.mypy` are listed in
+`devShells.default.packages` (or `buildInputs`). If absent, add them.
 
 #### Non-Nix projects
 
-Check `pyproject.toml` for `ruff` and `mypy` in dev dependencies (under `[project.optional-dependencies]`, `[tool.poetry.group.dev.dependencies]`, or `[dependency-groups]`). If absent, tell the user to install them:
+Check `pyproject.toml` for `ruff` and `mypy` in dev dependencies (under
+`[project.optional-dependencies]`, `[tool.poetry.group.dev.dependencies]`, or
+`[dependency-groups]`). If absent, tell the user to install them:
 
 ```bash
 uv add --dev ruff mypy
@@ -39,13 +46,16 @@ Or if not using uv:
 pip install --upgrade ruff mypy
 ```
 
-Do NOT run these commands automatically — the user must choose their package manager.
+Do NOT run these commands automatically. The user must choose their package
+manager.
 
 ### 2. Add Ruff and mypy configuration to `pyproject.toml`
 
 If `[tool.ruff]` already exists in `pyproject.toml`, go to Step 3.
 
-Add the configuration sections from [pyproject.ruff.toml.template](pyproject.ruff.toml.template) to `pyproject.toml`. Replace the following placeholders:
+Add the configuration sections from
+[pyproject.ruff.toml.template](assets/pyproject.ruff.toml.template) to
+`pyproject.toml`. Replace the following placeholders:
 
 | Placeholder | Value | Source |
 |---|---|---|
@@ -55,7 +65,9 @@ Add the configuration sections from [pyproject.ruff.toml.template](pyproject.ruf
 
 ### 3. Verify strict configuration
 
-If `[tool.ruff]` already existed, verify the following critical settings. If any are missing or weaker, inform the user of the discrepancies. Do NOT overwrite — let the user decide.
+If `[tool.ruff]` already existed, verify the following critical settings. If
+any are missing or weaker, inform the user of the discrepancies. Do NOT
+overwrite. Let the user decide.
 
 Required lint settings:
 
@@ -82,7 +94,8 @@ Required mypy settings:
 
 ### 4. Add `from __future__ import annotations`
 
-The Ruff configuration requires `from __future__ import annotations` in every file via `required-imports`. This enables:
+The Ruff configuration requires `from __future__ import annotations` in every
+file via `required-imports`. This enables:
 
 - PEP 563 postponed evaluation (all annotations become strings)
 - Forward references without quotes
@@ -96,25 +109,33 @@ Determine the hook integration method.
 
 #### Path A: Nix git-hooks.nix
 
-Add the hooks from [hooks.nix.template](hooks.nix.template) into the `hooks = { ... }` block. Do NOT duplicate hooks that already exist.
+Add the hooks from [hooks.nix.template](assets/hooks.nix.template) into the
+`hooks = { ... }` block. Do NOT duplicate hooks that already exist.
 
 Hooks added:
 
-- **ruff-check** — `ruff check --no-fix`. Lint violations fail the commit. No auto-fix in hooks.
-- **ruff-format-check** — `ruff format --check`. Formatting violations fail the commit. No auto-fix in hooks.
+- **ruff-check** — `ruff check --no-fix`. Lint violations fail the commit. No
+  auto-fix in hooks.
+- **ruff-format-check** — `ruff format --check`. Formatting violations fail the
+  commit. No auto-fix in hooks.
 - **mypy-check** — `mypy .`. Type errors fail the commit.
 
 #### Path B: Pre-commit (astral-sh/ruff-pre-commit)
 
-Add the hooks from [pre-commit-hooks.yaml.template](pre-commit-hooks.yaml.template) to `.pre-commit-config.yaml`. Replace `__RUFF_VERSION__` with the installed Ruff version prefixed with `v` (e.g. `v0.15.0`).
+Add the hooks from
+[pre-commit-hooks.yaml.template](assets/pre-commit-hooks.yaml.template) to
+`.pre-commit-config.yaml`. Replace `__RUFF_VERSION__` with the installed Ruff
+version prefixed with `v` (e.g. `v0.15.0`).
 
 Do NOT duplicate if ruff or mypy hooks already exist.
 
-**Hook ordering**: `ruff` (lint) MUST come before `ruff-format` (format check). Both MUST come before `mypy` (type check).
+**Hook ordering**: `ruff` (lint) MUST come before `ruff-format` (format check).
+Both MUST come before `mypy` (type check).
 
 ### 6. Remove conflicting tools (conditional)
 
-If the project has any of the following alongside Ruff, warn the user about the conflict. Do NOT remove anything automatically.
+If the project has any of the following alongside Ruff, warn the user about the
+conflict. Do NOT remove anything automatically.
 
 | Conflicting tool | Detection | Recommendation |
 |---|---|---|
@@ -131,7 +152,7 @@ List all detected conflicts and tell the user to resolve them.
 
 ### 7. Validate
 
-Run the following commands (or tell the user to run them):
+Run the following commands, or tell the user to run them:
 
 1. `ruff check .` — lint check
 2. `ruff format --check .` — format check
@@ -140,13 +161,16 @@ Run the following commands (or tell the user to run them):
 If there are violations:
 
 - Formatting: tell the user to run `ruff format .` to auto-fix.
-- Lint (fixable): tell the user to run `ruff check --fix .` to auto-fix safe violations.
-- Lint (unfixable): list them. The configuration marks `ERA001`, `F841`, `T20` as unfixable — these require manual removal.
+- Lint (fixable): tell the user to run `ruff check --fix .` to auto-fix safe
+  violations.
+- Lint (unfixable): list them. The configuration marks `ERA001`, `F841`, `T20`
+  as unfixable — these require manual removal.
 - Type errors: list them for the user. Do NOT add `# type: ignore` comments.
 
 ## Functional Style Enforcement
 
-The configuration promotes functional programming through the following rule groups:
+The configuration promotes functional programming through the following rule
+groups:
 
 | Rule Group | Enforcement |
 |---|---|
@@ -174,11 +198,25 @@ Additional mypy enforcement:
 
 ## Important Notes
 
-- Do NOT use `ruff check --fix` or `ruff format` in pre-commit hooks. Hooks MUST be check-only. Auto-fixing in hooks can produce changes that bypass review.
-- Do NOT disable `ANN` rules globally. Type annotations are mandatory for functional-style enforcement. The test file override relaxes this only for tests.
-- Do NOT add `# noqa` comments without an explicit rule code. The `PGH` rules enforce `# noqa: XXXX` format.
-- Do NOT add `# type: ignore` comments without an explicit error code. The mypy `ignore-without-code` error code enforces `# type: ignore[code]` format.
-- The `from __future__ import annotations` requirement is non-negotiable for Python < 3.14. It enables modern annotation syntax and prevents runtime evaluation of type hints.
-- The `ban-relative-imports = "all"` setting forbids relative imports. All imports must be absolute. This improves readability and prevents circular import ambiguity.
-- If the project uses Django, FastAPI, or other frameworks with specific patterns, some rules may need per-file overrides. Add them to `[tool.ruff.lint.per-file-ignores]` rather than disabling rules globally.
-- The `extend-immutable-calls` setting in `[tool.ruff.lint.flake8-bugbear]` includes FastAPI defaults. Remove or adjust this list based on the project's actual framework.
+- Do NOT use `ruff check --fix` or `ruff format` in pre-commit hooks. Hooks
+  MUST be check-only. Auto-fixing in hooks can produce changes that bypass
+  review.
+- Do NOT disable `ANN` rules globally. Type annotations are mandatory for
+  functional-style enforcement. The test file override relaxes this only for
+  tests.
+- Do NOT add `# noqa` comments without an explicit rule code. The `PGH` rules
+  enforce `# noqa: XXXX` format.
+- Do NOT add `# type: ignore` comments without an explicit error code. The mypy
+  `ignore-without-code` error code enforces `# type: ignore[code]` format.
+- The `from __future__ import annotations` requirement is non-negotiable for
+  Python < 3.14. It enables modern annotation syntax and prevents runtime
+  evaluation of type hints.
+- The `ban-relative-imports = "all"` setting forbids relative imports. All
+  imports must be absolute. This improves readability and prevents circular
+  import ambiguity.
+- If the project uses Django, FastAPI, or other frameworks with specific
+  patterns, some rules may need per-file overrides. Add them to
+  `[tool.ruff.lint.per-file-ignores]` rather than disabling rules globally.
+- The `extend-immutable-calls` setting in
+  `[tool.ruff.lint.flake8-bugbear]` includes FastAPI defaults. Remove or adjust
+  this list based on the project's actual framework.

@@ -1,0 +1,11 @@
+version: 1
+name: setup-git-hooks
+description: >-
+  Add git-hooks.nix (cachix/git-hooks.nix) infrastructure to an existing Nix
+  flake. Use when setting up pre-commit hooks in a Nix project.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: (no arguments required)
+  codex:
+    invocation: manual

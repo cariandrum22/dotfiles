@@ -1,13 +1,7 @@
----
-name: setup-git-hooks
-description: Add git-hooks.nix (cachix/git-hooks.nix) infrastructure to an existing Nix flake. Use when setting up pre-commit hooks in a Nix project.
-disable-model-invocation: true
-argument-hint: (no arguments required)
----
-
 # Setup git-hooks.nix
 
-Integrate [cachix/git-hooks.nix](https://github.com/cachix/git-hooks.nix) into the project's `flake.nix`.
+Integrate [cachix/git-hooks.nix](https://github.com/cachix/git-hooks.nix) into
+the project's `flake.nix`.
 
 ## Steps
 
@@ -20,9 +14,12 @@ Integrate [cachix/git-hooks.nix](https://github.com/cachix/git-hooks.nix) into t
    git-hooks.inputs.nixpkgs.follows = "nixpkgs";
    ```
 
-   If the project uses the old name `pre-commit-hooks` (i.e. `github:cachix/pre-commit-hooks.nix`), rename it to `git-hooks` and update all references throughout the file.
+   If the project uses the old name `pre-commit-hooks` (i.e.
+   `github:cachix/pre-commit-hooks.nix`), rename it to `git-hooks` and update
+   all references throughout the file.
 
-3. **Add `git-hooks` to the outputs function parameters** (if not already present).
+3. **Add `git-hooks` to the outputs function parameters** (if not already
+   present).
 
 4. **Add hook helper functions** in the `let` block (if not already present):
 
@@ -51,7 +48,8 @@ Integrate [cachix/git-hooks.nix](https://github.com/cachix/git-hooks.nix) into t
 
 6. **Wire it into `devShells.default`**:
    - Add `pre-commit-check.enabledPackages` to `packages`.
-   - Add `${pre-commit-check.shellHook}` (or `inherit (pre-commit-check) shellHook;`) to `shellHook`.
+   - Add `${pre-commit-check.shellHook}` (or `inherit (pre-commit-check)
+     shellHook;`) to `shellHook`.
 
 7. **Optionally expose as a check**:
 
@@ -62,6 +60,9 @@ Integrate [cachix/git-hooks.nix](https://github.com/cachix/git-hooks.nix) into t
 ## Important Notes
 
 - Do NOT remove any existing hooks already defined in `flake.nix`.
-- Preserve the existing `devShells.default` structure; only add the necessary wiring.
-- If `flake-utils` is used, keep the existing `eachSystem` / `eachDefaultSystem` pattern.
-- Run `nix flake check` mentally to verify the structure is valid (but do not actually run it unless asked).
+- Preserve the existing `devShells.default` structure; only add the necessary
+  wiring.
+- If `flake-utils` is used, keep the existing `eachSystem` /
+  `eachDefaultSystem` pattern.
+- Run `nix flake check` mentally to verify the structure is valid, but do not
+  actually run it unless asked.
