@@ -1,0 +1,10 @@
+version: 1
+name: setup-nix-lint
+description: Set up Nix lint hooks (nixfmt, statix, deadnix) and nix fmt formatter
+  in a Nix flake project. Use when adding Nix-specific linting to a project.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual

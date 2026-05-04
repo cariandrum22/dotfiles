@@ -1,0 +1,3 @@
+version: 1
+name: organize-context
+description: Analyze and reorganize CLAUDE.md or AGENTS.md with all referenced rules

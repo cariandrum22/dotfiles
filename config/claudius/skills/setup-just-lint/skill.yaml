@@ -1,0 +1,10 @@
+version: 1
+name: setup-just-lint
+description: Set up justfile formatting check and syntax validation hooks. Use when
+  adding justfile quality checks to a project.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual

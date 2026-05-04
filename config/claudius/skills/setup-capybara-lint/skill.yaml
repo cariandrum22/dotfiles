@@ -1,0 +1,10 @@
+version: 1
+name: setup-capybara-lint
+description: Set up rubocop-capybara for system test linting in a Rails project. Use
+  when adding browser/system test quality checks.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual

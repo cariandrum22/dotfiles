@@ -1,0 +1,10 @@
+version: 1
+name: setup-iac-security
+description: Set up IaC security scanning hooks (tfsec, trivy) in a Nix flake project.
+  Use when adding infrastructure-as-code security checks.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual

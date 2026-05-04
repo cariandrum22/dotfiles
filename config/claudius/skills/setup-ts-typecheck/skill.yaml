@@ -1,0 +1,10 @@
+version: 1
+name: setup-ts-typecheck
+description: Set up TypeScript type checking hook (tsc --noEmit) for a TypeScript
+  project. Use when adding type validation to pre-commit or CI.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual

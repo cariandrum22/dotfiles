@@ -1,0 +1,11 @@
+version: 1
+name: setup-file-hygiene
+description: Set up file hygiene hooks (editorconfig, whitespace, line endings, large
+  files, data format validation, markdownlint, typos) in a Nix flake project. Use
+  when adding general file quality checks.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual

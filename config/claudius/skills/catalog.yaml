@@ -1,0 +1,129 @@
+# Human-oriented catalog for the shared skills collection.
+# Claudius ignores this file during skill discovery because it is not a skill
+# directory; it exists for maintainers and future tooling.
+version: 1
+categories:
+  workflow:
+    title: Workflow Helpers
+    description: Search, context maintenance, and git authoring helpers.
+  foundation:
+    title: Cross-Project Foundation
+    description: Bootstrap, automation, Nix, git hook, and hygiene skills reused across stacks.
+  frontend-typescript:
+    title: Frontend / TypeScript
+    description: JavaScript, TypeScript, and stylesheet quality gates.
+  c-cpp:
+    title: C / C++
+    description: Formatting and static analysis for C-family projects.
+  python:
+    title: Python
+    description: Python linting and strict type checking.
+  rails-ruby:
+    title: Rails / Ruby
+    description: Rails-oriented linting, security, typing, database safety, testing, and CI.
+  iac-tofu:
+    title: IaC / OpenTofu
+    description: Infrastructure-as-code linting, template validation, security, and orchestration.
+  sql:
+    title: SQL
+    description: SQL linting and formatting.
+skills:
+  gemini-web-search:
+    category: workflow
+    kind: utility
+  organize-context:
+    category: workflow
+    kind: utility
+  suggest-commit:
+    category: workflow
+    kind: utility
+  setup-nix-flake:
+    category: foundation
+    kind: bootstrap
+  setup-git-hooks:
+    category: foundation
+    kind: building-block
+  setup-nix-lint:
+    category: foundation
+    kind: building-block
+  setup-shell-lint:
+    category: foundation
+    kind: building-block
+  setup-file-hygiene:
+    category: foundation
+    kind: building-block
+  setup-secrets-scan:
+    category: foundation
+    kind: building-block
+  setup-commitlint:
+    category: foundation
+    kind: building-block
+  setup-nix-ci-lint:
+    category: foundation
+    kind: building-block
+  setup-just:
+    category: foundation
+    kind: bootstrap
+  setup-just-lint:
+    category: foundation
+    kind: building-block
+  setup-biome:
+    category: frontend-typescript
+    kind: building-block
+  setup-ts-typecheck:
+    category: frontend-typescript
+    kind: building-block
+  setup-stylelint:
+    category: frontend-typescript
+    kind: building-block
+  setup-c-lint:
+    category: c-cpp
+    kind: building-block
+  setup-python-lint:
+    category: python
+    kind: building-block
+  setup-rubocop:
+    category: rails-ruby
+    kind: building-block
+  setup-capybara-lint:
+    category: rails-ruby
+    kind: building-block
+  setup-erb-lint:
+    category: rails-ruby
+    kind: building-block
+  setup-i18n-lint:
+    category: rails-ruby
+    kind: building-block
+  setup-sorbet:
+    category: rails-ruby
+    kind: building-block
+  setup-rails-security:
+    category: rails-ruby
+    kind: building-block
+  setup-rails-db-safety:
+    category: rails-ruby
+    kind: building-block
+  setup-rails-testing:
+    category: rails-ruby
+    kind: building-block
+  setup-rails-ci:
+    category: rails-ruby
+    kind: building-block
+  setup-rails-api:
+    category: rails-ruby
+    kind: orchestrator
+  setup-iac-security:
+    category: iac-tofu
+    kind: building-block
+  setup-tftpl-lint:
+    category: iac-tofu
+    kind: building-block
+  setup-tofu-lint:
+    category: iac-tofu
+    kind: building-block
+  setup-tofu-project:
+    category: iac-tofu
+    kind: orchestrator
+  setup-sql-lint:
+    category: sql
+    kind: building-block

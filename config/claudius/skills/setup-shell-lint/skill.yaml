@@ -1,0 +1,10 @@
+version: 1
+name: setup-shell-lint
+description: Set up shell script linting hooks (shellcheck + shfmt) in a Nix flake
+  project. Use when adding shell script quality checks to a project.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual

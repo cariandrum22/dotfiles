@@ -1,0 +1,10 @@
+version: 1
+name: setup-tftpl-lint
+description: Set up templatefile rendering checks for Terraform/OpenTofu .tftpl files.
+  Use when adding strict template validation.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: '[engine=tofu vars_file=tftpl.vars.json console_dir=.]'
+  codex:
+    invocation: manual

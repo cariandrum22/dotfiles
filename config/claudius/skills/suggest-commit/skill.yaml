@@ -1,0 +1,3 @@
+version: 1
+name: suggest-commit
+description: Generate well-formatted git commit messages following Conventional Commits

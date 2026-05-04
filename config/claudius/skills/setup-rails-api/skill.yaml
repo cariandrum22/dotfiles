@@ -1,0 +1,11 @@
+version: 1
+name: setup-rails-api
+description: One-command setup for a Rails API project with full linting, type checking,
+  security scanning, DB safety, test coverage, and CI. Orchestrates multiple setup
+  skills.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual

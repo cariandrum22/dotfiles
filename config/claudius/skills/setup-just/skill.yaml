@@ -1,0 +1,10 @@
+version: 1
+name: setup-just
+description: Set up a justfile with mandatory recipes and strict shell safety settings.
+  Use when bootstrapping task automation for a new project.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: '[project name, e.g. "my-project"]'
+  codex:
+    invocation: manual

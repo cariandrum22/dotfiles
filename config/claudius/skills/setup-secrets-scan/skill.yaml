@@ -1,0 +1,10 @@
+version: 1
+name: setup-secrets-scan
+description: Set up secret detection hooks (gitleaks, ripsecrets, detect-aws-credentials,
+  detect-private-keys) in a Nix flake project. Use when adding secret leak prevention.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual

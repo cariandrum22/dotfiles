@@ -1,0 +1,10 @@
+version: 1
+name: setup-stylelint
+description: Set up stylelint for CSS/SCSS linting in a Rails project. Use when adding
+  stylesheet quality checks.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual

@@ -1,0 +1,10 @@
+version: 1
+name: setup-rails-db-safety
+description: Set up database safety tools (strong_migrations, database_consistency)
+  for a Rails project. Use when adding migration and model-DB consistency checks.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual
