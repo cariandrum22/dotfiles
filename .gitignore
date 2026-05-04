@@ -2,6 +2,7 @@
 .codex
 !.codex/
 !.codex/**
+!config/claudius/skills/**/*.md
 Brewfile.lock.json
 dist-*
 result
