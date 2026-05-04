@@ -11,6 +11,7 @@ let
     inherit lib system isHeadless;
   };
   claudiusSource = ../../claudius;
+  claudiusExe = lib.getExe' pkgs.claudius "claudius";
   jsonFormat = pkgs.formats.json { };
   baseMcpServers = builtins.fromJSON (builtins.readFile (claudiusSource + "/mcpServers.json"));
   interactiveRemoteMcpServerNames = [
@@ -45,15 +46,19 @@ let
     "credentials/google"
     "credentials/mcp"
   ];
+  managedSkillSyncAgents = [
+    "claude-code"
+    "codex"
+  ];
+  managedSkillTargetRelativeDirs = [
+    ".claude/skills"
+    ".agents/skills"
+  ];
 in
 {
   xdg.configFile = {
     "claudius/bin" = {
       source = claudiusSource + "/bin";
-      recursive = true;
-    };
-    "claudius/commands" = {
-      source = claudiusSource + "/commands";
       recursive = true;
     };
     "claudius/rules" = {
@@ -87,5 +92,20 @@ in
       "$claudius_config_dir/credentials" \
       "$claudius_config_dir/credentials/google" \
       "$claudius_config_dir/credentials/mcp"
+  '';
+
+  home.activation.syncClaudiusManagedSkills = lib.hm.dag.entryAfter [ "ensureClaudiusStateDirs" ] ''
+    # ~/.config/claudius/skills is the declarative source tree.
+    # Agent-native skill directories remain generated artifacts.
+    for relative_dir in ${lib.concatStringsSep " " (map lib.escapeShellArg managedSkillTargetRelativeDirs)}; do
+      target_dir="$HOME/$relative_dir"
+      if [ -d "$target_dir" ]; then
+        find "$target_dir" -type f -exec chmod u+w {} +
+      fi
+    done
+
+    for agent in ${lib.concatStringsSep " " (map lib.escapeShellArg managedSkillSyncAgents)}; do
+      ${claudiusExe} skills sync --global --agent "$agent" --prune
+    done
   '';
 }
