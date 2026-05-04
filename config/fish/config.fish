@@ -109,11 +109,6 @@ if type -q kitty
     alias ssh="TERM=xterm-256color $(which ssh)"
 end
 
-# Configure fzf
-if type -q fzf
-    set -U FZF_LEGACY_KEYBINDINGS 0
-end
-
 # Configure atuin (shell history in SQLite)
 if type -q atuin
     atuin init fish | source
