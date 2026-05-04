@@ -1,4 +1,7 @@
 .direnv
+.codex
+!.codex/
+!.codex/**
 Brewfile.lock.json
 dist-*
 result
