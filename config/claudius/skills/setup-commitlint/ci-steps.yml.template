@@ -1,0 +1,32 @@
+      - name: Lint commit messages (push)
+        if: github.event_name == 'push'
+        run: |
+          if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+            if [ "${{ github.ref_name }}" = "${{ github.event.repository.default_branch }}" ]; then
+              printf '%s\n' "$(git log -1 --format=%B HEAD)" > /tmp/commit-msg
+              nix develop -c commitlint --edit /tmp/commit-msg
+            else
+              git fetch origin "${{ github.event.repository.default_branch }}" --depth=1
+              base_sha="$(git merge-base HEAD "origin/${{ github.event.repository.default_branch }}" || true)"
+              if [ -n "$base_sha" ]; then
+                nix develop -c commitlint --from "$base_sha" --to HEAD
+              else
+                printf '%s\n' "$(git log -1 --format=%B HEAD)" > /tmp/commit-msg
+                nix develop -c commitlint --edit /tmp/commit-msg
+              fi
+            fi
+          else
+            nix develop -c commitlint --from "${{ github.event.before }}" --to "${{ github.sha }}"
+          fi
+
+      - name: Lint commit messages (pull_request)
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          nix develop -c commitlint --from "origin/${{ github.base_ref }}" --to HEAD
+
+      - name: Lint PR title
+        if: github.event_name == 'pull_request'
+        run: |
+          printf '%s\n' "${{ github.event.pull_request.title }}" > /tmp/pr-title
+          nix develop -c commitlint --edit /tmp/pr-title

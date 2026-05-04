@@ -2,6 +2,7 @@
 
 {
   imports = [
+    ./claudius.nix
     ./home-manager.nix
     ./git.nix
     ./gpg.nix

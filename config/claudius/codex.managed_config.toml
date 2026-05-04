@@ -1,0 +1,21 @@
+# Codex managed_config.toml
+# Admin-managed defaults applied when Codex starts.
+#
+# Managed defaults are starting values that Codex reapplies when it launches. Users can still
+# change settings during a session; the managed defaults are restored next time Codex starts.
+#
+# Managed config location (per Codex docs):
+# - Linux/macOS (Unix): /etc/codex/managed_config.toml
+# - Windows/non-Unix: ~/.codex/managed_config.toml
+#
+# See:
+# https://developers.openai.com/codex/security#managed-defaults-managed_configtoml
+
+approval_policy = "never"
+sandbox_mode = "workspace-write"
+
+[sandbox_workspace_write]
+writable_roots = ["/tmp", "/var/tmp"]
+network_access = false
+exclude_tmpdir_env_var = false
+exclude_slash_tmp = false

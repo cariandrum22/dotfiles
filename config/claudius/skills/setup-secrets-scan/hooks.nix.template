@@ -1,0 +1,19 @@
+gitleaks = {
+  enable = true;
+  name = "gitleaks";
+  package = pkgs.gitleaks;
+  entry = "${pkgs.gitleaks}/bin/gitleaks protect --staged --redact";
+  language = "system";
+  pass_filenames = false;
+};
+gitleaks-full-scan = {
+  enable = true;
+  name = "gitleaks-full-scan";
+  package = pkgs.gitleaks;
+  entry = "${pkgs.gitleaks}/bin/gitleaks detect --source . --no-git --redact";
+  language = "system";
+  pass_filenames = false;
+};
+ripsecrets.enable = true;
+detect-aws-credentials.enable = true;
+detect-private-keys.enable = true;

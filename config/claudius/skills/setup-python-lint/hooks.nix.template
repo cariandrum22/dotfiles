@@ -1,0 +1,3 @@
+ruff-check = mkHook "ruff-check" "ruff check --no-fix";
+ruff-format-check = mkHook "ruff-format-check" "ruff format --check";
+mypy-check = mkHook "mypy-check" "mypy .";

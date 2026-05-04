@@ -1,0 +1,78 @@
+plugins:
+  - rubocop-minitest
+  - rubocop-performance
+  - rubocop-rails
+  - rubocop-rake
+  - rubocop-thread_safety
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: __RUBY_VERSION__
+  SuggestExtensions: false
+  Exclude:
+    - "bin/*"
+    - "db/schema.rb"
+    - "vendor/**/*"
+    - "node_modules/**/*"
+    - "log/**/*"
+    - "tmp/**/*"
+    - "storage/**/*"
+
+Layout/LineLength:
+  Max: 100
+
+Metrics/MethodLength:
+  Max: 15
+
+Metrics/AbcSize:
+  Max: 20
+
+Metrics/CyclomaticComplexity:
+  Max: 10
+
+Metrics/PerceivedComplexity:
+  Max: 10
+
+Metrics/BlockLength:
+  Exclude:
+    - "config/routes.rb"
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
+
+Style/MutableConstant:
+  Enabled: true
+
+Style/GlobalVars:
+  Enabled: true
+
+Style/For:
+  Enabled: true
+
+Style/EachWithObject:
+  Enabled: true
+
+Style/CombinableLoops:
+  Enabled: true
+
+Style/GuardClause:
+  Enabled: true
+
+# ── Rails ────────────────────────────────────────────
+Rails/HasManyOrHasOneDependent:
+  Enabled: true
+
+Rails/UniqueValidationWithoutIndex:
+  Enabled: true
+
+Rails/NotNullColumn:
+  Enabled: true
+
+Rails/BulkChangeTable:
+  Enabled: true
+
+Rails/ReversibleMigration:
+  Enabled: true
+
+Rails/SkipsModelValidations:
+  Enabled: true

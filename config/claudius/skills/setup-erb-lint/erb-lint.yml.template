@@ -1,0 +1,70 @@
+---
+glob: "app/views/**/*.{html,html.erb}"
+
+linters:
+  AllowedScriptType:
+    enabled: true
+
+  ClosingErbTagIndent:
+    enabled: true
+
+  ExtraNewline:
+    enabled: true
+
+  FinalNewline:
+    enabled: true
+
+  NoJavascriptTagHelper:
+    enabled: true
+
+  ParserErrors:
+    enabled: true
+
+  RightTrim:
+    enabled: true
+
+  SelfClosingTag:
+    enabled: true
+
+  SpaceAroundErbTag:
+    enabled: true
+
+  SpaceIndentation:
+    enabled: true
+    width: 2
+
+  SpaceInHtmlTag:
+    enabled: true
+
+  TrailingWhitespace:
+    enabled: true
+
+  DeprecatedClasses:
+    enabled: false
+
+  Rubocop:
+    enabled: true
+    rubocop_config:
+      inherit_from:
+        - .rubocop.yml
+      Layout/InitialIndentation:
+        Enabled: false
+      Layout/LineLength:
+        Enabled: false
+      Layout/TrailingEmptyLines:
+        Enabled: false
+      Naming/FileName:
+        Enabled: false
+      Style/FrozenStringLiteralComment:
+        Enabled: false
+
+  RequireInputAutocomplete:
+    enabled: true
+
+  RequireScriptNonce:
+    enabled: false
+
+  HardCodedString:
+    enabled: true
+    exclude:
+      - "app/views/layouts/**"

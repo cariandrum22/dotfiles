@@ -1,0 +1,38 @@
+tfsec = {
+  enable = true;
+  name = "tfsec";
+  package = pkgs.tfsec;
+  entry = pkgs.lib.concatStringsSep " " [
+    "${pkgs.tfsec}/bin/tfsec"
+    "--no-color"
+    "--force-all-dirs"
+    "--exclude-path"
+    ".direnv"
+    "--exclude-path"
+    ".terraform"
+    "."
+  ];
+  language = "system";
+  pass_filenames = false;
+};
+trivy = {
+  enable = true;
+  name = "trivy-config";
+  package = pkgs.trivy;
+  entry = pkgs.lib.concatStringsSep " " [
+    "${pkgs.trivy}/bin/trivy"
+    "config"
+    "--quiet"
+    "--exit-code"
+    "1"
+    "--severity"
+    "CRITICAL,HIGH,MEDIUM,LOW"
+    "--skip-dirs"
+    ".direnv"
+    "--skip-dirs"
+    ".terraform"
+    "."
+  ];
+  language = "system";
+  pass_filenames = false;
+};

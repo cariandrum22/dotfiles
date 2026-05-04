@@ -1,0 +1,119 @@
+{
+  "$schema": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/schemas/settings.schema.json",
+  "ui": {
+    "theme": "GitHub"
+  },
+  "context": {
+    "fileName": [
+      "AGENTS.md"
+    ]
+  },
+  "tools": {
+    "sandbox": false,
+    "allowed": [
+      "run_shell_command(curl)",
+      "run_shell_command(wget)",
+      "run_shell_command(ls)",
+      "run_shell_command(cat)",
+      "run_shell_command(rg)",
+      "run_shell_command(find)",
+      "run_shell_command(jq)",
+      "run_shell_command(sed)",
+      "run_shell_command(awk)",
+      "run_shell_command(head)",
+      "run_shell_command(tail)",
+      "run_shell_command(git status)",
+      "run_shell_command(git diff)",
+      "run_shell_command(git log)",
+      "run_shell_command(git show)",
+      "run_shell_command(git rev-parse)",
+      "run_shell_command(git branch)",
+      "run_shell_command(git fetch)",
+      "run_shell_command(npm test)",
+      "run_shell_command(cargo test)",
+      "run_shell_command(pytest)"
+    ],
+    "shell": {
+      "enableInteractiveShell": true,
+      "pager": "less -R",
+      "showColor": true
+    },
+    "useRipgrep": true
+  },
+  "model": {
+    "name": "gemini-2.5-pro",
+    "maxSessionTurns": 80,
+    "skipNextSpeakerCheck": false
+  },
+  "general": {
+    "enablePromptCompletion": true,
+    "retryFetchErrors": true,
+    "checkpointing": {
+      "enabled": true
+    },
+    "defaultApprovalMode": "auto_edit"
+  },
+  "privacy": {
+    "usageStatisticsEnabled": false
+  },
+  "telemetry": {
+    "enabled": false
+  },
+  "mcp": {
+    "allowed": [
+      "filesystem",
+      "chrome-devtools",
+      "github",
+      "awslabs_aws-documentation-mcp-server",
+      "perplexity-ask",
+      "figma",
+      "google-calendar",
+      "notion",
+      "todoist",
+      "playwright"
+    ]
+  },
+  "security": {
+    "disableYoloMode": true,
+    "enablePermanentToolApproval": true,
+    "folderTrust": {
+      "enabled": true
+    },
+    "environmentVariableRedaction": {
+      "enabled": true,
+      "blocked": [
+        "OPENAI_API_KEY",
+        "ANTHROPIC_API_KEY",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "PERPLEXITY_API_KEY",
+        "FIGMA_API_KEY",
+        "GOOGLE_OAUTH_CREDENTIALS",
+        "API_KEY",
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+        "AWS_SESSION_TOKEN",
+        "AZURE_OPENAI_API_KEY",
+        "CLAUDE_API_KEY",
+        "CLAUDIUS_SECRET_*",
+        "GEMINI_API_KEY",
+        "GOOGLE_API_KEY",
+        "GOOGLE_APPLICATION_CREDENTIALS",
+        "OPENAI_ORG_ID",
+        "OPENAI_PROJECT_ID"
+      ]
+    }
+  },
+  "advanced": {
+    "excludedEnvVars": [
+      "DEBUG",
+      "DEBUG_MODE",
+      "SHELL",
+      "AWS_SECRET_ACCESS_KEY",
+      "GCP_SERVICE_ACCOUNT",
+      "CLAUDIUS_SECRET_*",
+      "GOOGLE_APPLICATION_CREDENTIALS",
+      "AWS_ACCESS_KEY_ID",
+      "AWS_SESSION_TOKEN"
+    ]
+  }
+}

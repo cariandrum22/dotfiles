@@ -1,0 +1,8 @@
+- repo: local
+  hooks:
+    - id: biome-ci
+      name: Biome lint and format check
+      entry: biome ci --no-errors-on-unmatched
+      language: system
+      files: \.(js|jsx|ts|tsx|json|jsonc|css)$
+      pass_filenames: false

@@ -377,6 +377,7 @@
             "yaml"
             "json"
           ];
+          sharedClaudiusSources = "^config/claudius/";
           shellTypes = [
             "bash"
             "sh"
@@ -413,7 +414,10 @@
             check-case-conflicts.enable = true;
             check-executables-have-shebangs.enable = true;
             check-merge-conflicts.enable = true;
-            check-shebang-scripts-are-executable.enable = true;
+            check-shebang-scripts-are-executable = {
+              enable = true;
+              excludes = [ sharedClaudiusSources ];
+            };
             check-symlinks.enable = true;
             check-vcs-permalinks.enable = true;
           };
@@ -452,6 +456,7 @@
                 "\\.jpg$"
                 "\\.gpg$"
                 "\\.plist$"
+                sharedClaudiusSources
               ];
             };
             fish = {
@@ -461,6 +466,7 @@
             };
             markdownlint = {
               enable = true;
+              excludes = [ sharedClaudiusSources ];
               settings.configuration = markdownlintConfig;
             };
             nixfmt = {
@@ -470,7 +476,10 @@
             prettier = {
               enable = true;
               types_or = markdownAndDataTypes;
-              excludes = [ "^.pre-commit-config\\.yaml$" ];
+              excludes = [
+                "^.pre-commit-config\\.yaml$"
+                sharedClaudiusSources
+              ];
             };
             ruff = {
               enable = true;
@@ -487,6 +496,7 @@
               enable = true;
               types_or = shellTypes;
               entry = "${pkgs.shfmt}/bin/shfmt -i 2 -w";
+              excludes = [ sharedClaudiusSources ];
             };
             statix = {
               enable = true;

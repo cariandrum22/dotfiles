@@ -1,0 +1,13 @@
+nixfmt = {
+  enable = true;
+  package = pkgs.nixfmt;
+};
+statix.enable = true;
+deadnix = {
+  enable = true;
+  settings = {
+    noLambdaArg = true;
+    noLambdaPatternNames = true;
+    noUnderscore = true;
+  };
+};

@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+engine="${TFTPL_ENGINE:-}"
+vars_file="${TFTPL_VARS_FILE:-${root}/tftpl.vars.json}"
+console_dir="${TFTPL_CONSOLE_DIR:-${root}}"
+
+if [[ "${vars_file}" != /* ]]; then
+  vars_file="${root}/${vars_file}"
+fi
+
+if [[ "${console_dir}" != /* ]]; then
+  console_dir="${root}/${console_dir}"
+fi
+
+if [[ -z "${engine}" ]]; then
+  if command -v tofu >/dev/null 2>&1; then
+    engine="tofu"
+  elif command -v terraform >/dev/null 2>&1; then
+    engine="terraform"
+  else
+    echo "Neither tofu nor terraform is available in PATH." >&2
+    exit 1
+  fi
+fi
+
+if [[ ! -f "${vars_file}" ]]; then
+  echo "Missing variables file: ${vars_file}" >&2
+  exit 1
+fi
+
+files=("$@")
+if [[ ${#files[@]} -eq 0 ]]; then
+  mapfile -t files < <(git -C "${root}" ls-files '*.tftpl')
+fi
+
+if [[ ${#files[@]} -eq 0 ]]; then
+  exit 0
+fi
+
+for file in "${files[@]}"; do
+  if [[ ! -f "${file}" ]]; then
+    if [[ -f "${root}/${file}" ]]; then
+      file="${root}/${file}"
+    else
+      echo "Template file not found: ${file}" >&2
+      exit 1
+    fi
+  fi
+
+  "${engine}" console -chdir="${console_dir}" <<TFTPL_EOF
+templatefile("${file}", jsondecode(file("${vars_file}")))
+TFTPL_EOF
+done

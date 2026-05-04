@@ -1,0 +1,35 @@
+# ── Formatting & whitespace ──────────────────────────
+editorconfig-checker.enable = true;
+end-of-file-fixer.enable = true;
+trim-trailing-whitespace.enable = true;
+mixed-line-endings.enable = true;
+
+# ── File checks ──────────────────────────────────────
+check-added-large-files = {
+  enable = true;
+  args = [ "--maxkb=200" ];
+};
+check-case-conflicts.enable = true;
+check-executables-have-shebangs.enable = true;
+check-shebang-scripts-are-executable.enable = true;
+check-symlinks.enable = true;
+check-vcs-permalinks.enable = true;
+forbid-new-submodules.enable = true;
+check-merge-conflicts.enable = true;
+
+# ── Data format validation ───────────────────────────
+check-json.enable = true;
+check-toml.enable = true;
+check-yaml.enable = true;
+
+# ── Documentation ────────────────────────────────────
+markdownlint = {
+  enable = true;
+  settings.configuration = builtins.fromJSON (builtins.readFile ./.markdownlint.json);
+};
+
+# ── Spelling ─────────────────────────────────────────
+typos = {
+  enable = true;
+  settings.configPath = ".typos.toml";
+};

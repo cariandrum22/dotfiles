@@ -1,0 +1,4 @@
+[sqlfluff]
+dialect = __DIALECT__
+templater = __TEMPLATER__
+max_line_length = __MAX_LINE_LENGTH__

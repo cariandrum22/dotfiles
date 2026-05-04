@@ -1,0 +1,8 @@
+# frozen_string_literal: true
+
+# Mark existing migrations as safe so only new migrations are checked.
+# Update this value after running `bin/rails db:migrate` for the first time.
+StrongMigrations.start_after = 0
+
+# Set the PostgreSQL version for migration safety checks.
+StrongMigrations.target_postgresql_version = __PG_VERSION__

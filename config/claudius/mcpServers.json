@@ -1,0 +1,91 @@
+{
+  "mcpServers": {
+    "awslabs_aws-documentation-mcp-server": {
+      "args": [
+        "awslabs.aws-documentation-mcp-server@latest"
+      ],
+      "autoApprove": [],
+      "command": "uvx",
+      "disabled": false,
+      "env": {
+        "AWS_DOCUMENTATION_PARTITION": "aws",
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      }
+    },
+    "chrome-devtools": {
+      "args": [
+        "-y",
+        "chrome-devtools-mcp"
+      ],
+      "command": "npx",
+      "env": {}
+    },
+    "codex": {
+      "args": [
+        "-lc",
+        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server codex -- codex mcp-server"
+      ],
+      "command": "bash",
+      "env": {}
+    },
+    "figma": {
+      "args": [
+        "-lc",
+        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server figma -- bash -lc 'exec npx -y figma-developer-mcp --figma-api-key=\"$FIGMA_API_KEY\" --stdio'"
+      ],
+      "command": "bash",
+      "env": {}
+    },
+    "filesystem": {
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem"
+      ],
+      "command": "npx",
+      "env": {}
+    },
+    "github": {
+      "args": [
+        "-lc",
+        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server github -- bash -lc 'exec npx -y mcp-remote@latest https://api.githubcopilot.com/mcp/ --header \"Authorization:Bearer $GITHUB_PERSONAL_ACCESS_TOKEN\"'"
+      ],
+      "command": "bash",
+      "env": {}
+    },
+    "google-calendar": {
+      "args": [
+        "-lc",
+        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server google-calendar -- npx -y @cocal/google-calendar-mcp"
+      ],
+      "command": "bash",
+      "env": {}
+    },
+    "notion": {
+      "args": [],
+      "env": {},
+      "startup_timeout_sec": 120,
+      "url": "https://mcp.notion.com/mcp"
+    },
+    "perplexity-ask": {
+      "args": [
+        "-lc",
+        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server perplexity-ask -- docker run -i --rm -e PERPLEXITY_API_KEY mcp/perplexity-ask"
+      ],
+      "command": "bash",
+      "env": {}
+    },
+    "playwright": {
+      "args": [
+        "@playwright/mcp@latest"
+      ],
+      "command": "npx",
+      "env": {}
+    },
+    "todoist": {
+      "args": [],
+      "env": {},
+      "startup_timeout_sec": 120,
+      "url": "https://ai.todoist.net/mcp"
+    }
+  }
+}
