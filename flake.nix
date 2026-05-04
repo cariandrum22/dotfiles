@@ -179,7 +179,11 @@
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
           extraSpecialArgs = {
-            inherit system nixos-vscode-server;
+            inherit
+              system
+              home-manager
+              nixos-vscode-server
+              ;
           }
           // lib.optionalAttrs headless {
             isHeadless = true;
