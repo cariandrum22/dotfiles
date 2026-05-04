@@ -103,7 +103,7 @@ Current Document Analysis:
 - Duplicate topics found: 2
   - Communication style (3 sections)
   - Testing requirements (2 sections)
-- Structure issues: 
+- Structure issues:
   - Security section scattered across document
   - Inconsistent heading levels
 
