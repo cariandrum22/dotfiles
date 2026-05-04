@@ -1,0 +1,10 @@
+version: 1
+name: setup-biome
+description: Set up Biome for JavaScript/TypeScript/JSX/TSX linting and formatting
+  with strict rules. Use when adding code quality checks to a JS/TS project.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual

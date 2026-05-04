@@ -1,0 +1,12 @@
+version: 1
+name: setup-python-lint
+description: >-
+  Set up Ruff (linter + formatter) and mypy (type checker) with strict rules
+  encouraging functional style. Use when adding code quality checks to a Python
+  project.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: '[package name and Python target version, e.g. "myapp 3.12"]'
+  codex:
+    invocation: manual

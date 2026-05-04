@@ -1,0 +1,10 @@
+version: 1
+name: setup-sql-lint
+description: Set up SQLFluff linting and formatting checks for SQL files with a strict,
+  Postgres-first configuration. Use when adding SQL quality gates.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: '[dialect=postgres templater=raw max_line_length=100]'
+  codex:
+    invocation: manual

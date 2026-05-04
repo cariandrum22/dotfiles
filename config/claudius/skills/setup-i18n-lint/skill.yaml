@@ -1,0 +1,10 @@
+version: 1
+name: setup-i18n-lint
+description: Set up i18n linting with i18n-tasks and rubocop-i18n for a Rails project.
+  Use when adding translation quality checks.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual

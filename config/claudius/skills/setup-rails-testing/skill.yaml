@@ -1,0 +1,10 @@
+version: 1
+name: setup-rails-testing
+description: Set up test infrastructure with SimpleCov coverage tracking for a Rails
+  project. Use when adding test coverage measurement.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual

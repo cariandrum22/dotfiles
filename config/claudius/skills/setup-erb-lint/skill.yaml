@@ -1,0 +1,10 @@
+version: 1
+name: setup-erb-lint
+description: Set up ERB template linting with erb_lint, better_html, and htmlbeautifier
+  for a Rails project. Use when adding view/template quality checks.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual

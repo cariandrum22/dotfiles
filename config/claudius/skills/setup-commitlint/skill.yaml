@@ -1,0 +1,12 @@
+version: 1
+name: setup-commitlint
+description: >-
+  Set up commitlint with Conventional Commits rules, git hooks (commit-msg +
+  pre-push), and GitHub Actions CI. Use when adding commit message linting to a
+  project.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: '[comma-separated scopes, e.g. "api,web,ci,deps,docs,nix,scripts,tooling"]'
+  codex:
+    invocation: manual

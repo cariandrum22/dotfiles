@@ -1,0 +1,11 @@
+version: 1
+name: setup-nix-ci-lint
+description: Generate a GitHub Actions lint CI workflow from the project's flake.nix
+  hook configuration, using Determinate Systems Nix actions. Use when setting up lint
+  CI for a Nix project with pre-commit hooks.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual

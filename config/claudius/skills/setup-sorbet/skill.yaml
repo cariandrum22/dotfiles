@@ -1,0 +1,10 @@
+version: 1
+name: setup-sorbet
+description: Set up Sorbet type checking with Tapioca and rubocop-sorbet for a Rails
+  project. Use when adding static type checking to a Ruby project.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual

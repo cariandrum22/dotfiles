@@ -1,0 +1,11 @@
+version: 1
+name: setup-rails-ci
+description: Generate a GitHub Actions CI workflow for a Rails project by reading
+  the Gemfile to determine which tools are installed. Use when setting up Rails-specific
+  CI.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual

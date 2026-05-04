@@ -1,0 +1,10 @@
+version: 1
+name: setup-rails-security
+description: Set up Rails security scanning with Brakeman and bundler-audit. Use when
+  adding security checks to a Rails project.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual

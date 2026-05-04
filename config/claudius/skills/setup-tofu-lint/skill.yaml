@@ -1,0 +1,10 @@
+version: 1
+name: setup-tofu-lint
+description: Set up OpenTofu/Terraform lint and format hooks (tofu fmt, hclfmt, tflint,
+  tofu validate) in a Nix flake project. Use when adding OpenTofu code quality checks.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual

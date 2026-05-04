@@ -1,0 +1,10 @@
+version: 1
+name: setup-c-lint
+description: Set up clang-format and clang-tidy checks for C/C++ projects with strict,
+  check-only hooks. Use when adding C/H quality gates.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: '[build_dir=build]'
+  codex:
+    invocation: manual

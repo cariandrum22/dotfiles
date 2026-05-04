@@ -1,0 +1,10 @@
+version: 1
+name: setup-nix-flake
+description: Create a minimal Nix Flake skeleton (flake.nix + .envrc) for a new project.
+  Use when bootstrapping a Nix-based development environment.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: '[project description, e.g. "Development environment for my-api"]'
+  codex:
+    invocation: manual

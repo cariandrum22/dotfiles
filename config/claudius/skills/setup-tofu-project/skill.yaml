@@ -1,0 +1,10 @@
+version: 1
+name: setup-tofu-project
+description: One-command setup for a new OpenTofu IaC project with full linting, security
+  scanning, CI, and commit message enforcement. Orchestrates multiple setup skills.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: '[comma-separated commitlint scopes, e.g. "ci,deps,docs,envs,modules,nix,scripts,security,tooling"]'
+  codex:
+    invocation: manual

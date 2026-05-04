@@ -1,0 +1,11 @@
+version: 1
+name: setup-rubocop
+description: Set up RuboCop with rubocop-rails, rubocop-performance, rubocop-rake,
+  rubocop-minitest, and rubocop-thread_safety for a Rails project. Use when adding
+  Ruby/Rails code linting.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual
