@@ -21,6 +21,7 @@
         atuin
         zoxide
         carapace
+        gh
         ghq
         fzf
         (callPackage ./rivendell.nix { inherit pkgs; })
@@ -69,6 +70,7 @@
         powershell
         certbot
         awscli2
+        ssm-session-manager-plugin
         eksctl
         google-cloud-sdk
         k6
