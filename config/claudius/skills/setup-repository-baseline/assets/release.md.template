@@ -1,0 +1,32 @@
+# Release Runbook
+
+This runbook describes the minimum release process for `__REPOSITORY_NAME__`.
+
+## Preconditions
+
+- `__DEFAULT_BRANCH__` is green and review-complete
+- `CHANGELOG.md` is updated
+- version metadata is updated if this repository tracks versions in files
+- release notes reflect the shipped change set
+
+## Release Steps
+
+1. Update the local default branch and verify the exact commit to release.
+2. Create a signed annotated tag such as `vX.Y.Z`.
+3. Push the tag to the remote.
+4. Publish a GitHub release using the changelog as the source of truth.
+5. Verify any published artifacts, packages, or installation paths.
+
+## Post-Release Checks
+
+- confirm the tag and release notes are visible remotely
+- confirm the installation or upgrade path works as expected
+- note any follow-up fixes for the next patch release
+
+## Rollback Thinking
+
+If a severe regression or security issue is discovered after release, document:
+
+- whether the release should be yanked or superseded
+- what mitigation is available immediately
+- how affected users should recover

@@ -1,0 +1,5 @@
+# Prefer team handles for organization repositories when available.
+# Keep this file small at first and add path-specific ownership as the
+# repository grows.
+
+* __PRIMARY_OWNER__

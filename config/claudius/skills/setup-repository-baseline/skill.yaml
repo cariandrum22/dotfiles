@@ -1,0 +1,13 @@
+version: 1
+name: setup-repository-baseline
+description: >-
+  Establish repository governance documents and collaboration templates for a
+  modern OSS project: CONTRIBUTING.md, SECURITY.md, CHANGELOG.md, release
+  runbook, CODEOWNERS, and GitHub issue/PR templates. Use before CI or local
+  hook automation.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: '[optional: "<primary-owner>[,<security-contact>]"]'
+  codex:
+    invocation: manual

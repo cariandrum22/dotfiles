@@ -101,6 +101,16 @@ skills:
       Still useful as a helper, but commit authoring guidance is secondary to
       repository-wide change policy and PR-title enforcement.
 
+  setup-repository-baseline:
+    topic: foundation
+    role: orchestrator
+    exposure: primary
+    future_action: keep-as-primary-entry-point
+    successor: []
+    rationale: >-
+      This is the source-of-truth policy surface for repository collaboration.
+      Hosted enforcement and local hooks should compose around it, not replace it.
+
   setup-nix-flake:
     topic: foundation
     role: substrate

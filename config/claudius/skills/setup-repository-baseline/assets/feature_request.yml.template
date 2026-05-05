@@ -1,0 +1,37 @@
+name: Feature Request
+description: Propose an improvement or new capability.
+title: "feat: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please explain the user or maintainer problem first.
+        Good feature requests describe the need before the implementation idea.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem are you trying to solve?
+      placeholder: Describe the gap or pain point.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Change
+      description: What should the project do differently?
+      placeholder: Describe the preferred outcome.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What other options did you consider?
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Links, prior art, constraints, or rollout concerns.

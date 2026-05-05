@@ -4,6 +4,9 @@ This roadmap turns the current skills collection into a more natural structure
 for modern OSS teams that want shared repository guardrails first and local
 tooling second.
 
+Status: `setup-repository-baseline` is now the first implemented primary skill.
+The remaining items below are still open.
+
 ## Target shape
 
 ### 1. Repository governance first
