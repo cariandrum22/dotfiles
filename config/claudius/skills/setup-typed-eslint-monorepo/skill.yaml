@@ -1,0 +1,12 @@
+version: 1
+name: setup-typed-eslint-monorepo
+description: >-
+  Set up or normalize typed ESLint for monorepo app or package surfaces that
+  need more than Biome, such as Vue apps, browser add-ons, GraphQL-aware
+  packages, and surfaces that require security or functional lint plugins.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: '[optional: "web,addon,packages/foo"]'
+  codex:
+    invocation: manual

@@ -2,11 +2,12 @@ version: 1
 name: setup-commitlint
 description: >-
   Set up commitlint with Conventional Commits rules, git hooks (commit-msg +
-  pre-push), and GitHub Actions CI. Use when adding commit message linting to a
-  project.
+  pre-push), and GitHub Actions CI. Can infer and optimize the allowed scope
+  taxonomy from an existing repository layout when no explicit scope list is
+  provided.
 targets:
   claude-code:
     invocation: manual
-    argument-hint: '[comma-separated scopes, e.g. "api,web,ci,deps,docs,nix,scripts,tooling"]'
+    argument-hint: '[optional: comma-separated scopes, e.g. "api,web,ci,deps,docs,nix,scripts,tooling"]'
   codex:
     invocation: manual

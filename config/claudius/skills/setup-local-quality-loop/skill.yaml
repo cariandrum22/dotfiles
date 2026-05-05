@@ -1,0 +1,12 @@
+version: 1
+name: setup-local-quality-loop
+description: >-
+  Establish a shared local quality loop for a Nix-based repository by composing
+  git-hooks.nix, shared lint and secrets hooks, commitlint, and repo-wide lint
+  CI. Supported profiles: rails-monorepo, tofu-infra, and polyglot-oss.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: '[rails-monorepo|tofu-infra|polyglot-oss]'
+  codex:
+    invocation: manual

@@ -1,0 +1,12 @@
+version: 1
+name: setup-quality-profile
+description: >-
+  Apply a shared repository quality profile by composing baseline repository
+  policy, local hooks, lint CI, commitlint, and GitHub guardrails. Supported
+  profiles: rails-monorepo, tofu-infra, and polyglot-oss.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: '[profile][,<primary-owner>[,<security-contact>]]'
+  codex:
+    invocation: manual
