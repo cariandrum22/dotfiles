@@ -84,31 +84,47 @@ in
     "claudius/config.toml".text = claudiusConfig.claudiusConfigText;
   };
 
-  home.activation.ensureClaudiusStateDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    claudius_config_dir="$HOME/.config/claudius"
+  home = {
+    activation = {
+      ensureClaudiusStateDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        claudius_config_dir="$HOME/.config/claudius"
 
-    for relative_dir in ${lib.concatStringsSep " " (map lib.escapeShellArg mutableClaudiusRelativeDirs)}; do
-      mkdir -p "$claudius_config_dir/$relative_dir"
-    done
+        for relative_dir in ${lib.concatStringsSep " " (map lib.escapeShellArg mutableClaudiusRelativeDirs)}; do
+          mkdir -p "$claudius_config_dir/$relative_dir"
+        done
 
-    chmod 700 \
-      "$claudius_config_dir/credentials" \
-      "$claudius_config_dir/credentials/google" \
-      "$claudius_config_dir/credentials/mcp"
-  '';
+        chmod 700 \
+          "$claudius_config_dir/credentials" \
+          "$claudius_config_dir/credentials/google" \
+          "$claudius_config_dir/credentials/mcp"
+      '';
 
-  home.activation.syncClaudiusManagedSkills = lib.hm.dag.entryAfter [ "ensureClaudiusStateDirs" ] ''
-    # ~/.config/claudius/skills is the declarative source tree.
-    # Agent-native skill directories remain generated artifacts.
-    for relative_dir in ${lib.concatStringsSep " " (map lib.escapeShellArg managedSkillTargetRelativeDirs)}; do
-      target_dir="$HOME/$relative_dir"
-      if [ -d "$target_dir" ]; then
-        find "$target_dir" -type f -exec chmod u+w {} +
-      fi
-    done
+      pruneLegacyClaudiusSkillLayout = lib.hm.dag.entryBefore [ "linkGeneration" ] ''
+        legacy_skill_root="$HOME/.config/claudius/skills"
 
-    for agent in ${lib.concatStringsSep " " (map lib.escapeShellArg managedSkillSyncAgents)}; do
-      ${claudiusExe} skills sync --global --agent "$agent" --prune
-    done
-  '';
+        if [ -d "$legacy_skill_root" ]; then
+          # Legacy skill layouts stored SKILL.md and templates at the skill root.
+          # The current declarative tree uses skill.yaml/instructions.md plus assets/.
+          find "$legacy_skill_root" -mindepth 2 -maxdepth 2 -type f \
+            \( -name 'SKILL.md' -o -name '*.template' \) \
+            -delete
+        fi
+      '';
+
+      syncClaudiusManagedSkills = lib.hm.dag.entryAfter [ "ensureClaudiusStateDirs" ] ''
+        # ~/.config/claudius/skills is the declarative source tree.
+        # Agent-native skill directories remain generated artifacts.
+        for relative_dir in ${lib.concatStringsSep " " (map lib.escapeShellArg managedSkillTargetRelativeDirs)}; do
+          target_dir="$HOME/$relative_dir"
+          if [ -d "$target_dir" ]; then
+            find "$target_dir" -type f -exec chmod u+w {} +
+          fi
+        done
+
+        for agent in ${lib.concatStringsSep " " (map lib.escapeShellArg managedSkillSyncAgents)}; do
+          ${claudiusExe} skills sync --global --agent "$agent" --prune
+        done
+      '';
+    };
+  };
 }
