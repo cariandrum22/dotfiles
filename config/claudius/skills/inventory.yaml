@@ -1,0 +1,434 @@
+# Operational inventory for the shared skills collection.
+# This file is separate from catalog.yaml on purpose:
+# - catalog.yaml describes the current topical catalog
+# - inventory.yaml describes future-facing refactor intent
+version: 1
+
+roles:
+  utility:
+    description: User-invoked helper skill that is not part of repository baseline setup.
+  substrate:
+    description: Optional local development substrate or toolchain setup.
+  building-block:
+    description: Reusable setup unit that should usually be composed by a higher-level skill.
+  orchestrator:
+    description: User-facing skill that wires multiple building blocks into a coherent baseline.
+  retire:
+    description: Skill should be removed or replaced rather than expanded.
+
+exposure:
+  primary:
+    description: Keep directly discoverable for normal users.
+  secondary:
+    description: Keep callable, but prefer to route users through a higher-level skill.
+  internal:
+    description: Prefer not to expose directly once successor skills exist.
+
+proposed_primary_skills:
+  setup-repository-baseline:
+    purpose: >-
+      Establish source-of-truth repository governance for a modern international OSS
+      team: CONTRIBUTING, SECURITY, CODEOWNERS, PR/issue templates, merge and release
+      policy, and changelog/runbook conventions.
+    notes:
+      - Git and GitHub rules should be the primary source of truth.
+      - Local hooks are optional accelerators, not the core policy surface.
+  setup-github-guardrails:
+    purpose: >-
+      Establish hosted enforcement and collaboration defaults: CI wiring, PR-title
+      lint, labels, protected-branch assumptions, and release workflow scaffolding.
+    notes:
+      - Prefer server-side enforcement over commit-local enforcement where possible.
+      - Commitlint should become optional here, with PR-title lint as the main path.
+  setup-local-quality-loop:
+    purpose: >-
+      Add or adapt local developer feedback loops without assuming one backend.
+      Should support existing hooks, pre-commit, git-hooks.nix, lefthook, or no local
+      hooks.
+    notes:
+      - This is where current git hook and local lint setup skills should converge.
+      - Backend selection should be explicit rather than hard-coded to Nix.
+  setup-nix-workspace:
+    purpose: >-
+      Optional Nix-based workspace bootstrap for teams that want reproducible local
+      environments and hook execution through flakes.
+    notes:
+      - Keep separate from repository governance.
+      - Can compose setup-git-hooks and Nix-specific lint/CI helpers when selected.
+  setup-rails-project:
+    purpose: Rails-focused project baseline that composes repo baseline, local quality
+      loop choice, and Rails/Ruby quality gates.
+    notes:
+      - Existing setup-rails-api can evolve into this.
+  setup-tofu-project:
+    purpose: IaC-focused project baseline that composes repo baseline, local quality
+      loop choice, and Terraform/OpenTofu quality gates.
+    notes:
+      - Existing setup-tofu-project is already close to this role.
+
+skills:
+  gemini-web-search:
+    topic: workflow
+    role: retire
+    exposure: internal
+    future_action: replace-with-native-web-search-or-mcp
+    successor:
+      - web.run
+      - perplexity-ask MCP
+      - Gemini MCP / command surface
+    rationale: >-
+      This is a transport workaround rather than durable repository expertise.
+      Search should move to MCP or native web tools, not remain a shared setup skill.
+
+  organize-context:
+    topic: workflow
+    role: utility
+    exposure: primary
+    future_action: keep-standalone
+    successor: []
+    rationale: >-
+      This is a genuine agent workflow helper and is orthogonal to repository
+      baseline setup.
+
+  suggest-commit:
+    topic: workflow
+    role: utility
+    exposure: secondary
+    future_action: keep-for-now
+    successor:
+      - setup-github-guardrails
+    rationale: >-
+      Still useful as a helper, but commit authoring guidance is secondary to
+      repository-wide change policy and PR-title enforcement.
+
+  setup-nix-flake:
+    topic: foundation
+    role: substrate
+    exposure: primary
+    future_action: rename-or-compose-into-setup-nix-workspace
+    successor:
+      - setup-nix-workspace
+    rationale: >-
+      Valuable for teams choosing Nix, but optional relative to repository
+      governance and collaboration rules.
+
+  setup-git-hooks:
+    topic: foundation
+    role: substrate
+    exposure: secondary
+    future_action: absorb-into-backend-selection
+    successor:
+      - setup-local-quality-loop
+      - setup-nix-workspace
+    rationale: >-
+      Hook infrastructure is important, but should be selected or adapted by a
+      higher-level local quality skill instead of being the first user-facing step.
+
+  setup-nix-lint:
+    topic: foundation
+    role: building-block
+    exposure: secondary
+    future_action: compose-into-nix-workspace
+    successor:
+      - setup-nix-workspace
+      - setup-local-quality-loop
+    rationale: >-
+      Useful once Nix is selected, but too implementation-specific to be a primary
+      repo-baseline entry point.
+
+  setup-shell-lint:
+    topic: foundation
+    role: building-block
+    exposure: secondary
+    future_action: compose-into-local-quality-loop
+    successor:
+      - setup-local-quality-loop
+    rationale: >-
+      Good guardrail, but one of several local quality checks rather than a top-level
+      setup experience.
+
+  setup-file-hygiene:
+    topic: foundation
+    role: building-block
+    exposure: secondary
+    future_action: compose-into-local-quality-loop
+    successor:
+      - setup-local-quality-loop
+      - setup-repository-baseline
+    rationale: >-
+      File hygiene matters broadly, but its policy belongs in the repo baseline while
+      its local enforcement belongs in the local quality loop.
+
+  setup-secrets-scan:
+    topic: foundation
+    role: building-block
+    exposure: secondary
+    future_action: split-between-platform-and-local-enforcement
+    successor:
+      - setup-github-guardrails
+      - setup-local-quality-loop
+    rationale: >-
+      Secret scanning is important, but should prefer hosted scanning and CI as the
+      primary guardrail, with local hooks as optional acceleration.
+
+  setup-commitlint:
+    topic: foundation
+    role: building-block
+    exposure: internal
+    future_action: fold-into-github-guardrails-and-local-quality-loop
+    successor:
+      - setup-github-guardrails
+      - setup-local-quality-loop
+    rationale: >-
+      Commit-message policy is real, but direct commitlint setup is too narrow for a
+      primary skill. PR-title lint and squash-merge policy should dominate.
+
+  setup-nix-ci-lint:
+    topic: foundation
+    role: building-block
+    exposure: internal
+    future_action: fold-into-github-guardrails-when-nix-backend-selected
+    successor:
+      - setup-github-guardrails
+      - setup-nix-workspace
+    rationale: >-
+      CI generation from Nix hook config is useful, but only after a Nix substrate
+      has been chosen.
+
+  setup-just:
+    topic: foundation
+    role: substrate
+    exposure: secondary
+    future_action: keep-standalone
+    successor: []
+    rationale: >-
+      Task runner bootstrap is optional infrastructure. It should not be conflated
+      with repository governance.
+
+  setup-just-lint:
+    topic: foundation
+    role: building-block
+    exposure: internal
+    future_action: compose-into-local-quality-loop-when-just-is-adopted
+    successor:
+      - setup-local-quality-loop
+    rationale: >-
+      Only relevant after choosing just, so it should not remain prominent on its own.
+
+  setup-biome:
+    topic: frontend-typescript
+    role: building-block
+    exposure: primary
+    future_action: keep-standalone-and-compose-into-future-js-baseline
+    successor: []
+    rationale: >-
+      Strong standalone value for JS/TS projects. Still best treated as one building
+      block inside a broader project baseline.
+
+  setup-ts-typecheck:
+    topic: frontend-typescript
+    role: building-block
+    exposure: primary
+    future_action: keep-standalone-and-compose-into-future-js-baseline
+    successor: []
+    rationale: >-
+      Type checking is a clean reusable unit and still useful independently.
+
+  setup-stylelint:
+    topic: frontend-typescript
+    role: building-block
+    exposure: secondary
+    future_action: keep-standalone
+    successor: []
+    rationale: >-
+      Still useful for CSS/SCSS-heavy projects, but less central than Biome and type
+      checking in a modern default baseline.
+
+  setup-c-lint:
+    topic: c-cpp
+    role: building-block
+    exposure: primary
+    future_action: keep-standalone
+    successor: []
+    rationale: >-
+      A coherent language-specific building block with clear standalone value.
+
+  setup-python-lint:
+    topic: python
+    role: building-block
+    exposure: primary
+    future_action: keep-standalone-and-compose-into-future-python-baseline
+    successor: []
+    rationale: >-
+      Strong standalone value today, while still fitting naturally inside a later
+      Python project baseline.
+
+  setup-rubocop:
+    topic: rails-ruby
+    role: building-block
+    exposure: secondary
+    future_action: compose-into-rails-project-baseline
+    successor:
+      - setup-rails-project
+      - setup-rails-api
+    rationale: >-
+      Important, but Rails users usually want a broader quality baseline than only
+      RuboCop wiring.
+
+  setup-capybara-lint:
+    topic: rails-ruby
+    role: building-block
+    exposure: internal
+    future_action: compose-into-rails-project-baseline
+    successor:
+      - setup-rails-project
+      - setup-rails-api
+    rationale: >-
+      Too granular for a primary skill. Better selected automatically when the
+      project actually uses Capybara/system tests.
+
+  setup-erb-lint:
+    topic: rails-ruby
+    role: building-block
+    exposure: secondary
+    future_action: compose-into-rails-project-baseline
+    successor:
+      - setup-rails-project
+      - setup-rails-api
+    rationale: >-
+      Useful only for view-heavy Rails apps, so it should be a domain component
+      rather than a top-level universal skill.
+
+  setup-i18n-lint:
+    topic: rails-ruby
+    role: building-block
+    exposure: internal
+    future_action: compose-into-rails-project-baseline
+    successor:
+      - setup-rails-project
+      - setup-rails-api
+    rationale: >-
+      Valuable when i18n complexity exists, but too detailed to foreground.
+
+  setup-sorbet:
+    topic: rails-ruby
+    role: building-block
+    exposure: secondary
+    future_action: keep-standalone-and-compose-into-rails-project-baseline
+    successor:
+      - setup-rails-project
+      - setup-rails-api
+    rationale: >-
+      Sorbet adoption is a meaningful standalone decision, but should still compose
+      into the full Rails baseline.
+
+  setup-rails-security:
+    topic: rails-ruby
+    role: building-block
+    exposure: secondary
+    future_action: compose-into-rails-project-baseline
+    successor:
+      - setup-rails-project
+      - setup-rails-api
+    rationale: >-
+      Security scanning belongs in the standard Rails stack, not as one of the first
+      skills the user has to discover manually.
+
+  setup-rails-db-safety:
+    topic: rails-ruby
+    role: building-block
+    exposure: secondary
+    future_action: compose-into-rails-project-baseline
+    successor:
+      - setup-rails-project
+      - setup-rails-api
+    rationale: >-
+      High-value guardrail, but specific enough that it fits better inside a Rails
+      project baseline.
+
+  setup-rails-testing:
+    topic: rails-ruby
+    role: building-block
+    exposure: secondary
+    future_action: compose-into-rails-project-baseline
+    successor:
+      - setup-rails-project
+      - setup-rails-api
+    rationale: >-
+      Coverage and test harness setup are standard baseline concerns for Rails rather
+      than a standalone first-contact skill.
+
+  setup-rails-ci:
+    topic: rails-ruby
+    role: building-block
+    exposure: internal
+    future_action: split-between-github-guardrails-and-rails-project-baseline
+    successor:
+      - setup-github-guardrails
+      - setup-rails-project
+      - setup-rails-api
+    rationale: >-
+      CI is important, but should align with broader GitHub guardrails and derive from
+      the chosen project baseline.
+
+  setup-rails-api:
+    topic: rails-ruby
+    role: orchestrator
+    exposure: primary
+    future_action: evolve-into-setup-rails-project
+    successor:
+      - setup-rails-project
+    rationale: >-
+      Already close to the right granularity: one user-facing Rails baseline that
+      composes many narrower building blocks.
+
+  setup-iac-security:
+    topic: iac-tofu
+    role: building-block
+    exposure: secondary
+    future_action: compose-into-tofu-project-baseline
+    successor:
+      - setup-tofu-project
+    rationale: >-
+      Important but too narrow for initial discovery. Best bundled into the IaC
+      project baseline.
+
+  setup-tftpl-lint:
+    topic: iac-tofu
+    role: building-block
+    exposure: internal
+    future_action: compose-into-tofu-project-baseline
+    successor:
+      - setup-tofu-project
+    rationale: >-
+      Only relevant when templatefile usage exists, so it should not be a primary
+      top-level skill.
+
+  setup-tofu-lint:
+    topic: iac-tofu
+    role: building-block
+    exposure: secondary
+    future_action: compose-into-tofu-project-baseline
+    successor:
+      - setup-tofu-project
+    rationale: >-
+      Core IaC quality checks belong in the OpenTofu project baseline.
+
+  setup-tofu-project:
+    topic: iac-tofu
+    role: orchestrator
+    exposure: primary
+    future_action: keep-and-realign-around-repo-baseline
+    successor: []
+    rationale: >-
+      Already a strong top-level skill. It should keep its role, but hand off shared
+      governance and local backend choice to cross-project baseline skills.
+
+  setup-sql-lint:
+    topic: sql
+    role: building-block
+    exposure: primary
+    future_action: keep-standalone
+    successor: []
+    rationale: >-
+      Clean language/domain-specific building block with standalone value.
