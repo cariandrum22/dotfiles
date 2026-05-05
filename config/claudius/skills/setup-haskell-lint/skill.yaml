@@ -1,0 +1,11 @@
+version: 1
+name: setup-haskell-lint
+description: >-
+  Set up Fourmolu, HLint, and a strict Haskell build check with check-only
+  hooks. Use when adding Haskell formatting and lint gates.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: '[build_tool=auto|cabal|stack]'
+  codex:
+    invocation: manual

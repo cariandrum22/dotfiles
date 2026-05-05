@@ -1,0 +1,17 @@
+- repo: local
+  hooks:
+    - id: fourmolu-check
+      name: fourmolu --mode check
+      entry: fourmolu --mode check .
+      language: system
+      pass_filenames: false
+    - id: hlint-check
+      name: hlint
+      entry: hlint .
+      language: system
+      pass_filenames: false
+    - id: haskell-strict-check
+      name: strict Haskell build
+      entry: ./scripts/haskell-strict-check.sh
+      language: system
+      pass_filenames: false

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -eu
+
+scope="${LEAN_LINT_SCOPE:-clippy}"
+
+lake build
+
+case "$scope" in
+  default)
+    lake lint
+    ;;
+  clippy)
+    lake lint --clippy
+    ;;
+  all)
+    lake lint --lint-all
+    ;;
+  *)
+    echo "Unsupported LEAN_LINT_SCOPE: $scope" >&2
+    exit 1
+    ;;
+esac

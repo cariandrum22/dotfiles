@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -eu
+
+build_tool="${HASKELL_BUILD_TOOL:-auto}"
+strict_ghc_options="${HASKELL_STRICT_GHC_OPTIONS:--Wall -Wcompat -Wincomplete-record-updates -Wincomplete-uni-patterns -Wredundant-constraints -Werror}"
+
+detect_build_tool() {
+  if [ "$build_tool" != "auto" ]; then
+    printf '%s\n' "$build_tool"
+    return
+  fi
+
+  if [ -f stack.yaml ]; then
+    printf '%s\n' stack
+    return
+  fi
+
+  if ls ./*.cabal >/dev/null 2>&1 || [ -f cabal.project ]; then
+    printf '%s\n' cabal
+    return
+  fi
+
+  echo "Unable to detect a Haskell build tool. Set HASKELL_BUILD_TOOL=cabal or stack." >&2
+  exit 1
+}
+
+tool="$(detect_build_tool)"
+
+case "$tool" in
+  cabal)
+    cabal build all --ghc-options="$strict_ghc_options"
+    ;;
+  stack)
+    stack build --ghc-options "$strict_ghc_options"
+    ;;
+  *)
+    echo "Unsupported Haskell build tool: $tool" >&2
+    exit 1
+    ;;
+esac

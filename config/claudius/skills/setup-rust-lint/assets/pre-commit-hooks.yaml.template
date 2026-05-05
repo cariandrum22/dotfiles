@@ -1,0 +1,12 @@
+- repo: local
+  hooks:
+    - id: cargo-fmt-check
+      name: cargo fmt --check
+      entry: cargo fmt --all -- --check
+      language: system
+      pass_filenames: false
+    - id: cargo-clippy-strict
+      name: cargo clippy strict
+      entry: cargo clippy --workspace --all-targets --all-features -- -D warnings -W clippy::pedantic -W clippy::cargo -D clippy::unwrap_used -D clippy::expect_used -D clippy::panic -D clippy::todo -D clippy::unimplemented
+      language: system
+      pass_filenames: false

@@ -1,0 +1,54 @@
+plugins:
+  - rubocop-performance
+  - rubocop-thread_safety
+__OPTIONAL_PLUGINS__
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: __RUBY_VERSION__
+  SuggestExtensions: false
+  Exclude:
+    - "bin/*"
+    - "vendor/**/*"
+    - "node_modules/**/*"
+    - "log/**/*"
+    - "tmp/**/*"
+
+Layout/LineLength:
+  Max: 100
+
+Metrics/MethodLength:
+  Max: 15
+
+Metrics/AbcSize:
+  Max: 20
+
+Metrics/CyclomaticComplexity:
+  Max: 10
+
+Metrics/PerceivedComplexity:
+  Max: 10
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
+
+Style/MutableConstant:
+  Enabled: true
+
+Style/GlobalVars:
+  Enabled: true
+
+Style/For:
+  Enabled: true
+
+Style/EachWithObject:
+  Enabled: true
+
+Style/CombinableLoops:
+  Enabled: true
+
+Style/GuardClause:
+  Enabled: true
+
+Lint/ConstantDefinitionInBlock:
+  Enabled: true

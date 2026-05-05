@@ -38,6 +38,8 @@ Create or fill gaps in the following baseline files:
 - Hosted enforcement belongs in `/setup-github-guardrails`, not here.
 - Local hooks and developer feedback loops belong in `/setup-local-quality-loop`,
   not here.
+- Use `/setup-quality-profile` when bootstrapping a repository to the shared
+  house style end to end.
 - Keep policy concise, contributor-readable, and stack-agnostic.
 - Preserve existing project-specific content. Merge missing sections instead of
   overwriting files wholesale.
@@ -182,8 +184,9 @@ Summarize:
 - which follow-up steps remain for hosted enforcement or local tooling
 
 If the repository still lacks CI, branch protection, PR-title lint, release
-automation, or local hooks, recommend `/setup-github-guardrails` and
-`/setup-local-quality-loop` as the next skills.
+automation, or local hooks, recommend `/setup-quality-profile` for a one-shot
+bootstrap or `/setup-github-guardrails` and `/setup-local-quality-loop`
+separately when the user wants finer control.
 
 ## Important Notes
 

@@ -1,0 +1,13 @@
+version: 1
+name: setup-github-guardrails
+description: >-
+  Align GitHub-hosted guardrails with a shared repository profile: workflow and
+  job naming, PR-title lint, minimal permissions, and optional branch
+  protection recommendations. Supported profiles: rails-monorepo, tofu-infra,
+  and polyglot-oss.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: '[rails-monorepo|tofu-infra|polyglot-oss]'
+  codex:
+    invocation: manual

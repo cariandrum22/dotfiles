@@ -1,0 +1,11 @@
+version: 1
+name: setup-ruby-lint
+description: >-
+  Set up generic RuboCop checks for a Ruby project with check-only hooks. Use
+  when adding Ruby formatting and lint gates outside Rails-specific setups.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: '[ruby_version, e.g. "3.3"]'
+  codex:
+    invocation: manual
