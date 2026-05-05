@@ -1,0 +1,30 @@
+# Security Policy
+
+## Supported Versions
+
+By default, only the active default branch is supported for security fixes.
+Older releases are unsupported unless this repository later documents a separate
+maintenance policy.
+
+| Version | Supported |
+| --- | --- |
+| `__DEFAULT_BRANCH__` | Yes |
+| Older releases | No |
+
+## Reporting a Vulnerability
+
+Do not open a public issue for security reports.
+
+Report vulnerabilities to `__SECURITY_CONTACT__` with enough detail to reproduce
+and assess the issue:
+
+- affected versions, branches, or commits
+- impact and expected security boundary
+- reproduction steps or proof of concept
+- suggested mitigation if known
+
+## Disclosure Expectations
+
+Maintainers should acknowledge reports promptly and coordinate disclosure after a
+fix or mitigation is available. Keep the report private until maintainers confirm
+that public disclosure is safe.

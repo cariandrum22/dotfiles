@@ -1,0 +1,24 @@
+# Pull Request
+
+## Summary
+
+Describe the intent of this change in a few sentences.
+
+## Changes
+
+- Describe the main code, documentation, or configuration changes.
+
+## Verification
+
+- List the commands, tests, or manual checks you ran.
+
+## Risks
+
+- Note rollout, migration, compatibility, or operational risks.
+
+## Checklist
+
+- [ ] Tests or validation steps were updated or run as needed
+- [ ] Documentation was updated when contributor or user behavior changed
+- [ ] `CHANGELOG.md` was updated when the change is release-note-worthy
+- [ ] Breaking changes, migrations, or security impact are called out

@@ -1,0 +1,65 @@
+# Contributing to __REPOSITORY_NAME__
+
+Thanks for contributing. This repository prefers small, reviewable changes and
+clear source-of-truth documentation.
+
+## Before You Start
+
+- Search existing issues and pull requests before opening a new one.
+- Open or comment on an issue first for larger changes so the approach can be
+  aligned before implementation.
+- Do not report security issues in public issues. Follow `SECURITY.md` instead.
+
+## Working Model
+
+- Branch from `__DEFAULT_BRANCH__`.
+- Keep each pull request focused on one logical change.
+- Update tests, docs, and `CHANGELOG.md` when behavior or contributor-facing
+  workflows change.
+- Prefer follow-up pull requests over one oversized branch.
+
+Recommended branch prefixes:
+
+- `feat/`
+- `fix/`
+- `docs/`
+- `chore/`
+- `refactor/`
+- `test/`
+
+## Pull Requests
+
+Each pull request should explain:
+
+- what changed
+- why it changed
+- how it was verified
+- any operational or rollout risk
+
+Prefer pull request titles in this format:
+
+```text
+type(scope): summary
+```
+
+Use an omitted scope when a scoped title would add noise. If the repository uses
+squash merge, treat the pull request title as the canonical change summary.
+
+## Reviews
+
+- Self-review before requesting review.
+- Resolve review threads with code changes or explicit rationale.
+- Keep review discussions attached to the relevant code or document section.
+
+## Releases and Changelog
+
+- Add contributor-visible changes to `CHANGELOG.md` under `Unreleased`.
+- Keep release notes aligned with the changelog and the pull request title.
+- If a change affects compatibility, migrations, or security posture, call it
+  out explicitly.
+
+## Validation
+
+Run the repository's documented validation steps before opening a pull request.
+If the repository later adopts automated guardrails, follow those instructions as
+the execution path for local verification.

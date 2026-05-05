@@ -9,7 +9,7 @@ categories:
     description: Search, context maintenance, and git authoring helpers.
   foundation:
     title: Cross-Project Foundation
-    description: Bootstrap, automation, Nix, git hook, and hygiene skills reused across stacks.
+    description: Repository governance, bootstrap, automation, Nix, git hook, and hygiene skills reused across stacks.
   frontend-typescript:
     title: Frontend / TypeScript
     description: JavaScript, TypeScript, and stylesheet quality gates.
@@ -38,6 +38,9 @@ skills:
   suggest-commit:
     category: workflow
     kind: utility
+  setup-repository-baseline:
+    category: foundation
+    kind: bootstrap
   setup-nix-flake:
     category: foundation
     kind: bootstrap
