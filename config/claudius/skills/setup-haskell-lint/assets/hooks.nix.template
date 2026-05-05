@@ -1,0 +1,3 @@
+fourmolu-check = mkHook "fourmolu-check" "fourmolu --mode check .";
+hlint-check = mkHook "hlint-check" "hlint .";
+haskell-strict-check = mkHook "haskell-strict-check" "./scripts/haskell-strict-check.sh";

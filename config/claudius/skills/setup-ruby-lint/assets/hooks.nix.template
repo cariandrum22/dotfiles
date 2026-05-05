@@ -1,0 +1,1 @@
+ruby-lint = mkHook "ruby-lint" "bundle exec rubocop --parallel --format quiet";

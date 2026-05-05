@@ -1,0 +1,7 @@
+- repo: local
+  hooks:
+    - id: lean-lint
+      name: lean lint
+      entry: ./scripts/lean-lint-check.sh
+      language: system
+      pass_filenames: false

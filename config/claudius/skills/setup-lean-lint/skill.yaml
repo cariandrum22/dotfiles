@@ -1,0 +1,10 @@
+version: 1
+name: setup-lean-lint
+description: >-
+  Set up lake build and strict lake lint checks for a Lean 4 Lake project with
+  check-only hooks. Use when adding Lean quality gates.
+targets:
+  claude-code:
+    invocation: manual
+  codex:
+    invocation: manual

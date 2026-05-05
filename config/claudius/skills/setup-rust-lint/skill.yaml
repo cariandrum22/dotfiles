@@ -1,0 +1,10 @@
+version: 1
+name: setup-rust-lint
+description: >-
+  Set up cargo fmt and strict cargo clippy checks for a Cargo project with
+  check-only hooks. Use when adding Rust formatting and lint gates.
+targets:
+  claude-code:
+    invocation: manual
+  codex:
+    invocation: manual

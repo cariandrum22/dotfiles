@@ -1,0 +1,1 @@
+lean-lint = mkHook "lean-lint" "./scripts/lean-lint-check.sh";

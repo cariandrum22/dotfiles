@@ -1,0 +1,8 @@
+- repo: local
+  hooks:
+    - id: ruby-lint
+      name: rubocop
+      entry: bundle exec rubocop --parallel --format quiet
+      language: system
+      files: \.rb$
+      pass_filenames: true
