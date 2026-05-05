@@ -65,6 +65,9 @@ in
       source = claudiusSource + "/rules";
       recursive = true;
     };
+    # Keep only actual syncable skill directories under config/claudius/skills.
+    # Design notes and catalogs belong outside that tree because Claudius treats
+    # top-level Markdown files there as legacy skills during agent sync.
     "claudius/skills" = {
       source = claudiusSource + "/skills";
       recursive = true;
