@@ -1,6 +1,7 @@
 # Human-oriented catalog for the shared skills collection.
 # Claudius ignores this file during skill discovery because it is not a skill
 # directory; it exists for maintainers and future tooling.
+# See inventory.yaml for operational role classification and refactor intent.
 version: 1
 categories:
   workflow:
