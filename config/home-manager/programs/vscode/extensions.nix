@@ -69,8 +69,8 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.128";
-    sha256 = "0gdgbdz34v4mjalk42fdqwmb50xcdmsfxq2vgxsnl4xds8srl4z7";
+    version = "2.1.129";
+    sha256 = "0al8hg8f59lwrw904y9hdk398iw9jw55mx1an1z9b8f19af54mic";
     arch = "linux-x64";
   }
   {
@@ -226,8 +226,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.55.2026050108";
-    sha256 = "124mkgklz2myhy0gwjrfbbyxhgp3gawn9a6psic0rh1pxc423z13";
+    version = "1.55.2026050508";
+    sha256 = "13ag4pz4mzxwxj6r7hcmbgj6j79fdg7zzjsg79xzqx9ss6xxjnr9";
     arch = "linux-x64";
   }
   {
@@ -343,8 +343,8 @@
   {
     name = "remote-containers";
     publisher = "ms-vscode-remote";
-    version = "0.458.0";
-    sha256 = "1ccdklr5rxak90sm9j2p11baxg88fq2wbzq6i3w7di4j0ijc02hy";
+    version = "0.460.0";
+    sha256 = "175gx9rikrgfh3k11zkarrgy6zmqhhw850f0gzh3aaay9f0fs92n";
   }
   {
     name = "remote-explorer";
@@ -380,8 +380,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2889";
-    sha256 = "19ccpjy64crs0q6c4v1kldbv77njxnhiifpq3243hygwx15x8gml";
+    version = "0.4.2890";
+    sha256 = "1lrv7nq88x5wy7p62n518h8xlpkgx65gq65j9zdrl57p5n7zs8qz";
     arch = "linux-x64";
   }
   {
@@ -412,8 +412,8 @@
   {
     name = "svelte-vscode";
     publisher = "svelte";
-    version = "109.15.1";
-    sha256 = "132x7dnlq12s30kh1ngys1v8maz2z9bsl68rg6djkn6k6nm9mky5";
+    version = "110.0.0";
+    sha256 = "0rj4nh0rwrqs2r8s9jpx2gw3qifwfgkzvz1sbfkiw1g9l6xg94lp";
   }
   {
     name = "tamarin-prover";
@@ -491,8 +491,8 @@
   {
     name = "vscode-gradle";
     publisher = "vscjava";
-    version = "3.17.2026042802";
-    sha256 = "15f92vwscrl6940gwwhd53fdsz7i5zj8vy0k2h7m6y3z0388jn48";
+    version = "3.17.2026050602";
+    sha256 = "1fdckiskv9j9r46bx57p03rkxk5hy2a9qd27n9prqyl50ybxvdr8";
   }
   {
     name = "vscode-graphql";
