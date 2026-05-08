@@ -62,15 +62,15 @@
   {
     name = "chatgpt";
     publisher = "openai";
-    version = "26.5429.30905";
-    sha256 = "19gjhp6dz0d23z692rrfr7m24vqv3p8r98cbjg2kkg7v2yszdxg2";
+    version = "26.5506.21252";
+    sha256 = "17x9mzpr3rzqgxqn2b45iyl1hzwpsgjrk25scagl98gpsnhrvrcd";
     arch = "linux-x64";
   }
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.129";
-    sha256 = "0al8hg8f59lwrw904y9hdk398iw9jw55mx1an1z9b8f19af54mic";
+    version = "2.1.133";
+    sha256 = "1k76ky59ippwsz1z8gdyb9vdc8caik561flkvjigk0hm3wqcrrzb";
     arch = "linux-x64";
   }
   {
@@ -88,8 +88,8 @@
   {
     name = "cmake-tools";
     publisher = "ms-vscode";
-    version = "1.24.9";
-    sha256 = "03qnxgdqjw9fi8p6mhcd1gc3prmc4vmmdlkgv37pqx08m10jiyic";
+    version = "1.24.11";
+    sha256 = "1172lala3g9ksi5l7jbwi6gybvvi80shv0cpyr3pn1ajlcxxzas0";
   }
   {
     name = "code-d";
@@ -172,8 +172,8 @@
   {
     name = "factory-vscode-extension";
     publisher = "Factory";
-    version = "0.2.0";
-    sha256 = "1bly5v9xpsc7qjiwsil6awr758yilvcf5j5svgvzr4lhhc0rbfr0";
+    version = "0.2.3";
+    sha256 = "15fbpf33jj04jcbzz63vm8zsa9rd5g6nn4jwjn0xk5dns5qj890b";
   }
   {
     name = "figma-vscode-extension";
@@ -190,8 +190,8 @@
   {
     name = "geminicodeassist";
     publisher = "Google";
-    version = "2.79.0";
-    sha256 = "0fg3mija73x9qrgvdaj5mwnyksx1dzn6avj36v8zzva3bc42di7z";
+    version = "2.81.0";
+    sha256 = "161jhkjxsx4f8rpwjq5zvk38m3nprds9kihi5mv8jgfhfcy1hza1";
   }
   {
     name = "git-worktree-manager";
@@ -202,8 +202,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.5.40551";
-    sha256 = "1bv9l4yjz702w1vikcbci7r94xskmfrqq99vb60mfib690y5lq0w";
+    version = "2026.5.70554";
+    sha256 = "03b2masszhdsvafhw5d3wf6lii4x0ywbw7an23gq2z41l7x6j91l";
   }
   {
     name = "haskell";
@@ -233,8 +233,8 @@
   {
     name = "jupyter";
     publisher = "ms-toolsai";
-    version = "2025.10.2026042201";
-    sha256 = "1m8qsis034dv6jzqc155f9bwj6zakalpy7k7i69znaxl7lsm8ixa";
+    version = "2025.10.2026050701";
+    sha256 = "00w4nnv27y9glh7c3mbdsjdrh3f8dz08adh07kbi3gjchay5li64";
     arch = "linux-x64";
   }
   {
@@ -258,8 +258,8 @@
   {
     name = "latex-workshop";
     publisher = "James-Yu";
-    version = "10.14.1";
-    sha256 = "1l2bi51n31milivdij2f5vi1sw4h6jwb9sdfyjzlm5jk6qmy5iln";
+    version = "10.15.2";
+    sha256 = "1fbs6y3acm1mrizq73aqlsj2i907xajmn7ff0l2x520z9iv8kx8z";
   }
   {
     name = "lean4";
@@ -355,8 +355,8 @@
   {
     name = "remote-ssh";
     publisher = "ms-vscode-remote";
-    version = "0.123.2026033115";
-    sha256 = "1w6dq2cn4z7a6gnkrcfsjp2498i0w66ldmr03yxjjcwh2qyfqvsw";
+    version = "0.123.2026050715";
+    sha256 = "1kf4icf9wd4dg8825pgfqkr6p46i05hdkdz92b53z5dcp29lsfw1";
   }
   {
     name = "remote-ssh-edit";
@@ -380,8 +380,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2890";
-    sha256 = "1lrv7nq88x5wy7p62n518h8xlpkgx65gq65j9zdrl57p5n7zs8qz";
+    version = "0.4.2892";
+    sha256 = "0yrzspvmcff14a770fj1zfnf7kqv2mxf2lb1y90636g17w6jl00z";
     arch = "linux-x64";
   }
   {
@@ -399,8 +399,8 @@
   {
     name = "shellcheck";
     publisher = "timonwong";
-    version = "0.39.3";
-    sha256 = "0b6vsmng4axm2qih0dl2mmxl5fnv9dm3d6iv8xn8w5bpm7l8b1bq";
+    version = "0.39.4";
+    sha256 = "08n1mhb0am61pphadyxn9fc6qc2jlcmjjq0n0v1hypkcw5lqri93";
     arch = "linux-x64";
   }
   {
@@ -509,8 +509,8 @@
   {
     name = "vscode-ide";
     publisher = "tlaplus";
-    version = "2026.5.41421";
-    sha256 = "0pil624ivcip9hjfczl76jfvhy063plbfnnk7qngbaavn31ijxdn";
+    version = "2026.5.70104";
+    sha256 = "1z8a5i93fkm09h4w0xrhs5hjv4qw9pgyr1vnfa1h10scvmrg4wz3";
   }
   {
     name = "vscode-java-debug";
@@ -563,8 +563,8 @@
   {
     name = "vscode-tailwindcss";
     publisher = "bradlc";
-    version = "0.14.29";
-    sha256 = "15l1rvp6j804ib14zv0xc412hln8lwjmar83g8lyrwagihrz5kz7";
+    version = "0.15.0";
+    sha256 = "0hxwn18xcx11l59q1ds7nn6yz6byl1p7is541028cayip6a4wzav";
   }
   {
     name = "vscode-test-explorer";
