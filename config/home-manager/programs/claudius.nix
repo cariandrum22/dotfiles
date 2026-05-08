@@ -14,17 +14,17 @@ let
   claudiusExe = lib.getExe' pkgs.claudius "claudius";
   jsonFormat = pkgs.formats.json { };
   baseMcpServers = builtins.fromJSON (builtins.readFile (claudiusSource + "/mcpServers.json"));
-  interactiveRemoteMcpServerNames = [
+  nonHeadlessMcpServerNames = [
     "figma"
+    "figma-desktop"
     "notion"
     "todoist"
   ];
-  # These hosted servers rely on browser-based OAuth, so do not publish them on headless hosts.
+  # These servers either need a local desktop app or browser-mediated
+  # authentication, so do not publish them on headless hosts.
   filteredMcpServers =
     if isHeadless then
-      lib.filterAttrs (
-        name: _: !(lib.elem name interactiveRemoteMcpServerNames)
-      ) baseMcpServers.mcpServers
+      lib.filterAttrs (name: _: !(lib.elem name nonHeadlessMcpServerNames)) baseMcpServers.mcpServers
     else
       baseMcpServers.mcpServers;
   playwrightArgs = [
