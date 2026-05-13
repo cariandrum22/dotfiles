@@ -69,8 +69,8 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.138";
-    sha256 = "1fgkjsqcr6dlwcp7jcja3j2g2fkkx30lprnsn38m0fjhf72d8qpa";
+    version = "2.1.140";
+    sha256 = "06b1qrpjksqpqrp3l48rwzc1kl528zhirfbvljkkfck28gh3izva";
     arch = "linux-x64";
   }
   {
@@ -88,8 +88,8 @@
   {
     name = "cmake-tools";
     publisher = "ms-vscode";
-    version = "1.24.11";
-    sha256 = "1172lala3g9ksi5l7jbwi6gybvvi80shv0cpyr3pn1ajlcxxzas0";
+    version = "1.24.12";
+    sha256 = "0bbih7cnw7v08n33s3ij6gv9w396zb75msqql3zfd899cpnjngl1";
   }
   {
     name = "code-d";
@@ -202,8 +202,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.5.90535";
-    sha256 = "1w9wdrv20yl093wx9wavqmwwx29azz4zy2k3a6z0vk60gr708dzy";
+    version = "2026.5.120557";
+    sha256 = "0l36dv2sqvy5p08m2jafbm14yyqbl5d08sjz662mxfpnlklvy059";
   }
   {
     name = "haskell";
@@ -226,8 +226,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.55.2026050508";
-    sha256 = "13ag4pz4mzxwxj6r7hcmbgj6j79fdg7zzjsg79xzqx9ss6xxjnr9";
+    version = "1.55.2026051209";
+    sha256 = "18zjl7kk0g1i2kpiya023kzzm467bw6qdhmfh4ggwklpf0x9h972";
     arch = "linux-x64";
   }
   {
@@ -300,8 +300,8 @@
   {
     name = "nix-ide";
     publisher = "jnoortheen";
-    version = "0.5.5";
-    sha256 = "0zy22r34b3bk0wrs435fz8yf7ii3khwa6zn7bq48sji4y0q495vs";
+    version = "0.5.8";
+    sha256 = "0rvn4rvwr7bc6dvs1ww9zk8kxs4ydxix3whwb02djsc9w96a2h9x";
   }
   {
     name = "nord-visual-studio-code";
@@ -380,8 +380,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2894";
-    sha256 = "1x72n0vhh15v01kbv8p3nh25z9miylsfhbpmdy7mrpnx7s1cswar";
+    version = "0.4.2898";
+    sha256 = "1l78jmm3xbbm4x0v2366gklx08lafga2x6bk4cpz6mr6fh63dqzs";
     arch = "linux-x64";
   }
   {
@@ -509,14 +509,14 @@
   {
     name = "vscode-ide";
     publisher = "tlaplus";
-    version = "2026.5.81518";
-    sha256 = "1kv94cdckiwlyj53ywxlnczvrfs8ngx21p4zmh5b50l16ni5h6a1";
+    version = "2026.5.121710";
+    sha256 = "1kb97lyq9d5c5rz20k5w0kbizjzf1xswfr8frg0hrmnisx9ab81x";
   }
   {
     name = "vscode-java-debug";
     publisher = "vscjava";
-    version = "0.59.2026042907";
-    sha256 = "0rffsg7l0qgf5r7m0aqkq8ja7ff9mbmpqdddnl7h830n2sk5r0zn";
+    version = "0.59.2026051107";
+    sha256 = "1w2ya089y5y32lp945mnr5hdb4xzqh7yaqbh9zswdyp21c8jkk34";
   }
   {
     name = "vscode-markdownlint";
