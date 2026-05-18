@@ -114,7 +114,7 @@ let
     x86_64-linux = "sha256-ldBYkXlnC/h5HUhPC/CGwL6S0dxJzQsDEXA2DgJeDRE=";
     aarch64-linux = "sha256-ldBYkXlnC/h5HUhPC/CGwL6S0dxJzQsDEXA2DgJeDRE=";
     x86_64-darwin = "sha256-ldBYkXlnC/h5HUhPC/CGwL6S0dxJzQsDEXA2DgJeDRE=";
-    aarch64-darwin = "sha256-ldBYkXlnC/h5HUhPC/CGwL6S0dxJzQsDEXA2DgJeDRE=";
+    aarch64-darwin = "sha256-V1Exqmqf7Viq6EeYAS05vURHEf/ElHpbBMqPUwuwyM0=";
   };
 
   rustyV8Version = "146.4.0";
@@ -139,17 +139,40 @@ let
     }.a.gz";
     hash = rustyV8ArchiveHashes.${pkgs.stdenv.system};
   };
+
+  livekitWebRtcTag = "webrtc-24f6822-2";
+
+  livekitWebRtcTriples = {
+    x86_64-linux = "linux-x64-release";
+    aarch64-linux = "linux-arm64-release";
+    x86_64-darwin = "mac-x64-release";
+    aarch64-darwin = "mac-arm64-release";
+  };
+
+  livekitWebRtcArchiveHashes = {
+    x86_64-linux = "sha256-aR76GGfK2UJheN5nI10e2f8CZPgxMxqlEPxyWc95AQ0=";
+    aarch64-linux = "sha256-evqmKOmnM+JuoWg+vJfvCppHWTnyeunKhWa3OTr8JE4=";
+    x86_64-darwin = "sha256-XapngujlXtcDEGd2hacmP3nHFycEVZRybO/ORHPc6Og=";
+    aarch64-darwin = "sha256-4IwJM6EzTFgQd2AdX+Hj9NWzmyqXrSioRax2L6GKL1U=";
+  };
+
+  livekitWebRtcArchive = pkgs.fetchzip {
+    url = "https://github.com/livekit/rust-sdks/releases/download/${livekitWebRtcTag}/webrtc-${
+      livekitWebRtcTriples.${pkgs.stdenv.system}
+    }.zip";
+    hash = livekitWebRtcArchiveHashes.${pkgs.stdenv.system};
+  };
 in
 rustPlatform.buildRustPackage (
   rec {
     pname = "codex-cli";
-    version = "rust-v0.118.0";
+    version = "rust-v0.130.0";
 
     src = pkgs.fetchFromGitHub {
       owner = "openai";
       repo = "codex";
       rev = "${version}";
-      hash = "sha256-FdtV+CIqTInnegcXrXBxw4aE0JnNDh4GdYKwUDjSk9Y=";
+      hash = "sha256-YeUeYbzUMUx0lhIKdtPa8vUYK2Cj1hmbLb68Y80r71o=";
     };
 
     sourceRoot = "source/codex-rs";
@@ -179,6 +202,18 @@ rustPlatform.buildRustPackage (
       # Match upstream Codex's rusty_v8 prebuilt archive handling.
       patch -d "''${vendored_v8_dirs[0]}" -p1 < ${./rusty-v8-prebuilt-out-dir.patch}
     ''
+    + pkgs.lib.optionalString pkgs.stdenv.isDarwin ''
+            # Apple's newer linker can overflow ARM64 branch ranges when linking the
+            # WebRTC-heavy Codex binary. Force the classic linker on Darwin targets.
+            cat >> .cargo/config.toml <<'EOF'
+
+      [target.x86_64-apple-darwin]
+      rustflags = ["-C", "link-arg=-ld_classic"]
+
+      [target.aarch64-apple-darwin]
+      rustflags = ["-C", "link-arg=-ld_classic"]
+      EOF
+    ''
     + pkgs.lib.optionalString pkgs.stdenv.isLinux ''
       # LLVM 21 / rustc 1.91.1 currently crashes in release optimization passes
       # for this workspace. Lower Linux release optimization until nixpkgs updates.
@@ -195,16 +230,20 @@ rustPlatform.buildRustPackage (
     # To test: remove this line and run `nix build .#codex-cli`
     CARGO_PROFILE_RELEASE_LTO = "off";
 
-    # Upstream pins codegen-units=1 for smaller binaries, but that currently
-    # triggers an LLVM 21 / rustc 1.91.1 SIGSEGV while compiling `image` on Linux.
-    # Use multiple codegen units until nixpkgs moves past the buggy toolchain.
-    CARGO_PROFILE_RELEASE_CODEGEN_UNITS = "16";
+    # Upstream pins codegen-units=1 for smaller binaries. Keep that on Darwin,
+    # where we need to minimize link distance for the large WebRTC static
+    # archive. Linux still needs multiple codegen units to avoid an LLVM 21 /
+    # rustc 1.91.1 SIGSEGV while compiling `image`.
+    CARGO_PROFILE_RELEASE_CODEGEN_UNITS = if pkgs.stdenv.isLinux then "16" else "1";
 
     # Show backtrace for build failures
     RUST_BACKTRACE = "1";
 
     # Keep rusty_v8 fully offline inside the Nix sandbox.
     RUSTY_V8_ARCHIVE = "${rustyV8Archive}";
+
+    # Keep LiveKit WebRTC fully offline inside the Nix sandbox.
+    LK_CUSTOM_WEBRTC = "${livekitWebRtcArchive}";
 
     # Point rama-boring-sys to our pre-built patched BoringSSL
     BORING_BSSL_PATH = "${ramaBoringssl}";
@@ -234,7 +273,8 @@ rustPlatform.buildRustPackage (
         stdenv.cc.cc.lib # for libgcc_s.so.1
       ];
 
-    # Ensure C++ standard library is linked for BoringSSL
+    # Ensure libc++ is linked on Darwin. The classic linker is selected via the
+    # target-specific rustflags injected into `.cargo/config.toml` above.
     NIX_LDFLAGS = pkgs.lib.optionalString pkgs.stdenv.isDarwin "-lc++";
 
     doCheck = false;
@@ -249,6 +289,11 @@ rustPlatform.buildRustPackage (
       license = licenses.asl20;
       mainProgram = "codex";
     };
+  }
+  // pkgs.lib.optionalAttrs pkgs.stdenv.isDarwin {
+    # Favor smaller release binaries on Darwin so the final WebRTC-heavy link
+    # stays within ARM64 branch range limits.
+    CARGO_PROFILE_RELEASE_OPT_LEVEL = "s";
   }
   // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
     # Point openssl-sys to system OpenSSL on Linux (avoid BoringSSL detection)
