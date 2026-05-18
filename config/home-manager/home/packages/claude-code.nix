@@ -1,27 +1,50 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
-pkgs.stdenv.mkDerivation rec {
+let
   pname = "claude-code";
-  version = "2.1.100";
+  version = "2.1.143";
 
-  src = pkgs.fetchzip {
-    url = "https://registry.npmjs.org/@anthropic-ai/claude-code/-/claude-code-${version}.tgz";
-    hash = "sha256-7/Rhk1z3Us2vOYGa85lkVIzzqdQFmfmAxrT39a7D27Y=";
+  sources = {
+    aarch64-darwin = {
+      url = "https://registry.npmjs.org/@anthropic-ai/claude-code-darwin-arm64/-/claude-code-darwin-arm64-${version}.tgz";
+      hash = "sha256-XoZFAoRi/wxxeXhKvUdZHOI5nS/GWFe07PhfQrWM/Mc=";
+    };
+    x86_64-linux = {
+      url = "https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-${version}.tgz";
+      hash = "sha256-OfXj8/M7VBCSRSXCbd+8sAbcFgC3Ehu5RvaY3plZqGA=";
+    };
   };
 
-  nativeBuildInputs = [ pkgs.makeWrapper ];
+  sourceInfo =
+    sources.${pkgs.stdenv.hostPlatform.system}
+      or (throw "Unsupported system: ${pkgs.stdenv.hostPlatform.system}");
+in
+pkgs.stdenv.mkDerivation rec {
+  inherit pname version;
+
+  src = pkgs.fetchzip {
+    inherit (sourceInfo) url hash;
+  };
+
+  nativeBuildInputs = [
+    pkgs.makeWrapper
+  ]
+  ++ lib.optionals pkgs.stdenv.isLinux [ pkgs.autoPatchelfHook ];
+
+  buildInputs = lib.optionals pkgs.stdenv.isLinux [ pkgs.stdenv.cc.cc.lib ];
 
   dontBuild = true;
+  dontStrip = true;
 
   installPhase = ''
     runHook preInstall
 
-    mkdir -p $out/lib/node_modules/@anthropic-ai/claude-code
-    cp -r . $out/lib/node_modules/@anthropic-ai/claude-code
+    mkdir -p $out/lib/${pname}
+    cp -r . $out/lib/${pname}
+    chmod +x $out/lib/${pname}/claude
 
     mkdir -p $out/bin
-    makeWrapper ${pkgs.nodejs_22}/bin/node $out/bin/claude \
-      --add-flags "$out/lib/node_modules/@anthropic-ai/claude-code/cli.js" \
+    makeWrapper $out/lib/${pname}/claude $out/bin/claude \
       --set CLAUDE_NO_AUTO_UPDATE 1
 
     runHook postInstall
@@ -33,11 +56,15 @@ pkgs.stdenv.mkDerivation rec {
     $out/bin/claude --version | grep -q "${version}"
   '';
 
-  meta = with pkgs.lib; {
+  meta = with lib; {
     description = "Use Claude, Anthropic's AI assistant, right from your terminal";
     homepage = "https://github.com/anthropics/claude-code";
     license = licenses.unfree;
     maintainers = [ ];
     mainProgram = "claude";
+    platforms = [
+      "x86_64-linux"
+      "aarch64-darwin"
+    ];
   };
 }

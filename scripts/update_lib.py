@@ -188,7 +188,7 @@ def calculate_hash(url: str, *, unpack: bool = True) -> Hash:
         cmd.append("--unpack")
     cmd.append(url)
 
-    result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+    result = common.run_command(cmd)
     hash_value = result.stdout.strip()
 
     return Hash(common.convert_nix_hash_to_sri(hash_value))
