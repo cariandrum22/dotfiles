@@ -16,17 +16,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v14
+        uses: DeterminateSystems/nix-installer-action@v22
         with:
           extra-conf: |
             experimental-features = nix-command flakes
             accept-flake-config = true
-
-      - name: Setup Nix cache
-        uses: DeterminateSystems/magic-nix-cache-action@v8
 
       - name: Check flake metadata
         run: nix flake metadata
@@ -48,17 +45,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v14
+        uses: DeterminateSystems/nix-installer-action@v22
         with:
           extra-conf: |
             experimental-features = nix-command flakes
             accept-flake-config = true
-
-      - name: Setup Nix cache
-        uses: DeterminateSystems/magic-nix-cache-action@v8
 
       - name: Run pre-commit hooks
         run: |
@@ -78,17 +72,14 @@ jobs:
             os: macos-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v14
+        uses: DeterminateSystems/nix-installer-action@v22
         with:
           extra-conf: |
             experimental-features = nix-command flakes
             accept-flake-config = true
-
-      - name: Setup Nix cache
-        uses: DeterminateSystems/magic-nix-cache-action@v8
 
       - name: Evaluate Home Manager configuration (no build)
         run: |
@@ -107,17 +98,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v14
+        uses: DeterminateSystems/nix-installer-action@v22
         with:
           extra-conf: |
             experimental-features = nix-command flakes
             accept-flake-config = true
-
-      - name: Setup Nix cache
-        uses: DeterminateSystems/magic-nix-cache-action@v8
 
       - name: Build XMonad
         run: |
