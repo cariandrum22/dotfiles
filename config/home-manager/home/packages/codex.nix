@@ -111,9 +111,9 @@ let
   # cargo vendor utility. codex-utils-cargo-bin is only used by test helpers,
   # and tests are disabled for this package, so the stub is sufficient.
   cargoHashes = {
-    x86_64-linux = "sha256-ldBYkXlnC/h5HUhPC/CGwL6S0dxJzQsDEXA2DgJeDRE=";
-    aarch64-linux = "sha256-ldBYkXlnC/h5HUhPC/CGwL6S0dxJzQsDEXA2DgJeDRE=";
-    x86_64-darwin = "sha256-ldBYkXlnC/h5HUhPC/CGwL6S0dxJzQsDEXA2DgJeDRE=";
+    x86_64-linux = "sha256-V1Exqmqf7Viq6EeYAS05vURHEf/ElHpbBMqPUwuwyM0=";
+    aarch64-linux = "sha256-V1Exqmqf7Viq6EeYAS05vURHEf/ElHpbBMqPUwuwyM0=";
+    x86_64-darwin = "sha256-V1Exqmqf7Viq6EeYAS05vURHEf/ElHpbBMqPUwuwyM0=";
     aarch64-darwin = "sha256-V1Exqmqf7Viq6EeYAS05vURHEf/ElHpbBMqPUwuwyM0=";
   };
 
@@ -149,19 +149,42 @@ let
     aarch64-darwin = "mac-arm64-release";
   };
 
-  livekitWebRtcArchiveHashes = {
-    x86_64-linux = "sha256-aR76GGfK2UJheN5nI10e2f8CZPgxMxqlEPxyWc95AQ0=";
-    aarch64-linux = "sha256-evqmKOmnM+JuoWg+vJfvCppHWTnyeunKhWa3OTr8JE4=";
-    x86_64-darwin = "sha256-XapngujlXtcDEGd2hacmP3nHFycEVZRybO/ORHPc6Og=";
-    aarch64-darwin = "sha256-4IwJM6EzTFgQd2AdX+Hj9NWzmyqXrSioRax2L6GKL1U=";
+  livekitWebRtcZipHashes = {
+    x86_64-linux = "sha256-89SaZMN+qJmvUt3GhfUx8Kvi+3VSiqTa4lKtqqA77Mw=";
+    aarch64-linux = "sha256-QBPVPoY+RwQt1Ztnsb2EltoER6yEw9cMFwSZQG8Tqgs=";
+    x86_64-darwin = "sha256-COQh7Wa0KEmM1qUTMMldmP7WncRKPBNJ7RaiRowUyV8=";
+    aarch64-darwin = "sha256-eb5cwV5uBjPEOA4z4XLX6/Gm3Og+ngmXYdYQPw1+tsE=";
   };
 
-  livekitWebRtcArchive = pkgs.fetchzip {
+  livekitWebRtcZip = pkgs.fetchurl {
     url = "https://github.com/livekit/rust-sdks/releases/download/${livekitWebRtcTag}/webrtc-${
       livekitWebRtcTriples.${pkgs.stdenv.system}
     }.zip";
-    hash = livekitWebRtcArchiveHashes.${pkgs.stdenv.system};
+    hash = livekitWebRtcZipHashes.${pkgs.stdenv.system};
   };
+
+  livekitWebRtcArchive =
+    pkgs.runCommand "livekit-webrtc-${livekitWebRtcTriples.${pkgs.stdenv.system}}"
+      {
+        nativeBuildInputs = [
+          pkgs.unzip
+        ];
+      }
+      ''
+        extract_dir="$TMPDIR/livekit-webrtc"
+        extracted_root="$extract_dir/${livekitWebRtcTriples.${pkgs.stdenv.system}}"
+
+        mkdir -p "$extract_dir"
+        unzip -qq ${livekitWebRtcZip} -d "$extract_dir"
+
+        if [ ! -d "$extracted_root" ]; then
+          echo "Expected extracted LiveKit WebRTC directory at $extracted_root" >&2
+          find "$extract_dir" -maxdepth 2 -mindepth 1 -print >&2 || true
+          exit 1
+        fi
+
+        mv "$extracted_root" "$out"
+      '';
 in
 rustPlatform.buildRustPackage (
   rec {
