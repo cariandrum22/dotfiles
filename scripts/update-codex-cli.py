@@ -21,6 +21,7 @@ Files modified:
 
 from __future__ import annotations
 
+import base64
 import json
 import os
 import platform
@@ -59,6 +60,8 @@ CONFIG = lib.UpdateConfig(
 
 GITHUB_REPO = "openai/codex"
 VERSION_PREFIX = "rust-v"  # Codex uses "rust-v" prefix for versions
+_RUSTY_V8_GITHUB_REPO = "denoland/rusty_v8"
+_LIVEKIT_RUST_SDKS_GITHUB_REPO = "livekit/rust-sdks"
 
 _SYSTEM_MAP = {
     ("linux", "x86_64"): "x86_64-linux",
@@ -94,6 +97,9 @@ _LIVEKIT_WEBRTC_SOURCE_PATTERN = re.compile(
 _LIVEKIT_WEBRTC_TAG_SOURCE_PATTERN = re.compile(
     r'^\s*pub const WEBRTC_TAG: &str = "([^"]+)";\s*$',
     re.MULTILINE,
+)
+_GITHUB_RELEASE_ASSET_DIGEST_PATTERN = re.compile(
+    r"^sha256:(?P<hex>[0-9a-f]{64})$",
 )
 
 _LIVEKIT_WEBRTC_TRIPLES = {
@@ -326,6 +332,49 @@ def _extract_livekit_webrtc_tag(content: str) -> str | None:
     return match.group(2) if match else None
 
 
+def _sha256_hex_digest_to_sri(hex_digest: str) -> str:
+    return "sha256-" + base64.b64encode(bytes.fromhex(hex_digest)).decode("ascii")
+
+
+def _fetch_github_release_assets(repo: str, tag: str) -> list[dict[str, object]]:
+    url = f"{lib.GITHUB_API}/repos/{repo}/releases/tags/{tag}"
+    response = common.retry_with_backoff(
+        lambda: common.fetch_json(url),
+        retries=lib.DEFAULT_RETRIES,
+    )
+    assets = response.get("assets")
+    if not isinstance(assets, list):
+        msg = f"GitHub release metadata for {repo}@{tag} did not contain assets"
+        raise TypeError(msg)
+    return [asset for asset in assets if isinstance(asset, dict)]
+
+
+def _release_asset_digest_hashes(
+    repo: str,
+    tag: str,
+    asset_names: dict[str, str],
+) -> dict[str, str]:
+    assets_by_name = {
+        asset_name: asset
+        for asset in _fetch_github_release_assets(repo, tag)
+        if isinstance(asset_name := asset.get("name"), str)
+    }
+
+    hashes: dict[str, str] = {}
+    for system, asset_name in asset_names.items():
+        asset = assets_by_name.get(asset_name)
+        if not isinstance(asset, dict):
+            continue
+        digest = asset.get("digest")
+        if not isinstance(digest, str):
+            continue
+        match = _GITHUB_RELEASE_ASSET_DIGEST_PATTERN.match(digest)
+        if not match:
+            continue
+        hashes[system] = _sha256_hex_digest_to_sri(match.group("hex"))
+    return hashes
+
+
 def _update_rusty_v8_version(content: str, version: str) -> str:
     updated, replacements = _RUSTY_V8_VERSION_PATTERN.subn(
         rf'\1{version}\3',
@@ -396,9 +445,9 @@ def _update_rusty_v8_archive_hashes(
     return content[:match.start("body")] + updated_body + content[match.end("body"):]
 
 
-def _extract_livekit_webrtc_archive_hashes(content: str) -> dict[str, str]:
+def _extract_livekit_webrtc_zip_hashes(content: str) -> dict[str, str]:
     match = re.search(
-        r'livekitWebRtcArchiveHashes\s*=\s*{\n(?P<body>.*?)};',
+        r'livekitWebRtcZipHashes\s*=\s*{\n(?P<body>.*?)};',
         content,
         re.DOTALL,
     )
@@ -416,16 +465,16 @@ def _extract_livekit_webrtc_archive_hashes(content: str) -> dict[str, str]:
     }
 
 
-def _update_livekit_webrtc_archive_hashes(
+def _update_livekit_webrtc_zip_hashes(
     content: str, hashes: dict[str, str],
 ) -> str:
     match = re.search(
-        r'livekitWebRtcArchiveHashes\s*=\s*{\n(?P<body>.*?)};',
+        r'livekitWebRtcZipHashes\s*=\s*{\n(?P<body>.*?)};',
         content,
         re.DOTALL,
     )
     if not match:
-        msg = "Could not find livekitWebRtcArchiveHashes block in codex.nix"
+        msg = "Could not find livekitWebRtcZipHashes block in codex.nix"
         raise ValueError(msg)
 
     body = match.group("body")
@@ -450,6 +499,10 @@ def _rusty_v8_archive_url(version: str, system: str) -> str:
     )
 
 
+def _rusty_v8_archive_name(system: str) -> str:
+    return f"librusty_v8_release_{_RUSTY_V8_TARGETS[system]}.a.gz"
+
+
 def _prefetch_file_hash(url: str) -> str:
     result = common.run_command(
         ["nix", "store", "prefetch-file", "--json", url],
@@ -463,8 +516,17 @@ def _prefetch_file_hash(url: str) -> str:
 
 
 def _calculate_rusty_v8_archive_hashes(version: str) -> dict[str, str]:
+    asset_hashes = _release_asset_digest_hashes(
+        _RUSTY_V8_GITHUB_REPO,
+        f"v{version}",
+        {
+            system: _rusty_v8_archive_name(system)
+            for system in _RUSTY_V8_TARGETS
+        },
+    )
     return {
-        system: _prefetch_file_hash(_rusty_v8_archive_url(version, system))
+        system: asset_hashes.get(system)
+        or _prefetch_file_hash(_rusty_v8_archive_url(version, system))
         for system in _RUSTY_V8_TARGETS
     }
 
@@ -499,15 +561,22 @@ def _livekit_webrtc_archive_url(tag: str, system: str) -> str:
     )
 
 
-def _prefetch_unpacked_file_hash(url: str) -> str:
-    return common.run_nix_prefetch_sri(url, timeout=1800, unpack=True)
+def _livekit_webrtc_archive_name(system: str) -> str:
+    return f"webrtc-{_LIVEKIT_WEBRTC_TRIPLES[system]}.zip"
 
 
-def _calculate_livekit_webrtc_archive_hashes(tag: str) -> dict[str, str]:
+def _calculate_livekit_webrtc_zip_hashes(tag: str) -> dict[str, str]:
+    asset_hashes = _release_asset_digest_hashes(
+        _LIVEKIT_RUST_SDKS_GITHUB_REPO,
+        tag,
+        {
+            system: _livekit_webrtc_archive_name(system)
+            for system in _LIVEKIT_WEBRTC_TRIPLES
+        },
+    )
     return {
-        system: _prefetch_unpacked_file_hash(
-            _livekit_webrtc_archive_url(tag, system),
-        )
+        system: asset_hashes.get(system)
+        or _prefetch_file_hash(_livekit_webrtc_archive_url(tag, system))
         for system in _LIVEKIT_WEBRTC_TRIPLES
     }
 
@@ -522,7 +591,7 @@ def _needs_rusty_v8_update(content: str, version: str) -> bool:
 def _needs_livekit_webrtc_update(content: str, tag: str) -> bool:
     if _extract_livekit_webrtc_tag(content) != tag:
         return True
-    hashes = _extract_livekit_webrtc_archive_hashes(content)
+    hashes = _extract_livekit_webrtc_zip_hashes(content)
     return any(system not in hashes for system in _LIVEKIT_WEBRTC_TRIPLES)
 
 
@@ -563,7 +632,12 @@ def _extract_cargo_hash(content: str, system: str) -> str | None:
     return _extract_cargo_hashes(content).get(system)
 
 
-def _update_cargo_hashes(content: str, system: str, new_hash: str) -> str:
+def _update_cargo_hashes(
+    content: str,
+    new_hash: str,
+    *,
+    systems: tuple[str, ...] = _SUPPORTED_SYSTEMS,
+) -> str:
     match = re.search(
         r'cargoHashes\s*=\s*{\n(?P<body>.*?)};',
         content,
@@ -591,7 +665,8 @@ def _update_cargo_hashes(content: str, system: str, new_hash: str) -> str:
         entry_indent = f"{block_indent}  "
 
     hashes = _extract_cargo_hashes(content)
-    hashes[system] = new_hash
+    for system in systems:
+        hashes[system] = new_hash
 
     ordered_systems = [
         supported_system
@@ -739,9 +814,9 @@ def _refresh_livekit_webrtc_metadata(content: str, tag: str) -> str:
         return content
 
     updated_content = _update_livekit_webrtc_tag(content, tag)
-    return _update_livekit_webrtc_archive_hashes(
+    return _update_livekit_webrtc_zip_hashes(
         updated_content,
-        _calculate_livekit_webrtc_archive_hashes(tag),
+        _calculate_livekit_webrtc_zip_hashes(tag),
     )
 
 
@@ -784,7 +859,6 @@ def main() -> int:
         new_cargo_hash = _calculate_cargo_hash(updated_content)
         updated_content = _update_cargo_hashes(
             updated_content,
-            system,
             str(new_cargo_hash),
         )
 
