@@ -294,9 +294,9 @@ def run_nix_prefetch_sri(
 ) -> str:
     """Prefetch URL and return an SRI sha256 hash.
 
-    Prefer `nix store prefetch-file --json` when the current Nix supports the
-    requested mode. Fall back to `nix-prefetch-url` plus hash conversion for
-    older Nix versions or when unpacked archive hashing is requested.
+    Prefer `nix store prefetch-file --json` for plain file hashes. For
+    unpacked archive hashes, use `nix-prefetch-url --unpack`, which matches
+    `fetchzip` hashing semantics more reliably across Nix versions.
 
     Args:
         url: URL to prefetch
@@ -310,10 +310,21 @@ def run_nix_prefetch_sri(
         PrefetchError: If hash output cannot be parsed
         SubprocessError: If all supported prefetch commands fail
     """
+    if unpack:
+        nix32_hash = run_nix_prefetch(url, timeout=timeout, unpack=True)
+        first_line = next(
+            (line.strip() for line in nix32_hash.splitlines() if line.strip()),
+            "",
+        )
+        if not first_line:
+            raise PrefetchError(
+                url,
+                "missing unpack hash in nix-prefetch-url output",
+            ) from None
+        return convert_nix_hash_to_sri(first_line, timeout=timeout)
+
     try:
         cmd = ["nix", "store", "prefetch-file", "--json", "--hash-type", "sha256"]
-        if unpack:
-            cmd.append("--unpack")
         cmd.append(url)
         result = run_command(
             cmd,
@@ -325,18 +336,7 @@ def run_nix_prefetch_sri(
             raise PrefetchError(url, "missing hash field in nix prefetch output")
     except SubprocessError:
         # Fall back to nix-prefetch-url for environments without prefetch-file.
-        nix32_hash = run_nix_prefetch(url, timeout=timeout, unpack=unpack)
-        if unpack:
-            first_line = next(
-                (line.strip() for line in nix32_hash.splitlines() if line.strip()),
-                "",
-            )
-            if not first_line:
-                raise PrefetchError(
-                    url,
-                    "missing unpack hash in nix-prefetch-url output",
-                ) from None
-            nix32_hash = first_line
+        nix32_hash = run_nix_prefetch(url, timeout=timeout)
         return convert_nix_hash_to_sri(nix32_hash, timeout=timeout)
     except (json.JSONDecodeError, KeyError, TypeError) as exc:
         raise PrefetchError(url, exc) from exc
