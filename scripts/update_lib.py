@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import contextlib
 import hashlib
+import json
 import os
 import re
 import shutil
@@ -20,6 +21,7 @@ import subprocess  # noqa: S404
 import sys
 import tarfile
 import tempfile
+import textwrap
 import time
 from dataclasses import dataclass
 from enum import Enum
@@ -247,6 +249,52 @@ def _extract_cargo_hash_from_output(output: str) -> Hash | None:
     return None
 
 
+def _build_flake_callpackage_expr(nix_file: Path) -> str | None:
+    """Build a flake-based Nix expression for package evaluation when available."""
+    repo_root = common.resolve_script_relative("..")
+    flake_file = repo_root / "flake.nix"
+    if not flake_file.exists():
+        return None
+
+    repo_root_json = json.dumps(str(repo_root))
+    nix_file_json = json.dumps(str(nix_file))
+
+    return textwrap.dedent(
+        f"""
+        let
+            flake = builtins.getFlake {repo_root_json};
+            system = builtins.currentSystem;
+            pkgs = import flake.inputs.nixpkgs {{
+                inherit system;
+                config.allowUnfree = true;
+                overlays = [
+                    (
+                        import
+                        "${{flake.outPath}}/config/home-manager/overlays/xmonad.nix"
+                    )
+                    (_final: _prev: {{
+                        unstable = import flake.inputs.nixpkgs-unstable {{
+                            inherit system;
+                            config.allowUnfree = true;
+                        }};
+                        claudius = flake.inputs.claudius.packages.${{system}}.default;
+                    }})
+                    (
+                        import
+                        "${{flake.outPath}}/config/home-manager/overlays/hm-compat.nix"
+                    )
+                    (
+                        import
+                        "${{flake.outPath}}/config/home-manager/overlays/darwin-workarounds.nix"
+                    )
+                ];
+            }};
+        in
+            pkgs.callPackage {nix_file_json} {{}}
+        """,
+    )
+
+
 def calculate_cargo_hash(nix_file: Path) -> Hash | None:  # noqa: C901, PLR0912, PLR0915
     """Calculate cargoHash by building with dummy hash and extract correct one."""
     # Create a temporary file with dummy cargoHash
@@ -272,10 +320,21 @@ def calculate_cargo_hash(nix_file: Path) -> Hash | None:  # noqa: C901, PLR0912,
     try:
         # Try to build and capture the error
         nixpkgs_url = "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz"
+        expr = _build_flake_callpackage_expr(Path(tmp_path))
+        if expr is None:
+            expr = (
+                'with import '
+                f'(fetchTarball "{nixpkgs_url}") {{}}; callPackage {tmp_path} '
+                f'{{ unstable = import (fetchTarball "{nixpkgs_url}") {{}}; }}'
+            )
+
         cmd = [
-            "nix-build", "-E",
-            f'with import (fetchTarball "{nixpkgs_url}") {{}}; callPackage {tmp_path} '
-            f'{{ unstable = import (fetchTarball "{nixpkgs_url}") {{}}; }}',
+            "nix-build",
+            "--option",
+            "experimental-features",
+            "nix-command flakes",
+            "-E",
+            expr,
         ]
 
         # Print debug info in CI environment
