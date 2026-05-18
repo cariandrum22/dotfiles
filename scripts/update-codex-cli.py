@@ -2,8 +2,9 @@
 """Update codex-cli tool using functional programming style.
 
 This script updates codex-cli metadata in Nix and maintains per-platform
-cargoHashes and rusty_v8 archive hashes. It fetches the latest version from
-GitHub releases and generates the appropriate hashes.
+cargoHashes, rusty_v8 archive hashes, and LiveKit WebRTC archive hashes. It
+fetches the latest version from GitHub releases and generates the appropriate
+hashes.
 
 Usage:
     ./update-codex-cli.py
@@ -82,6 +83,25 @@ _RUSTY_V8_VERSION_PATTERN = re.compile(
     r'(^\s*rustyV8Version\s*=\s*")([^"]+)(";\s*$)',
     re.MULTILINE,
 )
+_LIVEKIT_WEBRTC_TAG_PATTERN = re.compile(
+    r'(^\s*livekitWebRtcTag\s*=\s*")([^"]+)(";\s*$)',
+    re.MULTILINE,
+)
+_LIVEKIT_WEBRTC_SOURCE_PATTERN = re.compile(
+    r'git\+https://github\.com/(?P<repo>[^?\n"]*?/rust-sdks)\.git\?rev='
+    r'(?P<rev>[0-9a-f]{40})#',
+)
+_LIVEKIT_WEBRTC_TAG_SOURCE_PATTERN = re.compile(
+    r'^\s*pub const WEBRTC_TAG: &str = "([^"]+)";\s*$',
+    re.MULTILINE,
+)
+
+_LIVEKIT_WEBRTC_TRIPLES = {
+    "x86_64-linux": "linux-x64-release",
+    "aarch64-linux": "linux-arm64-release",
+    "x86_64-darwin": "mac-x64-release",
+    "aarch64-darwin": "mac-arm64-release",
+}
 
 _RUNFILES_DEP_PATTERN = re.compile(
     r'^(?P<indent>\s*)runfiles\s*=\s*\{[^}]*github\.com/dzbarsky/rules_rust[^}]*\}\s*$',
@@ -301,6 +321,11 @@ def _extract_rusty_v8_version(content: str) -> str | None:
     return match.group(2) if match else None
 
 
+def _extract_livekit_webrtc_tag(content: str) -> str | None:
+    match = _LIVEKIT_WEBRTC_TAG_PATTERN.search(content)
+    return match.group(2) if match else None
+
+
 def _update_rusty_v8_version(content: str, version: str) -> str:
     updated, replacements = _RUSTY_V8_VERSION_PATTERN.subn(
         rf'\1{version}\3',
@@ -309,6 +334,18 @@ def _update_rusty_v8_version(content: str, version: str) -> str:
     )
     if replacements != 1:
         msg = "Could not find rustyV8Version assignment in codex.nix"
+        raise ValueError(msg)
+    return updated
+
+
+def _update_livekit_webrtc_tag(content: str, tag: str) -> str:
+    updated, replacements = _LIVEKIT_WEBRTC_TAG_PATTERN.subn(
+        rf'\1{tag}\3',
+        content,
+        count=1,
+    )
+    if replacements != 1:
+        msg = "Could not find livekitWebRtcTag assignment in codex.nix"
         raise ValueError(msg)
     return updated
 
@@ -359,6 +396,52 @@ def _update_rusty_v8_archive_hashes(
     return content[:match.start("body")] + updated_body + content[match.end("body"):]
 
 
+def _extract_livekit_webrtc_archive_hashes(content: str) -> dict[str, str]:
+    match = re.search(
+        r'livekitWebRtcArchiveHashes\s*=\s*{\n(?P<body>.*?)};',
+        content,
+        re.DOTALL,
+    )
+    if not match:
+        return {}
+
+    body = match.group("body")
+    return {
+        entry.group(1): entry.group(2)
+        for entry in re.finditer(
+            r'^\s*([A-Za-z0-9_-]+)\s*=\s*"([^"]+)";',
+            body,
+            re.MULTILINE,
+        )
+    }
+
+
+def _update_livekit_webrtc_archive_hashes(
+    content: str, hashes: dict[str, str],
+) -> str:
+    match = re.search(
+        r'livekitWebRtcArchiveHashes\s*=\s*{\n(?P<body>.*?)};',
+        content,
+        re.DOTALL,
+    )
+    if not match:
+        msg = "Could not find livekitWebRtcArchiveHashes block in codex.nix"
+        raise ValueError(msg)
+
+    body = match.group("body")
+    indent_match = re.search(
+        r'^(\s*)[A-Za-z0-9_-]+\s*=\s*"[^"]+";',
+        body,
+        re.MULTILINE,
+    )
+    entry_indent = indent_match.group(1) if indent_match else "    "
+    updated_body = "\n".join(
+        f'{entry_indent}{system} = "{hashes[system]}";'
+        for system in _LIVEKIT_WEBRTC_TRIPLES
+    )
+    return content[:match.start("body")] + updated_body + content[match.end("body"):]
+
+
 def _rusty_v8_archive_url(version: str, system: str) -> str:
     target = _RUSTY_V8_TARGETS[system]
     return (
@@ -386,11 +469,61 @@ def _calculate_rusty_v8_archive_hashes(version: str) -> dict[str, str]:
     }
 
 
+def _extract_rust_sdks_source(source_dir: Path) -> tuple[str, str]:
+    cargo_lock = source_dir / "Cargo.lock"
+    match = _LIVEKIT_WEBRTC_SOURCE_PATTERN.search(
+        cargo_lock.read_text(encoding="utf-8"),
+    )
+    if not match:
+        msg = f"Could not find rust-sdks source in {cargo_lock}"
+        raise RuntimeError(msg)
+    return match.group("repo"), match.group("rev")
+
+
+def _extract_upstream_livekit_webrtc_tag(repo: str, rev: str) -> str:
+    source = _download_text(
+        f"https://raw.githubusercontent.com/{repo}/{rev}/webrtc-sys/build/src/lib.rs",
+    )
+    match = _LIVEKIT_WEBRTC_TAG_SOURCE_PATTERN.search(source)
+    if not match:
+        msg = f"Could not find WEBRTC_TAG in rust-sdks {repo}@{rev}"
+        raise RuntimeError(msg)
+    return match.group(1)
+
+
+def _livekit_webrtc_archive_url(tag: str, system: str) -> str:
+    triple = _LIVEKIT_WEBRTC_TRIPLES[system]
+    return (
+        "https://github.com/livekit/rust-sdks/releases/download/"
+        f"{tag}/webrtc-{triple}.zip"
+    )
+
+
+def _prefetch_unpacked_file_hash(url: str) -> str:
+    return common.run_nix_prefetch_sri(url, timeout=1800, unpack=True)
+
+
+def _calculate_livekit_webrtc_archive_hashes(tag: str) -> dict[str, str]:
+    return {
+        system: _prefetch_unpacked_file_hash(
+            _livekit_webrtc_archive_url(tag, system),
+        )
+        for system in _LIVEKIT_WEBRTC_TRIPLES
+    }
+
+
 def _needs_rusty_v8_update(content: str, version: str) -> bool:
     if _extract_rusty_v8_version(content) != version:
         return True
     hashes = _extract_rusty_v8_archive_hashes(content)
     return any(system not in hashes for system in _RUSTY_V8_TARGETS)
+
+
+def _needs_livekit_webrtc_update(content: str, tag: str) -> bool:
+    if _extract_livekit_webrtc_tag(content) != tag:
+        return True
+    hashes = _extract_livekit_webrtc_archive_hashes(content)
+    return any(system not in hashes for system in _LIVEKIT_WEBRTC_TRIPLES)
 
 
 def _detect_system() -> str:
@@ -532,10 +665,11 @@ def _refresh_release_metadata(
     latest_version: lib.Version,
     *,
     version_updated: bool,
-) -> tuple[str, lib.Hash, str]:
+) -> tuple[str, lib.Hash, str, str]:
     updated_content = content
     latest_hash = current_hash
     rusty_v8_version = _extract_rusty_v8_version(updated_content)
+    livekit_webrtc_tag = _extract_livekit_webrtc_tag(updated_content)
 
     if version_updated:
         latest_hash = lib.calculate_hash(
@@ -557,14 +691,36 @@ def _refresh_release_metadata(
             tarball_path = _download_release_tarball(latest_version, temp_root)
             source_dir = _extract_codex_source_tree(tarball_path, temp_root)
             rusty_v8_version = _extract_upstream_rusty_v8_version(source_dir)
+            rust_sdks_repo, rust_sdks_rev = _extract_rust_sdks_source(source_dir)
+            livekit_webrtc_tag = _extract_upstream_livekit_webrtc_tag(
+                rust_sdks_repo,
+                rust_sdks_rev,
+            )
     elif not RUSTY_V8_PATCH_FILE.exists():
         _regenerate_rusty_v8_patch(latest_version)
 
-    if rusty_v8_version is None:
-        msg = "Could not determine rusty_v8 version"
+    if rusty_v8_version is None or livekit_webrtc_tag is None:
+        with tempfile.TemporaryDirectory(prefix="codex-upstream-metadata-") as temp_dir:
+            temp_root = Path(temp_dir)
+            tarball_path = _download_release_tarball(latest_version, temp_root)
+            source_dir = _extract_codex_source_tree(tarball_path, temp_root)
+            rusty_v8_version = rusty_v8_version or _extract_upstream_rusty_v8_version(
+                source_dir,
+            )
+            rust_sdks_repo, rust_sdks_rev = _extract_rust_sdks_source(source_dir)
+            livekit_webrtc_tag = (
+                livekit_webrtc_tag
+                or _extract_upstream_livekit_webrtc_tag(
+                    rust_sdks_repo,
+                    rust_sdks_rev,
+                )
+            )
+
+    if rusty_v8_version is None or livekit_webrtc_tag is None:
+        msg = "Could not determine upstream Codex archive metadata"
         raise RuntimeError(msg)
 
-    return updated_content, latest_hash, rusty_v8_version
+    return updated_content, latest_hash, rusty_v8_version, livekit_webrtc_tag
 
 
 def _refresh_rusty_v8_metadata(content: str, rusty_v8_version: str) -> str:
@@ -575,6 +731,17 @@ def _refresh_rusty_v8_metadata(content: str, rusty_v8_version: str) -> str:
     return _update_rusty_v8_archive_hashes(
         updated_content,
         _calculate_rusty_v8_archive_hashes(rusty_v8_version),
+    )
+
+
+def _refresh_livekit_webrtc_metadata(content: str, tag: str) -> str:
+    if not _needs_livekit_webrtc_update(content, tag):
+        return content
+
+    updated_content = _update_livekit_webrtc_tag(content, tag)
+    return _update_livekit_webrtc_archive_hashes(
+        updated_content,
+        _calculate_livekit_webrtc_archive_hashes(tag),
     )
 
 
@@ -591,15 +758,21 @@ def main() -> int:
     latest_version = lib.fetch_github_release(GITHUB_REPO, VERSION_PREFIX)
 
     version_updated = current.version != latest_version
-    updated_content, latest_hash, rusty_v8_version = _refresh_release_metadata(
-        content,
-        current.hash,
-        latest_version,
-        version_updated=version_updated,
+    updated_content, latest_hash, rusty_v8_version, livekit_webrtc_tag = (
+        _refresh_release_metadata(
+            content,
+            current.hash,
+            latest_version,
+            version_updated=version_updated,
+        )
     )
     updated_content = _refresh_rusty_v8_metadata(
         updated_content,
         rusty_v8_version,
+    )
+    updated_content = _refresh_livekit_webrtc_metadata(
+        updated_content,
+        livekit_webrtc_tag,
     )
 
     if _needs_cargo_update(
