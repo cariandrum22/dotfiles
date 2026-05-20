@@ -235,6 +235,17 @@ skills:
       Strong standalone value for JS/TS projects. Still best treated as one building
       block inside a broader project baseline.
 
+  setup-pandacss:
+    topic: frontend-typescript
+    role: building-block
+    exposure: primary
+    future_action: keep-standalone-and-compose-into-future-js-baseline
+    successor: []
+    rationale: >-
+      PandaCSS adoption is a meaningful frontend architecture decision. It should
+      be directly available for React/React Router apps while still composing with
+      Biome, TypeScript type checks, Storybook, and local quality-loop skills.
+
   setup-ts-typecheck:
     topic: frontend-typescript
     role: building-block
