@@ -74,6 +74,9 @@ skills:
   setup-biome:
     category: frontend-typescript
     kind: building-block
+  setup-pandacss:
+    category: frontend-typescript
+    kind: building-block
   setup-ts-typecheck:
     category: frontend-typescript
     kind: building-block

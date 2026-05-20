@@ -1,0 +1,156 @@
+#!/usr/bin/env node
+
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import path from 'node:path';
+
+const root = process.cwd();
+const sourceRoots = splitEnv('PANDACSS_CHECK_ROOTS', ['src', '.storybook', 'app', 'routes', 'components']);
+const tokenPathFragments = splitEnv('PANDACSS_CHECK_TOKEN_PATHS', [
+  'panda.config.',
+  'tokens.',
+  'semantic-tokens',
+  `${path.sep}theme${path.sep}`,
+  `${path.sep}tokens${path.sep}`,
+  `${path.sep}global.css`,
+  `${path.sep}globals.css`,
+  `${path.sep}global-styles`,
+  `${path.sep}globalStyles`,
+  `${path.sep}style-layers.css`,
+  `${path.sep}storybook-overrides.css`,
+]);
+const runtimeVariablePathFragments = splitEnv('PANDACSS_CHECK_RUNTIME_VAR_PATHS', []);
+const ignoredPathFragments = splitEnv('PANDACSS_CHECK_IGNORE_PATHS', [
+  `${path.sep}node_modules${path.sep}`,
+  `${path.sep}dist${path.sep}`,
+  `${path.sep}build${path.sep}`,
+  `${path.sep}storybook-static${path.sep}`,
+  `${path.sep}styled-system${path.sep}`,
+]);
+const sourceExtensions = new Set(['.js', '.jsx', '.ts', '.tsx', '.css', '.mdx']);
+const rawColorPattern = /#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(/;
+const cssVariablePattern = /var\(--/;
+const inlineStylePattern = /\bstyle\s*=/;
+
+const errors = [];
+
+checkPandaConfig();
+checkPackageScripts();
+checkSources();
+
+if (errors.length > 0) {
+  console.error('PandaCSS practice check failed:');
+  for (const error of errors) console.error(`- ${error}`);
+  process.exit(1);
+}
+
+console.log('PandaCSS practice check passed.');
+
+function splitEnv(name, fallback) {
+  const value = process.env[name];
+  if (!value) return fallback;
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function read(relativePath) {
+  return readFileSync(path.join(root, relativePath), 'utf8');
+}
+
+function checkPandaConfig() {
+  const configPath = ['panda.config.ts', 'panda.config.mts', 'panda.config.js', 'panda.config.mjs'].find((file) =>
+    existsSync(path.join(root, file)),
+  );
+
+  if (!configPath) {
+    errors.push('missing panda.config.ts/js');
+    return;
+  }
+
+  const config = read(configPath);
+  if (!/strictTokens\s*:\s*true/.test(config)) {
+    errors.push(`${configPath}: expected strictTokens: true`);
+  }
+  if (!/jsxFramework\s*:\s*['"]react['"]/.test(config)) {
+    errors.push(`${configPath}: expected jsxFramework: 'react'`);
+  }
+  if (!/include\s*:/.test(config)) {
+    errors.push(`${configPath}: expected explicit include globs`);
+  }
+}
+
+function checkPackageScripts() {
+  const packagePath = path.join(root, 'package.json');
+  if (!existsSync(packagePath)) {
+    errors.push('missing package.json');
+    return;
+  }
+
+  const pkg = JSON.parse(readFileSync(packagePath, 'utf8'));
+  if (!pkg.scripts?.['panda:codegen']) {
+    errors.push('package.json: missing scripts.panda:codegen');
+  }
+  if (!pkg.devDependencies?.['@pandacss/dev'] && !pkg.dependencies?.['@pandacss/dev']) {
+    errors.push('package.json: missing @pandacss/dev dependency');
+  }
+}
+
+function checkSources() {
+  for (const sourceRoot of sourceRoots) {
+    const absoluteRoot = path.join(root, sourceRoot);
+    if (!existsSync(absoluteRoot)) continue;
+    if (hasPathFragment(absoluteRoot, ignoredPathFragments)) continue;
+    for (const file of walk(absoluteRoot)) {
+      const extension = path.extname(file);
+      if (!sourceExtensions.has(extension)) continue;
+      checkSourceFile(file);
+    }
+  }
+}
+
+function checkSourceFile(file) {
+  const content = readFileSync(file, 'utf8');
+  const relative = path.relative(root, file);
+  const isTokenFile = hasPathFragment(file, tokenPathFragments);
+  const allowsRuntimeVariable = hasPathFragment(file, runtimeVariablePathFragments);
+
+  content.split(/\r?\n/).forEach((line, index) => {
+    const location = `${relative}:${index + 1}`;
+    if ((file.endsWith('.jsx') || file.endsWith('.tsx')) && inlineStylePattern.test(line)) {
+      errors.push(`${location}: avoid inline style=; use Panda recipes, recipe variants, or data attributes`);
+    }
+    if (!isTokenFile && rawColorPattern.test(line)) {
+      errors.push(`${location}: raw color found; move repeated colors to Panda tokens or semantic tokens`);
+    }
+    if (
+      !isTokenFile &&
+      !allowsRuntimeVariable &&
+      cssVariablePattern.test(line) &&
+      !line.includes('pandacss-allow-runtime-var')
+    ) {
+      errors.push(`${location}: direct CSS variable reference found outside token/theme/runtime allowlisted files`);
+    }
+  });
+}
+
+function* walk(directory) {
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const absolute = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      if (hasPathFragment(absolute, ignoredPathFragments)) continue;
+      yield* walk(absolute);
+    } else if (entry.isFile()) {
+      yield absolute;
+    }
+  }
+}
+
+function hasPathFragment(file, fragments) {
+  const normalized = path.normalize(file);
+  const normalizedWithTrailingSeparator = normalized.endsWith(path.sep) ? normalized : `${normalized}${path.sep}`;
+  return fragments.some((fragment) => {
+    const normalizedFragment = path.normalize(fragment);
+    return normalized.includes(normalizedFragment) || normalizedWithTrailingSeparator.includes(normalizedFragment);
+  });
+}

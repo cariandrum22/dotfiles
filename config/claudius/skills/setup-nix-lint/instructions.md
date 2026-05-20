@@ -23,8 +23,9 @@ Hooks added:
 Add the formatter output from [formatter.nix.template](assets/formatter.nix.template) to the flake outputs (sibling of `checks` and `devShells`). Skip if a `formatter` output already exists.
 
 This provides `nix fmt` support via a wrapper that:
-- Formats specific files when arguments are given
+- Formats only git-tracked `.nix` files under the given path arguments
 - Formats all git-tracked `.nix` files when no arguments are given
+- Avoids passing directories such as `.` or `.direnv` directly to `nixfmt`
 
 ## Important Notes
 

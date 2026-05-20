@@ -427,6 +427,14 @@
           };
           lintHooks = {
             actionlint.enable = true;
+            claudius-skill-guardrails = {
+              enable = true;
+              name = "claudius-skill-guardrails";
+              entry = "${pkgs.python3}/bin/python3 scripts/test-claudius-skills.py";
+              language = "system";
+              pass_filenames = false;
+              files = "^config/claudius/skills/|^scripts/test-claudius-skills\\.py$";
+            };
             deadnix = {
               enable = true;
               settings = {

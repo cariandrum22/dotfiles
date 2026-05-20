@@ -12,24 +12,26 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        # v4 resolved on 2026-05-20. Re-resolve before intentionally upgrading.
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           fetch-depth: 0
 
       - name: Install Nix
-        uses: DeterminateSystems/determinate-nix-action@v3
+        # v3 resolved on 2026-05-20. Re-resolve before intentionally upgrading.
+        uses: DeterminateSystems/determinate-nix-action@bafaa638b9d5ec0e7e3ac1a7fc80453ef1fd265f
 
       - name: Magic Nix Cache
-        uses: DeterminateSystems/magic-nix-cache-action@v13
+        # v13 resolved on 2026-05-20. Re-resolve before intentionally upgrading.
+        uses: DeterminateSystems/magic-nix-cache-action@565684385bcd71bad329742eefe8d12f2e765b39
 
       # Hook-specific initialization steps go here (see step 3)
 
       # Project-specific dependency installation steps go here (see step 5)
 
       - name: Run pre-commit hooks
-        run: nix develop -c pre-commit run --all-files
+        run: nix develop -c pre-commit run --all-files --show-diff-on-failure
 
       # Commitlint CI steps go here if applicable (see step 6)

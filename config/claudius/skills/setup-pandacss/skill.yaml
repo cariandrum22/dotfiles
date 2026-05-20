@@ -1,0 +1,12 @@
+version: 1
+name: setup-pandacss
+description: Set up or harden PandaCSS for React, React Router 7, Vite, and
+  Storybook projects. Use when adding PandaCSS, migrating from ad hoc CSS or
+  inline styles to Panda recipes/tokens, or enforcing PandaCSS practices in a
+  TypeScript frontend.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "(no arguments required)"
+  codex:
+    invocation: manual

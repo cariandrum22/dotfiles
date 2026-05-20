@@ -1,9 +1,14 @@
 formatter = pkgs.writeShellScriptBin "nixfmt-wrapper" ''
   set -euo pipefail
   if [ "$#" -gt 0 ]; then
-    exec ${pkgs.nixfmt}/bin/nixfmt "$@"
+    mapfile -t files < <(
+      ${pkgs.git}/bin/git ls-files -- "$@" \
+        | ${pkgs.gnugrep}/bin/grep -E '\.nix$' \
+        || true
+    )
+  else
+    mapfile -t files < <(${pkgs.git}/bin/git ls-files '*.nix')
   fi
-  mapfile -t files < <(${pkgs.git}/bin/git ls-files '*.nix')
   if [ "''${#files[@]}" -eq 0 ]; then
     exit 0
   fi

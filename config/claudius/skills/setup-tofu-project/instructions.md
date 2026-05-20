@@ -35,6 +35,10 @@ Add commitlint with Conventional Commits rules, git hooks, and CI enforcement us
 ### Step 9: `/setup-nix-ci-lint`
 Generate `.github/workflows/lint.yml` from the flake.nix hook configuration using Determinate Systems actions.
 
+### Step 10: `/setup-github-guardrails tofu-infra`
+Normalize workflow names, job names, permissions, required-check recommendations, and Action pinning
+against the OpenTofu infrastructure profile.
+
 ## After Completion
 
 Summarize what was set up and list any config files the user needs to create:
@@ -44,9 +48,17 @@ Summarize what was set up and list any config files the user needs to create:
 
 Only list files that do not already exist in the project root.
 
+Also summarize any remaining reproducibility gaps:
+- root modules missing `.terraform.lock.hcl`
+- provider constraints with no upper bound
+- lint workflows that skip local hooks in CI
+- GitHub Actions left on mutable tag references
+- deploy/apply workflows that bypass the required lint gate
+
 ## Important Notes
 
 - Each step is idempotent — if hooks or config already exist, they are skipped, not duplicated.
 - The execution order matters: `setup-git-hooks` must run first as all other skills depend on it.
-- `/setup-nix-ci-lint` must run last because it reads the final hook configuration to generate CI.
+- `/setup-nix-ci-lint` must run after all hooks are in place because it reads the final hook configuration to generate CI.
+- `/setup-github-guardrails` must run after workflows exist so it can normalize the hosted enforcement surface.
 - This skill is designed for OpenTofu IaC projects. For application projects with different language tooling, use the individual skills selectively instead.
