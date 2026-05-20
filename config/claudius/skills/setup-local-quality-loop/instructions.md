@@ -25,7 +25,7 @@ Extract:
 - the allowed commitlint scopes
 - the expected `CI - Lint` naming surface
 - the preferred hook names
-- any profile-specific CI initialization or skip rules
+- any profile-specific CI initialization rules and local/CI parity requirements
 
 ## Steps
 
@@ -104,7 +104,7 @@ After generation, ensure the local and CI surface matches the profile:
 - commitlint and PR-title lint run after `pre-commit`
 - dependency installation happens before `pre-commit`
 - `fetch-depth: 0` is preserved
-- `SKIP` is used only for profile-approved hooks and documented inline
+- CI does not skip local hooks by default; any `SKIP` entry is a last resort with an inline reason
 
 ### 6. Finish cleanly
 

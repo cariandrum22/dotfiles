@@ -75,7 +75,22 @@ permissions:
 Add broader permissions only when a workflow actually needs them, for example `id-token: write` for
 OIDC-based cloud access.
 
-### 5. Preserve the lint policy surface
+### 5. Pin reusable Actions for reproducibility
+
+For mature infrastructure repositories, prefer full commit SHA pins for every `uses:` reference.
+Keep the intended semantic version in a nearby comment and re-resolve it explicitly on upgrades:
+
+```shell
+git ls-remote https://github.com/<owner>/<repo>.git 'refs/tags/<tag>^{}'
+```
+
+Use the peeled `^{}` ref for annotated tags so the result is the target commit, not the tag object.
+If the peeled ref is absent because the tag is lightweight, use the direct `refs/tags/<tag>` value.
+
+Tag pins are acceptable only as a temporary bootstrap state or when the repository explicitly trades
+strict reproducibility for automated Action updates.
+
+### 6. Preserve the lint policy surface
 
 Ensure the repo-wide lint workflow keeps:
 
@@ -84,14 +99,14 @@ Ensure the repo-wide lint workflow keeps:
 - PR-title lint when commitlint is present
 - stable job names that can be required in branch protection
 
-### 6. Recommend or apply branch protection carefully
+### 7. Recommend or apply branch protection carefully
 
 If the user explicitly asks for hosted enforcement and `gh` is available and authenticated,
 configure branch protection only after listing the exact checks that will be required.
 
 Otherwise, summarize the recommended required checks and leave the hosted settings unchanged.
 
-### 7. Finish cleanly
+### 8. Finish cleanly
 
 Summarize:
 

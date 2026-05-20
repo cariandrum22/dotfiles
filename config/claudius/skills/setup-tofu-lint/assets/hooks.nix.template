@@ -17,23 +17,68 @@ tofu-validate-no-backend = {
         #!/usr/bin/env bash
         set -euo pipefail
         temp_cli_config="$(mktemp)"
-        trap 'rm -f "$temp_cli_config"' EXIT
+        temp_data_root="$(mktemp -d)"
+        trap 'rm -rf "$temp_cli_config" "$temp_data_root"' EXIT
         export TF_CLI_CONFIG_FILE="$temp_cli_config"
+        export TF_IN_AUTOMATION=true
         export AWS_EC2_METADATA_DISABLED=true
-        for arg in "$@"; do
-          dirname "$arg"
-        done \
-          | sort \
-          | uniq \
-          | while read -r dir; do
-              ${pkgs.opentofu}/bin/tofu -chdir="$dir" init -backend=false
-              ${pkgs.opentofu}/bin/tofu -chdir="$dir" validate
-            done
+        export CHECKPOINT_DISABLE=true
+        root_list_file="''${TOFU_VALIDATE_ROOTS_FILE:-.tofu-root-modules}"
+        if [ ! -f "$root_list_file" ]; then
+          mapfile -t tf_files < <(
+            ${pkgs.findutils}/bin/find . \
+              -name '*.tf' \
+              -not -path '*/.terraform/*' \
+              -print
+          )
+          if [ "''${#tf_files[@]}" -gt 0 ] && [ "''${TOFU_VALIDATE_ALLOW_NO_LOCKED_ROOTS:-}" != "1" ]; then
+            echo "tofu-validate-no-backend: found .tf files but no $root_list_file root-module list." >&2
+            echo "Create $root_list_file with one root module directory per line and commit provider lock files for each root." >&2
+            echo "Set TOFU_VALIDATE_ALLOW_NO_LOCKED_ROOTS=1 only for module-only repositories with a separate validation harness." >&2
+            exit 1
+          fi
+          echo "tofu-validate-no-backend: no root-module list found; skipping."
+          exit 0
+        fi
+
+        mapfile -t root_dirs < <(
+          ${pkgs.gnugrep}/bin/grep -Ev '^[[:space:]]*(#|$)' "$root_list_file" \
+            | ${pkgs.gnused}/bin/sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' \
+            | ${pkgs.gnugrep}/bin/grep -Ev '^[[:space:]]*$' \
+            || true
+        )
+        if [ "''${#root_dirs[@]}" -eq 0 ]; then
+          echo "tofu-validate-no-backend: $root_list_file contains no root module directories." >&2
+          exit 1
+        fi
+        missing_lock_dirs=()
+        for dir in "''${root_dirs[@]}"; do
+          if [ ! -d "$dir" ]; then
+            echo "tofu-validate-no-backend: root module directory does not exist: $dir" >&2
+            exit 1
+          fi
+          if [ ! -f "$dir/.terraform.lock.hcl" ]; then
+            missing_lock_dirs+=("$dir")
+          fi
+        done
+        if [ "''${#missing_lock_dirs[@]}" -gt 0 ]; then
+          echo "tofu-validate-no-backend: root modules are missing .terraform.lock.hcl:" >&2
+          for dir in "''${missing_lock_dirs[@]}"; do
+            echo "- $dir" >&2
+          done
+          exit 1
+        fi
+        for dir in "''${root_dirs[@]}"; do
+          data_dir="$(mktemp -d "$temp_data_root/tfdata.XXXXXX")"
+          TF_DATA_DIR="$data_dir" ${pkgs.opentofu}/bin/tofu -chdir="$dir" init -backend=false -lockfile=readonly
+          TF_DATA_DIR="$data_dir" ${pkgs.opentofu}/bin/tofu -chdir="$dir" validate
+        done
       '';
     in
     "${tofu-validate}/bin/tofu-validate-no-backend";
-  files = "\\.(tf(vars)?|terraform\\.lock\\.hcl)$";
+  files = "(^|/)\\.tofu-root-modules$|\\.(tf(vars)?|terraform\\.lock\\.hcl)$";
   excludes = [ "\\.terraform/.*$" ];
+  pass_filenames = false;
   require_serial = true;
 };
 hclfmt = {
