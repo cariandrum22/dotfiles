@@ -8,11 +8,9 @@ in
   xdg.configFile = {
 
     # Generate direnv integration module
-    "elvish/lib/direnv.elv".text = builtins.readFile (
-      pkgs.runCommand "direnv-elvish-hook" { } ''
-        ${pkgs.direnv}/bin/direnv hook elvish > $out
-      ''
-    );
+    "elvish/lib/direnv.elv".source = pkgs.runCommand "direnv-elvish-hook" { } ''
+      ${pkgs.direnv}/bin/direnv hook elvish > $out
+    '';
 
     # Local Atuin module patched for Elvish 0.21+
     "elvish/lib/atuin.elv".source = ./../../elvish/lib/atuin.elv;
