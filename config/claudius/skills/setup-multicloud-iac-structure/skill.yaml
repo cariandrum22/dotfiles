@@ -1,0 +1,12 @@
+version: 1
+name: setup-multicloud-iac-structure
+description:
+  Create or migrate a corporate multi-cloud, multi-region IaC repository structure with explicit
+  stack state boundaries, global/regional splits, provider ownership paths, deployment catalogs, and
+  reusable module placement for AWS, Azure, and GCP OpenTofu/Terragrunt repositories.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "[new|migrate] [optional target clouds/regions]"
+  codex:
+    invocation: manual

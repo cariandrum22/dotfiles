@@ -434,6 +434,18 @@ skills:
       Already a strong top-level skill. It should keep its role, but hand off shared
       governance and local backend choice to cross-project baseline skills.
 
+  setup-multicloud-iac-structure:
+    topic: iac-tofu
+    role: orchestrator
+    exposure: primary
+    future_action: keep-as-primary-architecture-skill
+    successor: []
+    rationale: >-
+      Multi-cloud and multi-region repository shape is a durable architecture
+      concern that should be handled before project-specific OpenTofu quality gates.
+      It standardizes stack state boundaries, global/regional splits, provider-native
+      ownership paths, and deployment catalog placement across AWS, Azure, and GCP.
+
   setup-sql-lint:
     topic: sql
     role: building-block
