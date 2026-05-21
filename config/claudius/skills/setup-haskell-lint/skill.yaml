@@ -8,4 +8,4 @@ targets:
     invocation: manual
     argument-hint: '[build_tool=auto|cabal|stack]'
   codex:
-    invocation: manual
+    allow-implicit-invocation: false

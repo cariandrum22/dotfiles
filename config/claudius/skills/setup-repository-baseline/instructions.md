@@ -44,6 +44,32 @@ Create or fill gaps in the following baseline files:
 - Preserve existing project-specific content. Merge missing sections instead of
   overwriting files wholesale.
 
+## Existing Configuration Policy
+
+Before changing an existing repository file, inspect the current content and ask the user to confirm the proposed change. This applies even when the change is additive, such as merging config keys, appending CI steps, adding package scripts, normalizing workflow names, or updating tool versions.
+
+Do not ask when creating a missing file from this skill's template or when the user explicitly requested applying all changes without confirmation. Preserve project-specific settings and avoid replacing entire files unless the user approves that replacement.
+
+When an existing file is involved, present a concise change plan before editing:
+
+- `file`: target path
+- `current_state`: what exists and whether this skill owns it
+- `operation`: `skip`, `merge`, `update`, `replace`, or `create-adjacent`
+- `proposed_delta`: exact setting, block, command, or path change to add or modify
+- `risk`: compatibility, policy, or behavior risk
+- `question`: the approval needed from the user
+
+Default to `skip` or `merge`. Use `replace` only when the user explicitly
+approves replacing that file.
+
+If the user explicitly requested applying all changes without confirmation, do
+not wait for approval after presenting the plan. Still follow the plan, preserve
+project-specific settings, and do not use `replace` unless the user explicitly
+allowed replacement.
+
+Otherwise, if multiple existing files are affected, batch them in one plan and
+wait for approval before editing any of them.
+
 ## Steps
 
 ### 1. Inspect repository state
@@ -54,6 +80,19 @@ Determine these values before editing:
 - default branch
 - primary owner for `CODEOWNERS`
 - security contact for `SECURITY.md`
+
+Replace template placeholders with the inferred or confirmed values:
+
+| Placeholder | Replacement |
+|---|---|
+| `__REPOSITORY_NAME__` | repository name |
+| `__DEFAULT_BRANCH__` | default branch |
+| `__PRIMARY_OWNER__` | GitHub user or team owner for fallback `CODEOWNERS` |
+| `__SECURITY_CONTACT__` | non-public vulnerability reporting contact |
+
+Do not leave any `__REPOSITORY_NAME__`, `__DEFAULT_BRANCH__`,
+`__PRIMARY_OWNER__`, or `__SECURITY_CONTACT__` placeholders in generated
+files.
 
 Inspect existing files first. If any of the target files already exist, preserve
 project-specific details and only fill gaps.
@@ -74,7 +113,9 @@ fallback owner.
 If `CONTRIBUTING.md` does not exist, create it from
 [CONTRIBUTING.md.template](assets/CONTRIBUTING.md.template).
 
-If it already exists, ensure it covers these baseline policies:
+If it already exists, inspect it, report missing baseline policy items, and ask
+the user before changing it. When approved, merge only the missing baseline
+coverage:
 
 - how to propose changes and discuss larger changes early
 - branch-from-default-branch workflow
@@ -92,7 +133,9 @@ lefthook, plain scripts, or no local automation.
 If `SECURITY.md` does not exist, create it from
 [SECURITY.md.template](assets/SECURITY.md.template).
 
-If it already exists, ensure it includes:
+If it already exists, inspect it, report missing baseline security policy items,
+and ask the user before changing it. When approved, merge only the missing
+baseline coverage:
 
 - a clear non-public reporting path
 - supported versions or branches
@@ -111,8 +154,9 @@ Do NOT leave placeholder contact values in the final file.
 If `CHANGELOG.md` does not exist, create it from
 [CHANGELOG.md.template](assets/CHANGELOG.md.template).
 
-If it already exists, ensure there is an `Unreleased` section and that the file
-is appropriate for contributor-facing release notes.
+If it already exists, inspect it, report whether `Unreleased` or
+contributor-facing release-note structure is missing, and ask the user before
+changing it.
 
 Prefer Keep a Changelog structure unless the repository already has another
 clear changelog convention.
@@ -122,7 +166,9 @@ clear changelog convention.
 If `docs/runbooks/release.md` does not exist, create it from
 [release.md.template](assets/release.md.template).
 
-If it already exists, ensure it covers:
+If it already exists, inspect it, report missing release-process items, and ask
+the user before changing it. When approved, merge only the missing baseline
+coverage:
 
 - release preconditions
 - changelog and version preparation
@@ -142,6 +188,7 @@ If the file does not exist, create it from
 
 If it exists:
 
+- inspect it and ask the user before changing it
 - preserve granular path ownership rules
 - ensure there is a fallback owner entry for `*`
 - avoid removing stricter existing ownership patterns
@@ -151,7 +198,8 @@ If it exists:
 If the file does not exist, create it from
 [pull_request_template.md.template](assets/pull_request_template.md.template).
 
-If it exists, ensure it asks for:
+If it exists, inspect it, report missing PR-description fields, and ask the user
+before changing it. When approved, merge only the missing fields:
 
 - summary
 - verification

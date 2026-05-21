@@ -3,26 +3,66 @@
 Set up or normalize typed ESLint for monorepo surfaces where Biome would lose
 important framework, security, or domain-specific checks.
 
-**The argument `$ARGUMENTS` is optional** and may provide a comma-separated list
-of target surfaces such as:
+**The argument `$ARGUMENTS` is optional** and may provide
+`profile=<rails-monorepo|polyglot-oss>` plus a comma-separated list of target
+surfaces such as:
 
 - `web,addon`
 - `apps/web,apps/addon`
 - `apps/web,packages/graphql-types`
+- `profile=polyglot-oss apps/web,packages/graphql-types`
 
 If `$ARGUMENTS` is omitted, inspect the repository and infer the candidate
-surfaces.
+surfaces and profile. Use `rails-monorepo` only when the repository clearly has
+a Rails API plus frontend or package surfaces under a shared root. Use
+`polyglot-oss` for general-purpose monorepos that do not fit the Rails profile.
+If the profile remains ambiguous, default the profile reference to
+`polyglot-oss` and report that assumption.
 
 ## References
 
-Read these before editing:
+Read the quality-profile reference that matches the selected profile before
+editing:
 
 - [../setup-quality-profile/references/rails-monorepo.md](../setup-quality-profile/references/rails-monorepo.md)
+- [../setup-quality-profile/references/polyglot-oss.md](../setup-quality-profile/references/polyglot-oss.md)
+
+Do not read or apply the `rails-monorepo` profile when this skill is invoked
+from `polyglot-oss` or when the repository lacks a Rails API surface.
+
+Then read these local references:
+
 - [references/surface-selection.md](references/surface-selection.md)
 - [references/rule-patterns.md](references/rule-patterns.md)
 
-Use the profile reference for naming and CI policy. Use the local references for
-ESLint-vs-Biome selection and surface-specific rule patterns.
+Use the selected profile reference for naming and CI policy. Use the local
+references for ESLint-vs-Biome selection and surface-specific rule patterns.
+
+## Existing Configuration Policy
+
+Before changing an existing repository file, inspect the current content and ask the user to confirm the proposed change. This applies even when the change is additive, such as merging config keys, appending CI steps, adding package scripts, normalizing workflow names, or updating tool versions.
+
+Do not ask when creating a missing file from this skill's template or when the user explicitly requested applying all changes without confirmation. Preserve project-specific settings and avoid replacing entire files unless the user approves that replacement.
+
+When an existing file is involved, present a concise change plan before editing:
+
+- `file`: target path
+- `current_state`: what exists and whether this skill owns it
+- `operation`: `skip`, `merge`, `update`, `replace`, or `create-adjacent`
+- `proposed_delta`: exact setting, block, command, or path change to add or modify
+- `risk`: compatibility, policy, or behavior risk
+- `question`: the approval needed from the user
+
+Default to `skip` or `merge`. Use `replace` only when the user explicitly
+approves replacing that file.
+
+If the user explicitly requested applying all changes without confirmation, do
+not wait for approval after presenting the plan. Still follow the plan, preserve
+project-specific settings, and do not use `replace` unless the user explicitly
+allowed replacement.
+
+Otherwise, if multiple existing files are affected, batch them in one plan and
+wait for approval before editing any of them.
 
 ## Steps
 

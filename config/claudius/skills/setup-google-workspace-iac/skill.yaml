@@ -1,0 +1,12 @@
+version: 1
+name: setup-google-workspace-iac
+description: >-
+  Define Google Workspace and Cloud Identity IaC structure, state boundaries,
+  credential policy, group-management modes, and AWS federation separation for
+  OpenTofu/Terraform repositories.
+targets:
+  claude-code:
+    invocation: manual
+    argument-hint: "[new|migrate] [optional domain/customer]"
+  codex:
+    allow-implicit-invocation: false

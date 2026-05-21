@@ -1,2 +1,16 @@
-clang-format-check = mkHook "clang-format-check" "clang-format --dry-run --Werror";
-clang-tidy-check = mkHook "clang-tidy-check" "./scripts/clang-tidy-check.sh";
+clang-format-check = {
+  enable = true;
+  name = "clang-format-check";
+  entry = "clang-format --dry-run --Werror";
+  language = "system";
+  files = "\\.(c|cc|cpp|cxx|h|hh|hpp|hxx)$";
+  pass_filenames = true;
+};
+clang-tidy-check = {
+  enable = true;
+  name = "clang-tidy-check";
+  entry = "./scripts/clang-tidy-check.sh";
+  language = "system";
+  files = "\\.(c|cc|cpp|cxx|h|hh|hpp|hxx)$";
+  pass_filenames = true;
+};

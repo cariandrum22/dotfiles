@@ -2,6 +2,32 @@
 
 Generate `.github/workflows/lint.yml` by reading the project's `flake.nix` hook configuration and building a GitHub Actions workflow using Determinate Systems actions.
 
+## Existing Configuration Policy
+
+Before changing an existing repository file, inspect the current content and ask the user to confirm the proposed change. This applies even when the change is additive, such as merging config keys, appending CI steps, adding package scripts, normalizing workflow names, or updating tool versions.
+
+Do not ask when creating a missing file from this skill's template or when the user explicitly requested applying all changes without confirmation. Preserve project-specific settings and avoid replacing entire files unless the user approves that replacement.
+
+When an existing file is involved, present a concise change plan before editing:
+
+- `file`: target path
+- `current_state`: what exists and whether this skill owns it
+- `operation`: `skip`, `merge`, `update`, `replace`, or `create-adjacent`
+- `proposed_delta`: exact setting, block, command, or path change to add or modify
+- `risk`: compatibility, policy, or behavior risk
+- `question`: the approval needed from the user
+
+Default to `skip` or `merge`. Use `replace` only when the user explicitly
+approves replacing that file.
+
+If the user explicitly requested applying all changes without confirmation, do
+not wait for approval after presenting the plan. Still follow the plan, preserve
+project-specific settings, and do not use `replace` unless the user explicitly
+allowed replacement.
+
+Otherwise, if multiple existing files are affected, batch them in one plan and
+wait for approval before editing any of them.
+
 ## Steps
 
 ### 1. Read the project's `flake.nix`
@@ -11,9 +37,20 @@ Read `flake.nix` in the project root and extract:
 - Whether commitlint hooks exist (commit-msg / pre-push stages)
 - Any hooks that may need initialization or special CI handling
 
-### 2. Create `.github/workflows/lint.yml`
+### 2. Create or update `.github/workflows/lint.yml`
 
-Create the workflow using [lint.yml.template](assets/lint.yml.template) as the base structure. The base provides:
+If `.github/workflows/lint.yml` does not exist, create it using
+[lint.yml.template](assets/lint.yml.template) as the base structure.
+
+If `.github/workflows/lint.yml` already exists, inspect it and ask the user
+before changing it. Merge missing Nix setup, cache, dependency installation,
+pre-commit, and commitlint steps into the existing workflow. Do not replace the
+workflow wholesale unless the user explicitly approves that replacement.
+Preserve project-specific triggers, path filters, job names, matrices,
+permissions, concurrency, and environment variables unless they conflict with
+the requested lint policy.
+
+The base provides:
 - Trigger on `pull_request` and `push` to all branches
 - Checkout with `fetch-depth: 0` (needed for commitlint range checks)
 - minimal `contents: read` permissions by default
@@ -60,13 +97,22 @@ If no dependency installation is needed (common for pure IaC projects), skip thi
 
 ### 6. Add commitlint CI steps
 
-If commitlint hooks are present in the flake, append the commit message linting steps. These steps are defined by the `/setup-commitlint` skill's CI template — read the `setup-commitlint` skill asset `assets/ci-steps.yml.template` and append its contents after the "Run pre-commit hooks" step.
+If commitlint hooks are present in the flake, add the commit message linting
+steps. These steps are defined by the `/setup-commitlint` skill's CI template —
+read the `setup-commitlint` skill asset `assets/ci-steps.yml.template` and add
+its contents after the "Run pre-commit hooks" step.
+
+Before changing the workflow, check whether equivalent commitlint or PR-title
+lint steps already exist. Do NOT duplicate them. If existing steps use a simpler
+range strategy such as `HEAD~1`, explain the proposed merge-base update and ask
+the user before replacing or rewriting those steps.
 
 If commitlint hooks are not present, skip this step.
 
 ## Important Notes
 
-- If `.github/workflows/lint.yml` already exists, ask the user before overwriting.
+- If `.github/workflows/lint.yml` already exists, merge/update it in place; ask
+  the user before any broad replacement or policy-changing rewrite.
 - Do NOT hardcode project-specific details. Derive everything from the flake.nix configuration.
 - The `fetch-depth: 0` on checkout is required for commitlint `--from`/`--to` range checks to work. Always include it even if commitlint is not yet configured, to avoid needing to change it later.
 - The Determinate Systems actions handle Nix installation and caching. Do NOT use `cachix/install-nix-action` or other alternatives.

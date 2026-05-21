@@ -1,16 +1,20 @@
 # Git Commit Message Generator
 
-This command analyzes your staged changes and suggests appropriate commit messages following the Conventional Commits specification.
+Analyze staged changes and suggest appropriate commit messages following the
+Conventional Commits specification.
 
 ## Prerequisites
 
-Before using this command:
-1. Ensure you have staged changes: `git add <files>`
-2. Review staged changes: `git diff --cached`
+Before suggesting messages:
+
+1. Run `git diff --cached --stat`.
+2. Run `git diff --cached`.
+3. If there are no staged changes, tell the user to stage changes first.
 
 ## Analysis Process
 
-I will analyze:
+Analyze:
+
 - **File types and paths** to determine commit type and scope
 - **Change patterns** to identify the nature of modifications
 - **Project conventions** from `.commitlintrc`, `.gitmessage`, or commit hooks
@@ -45,19 +49,8 @@ Brief description in imperative mood (e.g., "add OAuth support" not "added OAuth
 
 ## Usage Instructions
 
-1. **Stage your changes**:
-   ```bash
-   git add <files>
-   ```
-
-2. **Run this command** to get commit message suggestions
-
-3. **Choose or modify** a suggested message
-
-4. **Commit** with:
-   ```bash
-   git commit -m "<chosen message>"
-   ```
+Generate 2-4 candidate messages from the staged diff. Do not commit unless the
+user explicitly asks you to commit.
 
 ## Example Output
 
@@ -90,7 +83,3 @@ If your change breaks backward compatibility, add `!` after type:
 ```
 feat!: remove deprecated API endpoints
 ```
-
-## Ready to Analyze
-
-Please share the output of `git diff --cached --stat` and I'll suggest appropriate commit messages based on your staged changes.

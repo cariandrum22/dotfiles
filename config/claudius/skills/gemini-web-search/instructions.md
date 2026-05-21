@@ -1,28 +1,33 @@
 # Gemini Web Search
 
-This command performs web searches using the Gemini CLI, which provides more accurate and up-to-date results than the built-in web search tool.
+Use Gemini CLI for web search only when the user explicitly asks to use Gemini
+or Gemini CLI. Do not claim it is more accurate than other available search
+tools.
 
 ## Prerequisites
 
-Before using this command:
-1. Ensure Gemini CLI is installed and configured
-2. Verify API credentials are properly set
-3. Check network connectivity
+Before searching:
+
+1. Verify `gemini` is available.
+2. Verify Gemini CLI can start with the current configuration.
+3. If credentials or local Gemini configuration are broken, report the concrete
+   startup error and stop.
 
 ## Search Process
 
-I will:
-- **Format your query** for optimal search results
-- **Execute search** via Gemini CLI command
-- **Parse results** to extract relevant information
-- **Present findings** in a structured format
-- **Cite sources** with proper attribution
+When the user provides a query:
+
+1. Format the query for search.
+2. Execute Gemini CLI in non-interactive mode.
+3. Parse the result for relevant claims and source links.
+4. Present findings with source attribution when Gemini returns sources.
 
 ## Query Format
 
 The command uses the following format:
+
 ```bash
-gemini --prompt "WebSearch: <your query>"
+gemini --prompt "WebSearch: <query>"
 ```
 
 ### Query Types
@@ -38,16 +43,11 @@ gemini --prompt "WebSearch: <your query>"
 - Add date constraints for time-sensitive information
 - Specify programming language or technology stack
 
-## Usage Instructions
+## Usage
 
-1. **Provide your search query** with clear intent
-
-2. **Specify any constraints**:
-   - Time range (e.g., "past year", "since 2024")
-   - Source preferences (e.g., "official docs only")
-   - Language or region
-
-3. **Review the results** and request refinement if needed
+If the user already provided a query, run the search. Ask a follow-up question
+only when the query is missing or the requested constraints are ambiguous enough
+to change the result materially.
 
 ## Example Queries
 
@@ -92,7 +92,3 @@ Results will include:
 - Some regions may have restricted access
 - Rate limits may apply for extensive searches
 - Real-time data may have slight delays
-
-## Ready to Search
-
-Please provide your search query and any specific requirements, and I'll execute it using the Gemini CLI for the most accurate results.

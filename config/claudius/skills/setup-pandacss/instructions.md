@@ -10,6 +10,32 @@ This skill is based on practices proven useful in a React Router 7 admin-console
 - Use explicit CSS cascade layers and React Router-compatible stylesheet loading.
 - Add check-only enforcement for inline styles, raw colors, and missing Panda config basics.
 
+## Existing Configuration Policy
+
+Before changing an existing repository file, inspect the current content and ask the user to confirm the proposed change. This applies even when the change is additive, such as merging config keys, appending CI steps, adding package scripts, normalizing workflow names, or updating tool versions.
+
+Do not ask when creating a missing file from this skill's template or when the user explicitly requested applying all changes without confirmation. Preserve project-specific settings and avoid replacing entire files unless the user approves that replacement.
+
+When an existing file is involved, present a concise change plan before editing:
+
+- `file`: target path
+- `current_state`: what exists and whether this skill owns it
+- `operation`: `skip`, `merge`, `update`, `replace`, or `create-adjacent`
+- `proposed_delta`: exact setting, block, command, or path change to add or modify
+- `risk`: compatibility, policy, or behavior risk
+- `question`: the approval needed from the user
+
+Default to `skip` or `merge`. Use `replace` only when the user explicitly
+approves replacing that file.
+
+If the user explicitly requested applying all changes without confirmation, do
+not wait for approval after presenting the plan. Still follow the plan, preserve
+project-specific settings, and do not use `replace` unless the user explicitly
+allowed replacement.
+
+Otherwise, if multiple existing files are affected, batch them in one plan and
+wait for approval before editing any of them.
+
 ## Prerequisites
 
 - The project must have a `package.json`.
@@ -62,7 +88,13 @@ not depend on an unpinned host Node installation.
 
 ### 3. Add or normalize Panda config
 
-Create or update `panda.config.ts`.
+If `panda.config.ts` does not exist, create it from the baseline below.
+
+If `panda.config.ts` already exists, inspect it, report the proposed config
+delta, and ask the user before changing it. Merge only missing compatible
+settings. Preserve existing tokens, presets, `conditions`, include/exclude
+patterns, `globalCss`, output paths, and project-specific extraction behavior
+unless the user approves changing them.
 
 Required baseline:
 
@@ -97,9 +129,12 @@ Use exactly one root stylesheet for Panda layers.
 
 For Vite SPA/Data mode:
 
-1. Create or update a root CSS file such as `src/App.css`.
-2. Import it once from the app entry.
-3. Keep Panda layer order explicit:
+1. If the root CSS file does not exist, create one such as `src/App.css`.
+2. If the root CSS file already exists, inspect it, report the proposed Panda
+   layer addition, and ask the user before changing it.
+3. Import it once from the app entry. If the app entry already exists, inspect
+   it and ask the user before adding or changing imports.
+4. Keep Panda layer order explicit:
 
 ```css
 @layer reset, third-party, base, tokens, recipes, utilities;

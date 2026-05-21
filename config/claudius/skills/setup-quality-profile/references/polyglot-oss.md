@@ -102,6 +102,13 @@ Preferred hook names:
 - `commitlint`
 - `commitlint-pre-push`
 
+Component skills may still install lower-level tool hooks when they are clearer
+and already established, for example `cargo-fmt-check`,
+`cargo-clippy-strict`, `ruff-check`, `ruff-format-check`, `mypy-check`, and
+`tsc-noEmit`. Use the language-level names above for aggregate wrapper hooks or
+branch-protection-facing check names; do not rename existing component hook IDs
+solely for profile aesthetics.
+
 Use stronger domain-oriented hook names only when the repository already has a
 clear surface contract that is better than language-level naming.
 
@@ -131,7 +138,7 @@ The Haskell baseline should include:
 The Lean baseline should include:
 
 - `lake build`
-- `lake lint --clippy` by default
+- `lake lint` when a project lint driver is configured
 - preservation of project-specific lint drivers or custom Lake lint executables
 
 Formatting stays project-specific unless the repository already exposes a

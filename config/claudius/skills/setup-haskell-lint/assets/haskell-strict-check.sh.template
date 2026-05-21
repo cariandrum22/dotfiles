@@ -27,14 +27,14 @@ detect_build_tool() {
 tool="$(detect_build_tool)"
 
 case "$tool" in
-  cabal)
-    cabal build all --ghc-options="$strict_ghc_options"
-    ;;
-  stack)
-    stack build --ghc-options "$strict_ghc_options"
-    ;;
-  *)
-    echo "Unsupported Haskell build tool: $tool" >&2
-    exit 1
-    ;;
+cabal)
+  cabal build all --ghc-options="$strict_ghc_options"
+  ;;
+stack)
+  stack build --ghc-options "$strict_ghc_options"
+  ;;
+*)
+  echo "Unsupported Haskell build tool: $tool" >&2
+  exit 1
+  ;;
 esac

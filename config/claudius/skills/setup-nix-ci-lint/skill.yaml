@@ -9,4 +9,4 @@ targets:
     invocation: manual
     argument-hint: "(no arguments required)"
   codex:
-    invocation: manual
+    allow-implicit-invocation: false

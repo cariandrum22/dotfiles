@@ -9,4 +9,4 @@ targets:
     invocation: manual
     argument-hint: '[optional: "web,addon,packages/foo"]'
   codex:
-    invocation: manual
+    allow-implicit-invocation: false

@@ -9,4 +9,4 @@ targets:
     invocation: manual
     argument-hint: '[profile][,<primary-owner>[,<security-contact>]]'
   codex:
-    invocation: manual
+    allow-implicit-invocation: false

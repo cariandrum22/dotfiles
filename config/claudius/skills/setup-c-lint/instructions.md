@@ -1,12 +1,40 @@
 # Setup C/C++ Lint
 
-Add clang-format and clang-tidy checks for `.c` and `.h` files. This skill enforces strict formatting and static analysis with check-only hooks.
+Add clang-format and clang-tidy checks for C and C++ source/header files (`.c`, `.cc`,
+`.cpp`, `.cxx`, `.h`, `.hh`, `.hpp`, `.hxx`). This skill enforces strict formatting and
+static analysis with check-only hooks.
 
 **The argument `$ARGUMENTS` is an optional list of `key=value` pairs**:
 
 - `build_dir`: Directory that contains `compile_commands.json` (default: `build`)
 
 If no argument is given, use the default above.
+
+## Existing Configuration Policy
+
+Before changing an existing repository file, inspect the current content and ask the user to confirm the proposed change. This applies even when the change is additive, such as merging config keys, appending CI steps, adding package scripts, normalizing workflow names, or updating tool versions.
+
+Do not ask when creating a missing file from this skill's template or when the user explicitly requested applying all changes without confirmation. Preserve project-specific settings and avoid replacing entire files unless the user approves that replacement.
+
+When an existing file is involved, present a concise change plan before editing:
+
+- `file`: target path
+- `current_state`: what exists and whether this skill owns it
+- `operation`: `skip`, `merge`, `update`, `replace`, or `create-adjacent`
+- `proposed_delta`: exact setting, block, command, or path change to add or modify
+- `risk`: compatibility, policy, or behavior risk
+- `question`: the approval needed from the user
+
+Default to `skip` or `merge`. Use `replace` only when the user explicitly
+approves replacing that file.
+
+If the user explicitly requested applying all changes without confirmation, do
+not wait for approval after presenting the plan. Still follow the plan, preserve
+project-specific settings, and do not use `replace` unless the user explicitly
+allowed replacement.
+
+Otherwise, if multiple existing files are affected, batch them in one plan and
+wait for approval before editing any of them.
 
 ## Prerequisites
 
@@ -36,8 +64,8 @@ Add the hooks from [hooks.nix.template](assets/hooks.nix.template) into the `hoo
 
 Hooks added:
 
-- **clang-format-check** — Runs `clang-format --dry-run --Werror`
-- **clang-tidy-check** — Runs `./scripts/clang-tidy-check.sh`
+- **clang-format-check** — Runs `clang-format --dry-run --Werror` on C/C++ files
+- **clang-tidy-check** — Runs `./scripts/clang-tidy-check.sh` on C/C++ files
 
 #### A-2. Ensure clang tools are in the dev shell
 
@@ -55,27 +83,43 @@ Add the hooks from [pre-commit-hooks.yaml.template](assets/pre-commit-hooks.yaml
 
 Hooks added:
 
-- **clang-format-check** — Runs `clang-format --dry-run --Werror` on staged `.c`/`.h` files
-- **clang-tidy-check** — Runs `./scripts/clang-tidy-check.sh` on staged `.c`/`.h` files
+- **clang-format-check** — Runs `clang-format --dry-run --Werror` on staged C/C++ files
+- **clang-tidy-check** — Runs `./scripts/clang-tidy-check.sh` on staged C/C++ files
 
 ---
 
 ### 2. Create `.clang-format`
 
-Create `.clang-format` in the project root using the template in [clang-format.template](assets/clang-format.template).
+If `.clang-format` does not exist, create it in the project root using the
+template in [clang-format.template](assets/clang-format.template).
+
+If `.clang-format` already exists, inspect it and ask the user before changing
+it. Prefer preserving the existing style and only merge clearly missing baseline
+options when the user approves.
 
 ### 3. Create `.clang-tidy`
 
-Create `.clang-tidy` in the project root using the template in [clang-tidy.template](assets/clang-tidy.template).
+If `.clang-tidy` does not exist, create it in the project root using the
+template in [clang-tidy.template](assets/clang-tidy.template).
+
+If `.clang-tidy` already exists, inspect it and ask the user before changing it.
+Merge missing safety-critical checks without removing project-specific checks,
+warnings, or ignores.
 
 ### 4. Create `scripts/clang-tidy-check.sh`
 
-Create `scripts/clang-tidy-check.sh` using the template in [clang-tidy-check.sh.template](assets/clang-tidy-check.sh.template). Make it executable (`chmod +x`).
+If `scripts/clang-tidy-check.sh` does not exist, create it using the template in
+[clang-tidy-check.sh.template](assets/clang-tidy-check.sh.template). Make it
+executable (`chmod +x`).
+
+If the script already exists, inspect it and ask the user before replacing it.
+Prefer updating only the missing behavior needed by this skill.
 
 The script:
 
 - Requires `compile_commands.json` in `build_dir` (default: `build`)
 - Reads `CLANG_TIDY_BUILD_DIR` to override the build directory at runtime
+- Falls back to all git-tracked C/C++ files when invoked without file arguments
 
 ### 5. Ensure `compile_commands.json` exists
 

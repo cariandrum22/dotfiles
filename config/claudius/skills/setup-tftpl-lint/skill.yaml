@@ -7,4 +7,4 @@ targets:
     invocation: manual
     argument-hint: '[engine=tofu vars_file=tftpl.vars.json console_dir=.]'
   codex:
-    invocation: manual
+    allow-implicit-invocation: false

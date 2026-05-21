@@ -8,4 +8,4 @@ targets:
     invocation: manual
     argument-hint: '[ruby_version, e.g. "3.3"]'
   codex:
-    invocation: manual
+    allow-implicit-invocation: false

@@ -1,8 +1,69 @@
 # ── Formatting & whitespace ──────────────────────────
-editorconfig-checker.enable = true;
-end-of-file-fixer.enable = true;
-trim-trailing-whitespace.enable = true;
-mixed-line-endings.enable = true;
+editorconfig-checker.enable = builtins.pathExists ./.editorconfig;
+final-newline-check = {
+  enable = true;
+  name = "final-newline-check";
+  language = "system";
+  pass_filenames = false;
+  entry =
+    let
+      final-newline-check = pkgs.writeScriptBin "final-newline-check" ''
+        #!/usr/bin/env bash
+        set -euo pipefail
+
+        status=0
+        while IFS= read -r -d "" file; do
+          if [ ! -f "$file" ] || [ ! -s "$file" ]; then
+            continue
+          fi
+
+          if ! ${pkgs.gnugrep}/bin/grep -Iq . "$file"; then
+            continue
+          fi
+
+          last_byte="$(${pkgs.coreutils}/bin/tail -c 1 "$file" | ${pkgs.coreutils}/bin/od -An -t x1 | ${pkgs.coreutils}/bin/tr -d '[:space:]')"
+          if [ "$last_byte" != "0a" ]; then
+            echo "final-newline-check: missing final newline: $file" >&2
+            status=1
+          fi
+        done < <(${pkgs.git}/bin/git ls-files -z)
+
+        exit "$status"
+      '';
+    in
+    "${final-newline-check}/bin/final-newline-check";
+};
+trailing-whitespace-check = {
+  enable = true;
+  name = "trailing-whitespace-check";
+  language = "system";
+  pass_filenames = false;
+  entry =
+    let
+      trailing-whitespace-check = pkgs.writeScriptBin "trailing-whitespace-check" ''
+        #!/usr/bin/env bash
+        set -euo pipefail
+
+        status=0
+        while IFS= read -r -d "" file; do
+          if [ ! -f "$file" ]; then
+            continue
+          fi
+
+          if ${pkgs.gnugrep}/bin/grep -nI -E '[[:blank:]]$' "$file" >&2; then
+            status=1
+          fi
+        done < <(${pkgs.git}/bin/git ls-files -z)
+
+        exit "$status"
+      '';
+    in
+    "${trailing-whitespace-check}/bin/trailing-whitespace-check";
+};
+mixed-line-endings = {
+  enable = true;
+  args = [ "--fix=no" ];
+};
 
 # ── File checks ──────────────────────────────────────
 check-added-large-files = {
@@ -25,11 +86,19 @@ check-yaml.enable = true;
 # ── Documentation ────────────────────────────────────
 markdownlint = {
   enable = true;
-  settings.configuration = builtins.fromJSON (builtins.readFile ./.markdownlint.json);
+  settings.configuration =
+    if builtins.pathExists ./.markdownlint.json then
+      builtins.fromJSON (builtins.readFile ./.markdownlint.json)
+    else
+      { };
 };
 
 # ── Spelling ─────────────────────────────────────────
 typos = {
   enable = true;
-  settings.configPath = ".typos.toml";
+  settings =
+    if builtins.pathExists ./.typos.toml then
+      { configPath = ".typos.toml"; }
+    else
+      { config = { }; };
 };

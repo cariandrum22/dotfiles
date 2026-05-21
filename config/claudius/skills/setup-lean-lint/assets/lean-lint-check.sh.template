@@ -1,22 +1,29 @@
 #!/usr/bin/env bash
-set -eu
-
-scope="${LEAN_LINT_SCOPE:-clippy}"
+set -euo pipefail
 
 lake build
 
-case "$scope" in
-  default)
-    lake lint
-    ;;
-  clippy)
-    lake lint --clippy
-    ;;
-  all)
-    lake lint --lint-all
-    ;;
-  *)
-    echo "Unsupported LEAN_LINT_SCOPE: $scope" >&2
-    exit 1
-    ;;
-esac
+lint_output=""
+set +e
+lint_output="$(lake lint 2>&1)"
+lint_status=$?
+set -e
+
+if [ "${lint_status}" -eq 0 ]; then
+  printf '%s\n' "$lint_output"
+  exit 0
+fi
+
+if printf '%s\n' "$lint_output" | grep -qi "no lint driver configured"; then
+  if [ "${LEAN_LINT_REQUIRE_DRIVER:-0}" = "1" ]; then
+    printf '%s\n' "$lint_output" >&2
+    exit "$lint_status"
+  fi
+
+  echo "lean-lint-check: no Lake lint driver configured; build passed, lint skipped." >&2
+  echo "Set LEAN_LINT_REQUIRE_DRIVER=1 to fail when lint is unavailable." >&2
+  exit 0
+fi
+
+printf '%s\n' "$lint_output" >&2
+exit "$lint_status"

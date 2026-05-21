@@ -4,6 +4,32 @@ Add Biome as the unified linter and formatter for JavaScript, TypeScript, JSX, T
 
 Biome replaces both ESLint and Prettier with a single tool. This skill configures the **strictest practical ruleset** suitable for production projects.
 
+## Existing Configuration Policy
+
+Before changing an existing repository file, inspect the current content and ask the user to confirm the proposed change. This applies even when the change is additive, such as merging config keys, appending CI steps, adding package scripts, normalizing workflow names, or updating tool versions.
+
+Do not ask when creating a missing file from this skill's template or when the user explicitly requested applying all changes without confirmation. Preserve project-specific settings and avoid replacing entire files unless the user approves that replacement.
+
+When an existing file is involved, present a concise change plan before editing:
+
+- `file`: target path
+- `current_state`: what exists and whether this skill owns it
+- `operation`: `skip`, `merge`, `update`, `replace`, or `create-adjacent`
+- `proposed_delta`: exact setting, block, command, or path change to add or modify
+- `risk`: compatibility, policy, or behavior risk
+- `question`: the approval needed from the user
+
+Default to `skip` or `merge`. Use `replace` only when the user explicitly
+approves replacing that file.
+
+If the user explicitly requested applying all changes without confirmation, do
+not wait for approval after presenting the plan. Still follow the plan, preserve
+project-specific settings, and do not use `replace` unless the user explicitly
+allowed replacement.
+
+Otherwise, if multiple existing files are affected, batch them in one plan and
+wait for approval before editing any of them.
+
 ## Prerequisites
 
 - The project must have a `package.json` in the root.
@@ -41,6 +67,12 @@ Create `biome.json` in the project root from [biome.json.template](assets/biome.
 
 If the version cannot be determined, omit the `$schema` field entirely rather than guessing.
 
+The template enables `vcs.useIgnoreFile`, so the repository must have a `.gitignore`.
+If `.gitignore` is missing, create an empty `.gitignore` before running Biome, or
+set `vcs.useIgnoreFile` to `false` and report that this weakens the baseline.
+Prefer creating `.gitignore`; do not leave the generated config in a state where
+`biome ci` fails before checking source files.
+
 ### 3. Verify strict configuration
 
 If `biome.json` already existed, verify the following settings are present. If any are missing or weaker, **do NOT overwrite** — inform the user of the discrepancies and let them decide.
@@ -51,9 +83,10 @@ Required settings:
 |---|---|---|
 | `linter.enabled` | `true` | Must not be disabled |
 | `formatter.enabled` | `true` | Must not be disabled |
-| `organizeImports.enabled` | `true` | Import ordering must be enforced |
+| `assist.actions.source.organizeImports` | `"on"` | Import ordering must be enforced |
 | `formatter.lineEnding` | `"lf"` | Unix line endings only |
-| `vcs.enabled` | `true` | Respect `.gitignore` |
+| `vcs.enabled` | `true` | Enable VCS integration |
+| `vcs.useIgnoreFile` | `true` when `.gitignore` exists | Respect `.gitignore`; requires the file to exist |
 | `linter.rules.recommended` | `true` | Baseline rule coverage |
 | `correctness.noUnusedImports` | `"error"` | Dead imports must not pass |
 | `correctness.noUnusedVariables` | `"error"` | Dead variables must not pass |

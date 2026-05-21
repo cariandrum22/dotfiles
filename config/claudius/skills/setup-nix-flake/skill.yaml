@@ -7,4 +7,4 @@ targets:
     invocation: manual
     argument-hint: '[project description, e.g. "Development environment for my-api"]'
   codex:
-    invocation: manual
+    allow-implicit-invocation: false

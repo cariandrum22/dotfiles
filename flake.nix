@@ -333,6 +333,9 @@
             statix
             shfmt
             shellcheck
+            nodejs
+            biome
+            stylelint
             python3
             (python3.withPackages pythonLintPackages)
             act
@@ -430,7 +433,7 @@
             claudius-skill-guardrails = {
               enable = true;
               name = "claudius-skill-guardrails";
-              entry = "${pkgs.python3}/bin/python3 scripts/test-claudius-skills.py";
+              entry = "${pkgs.bash}/bin/bash -c 'CLAUDIUS_BIN=${lib.getExe' pkgs.claudius "claudius"} ${pkgs.python3}/bin/python3 scripts/test-claudius-skills.py'";
               language = "system";
               pass_filenames = false;
               files = "^config/claudius/skills/|^scripts/test-claudius-skills\\.py$";

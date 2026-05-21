@@ -111,6 +111,38 @@ skills:
       This is the source-of-truth policy surface for repository collaboration.
       Hosted enforcement and local hooks should compose around it, not replace it.
 
+  setup-github-guardrails:
+    topic: foundation
+    role: orchestrator
+    exposure: primary
+    future_action: keep-as-hosted-policy-layer
+    successor: []
+    rationale: >-
+      Hosted enforcement is the durable policy surface for workflow naming,
+      required checks, permissions, and PR-title lint. It should remain aligned
+      with repository profiles and compose with the local quality loop.
+
+  setup-local-quality-loop:
+    topic: foundation
+    role: orchestrator
+    exposure: primary
+    future_action: keep-as-local-ci-feedback-layer
+    successor: []
+    rationale: >-
+      This skill coordinates local hooks, commitlint, and repo-wide lint CI for a
+      chosen repository profile. It should stay separate from hosted GitHub policy
+      while sharing the same naming and check contract.
+
+  setup-quality-profile:
+    topic: foundation
+    role: orchestrator
+    exposure: primary
+    future_action: keep-as-profile-entry-point
+    successor: []
+    rationale: >-
+      This is the profile-level entry point that composes repository governance,
+      local quality loops, hosted guardrails, and stack-specific lint skills.
+
   setup-nix-flake:
     topic: foundation
     role: substrate
@@ -255,6 +287,17 @@ skills:
     rationale: >-
       Type checking is a clean reusable unit and still useful independently.
 
+  setup-typed-eslint-monorepo:
+    topic: frontend-typescript
+    role: building-block
+    exposure: primary
+    future_action: keep-standalone-and-compose-into-js-baselines
+    successor: []
+    rationale: >-
+      Typed ESLint remains necessary for framework-heavy, browser-extension,
+      GraphQL-aware, security-sensitive, or functional-rule-heavy TypeScript
+      surfaces that Biome alone should not replace.
+
   setup-stylelint:
     topic: frontend-typescript
     role: building-block
@@ -274,6 +317,26 @@ skills:
     rationale: >-
       A coherent language-specific building block with clear standalone value.
 
+  setup-haskell-lint:
+    topic: haskell
+    role: building-block
+    exposure: primary
+    future_action: keep-standalone-and-compose-into-polyglot-profile
+    successor: []
+    rationale: >-
+      Haskell formatting, HLint, and strict build checks are a coherent
+      language-specific quality surface for polyglot repositories.
+
+  setup-lean-lint:
+    topic: lean
+    role: building-block
+    exposure: primary
+    future_action: keep-standalone-and-compose-into-polyglot-profile
+    successor: []
+    rationale: >-
+      Lean/Lake quality checks are specific enough to stay standalone while
+      remaining available to the polyglot profile.
+
   setup-python-lint:
     topic: python
     role: building-block
@@ -283,6 +346,26 @@ skills:
     rationale: >-
       Strong standalone value today, while still fitting naturally inside a later
       Python project baseline.
+
+  setup-rust-lint:
+    topic: rust
+    role: building-block
+    exposure: primary
+    future_action: keep-standalone-and-compose-into-polyglot-profile
+    successor: []
+    rationale: >-
+      Cargo fmt and strict Clippy checks are a common reusable baseline for Rust
+      projects and polyglot repositories.
+
+  setup-ruby-lint:
+    topic: rails-ruby
+    role: building-block
+    exposure: primary
+    future_action: keep-standalone-and-compose-into-polyglot-profile
+    successor: []
+    rationale: >-
+      Generic Ruby RuboCop setup is useful outside Rails projects and should stay
+      separate from Rails-specific RuboCop policy.
 
   setup-rubocop:
     topic: rails-ruby
@@ -456,6 +539,18 @@ skills:
       concern that should be handled before project-specific OpenTofu quality gates.
       It standardizes stack state boundaries, global/regional splits, provider-native
       ownership paths, and deployment catalog placement across AWS, Azure, and GCP.
+
+  setup-google-workspace-iac:
+    topic: iac-tofu
+    role: orchestrator
+    exposure: primary
+    future_action: keep-as-primary-identity-iac-skill
+    successor: []
+    rationale: >-
+      Google Workspace and Cloud Identity need a dedicated identity-governance
+      IaC model separate from Google Cloud project infrastructure. This skill
+      covers Workspace state boundaries, group-management modes, credential
+      policy, and AWS federation separation.
 
   setup-sql-lint:
     topic: sql

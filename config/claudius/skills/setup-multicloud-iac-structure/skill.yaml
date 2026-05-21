@@ -9,4 +9,4 @@ targets:
     invocation: manual
     argument-hint: "[new|migrate] [optional target clouds/regions]"
   codex:
-    invocation: manual
+    allow-implicit-invocation: false

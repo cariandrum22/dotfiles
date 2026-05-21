@@ -5,6 +5,8 @@ description: One-command setup for a new OpenTofu IaC project with full linting,
 targets:
   claude-code:
     invocation: manual
-    argument-hint: '[comma-separated commitlint scopes, e.g. "ci,deps,docs,envs,modules,nix,scripts,security,tooling"]'
+    argument-hint: >-
+      [optional: comma-separated commitlint scopes, e.g.
+      "ci,deps,docs,envs,modules,nix,scripts,security,tooling"]
   codex:
-    invocation: manual
+    allow-implicit-invocation: false

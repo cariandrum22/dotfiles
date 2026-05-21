@@ -3,7 +3,11 @@ name: CI - Rails
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches:
+      - "**"
+
+permissions:
+  contents: read
 
 jobs:
   scan_ruby:
@@ -12,27 +16,48 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        # actions/checkout v4 resolved on 2026-05-21.
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        # ruby/setup-ruby v1 branch resolved on 2026-05-21.
+        uses: ruby/setup-ruby@afeafc3d1ab54a631816aba4c914a0081c12ff2f
         with:
-          ruby-version: .ruby-version
+          ruby-version: __RUBY_VERSION__
           bundler-cache: true
 
-      # Security and consistency steps go here (see step 3)
+      # Security and consistency steps go here (see step 4)
 
   lint:
     name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        # actions/checkout v4 resolved on 2026-05-21.
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+        # ruby/setup-ruby v1 branch resolved on 2026-05-21.
+        uses: ruby/setup-ruby@afeafc3d1ab54a631816aba4c914a0081c12ff2f
         with:
-          ruby-version: .ruby-version
+          ruby-version: __RUBY_VERSION__
           bundler-cache: true
 
-      # Lint and type check steps go here (see step 3)
+      # Lint and type check steps go here (see step 4)
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        # actions/checkout v4 resolved on 2026-05-21.
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Set up Ruby
+        # ruby/setup-ruby v1 branch resolved on 2026-05-21.
+        uses: ruby/setup-ruby@afeafc3d1ab54a631816aba4c914a0081c12ff2f
+        with:
+          ruby-version: __RUBY_VERSION__
+          bundler-cache: true
+
+      # Test setup and test command go here (see step 4)

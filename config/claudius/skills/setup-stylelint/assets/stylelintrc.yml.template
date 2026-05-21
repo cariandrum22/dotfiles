@@ -24,9 +24,8 @@ rules:
       - /^font/
       - z-index
       - border-radius
-    - ignoreValues:
-        "": ["currentColor", "inherit", "transparent", "initial", "none", "0"]
-      expandShorthandProperties: true
+    - ignoreValues: ["currentColor", "inherit", "transparent", "initial", "none", "0"]
+      expandShorthand: true
 
   # Disallow redundant values
   shorthand-property-no-redundant-values: true
@@ -40,7 +39,7 @@ rules:
   scss/at-extend-no-missing-placeholder: null
 
   # Enforce @use over @import (modern SCSS modules)
-  scss/at-import-no-partial-leading-underscore: true
+  scss/load-no-partial-leading-underscore: true
   scss/no-global-function-names: true
 
   # ── Naming ──────────────────────────────────────────

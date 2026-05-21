@@ -1,6 +1,7 @@
 # Context Document Organizer
 
-This command analyzes CLAUDE.md or AGENTS.md files and reorganizes them with complete, deduplicated rule references for optimal context management.
+Analyze `CLAUDE.md` or `AGENTS.md` files and reorganize them with complete,
+deduplicated rule references for optimal context management.
 
 ## Purpose
 
@@ -12,13 +13,31 @@ Context documents (CLAUDE.md, AGENTS.md) serve as primary guidance for AI agents
 
 This command ensures your context documents remain comprehensive and well-organized.
 
+## Target Discovery
+
+If the user provides a path, use it. Otherwise search the current repository for
+`CLAUDE.md` and `AGENTS.md`.
+
+- If exactly one candidate exists, use it.
+- If multiple candidates exist, ask the user which one to update.
+- If no candidate exists, ask whether to create `AGENTS.md` or `CLAUDE.md`.
+
+Use `config/claudius/rules` as the rules directory when it exists. Otherwise
+fall back to `/rules/` or a repository-local `rules/` directory.
+
+## Existing Configuration Policy
+
+Before changing an existing context document, present the intended
+reorganization approach and ask the user to confirm. Do not replace custom
+project sections unless the user approves that change.
+
 ## Analysis Process
 
-I will perform the following steps:
+Perform these steps:
 
 1. **Rule Discovery**
    - Parse the target document for all rule references
-   - Scan `/rules/` directory for all available rules
+   - Scan the selected rules directory for all available rules
    - Identify missing, outdated, or broken references
 
 2. **Content Analysis**
@@ -39,17 +58,13 @@ I will perform the following steps:
 
 ## Usage Instructions
 
-1. **Specify the target document**:
-   - Full path to CLAUDE.md or AGENTS.md
-   - Or simply "CLAUDE.md" for the current directory
-
-2. **Review the analysis report** showing:
+1. **Review the analysis report** showing:
    - Current structure assessment
    - Missing rule detections
    - Redundancy findings
    - Proposed reorganization plan
 
-3. **Approve the reorganization** to:
+2. **Approve the reorganization** to:
    - Update the document with optimized structure
    - Include all relevant rules
    - Remove duplications
@@ -137,7 +152,7 @@ Proposed Reorganization:
 ## Validation Checklist
 
 The reorganized document will ensure:
-- [ ] All rules in `/rules/` are considered for inclusion
+- [ ] All rules in the selected rules directory are considered for inclusion
 - [ ] No broken rule references remain
 - [ ] Related content is grouped logically
 - [ ] Hierarchical structure is consistent
@@ -145,12 +160,3 @@ The reorganized document will ensure:
 - [ ] Cross-references use current paths
 - [ ] Markdown formatting is standardized
 - [ ] Document remains concise yet complete
-
-## Ready to Organize
-
-Please provide:
-1. Path to the context document (CLAUDE.md or AGENTS.md)
-2. Preferred reorganization approach (minimal/comprehensive)
-3. Any specific rules that must be included or excluded
-
-I'll analyze the document and present a detailed reorganization plan for your approval.

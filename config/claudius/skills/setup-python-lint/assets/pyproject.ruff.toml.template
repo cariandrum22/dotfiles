@@ -80,8 +80,6 @@ select = [
 
 ignore = [
   # ── Intentional relaxations ─────────────────────────────────────────────
-  "ANN101",   # deprecated — self type annotation
-  "ANN102",   # deprecated — cls type annotation
   "COM812",   # trailing comma — conflicts with formatter
   "ISC001",   # implicit string concat — conflicts with formatter
   "TD003",    # TODO issue link — too noisy for most teams

@@ -2,8 +2,9 @@ tofu-format = {
   enable = true;
   name = "tofu-format";
   package = pkgs.opentofu;
-  entry = "${pkgs.opentofu}/bin/tofu fmt";
+  entry = "${pkgs.opentofu}/bin/tofu fmt -check -diff";
   files = "\\.(tf|tfvars)$";
+  pass_filenames = true;
 };
 tflint.enable = true;
 terraform-validate.enable = false;
@@ -85,6 +86,30 @@ hclfmt = {
   enable = true;
   name = "hclfmt";
   package = pkgs.hclfmt;
-  entry = "${pkgs.hclfmt}/bin/hclfmt -w";
+  entry =
+    let
+      hclfmt-check = pkgs.writeScriptBin "hclfmt-check" ''
+        #!/usr/bin/env bash
+        set -euo pipefail
+        temp_dir="$(mktemp -d)"
+        trap 'rm -rf "$temp_dir"' EXIT
+        status=0
+        for file in "$@"; do
+          if [ ! -f "$file" ]; then
+            continue
+          fi
+          formatted="$(mktemp "$temp_dir/hclfmt.XXXXXX")"
+          ${pkgs.hclfmt}/bin/hclfmt "$file" > "$formatted"
+          if ! ${pkgs.diffutils}/bin/cmp -s "$file" "$formatted"; then
+            echo "hclfmt-check: $file is not formatted" >&2
+            ${pkgs.diffutils}/bin/diff -u "$file" "$formatted" >&2 || true
+            status=1
+          fi
+        done
+        exit "$status"
+      '';
+    in
+    "${hclfmt-check}/bin/hclfmt-check";
   files = "\\.hcl$";
+  pass_filenames = true;
 };

@@ -9,4 +9,4 @@ targets:
     invocation: manual
     argument-hint: '[rails-monorepo|tofu-infra|polyglot-oss]'
   codex:
-    invocation: manual
+    allow-implicit-invocation: false
