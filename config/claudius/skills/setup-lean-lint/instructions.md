@@ -1,8 +1,34 @@
 # Setup Lean Lint
 
 Add Lean quality checks for a Lake project. This skill standardizes on
-`lake build` plus `lake lint`, using the built-in Clippy-style linters by
-default. Keep the formatting surface project-specific and check-only.
+`lake build` plus `lake lint` when the project exposes a Lake lint driver. Keep
+the formatting surface project-specific and check-only.
+
+## Existing Configuration Policy
+
+Before changing an existing repository file, inspect the current content and ask the user to confirm the proposed change. This applies even when the change is additive, such as merging config keys, appending CI steps, adding package scripts, normalizing workflow names, or updating tool versions.
+
+Do not ask when creating a missing file from this skill's template or when the user explicitly requested applying all changes without confirmation. Preserve project-specific settings and avoid replacing entire files unless the user approves that replacement.
+
+When an existing file is involved, present a concise change plan before editing:
+
+- `file`: target path
+- `current_state`: what exists and whether this skill owns it
+- `operation`: `skip`, `merge`, `update`, `replace`, or `create-adjacent`
+- `proposed_delta`: exact setting, block, command, or path change to add or modify
+- `risk`: compatibility, policy, or behavior risk
+- `question`: the approval needed from the user
+
+Default to `skip` or `merge`. Use `replace` only when the user explicitly
+approves replacing that file.
+
+If the user explicitly requested applying all changes without confirmation, do
+not wait for approval after presenting the plan. Still follow the plan, preserve
+project-specific settings, and do not use `replace` unless the user explicitly
+allowed replacement.
+
+Otherwise, if multiple existing files are affected, batch them in one plan and
+wait for approval before editing any of them.
 
 ## Prerequisites
 
@@ -58,16 +84,20 @@ Hook added:
 
 ### 2. Create `scripts/lean-lint-check.sh`
 
-Create `scripts/lean-lint-check.sh` from
+If `scripts/lean-lint-check.sh` does not exist, create it from
 [lean-lint-check.sh.template](assets/lean-lint-check.sh.template) and make it
 executable.
+
+If the script already exists, inspect it and ask the user before changing it.
+Merge missing Lean quality checks without replacing project-specific Lake or
+lint-driver logic unless approved.
 
 The script:
 
 - runs `lake build`
-- runs `lake lint --clippy` by default
-- supports `LEAN_LINT_SCOPE=default|clippy|all` to adjust the built-in linter
-  scope
+- runs `lake lint` when a project lint driver is configured
+- skips lint with a clear message when no Lake lint driver is configured
+- supports `LEAN_LINT_REQUIRE_DRIVER=1` to fail if lint is unavailable
 
 ### 3. Inspect the project's strictness surface
 
@@ -96,5 +126,7 @@ built-in linter scope globally just to get the hook green.
 - Do NOT invent an auto-format hook that rewrites files during commit.
 - Keep formatting editor- or project-command driven unless the repository
   already has a checked formatter surface.
-- Use `LEAN_LINT_SCOPE=all` only when the project is already ready for the
-  broader lint set; `clippy` is the strict default for general Lean projects.
+- Lake does not provide a universal `--clippy` or `--lint-all` flag. Preserve
+  any project-specific lint driver and run `lake lint` through that driver.
+- Set `LEAN_LINT_REQUIRE_DRIVER=1` only when the repository requires a configured
+  lint driver before commits or CI may pass.

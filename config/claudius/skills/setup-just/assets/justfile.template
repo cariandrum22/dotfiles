@@ -6,8 +6,8 @@
 # ---------------------------------------------------------------------------
 
 set shell := ["bash", "-euo", "pipefail", "-c"]
-set positional-arguments := true
-set export := true
+set positional-arguments
+set export
 
 # ---------------------------------------------------------------------------
 # Project metadata
@@ -25,7 +25,7 @@ default:
 
 # Display project help
 help:
-    @echo "{{project_name}}"
+    @echo "{{ project_name }}"
     @echo ""
     @just --list --unsorted
 

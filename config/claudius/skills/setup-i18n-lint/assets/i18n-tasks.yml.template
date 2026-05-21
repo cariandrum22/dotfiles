@@ -1,5 +1,5 @@
-base_locale: ja
-locales: [ja, en]
+base_locale: __BASE_LOCALE__
+locales: __LOCALES__
 
 data:
   adapter: file

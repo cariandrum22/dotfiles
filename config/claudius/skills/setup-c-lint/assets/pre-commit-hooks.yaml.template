@@ -4,11 +4,11 @@
       name: clang-format check
       entry: clang-format --dry-run --Werror
       language: system
-      files: \.(c|h)$
+      files: \.(c|cc|cpp|cxx|h|hh|hpp|hxx)$
       pass_filenames: true
     - id: clang-tidy-check
       name: clang-tidy check
       entry: ./scripts/clang-tidy-check.sh
       language: system
-      files: \.(c|h)$
+      files: \.(c|cc|cpp|cxx|h|hh|hpp|hxx)$
       pass_filenames: true

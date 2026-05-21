@@ -7,4 +7,4 @@ targets:
     invocation: manual
     argument-hint: '[build_dir=build]'
   codex:
-    invocation: manual
+    allow-implicit-invocation: false

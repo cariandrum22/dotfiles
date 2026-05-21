@@ -2,7 +2,35 @@
 
 Set up a complete linting, formatting, security scanning, CI, and commit message enforcement stack for an OpenTofu IaC project. This skill orchestrates the following individual skills in order.
 
-**The argument `$ARGUMENTS` is a comma-separated list of allowed commitlint scopes.** If no argument is given, ask the user for the list of scopes.
+**The argument `$ARGUMENTS` is optional** and may provide a comma-separated list
+of allowed commitlint scopes. If no argument is given, run `/setup-commitlint`
+without explicit scopes so it can infer the repository taxonomy.
+
+## Existing Configuration Policy
+
+Before changing an existing repository file, inspect the current content and ask the user to confirm the proposed change. This applies even when the change is additive, such as merging config keys, appending CI steps, adding package scripts, normalizing workflow names, or updating tool versions.
+
+Do not ask when creating a missing file from this skill's template or when the user explicitly requested applying all changes without confirmation. Preserve project-specific settings and avoid replacing entire files unless the user approves that replacement.
+
+When an existing file is involved, present a concise change plan before editing:
+
+- `file`: target path
+- `current_state`: what exists and whether this skill owns it
+- `operation`: `skip`, `merge`, `update`, `replace`, or `create-adjacent`
+- `proposed_delta`: exact setting, block, command, or path change to add or modify
+- `risk`: compatibility, policy, or behavior risk
+- `question`: the approval needed from the user
+
+Default to `skip` or `merge`. Use `replace` only when the user explicitly
+approves replacing that file.
+
+If the user explicitly requested applying all changes without confirmation, do
+not wait for approval after presenting the plan. Still follow the plan, preserve
+project-specific settings, and do not use `replace` unless the user explicitly
+allowed replacement.
+
+Otherwise, if multiple existing files are affected, batch them in one plan and
+wait for approval before editing any of them.
 
 ## Execution Order
 
@@ -29,8 +57,10 @@ Add OpenTofu code quality hooks (tofu fmt, hclfmt, tflint, tofu validate).
 ### Step 7: `/setup-iac-security`
 Add IaC security scanning (tfsec, trivy).
 
-### Step 8: `/setup-commitlint $ARGUMENTS`
-Add commitlint with Conventional Commits rules, git hooks, and CI enforcement using the provided scopes.
+### Step 8: `/setup-commitlint`
+Add commitlint with Conventional Commits rules, git hooks, and CI enforcement.
+Pass `$ARGUMENTS` through only when explicit scopes were provided; otherwise let
+`/setup-commitlint` infer and optimize scopes from the repository layout.
 
 ### Step 9: `/setup-nix-ci-lint`
 Generate `.github/workflows/lint.yml` from the flake.nix hook configuration using Determinate Systems actions.
@@ -41,12 +71,14 @@ against the OpenTofu infrastructure profile.
 
 ## After Completion
 
-Summarize what was set up and list any config files the user needs to create:
+Summarize what was set up and list any required config files the user needs to create:
 - `.editorconfig`
-- `.markdownlint.json`
-- `.typos.toml`
 
 Only list files that do not already exist in the project root.
+
+Also mention these optional override files if they do not exist and the project would benefit from custom rules:
+- `.markdownlint.json` — markdownlint uses defaults when this is missing
+- `.typos.toml` — typos uses defaults when this is missing
 
 Also summarize any remaining reproducibility gaps:
 - root modules missing `.terraform.lock.hcl`

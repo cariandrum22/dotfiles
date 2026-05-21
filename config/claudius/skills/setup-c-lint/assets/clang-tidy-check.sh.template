@@ -10,9 +10,15 @@ if [[ ! -f "${compile_commands}" ]]; then
   exit 1
 fi
 
-if [[ "$#" -eq 0 ]]; then
-  echo "No input files provided to clang-tidy." >&2
-  exit 1
+files=("$@")
+if [[ ${#files[@]} -eq 0 ]]; then
+  mapfile -t files < <(
+    git ls-files '*.c' '*.cc' '*.cpp' '*.cxx' '*.h' '*.hh' '*.hpp' '*.hxx'
+  )
 fi
 
-exec clang-tidy -p "${build_dir}" "$@"
+if [[ ${#files[@]} -eq 0 ]]; then
+  exit 0
+fi
+
+exec clang-tidy -p "${build_dir}" "${files[@]}"

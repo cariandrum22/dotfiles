@@ -10,4 +10,4 @@ targets:
     invocation: manual
     argument-hint: '[optional: "<primary-owner>[,<security-contact>]"]'
   codex:
-    invocation: manual
+    allow-implicit-invocation: false

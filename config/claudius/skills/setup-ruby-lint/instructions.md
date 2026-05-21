@@ -8,6 +8,32 @@ Minitest support when the repository actually uses those surfaces.
 If it is omitted, infer it from `.ruby-version`, `.tool-versions`, `mise.toml`,
 `Gemfile`, or `gems.rb`. If it still cannot be inferred safely, ask the user.
 
+## Existing Configuration Policy
+
+Before changing an existing repository file, inspect the current content and ask the user to confirm the proposed change. This applies even when the change is additive, such as merging config keys, appending CI steps, adding package scripts, normalizing workflow names, or updating tool versions.
+
+Do not ask when creating a missing file from this skill's template or when the user explicitly requested applying all changes without confirmation. Preserve project-specific settings and avoid replacing entire files unless the user approves that replacement.
+
+When an existing file is involved, present a concise change plan before editing:
+
+- `file`: target path
+- `current_state`: what exists and whether this skill owns it
+- `operation`: `skip`, `merge`, `update`, `replace`, or `create-adjacent`
+- `proposed_delta`: exact setting, block, command, or path change to add or modify
+- `risk`: compatibility, policy, or behavior risk
+- `question`: the approval needed from the user
+
+Default to `skip` or `merge`. Use `replace` only when the user explicitly
+approves replacing that file.
+
+If the user explicitly requested applying all changes without confirmation, do
+not wait for approval after presenting the plan. Still follow the plan, preserve
+project-specific settings, and do not use `replace` unless the user explicitly
+allowed replacement.
+
+Otherwise, if multiple existing files are affected, batch them in one plan and
+wait for approval before editing any of them.
+
 ## Prerequisites
 
 - The project must have a root `Gemfile` or `gems.rb`.
@@ -57,10 +83,26 @@ if it does not exist.
 Replace:
 
 - `__RUBY_VERSION__`
-- `__OPTIONAL_PLUGINS__`
+- the full `  # __OPTIONAL_PLUGINS__` line
 
-If `.rubocop.yml` already exists, merge missing baseline rules and plugins
-without removing existing project-specific configuration.
+Use this replacement when both optional surfaces are detected:
+
+```yaml
+  - rubocop-rake
+  - rubocop-minitest
+```
+
+If only one optional surface is detected, replace the line with only that plugin.
+If no optional surface is detected, remove the placeholder line entirely.
+
+Do not leave `__OPTIONAL_PLUGINS__` in the generated `.rubocop.yml`.
+
+If `.rubocop.yml` already exists, inspect it and ask the user before changing
+it. Merge only missing compatible baseline rules and plugins.
+
+Do NOT duplicate plugin entries or rule blocks. Preserve existing plugin order,
+inheritance, excludes, and project-specific configuration unless the user
+approves changing them.
 
 ### 4. Create `bin/rubocop` wrapper (optional)
 

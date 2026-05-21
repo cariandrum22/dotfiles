@@ -1,7 +1,7 @@
 plugins:
   - rubocop-performance
   - rubocop-thread_safety
-__OPTIONAL_PLUGINS__
+  # __OPTIONAL_PLUGINS__
 
 AllCops:
   NewCops: enable

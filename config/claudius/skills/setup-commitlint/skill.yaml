@@ -10,4 +10,4 @@ targets:
     invocation: manual
     argument-hint: '[optional: comma-separated scopes, e.g. "api,web,ci,deps,docs,nix,scripts,tooling"]'
   codex:
-    invocation: manual
+    allow-implicit-invocation: false

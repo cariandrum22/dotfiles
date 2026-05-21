@@ -7,4 +7,4 @@ targets:
     invocation: manual
     argument-hint: '[project name, e.g. "my-project"]'
   codex:
-    invocation: manual
+    allow-implicit-invocation: false

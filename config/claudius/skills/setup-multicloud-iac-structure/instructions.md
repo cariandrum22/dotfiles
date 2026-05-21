@@ -7,6 +7,38 @@ Use this skill when the user wants a durable directory standard, state-boundary 
 path for AWS, Azure, and GCP infrastructure. This skill focuses on repository architecture, not
 linting or CI. For quality gates, use `/setup-tofu-project` after the structure is in place.
 
+## Existing Configuration Policy
+
+Before changing an existing repository file, inspect the current content and ask
+the user to confirm the proposed change. This applies even when the change is
+additive, such as merging config keys, appending CI steps, adding package
+scripts, normalizing workflow names, or updating tool versions.
+
+Do not ask when creating a missing file from this skill's template or when the
+user explicitly requested applying all changes without confirmation. Preserve
+project-specific settings and avoid replacing entire files unless the user
+approves that replacement.
+
+When an existing file is involved, present a concise change plan before editing:
+
+- `file`: target path
+- `current_state`: what exists and whether this skill owns it
+- `operation`: `skip`, `merge`, `update`, `replace`, or `create-adjacent`
+- `proposed_delta`: exact setting, block, command, or path change to add or modify
+- `risk`: compatibility, policy, or behavior risk
+- `question`: the approval needed from the user
+
+Default to `skip` or `merge`. Use `replace` only when the user explicitly
+approves replacing that file.
+
+If the user explicitly requested applying all changes without confirmation, do
+not wait for approval after presenting the plan. Still follow the plan, preserve
+project-specific settings, and do not use `replace` unless the user explicitly
+allowed replacement.
+
+Otherwise, if multiple existing files are affected, batch them in one plan and
+wait for approval before editing any of them.
+
 ## Core Principles
 
 - `stacks/` contains execution units and state boundaries.
@@ -209,13 +241,17 @@ committed by the user. Do not create hidden coupling.
 
 For a new repository:
 
-1. Create `stacks/aws`, `stacks/azure`, `stacks/gcp`, `modules`, `catalog`, `docs`, and `results`.
-2. Add provider-specific `modules/` directories only when provider-specific modules exist.
-3. Add `_naming` and provider adapter modules if the repository needs shared naming.
-4. Add at least one region catalog file per governed region.
-5. Add a short `docs/infrastructure-as-code/directory-structure.md` describing the state boundary
+1. Determine the target clouds from `$ARGUMENTS` or the user's request. If the target clouds are
+   unclear, ask before creating cloud-specific directories. Do not create `stacks/aws`,
+   `stacks/azure`, or `stacks/gcp` for clouds outside the confirmed scope.
+2. Create only the selected `stacks/<cloud>` directories, plus `modules`, `catalog`, `docs`, and
+   `results`.
+3. Add provider-specific `modules/` directories only when provider-specific modules exist.
+4. Add `_naming` and provider adapter modules only for selected clouds that need shared naming.
+5. Add region catalog files only for governed regions in the selected clouds.
+6. Add a short `docs/infrastructure-as-code/directory-structure.md` describing the state boundary
    and global/regional rules.
-6. Apply `/setup-tofu-project` or component quality skills after the structure exists.
+7. Apply `/setup-tofu-project` or component quality skills after the structure exists.
 
 ## Safety Rules
 

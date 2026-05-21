@@ -39,17 +39,34 @@ if [[ ${#files[@]} -eq 0 ]]; then
   exit 0
 fi
 
+hcl_string() {
+  local value="$1"
+  value="${value//\\/\\\\}"
+  value="${value//\"/\\\"}"
+  value="${value//$'\n'/\\n}"
+  value="${value//$'\r'/\\r}"
+  value="${value//$'\t'/\\t}"
+  printf '"%s"' "${value}"
+}
+
 for file in "${files[@]}"; do
+  if [[ ! -f "${file}" && -f "${root}/${file}" ]]; then
+    file="${root}/${file}"
+  fi
   if [[ ! -f "${file}" ]]; then
-    if [[ -f "${root}/${file}" ]]; then
-      file="${root}/${file}"
-    else
-      echo "Template file not found: ${file}" >&2
-      exit 1
-    fi
+    echo "Template file not found: ${file}" >&2
+    exit 1
+  fi
+  if [[ "${file}" != /* ]]; then
+    file="$(cd "$(dirname "${file}")" && pwd)/$(basename "${file}")"
   fi
 
-  "${engine}" console -chdir="${console_dir}" <<TFTPL_EOF
-templatefile("${file}", jsondecode(file("${vars_file}")))
+  file_expr="$(hcl_string "${file}")"
+  vars_expr="$(hcl_string "${vars_file}")"
+  if ! "${engine}" -chdir="${console_dir}" console >/dev/null <<TFTPL_EOF; then
+templatefile(${file_expr}, jsondecode(file(${vars_expr})))
 TFTPL_EOF
+    echo "tftpl-validate: failed to render ${file}" >&2
+    exit 1
+  fi
 done

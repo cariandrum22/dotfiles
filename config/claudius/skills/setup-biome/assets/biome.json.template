@@ -5,8 +5,13 @@
     "clientKind": "git",
     "useIgnoreFile": true
   },
-  "organizeImports": {
-    "enabled": true
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
   },
   "formatter": {
     "enabled": true,
@@ -33,7 +38,6 @@
         "noUnusedImports": "error",
         "noUnusedVariables": "error",
         "noUnusedFunctionParameters": "warn",
-        "useArrayLiterals": "error",
         "useHookAtTopLevel": "error"
       },
       "suspicious": {
@@ -48,6 +52,7 @@
         "noNonNullAssertion": "warn",
         "useBlockStatements": "error",
         "useCollapsedElseIf": "error",
+        "useArrayLiterals": "error",
         "useConsistentArrayType": {
           "level": "error",
           "options": { "syntax": "shorthand" }
@@ -61,7 +66,10 @@
             "strictCase": true,
             "conventions": [
               { "selector": { "kind": "function" }, "formats": ["camelCase", "PascalCase"] },
-              { "selector": { "kind": "variable" }, "formats": ["camelCase", "PascalCase", "CONSTANT_CASE"] },
+              {
+                "selector": { "kind": "variable" },
+                "formats": ["camelCase", "PascalCase", "CONSTANT_CASE"]
+              },
               { "selector": { "kind": "typeLike" }, "formats": ["PascalCase"] }
             ]
           }
@@ -92,7 +100,7 @@
   },
   "overrides": [
     {
-      "include": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+      "includes": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
       "linter": {
         "rules": {
           "suspicious": {

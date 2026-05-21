@@ -1,32 +1,58 @@
       - name: Lint commit messages (push)
         if: github.event_name == 'push'
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          PUSH_SHA: ${{ github.sha }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
-            if [ "${{ github.ref_name }}" = "${{ github.event.repository.default_branch }}" ]; then
-              printf '%s\n' "$(git log -1 --format=%B HEAD)" > /tmp/commit-msg
-              nix develop -c commitlint --edit /tmp/commit-msg
+          tmp_msg="$(mktemp)"
+          trap 'rm -f "$tmp_msg"' EXIT
+
+          if [ "$(git rev-parse --is-shallow-repository)" = "true" ]; then
+            git fetch --no-tags --prune --unshallow origin
+          fi
+
+          if [ "$BEFORE_SHA" = "0000000000000000000000000000000000000000" ]; then
+            if [ "$REF_NAME" = "$DEFAULT_BRANCH" ]; then
+              git log -1 --format=%B HEAD > "$tmp_msg"
+              nix develop -c commitlint --edit "$tmp_msg"
             else
-              git fetch origin "${{ github.event.repository.default_branch }}" --depth=1
-              base_sha="$(git merge-base HEAD "origin/${{ github.event.repository.default_branch }}" || true)"
-              if [ -n "$base_sha" ]; then
-                nix develop -c commitlint --from "$base_sha" --to HEAD
-              else
-                printf '%s\n' "$(git log -1 --format=%B HEAD)" > /tmp/commit-msg
-                nix develop -c commitlint --edit /tmp/commit-msg
-              fi
+              git fetch --no-tags --prune origin "+refs/heads/${DEFAULT_BRANCH}:refs/remotes/origin/${DEFAULT_BRANCH}"
+              base_sha="$(git merge-base HEAD "refs/remotes/origin/${DEFAULT_BRANCH}")"
+              nix develop -c commitlint --from "$base_sha" --to HEAD
             fi
+          elif git cat-file -e "$BEFORE_SHA^{commit}" 2>/dev/null; then
+            nix develop -c commitlint --from "$BEFORE_SHA" --to "$PUSH_SHA"
           else
-            nix develop -c commitlint --from "${{ github.event.before }}" --to "${{ github.sha }}"
+            git fetch --no-tags --prune origin "+refs/heads/${DEFAULT_BRANCH}:refs/remotes/origin/${DEFAULT_BRANCH}"
+            base_sha="$(git merge-base HEAD "refs/remotes/origin/${DEFAULT_BRANCH}" || true)"
+            if [ -n "$base_sha" ]; then
+              nix develop -c commitlint --from "$base_sha" --to "$PUSH_SHA"
+            else
+              git log -1 --format=%B "$PUSH_SHA" > "$tmp_msg"
+              nix develop -c commitlint --edit "$tmp_msg"
+            fi
           fi
 
       - name: Lint commit messages (pull_request)
         if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          git fetch origin "${{ github.base_ref }}" --depth=1
-          nix develop -c commitlint --from "origin/${{ github.base_ref }}" --to HEAD
+          if [ "$(git rev-parse --is-shallow-repository)" = "true" ]; then
+            git fetch --no-tags --prune --unshallow origin
+          fi
+          git fetch --no-tags --prune origin "+refs/heads/${BASE_REF}:refs/remotes/origin/${BASE_REF}"
+          base_sha="$(git merge-base HEAD "refs/remotes/origin/${BASE_REF}")"
+          nix develop -c commitlint --from "$base_sha" --to HEAD
 
       - name: Lint PR title
         if: github.event_name == 'pull_request'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          printf '%s\n' "${{ github.event.pull_request.title }}" > /tmp/pr-title
-          nix develop -c commitlint --edit /tmp/pr-title
+          tmp_msg="$(mktemp)"
+          trap 'rm -f "$tmp_msg"' EXIT
+          printf '%s\n' "$PR_TITLE" > "$tmp_msg"
+          nix develop -c commitlint --edit "$tmp_msg"

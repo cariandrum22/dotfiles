@@ -13,6 +13,32 @@ directory and detect the Python version from `pyproject.toml` `[project]`
 `requires-python`, `.python-version`, or `runtime.txt`. If none can be
 detected, ask the user.
 
+## Existing Configuration Policy
+
+Before changing an existing repository file, inspect the current content and ask the user to confirm the proposed change. This applies even when the change is additive, such as merging config keys, appending CI steps, adding package scripts, normalizing workflow names, or updating tool versions.
+
+Do not ask when creating a missing file from this skill's template or when the user explicitly requested applying all changes without confirmation. Preserve project-specific settings and avoid replacing entire files unless the user approves that replacement.
+
+When an existing file is involved, present a concise change plan before editing:
+
+- `file`: target path
+- `current_state`: what exists and whether this skill owns it
+- `operation`: `skip`, `merge`, `update`, `replace`, or `create-adjacent`
+- `proposed_delta`: exact setting, block, command, or path change to add or modify
+- `risk`: compatibility, policy, or behavior risk
+- `question`: the approval needed from the user
+
+Default to `skip` or `merge`. Use `replace` only when the user explicitly
+approves replacing that file.
+
+If the user explicitly requested applying all changes without confirmation, do
+not wait for approval after presenting the plan. Still follow the plan, preserve
+project-specific settings, and do not use `replace` unless the user explicitly
+allowed replacement.
+
+Otherwise, if multiple existing files are affected, batch them in one plan and
+wait for approval before editing any of them.
+
 ## Prerequisites
 
 - The project must have a `pyproject.toml` in the root. If not, tell the user
@@ -51,21 +77,34 @@ manager.
 
 ### 2. Add Ruff and mypy configuration to `pyproject.toml`
 
-If `[tool.ruff]` already exists in `pyproject.toml`, go to Step 3.
+Inspect `pyproject.toml` for Ruff and mypy sections independently. Do not skip
+mypy setup just because Ruff is already configured, and do not replace existing
+project-specific Ruff or mypy settings wholesale.
 
-Add the configuration sections from
-[pyproject.ruff.toml.template](assets/pyproject.ruff.toml.template) to
-`pyproject.toml`. Replace the following placeholders:
+If all relevant Ruff sections are missing, add the Ruff-related sections from
+[pyproject.ruff.toml.template](assets/pyproject.ruff.toml.template). If
+`[tool.ruff]` already exists, leave existing Ruff configuration in place and
+verify it in Step 3.
+
+If `[tool.mypy]` is missing, add the mypy-related sections from
+[pyproject.ruff.toml.template](assets/pyproject.ruff.toml.template), including
+`[tool.mypy]` and any `[[tool.mypy.overrides]]` blocks. If `[tool.mypy]` already
+exists, leave existing mypy configuration in place and verify it in Step 3.
+
+Replace the following placeholders in any sections you add:
 
 | Placeholder | Value | Source |
 |---|---|---|
-| `__TARGET_VERSION__` | e.g. `"py312"` | Python version from `$ARGUMENTS`, formatted as `pyNN` |
-| `__MYPY_PYTHON_VERSION__` | e.g. `"3.12"` | Python version from `$ARGUMENTS` |
-| `__PACKAGE_NAME__` | e.g. `"myapp"` | Package name from `$ARGUMENTS` |
+| `__TARGET_VERSION__` | e.g. `py312` | Python version from `$ARGUMENTS`, formatted as `pyNN` |
+| `__MYPY_PYTHON_VERSION__` | e.g. `3.12` | Python version from `$ARGUMENTS` |
+| `__PACKAGE_NAME__` | e.g. `myapp` | Package name from `$ARGUMENTS` |
+
+Use unquoted replacement values. The template already includes TOML quotes around
+these placeholders.
 
 ### 3. Verify strict configuration
 
-If `[tool.ruff]` already existed, verify the following critical settings. If
+Verify the following critical settings for existing or merged configuration. If
 any are missing or weaker, inform the user of the discrepancies. Do NOT
 overwrite. Let the user decide.
 

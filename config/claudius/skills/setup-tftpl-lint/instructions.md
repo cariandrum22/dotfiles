@@ -10,6 +10,32 @@ Add a strict validation hook for `.tftpl` files by rendering them with `template
 
 If no argument is given, use the defaults above.
 
+## Existing Configuration Policy
+
+Before changing an existing repository file, inspect the current content and ask the user to confirm the proposed change. This applies even when the change is additive, such as merging config keys, appending CI steps, adding package scripts, normalizing workflow names, or updating tool versions.
+
+Do not ask when creating a missing file from this skill's template or when the user explicitly requested applying all changes without confirmation. Preserve project-specific settings and avoid replacing entire files unless the user approves that replacement.
+
+When an existing file is involved, present a concise change plan before editing:
+
+- `file`: target path
+- `current_state`: what exists and whether this skill owns it
+- `operation`: `skip`, `merge`, `update`, `replace`, or `create-adjacent`
+- `proposed_delta`: exact setting, block, command, or path change to add or modify
+- `risk`: compatibility, policy, or behavior risk
+- `question`: the approval needed from the user
+
+Default to `skip` or `merge`. Use `replace` only when the user explicitly
+approves replacing that file.
+
+If the user explicitly requested applying all changes without confirmation, do
+not wait for approval after presenting the plan. Still follow the plan, preserve
+project-specific settings, and do not use `replace` unless the user explicitly
+allowed replacement.
+
+Otherwise, if multiple existing files are affected, batch them in one plan and
+wait for approval before editing any of them.
+
 ## Prerequisites
 
 - `tofu` or `terraform` must be available in the environment.
@@ -56,11 +82,23 @@ Hook added:
 
 ### 2. Create `tftpl.vars.json`
 
-Create `tftpl.vars.json` in the project root using the template in [tftpl.vars.json.template](assets/tftpl.vars.json.template). Populate it with all variables required by your templates.
+If `tftpl.vars.json` does not exist, create it in the project root using the
+template in [tftpl.vars.json.template](assets/tftpl.vars.json.template).
+Populate it with all variables required by your templates.
+
+If the variables file already exists, inspect it and ask the user before
+changing it. Merge only missing variables required by the templates; do not
+delete project-specific sample values.
 
 ### 3. Create `scripts/tftpl-validate.sh`
 
-Create `scripts/tftpl-validate.sh` using the template in [tftpl-validate.sh.template](assets/tftpl-validate.sh.template). Make it executable (`chmod +x`).
+If `scripts/tftpl-validate.sh` does not exist, create it using the template in
+[tftpl-validate.sh.template](assets/tftpl-validate.sh.template). Make it
+executable (`chmod +x`).
+
+If the script already exists, inspect it and ask the user before changing it.
+Merge missing validation behavior without replacing project-specific engine,
+console directory, or variable-loading logic unless approved.
 
 The script:
 
@@ -79,5 +117,8 @@ If any template fails to render, fix the syntax or update `tftpl.vars.json`.
 ## Important Notes
 
 - This hook is check-only. Do NOT auto-generate template outputs in hooks or CI.
+- The validation script must discard rendered template stdout. Do NOT print
+  rendered `.tftpl` bodies in pre-commit or CI logs unless the user explicitly
+  asks for a debug run and the output has been reviewed for sensitive values.
 - Keep `tftpl.vars.json` complete and explicit. Missing variables must fail the hook.
 - If templates require module context or providers, run the hook in a directory where console evaluation is valid.
