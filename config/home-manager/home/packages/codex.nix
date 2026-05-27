@@ -115,7 +115,7 @@ let
     aarch64-linux = "sha256-7gHqZHViytvGLRH3SHyBgtrR9s/W1itLr6Eekfac1kE=";
     x86_64-darwin = "sha256-7gHqZHViytvGLRH3SHyBgtrR9s/W1itLr6Eekfac1kE=";
     aarch64-darwin = "sha256-7gHqZHViytvGLRH3SHyBgtrR9s/W1itLr6Eekfac1kE=";
-};
+  };
 
   rustyV8Version = "146.4.0";
 
