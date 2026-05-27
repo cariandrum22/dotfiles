@@ -69,8 +69,8 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.145";
-    sha256 = "039h7rnsvkvl5a1wwmd85bwxpz4h50h327f4gi8yw4d4m8vgw03c";
+    version = "2.1.152";
+    sha256 = "1brr22qdqgvw8z1cxpdlxyf5kjvk991j8kzwd7j5rnkinwxc5mqg";
     arch = "linux-x64";
   }
   {
@@ -202,8 +202,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.5.252009";
-    sha256 = "1024b0xaq3avl1w5a7i40kvri24ilvknkyfx24y5wgvwrvcdl5b4";
+    version = "2026.5.261305";
+    sha256 = "1dmkalwy3wzfwy862i078qg8w74d1zbwahp4vph4gb94asdkqqnz";
   }
   {
     name = "haskell";
@@ -226,8 +226,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.55.2026052308";
-    sha256 = "1b9c34df9br4swhqnv85nmkx2i8sxn7hw9cyszsi2lalxz3xy82i";
+    version = "1.55.2026052609";
+    sha256 = "14h43a9i17v2qjv68qppkzx9z7sfn0dz2cy1mgw02bf77bwbd9ag";
     arch = "linux-x64";
   }
   {
@@ -258,8 +258,8 @@
   {
     name = "latex-workshop";
     publisher = "James-Yu";
-    version = "10.15.2";
-    sha256 = "1fbs6y3acm1mrizq73aqlsj2i907xajmn7ff0l2x520z9iv8kx8z";
+    version = "10.15.3";
+    sha256 = "0ra4adn1yv4cvarlxriff7sigjavh3hnwplask9ma578j4yr3rv7";
   }
   {
     name = "lean4";
@@ -563,8 +563,8 @@
   {
     name = "vscode-tailwindcss";
     publisher = "bradlc";
-    version = "0.15.1";
-    sha256 = "10n04d1613nmz1y54z8lk0bh9gkjdgl00rhfc3crga2wqaibx142";
+    version = "0.15.2";
+    sha256 = "0w441cl9lahib2mp7l6pvvxsyvdi3znmg7nrbqsjy5g4vkfr5rzf";
   }
   {
     name = "vscode-test-explorer";
