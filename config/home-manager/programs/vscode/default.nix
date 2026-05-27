@@ -49,8 +49,10 @@ let
       oldAttrs.runtimeDependencies
       ++ [
         pkgs.libsecret
+        pkgs.musl
       ]
     );
+    autoPatchelfIgnoreMissingDeps = lib.optionals pkgs.stdenv.isLinux [ "libc.musl-x86_64.so.1" ];
     urlHandlerDesktopItem = pkgs.makeDesktopItem {
       name = "code-insiders-url-handler";
       desktopName = "Visual Studio Code - Insiders - URL Handler";
