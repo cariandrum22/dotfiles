@@ -98,13 +98,12 @@ let
 
   opensslPkg = pkgs.openssl;
 
-  rustPlatform =
-    if pkgs.stdenv.isLinux then
-      pkgs.makeRustPlatform {
-        inherit (pkgs.unstable) cargo rustc;
-      }
-    else
-      pkgs.rustPlatform;
+  # Codex tracks recent Rust dependencies closely. Use the unstable Rust
+  # toolchain on every platform so dependency MSRV bumps do not break Darwin
+  # while Linux is still using a newer compiler.
+  rustPlatform = pkgs.makeRustPlatform {
+    inherit (pkgs.unstable) cargo rustc;
+  };
 
   # Replace the upstream runfiles git dependency with a tiny local stub.
   # rules_rust ships examples that use -Z bindeps, which breaks nixpkgs'
@@ -238,15 +237,15 @@ rustPlatform.buildRustPackage (
       EOF
     ''
     + pkgs.lib.optionalString pkgs.stdenv.isLinux ''
-      # LLVM 21 / rustc 1.91.1 currently crashes in release optimization passes
-      # for this workspace. Lower Linux release optimization until nixpkgs updates.
+      # LLVM currently crashes in release optimization passes for this
+      # workspace. Lower Linux release optimization until the toolchain settles.
       perl -0pi -e 's/\\[profile\\.release\\]\\n/[profile.release]\\nopt-level = 2\\n/' Cargo.toml
     '';
 
     # Enable unstable features (file_lock)
     RUSTC_BOOTSTRAP = "1";
 
-    # Disable LTO to work around LLVM 21.1.2 + rustc 1.91.1 ICE during LTO codegen.
+    # Disable LTO to work around LLVM ICEs during LTO codegen.
     # The crash occurs in LLVMContextDispose when building with lto=fat.
     # This affects both binary size and runtime performance (5-20% slower).
     # TODO: Re-enable LTO ("fat" or "thin") once nixpkgs updates LLVM/rustc.
@@ -256,7 +255,7 @@ rustPlatform.buildRustPackage (
     # Upstream pins codegen-units=1 for smaller binaries. Keep that on Darwin,
     # where we need to minimize link distance for the large WebRTC static
     # archive. Linux still needs multiple codegen units to avoid an LLVM 21 /
-    # rustc 1.91.1 SIGSEGV while compiling `image`.
+    # rustc SIGSEGV while compiling `image`.
     CARGO_PROFILE_RELEASE_CODEGEN_UNITS = if pkgs.stdenv.isLinux then "16" else "1";
 
     # Show backtrace for build failures
