@@ -310,7 +310,7 @@ def calculate_cargo_hash(nix_file: Path) -> Hash | None:  # noqa: C901, PLR0912,
         # Replace cargoHash with a dummy value
         dummy_content = re.sub(
             r'(cargoHash\s*=\s*")([^"]+)(")',
-            r'\1sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\3',
+            r'\g<1>sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=\g<3>',
             content,
             flags=re.MULTILINE | re.DOTALL,
         )
@@ -700,7 +700,7 @@ def apply_updates(config: UpdateConfig, content: str, new_info: PackageInfo) -> 
             # Match the full line: cargoHash = "...";
             updated = re.sub(
                 r'(cargoHash\s*=\s*"[^"]+";)',
-                rf'\1\n    {new_comment}',
+                rf'\g<1>\n    {new_comment}',
                 updated,
             )
 

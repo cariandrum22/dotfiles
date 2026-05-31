@@ -377,7 +377,7 @@ def _release_asset_digest_hashes(
 
 def _update_rusty_v8_version(content: str, version: str) -> str:
     updated, replacements = _RUSTY_V8_VERSION_PATTERN.subn(
-        rf'\1{version}\3',
+        rf'\g<1>{version}\g<3>',
         content,
         count=1,
     )
@@ -389,7 +389,7 @@ def _update_rusty_v8_version(content: str, version: str) -> str:
 
 def _update_livekit_webrtc_tag(content: str, tag: str) -> str:
     updated, replacements = _LIVEKIT_WEBRTC_TAG_PATTERN.subn(
-        rf'\1{tag}\3',
+        rf'\g<1>{tag}\g<3>',
         content,
         count=1,
     )
@@ -441,7 +441,7 @@ def _update_rusty_v8_archive_hashes(
     updated_body = "\n".join(
         f'{entry_indent}{system} = "{hashes[system]}";'
         for system in _RUSTY_V8_TARGETS
-    )
+    ) + "\n"
     return content[:match.start("body")] + updated_body + content[match.end("body"):]
 
 
@@ -487,7 +487,7 @@ def _update_livekit_webrtc_zip_hashes(
     updated_body = "\n".join(
         f'{entry_indent}{system} = "{hashes[system]}";'
         for system in _LIVEKIT_WEBRTC_TRIPLES
-    )
+    ) + "\n"
     return content[:match.start("body")] + updated_body + content[match.end("body"):]
 
 
