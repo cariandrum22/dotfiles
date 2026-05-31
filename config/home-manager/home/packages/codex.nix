@@ -111,13 +111,13 @@ let
   # cargo vendor utility. codex-utils-cargo-bin is only used by test helpers,
   # and tests are disabled for this package, so the stub is sufficient.
   cargoHashes = {
-    x86_64-linux = "sha256-7gHqZHViytvGLRH3SHyBgtrR9s/W1itLr6Eekfac1kE=";
-    aarch64-linux = "sha256-7gHqZHViytvGLRH3SHyBgtrR9s/W1itLr6Eekfac1kE=";
-    x86_64-darwin = "sha256-7gHqZHViytvGLRH3SHyBgtrR9s/W1itLr6Eekfac1kE=";
-    aarch64-darwin = "sha256-7gHqZHViytvGLRH3SHyBgtrR9s/W1itLr6Eekfac1kE=";
+    x86_64-linux = "sha256-951guRubvmbgiMaBGTlTOBunoFGjAEc7+0Wnt06gNFE=";
+    aarch64-linux = "sha256-951guRubvmbgiMaBGTlTOBunoFGjAEc7+0Wnt06gNFE=";
+    x86_64-darwin = "sha256-951guRubvmbgiMaBGTlTOBunoFGjAEc7+0Wnt06gNFE=";
+    aarch64-darwin = "sha256-951guRubvmbgiMaBGTlTOBunoFGjAEc7+0Wnt06gNFE=";
   };
 
-  rustyV8Version = "146.4.0";
+  rustyV8Version = "147.4.0";
 
   rustyV8Targets = {
     x86_64-linux = "x86_64-unknown-linux-gnu";
@@ -127,10 +127,10 @@ let
   };
 
   rustyV8ArchiveHashes = {
-    x86_64-linux = "sha256-5ktNmeSuKTouhGJEqJuAF4uhA4LBP7WRwfppaPUpEVM=";
-    aarch64-linux = "sha256-2/FlsHyBvbBUvARrQ9I+afz3vMGkwbW0d2mDpxBi7Ng=";
-    x86_64-darwin = "sha256-YwzSQPG77NsHFBfcGDh6uBz2fFScHFFaC0/Pnrpke7c=";
-    aarch64-darwin = "sha256-v+LJvjKlbChUbw+WWCXuaPv2BkBfMQzE4XtEilaM+Yo=";
+    x86_64-linux = "sha256-Cd3vbFEZKv/wVBExoO+cAPgxhdI5HaqxgDgqOr82rJU=";
+    aarch64-linux = "sha256-lMPw/eAFFAT8obaR8opJbXjbgw58+0maBEyxpeOllFU=";
+    x86_64-darwin = "sha256-+ppR8dMhVTSZL0PPar+DlKZ0K+E5N7WfdXXfBTYel+Y=";
+    aarch64-darwin = "sha256-fnR0DD7woOj8DiaKJYYSPpg0D+lDVmjNwSiPrvtzYq4=";
   };
 
   rustyV8Archive = pkgs.fetchurl {
@@ -189,13 +189,13 @@ in
 rustPlatform.buildRustPackage (
   rec {
     pname = "codex-cli";
-    version = "rust-v0.132.0";
+    version = "rust-v0.135.0";
 
     src = pkgs.fetchFromGitHub {
       owner = "openai";
       repo = "codex";
       rev = "${version}";
-      hash = "sha256-T+iPhi0/h6+tIGZy04e8l8xjxUBH/aUQ21pXbunLYxM=";
+      hash = "sha256-7Ak7rpogcN2kNezk7aMdMmkgNyPxH58f6lFdXOd/mgc=";
     };
 
     sourceRoot = "source/codex-rs";
