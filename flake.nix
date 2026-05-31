@@ -433,10 +433,18 @@
             claudius-skill-guardrails = {
               enable = true;
               name = "claudius-skill-guardrails";
-              entry = "${pkgs.bash}/bin/bash -c 'CLAUDIUS_BIN=${lib.getExe' pkgs.claudius "claudius"} ${pkgs.python3}/bin/python3 scripts/test-claudius-skills.py'";
+              entry = "${pkgs.bash}/bin/bash -c 'PATH=${pkgs.shfmt}/bin:$PATH CLAUDIUS_BIN=${lib.getExe' pkgs.claudius "claudius"} ${pkgs.python3}/bin/python3 scripts/test-claudius-skills.py'";
               language = "system";
               pass_filenames = false;
               files = "^config/claudius/skills/|^scripts/test-claudius-skills\\.py$";
+            };
+            codex-updater-regression = {
+              enable = true;
+              name = "codex-updater-regression";
+              entry = "${pkgs.python3}/bin/python3 scripts/test-update-codex-cli.py";
+              language = "system";
+              pass_filenames = false;
+              files = "^scripts/(update-codex-cli|test-update-codex-cli)\\.py$";
             };
             deadnix = {
               enable = true;

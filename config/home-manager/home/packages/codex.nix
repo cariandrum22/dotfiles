@@ -98,26 +98,25 @@ let
 
   opensslPkg = pkgs.openssl;
 
-  rustPlatform =
-    if pkgs.stdenv.isLinux then
-      pkgs.makeRustPlatform {
-        inherit (pkgs.unstable) cargo rustc;
-      }
-    else
-      pkgs.rustPlatform;
+  # Codex tracks recent Rust dependencies closely. Use the unstable Rust
+  # toolchain on every platform so dependency MSRV bumps do not break Darwin
+  # while Linux is still using a newer compiler.
+  rustPlatform = pkgs.makeRustPlatform {
+    inherit (pkgs.unstable) cargo rustc;
+  };
 
   # Replace the upstream runfiles git dependency with a tiny local stub.
   # rules_rust ships examples that use -Z bindeps, which breaks nixpkgs'
   # cargo vendor utility. codex-utils-cargo-bin is only used by test helpers,
   # and tests are disabled for this package, so the stub is sufficient.
   cargoHashes = {
-    x86_64-linux = "sha256-7gHqZHViytvGLRH3SHyBgtrR9s/W1itLr6Eekfac1kE=";
-    aarch64-linux = "sha256-7gHqZHViytvGLRH3SHyBgtrR9s/W1itLr6Eekfac1kE=";
-    x86_64-darwin = "sha256-7gHqZHViytvGLRH3SHyBgtrR9s/W1itLr6Eekfac1kE=";
-    aarch64-darwin = "sha256-7gHqZHViytvGLRH3SHyBgtrR9s/W1itLr6Eekfac1kE=";
+    x86_64-linux = "sha256-951guRubvmbgiMaBGTlTOBunoFGjAEc7+0Wnt06gNFE=";
+    aarch64-linux = "sha256-951guRubvmbgiMaBGTlTOBunoFGjAEc7+0Wnt06gNFE=";
+    x86_64-darwin = "sha256-951guRubvmbgiMaBGTlTOBunoFGjAEc7+0Wnt06gNFE=";
+    aarch64-darwin = "sha256-951guRubvmbgiMaBGTlTOBunoFGjAEc7+0Wnt06gNFE=";
   };
 
-  rustyV8Version = "146.4.0";
+  rustyV8Version = "147.4.0";
 
   rustyV8Targets = {
     x86_64-linux = "x86_64-unknown-linux-gnu";
@@ -127,10 +126,10 @@ let
   };
 
   rustyV8ArchiveHashes = {
-    x86_64-linux = "sha256-5ktNmeSuKTouhGJEqJuAF4uhA4LBP7WRwfppaPUpEVM=";
-    aarch64-linux = "sha256-2/FlsHyBvbBUvARrQ9I+afz3vMGkwbW0d2mDpxBi7Ng=";
-    x86_64-darwin = "sha256-YwzSQPG77NsHFBfcGDh6uBz2fFScHFFaC0/Pnrpke7c=";
-    aarch64-darwin = "sha256-v+LJvjKlbChUbw+WWCXuaPv2BkBfMQzE4XtEilaM+Yo=";
+    x86_64-linux = "sha256-Cd3vbFEZKv/wVBExoO+cAPgxhdI5HaqxgDgqOr82rJU=";
+    aarch64-linux = "sha256-lMPw/eAFFAT8obaR8opJbXjbgw58+0maBEyxpeOllFU=";
+    x86_64-darwin = "sha256-+ppR8dMhVTSZL0PPar+DlKZ0K+E5N7WfdXXfBTYel+Y=";
+    aarch64-darwin = "sha256-fnR0DD7woOj8DiaKJYYSPpg0D+lDVmjNwSiPrvtzYq4=";
   };
 
   rustyV8Archive = pkgs.fetchurl {
@@ -189,13 +188,13 @@ in
 rustPlatform.buildRustPackage (
   rec {
     pname = "codex-cli";
-    version = "rust-v0.132.0";
+    version = "rust-v0.135.0";
 
     src = pkgs.fetchFromGitHub {
       owner = "openai";
       repo = "codex";
       rev = "${version}";
-      hash = "sha256-T+iPhi0/h6+tIGZy04e8l8xjxUBH/aUQ21pXbunLYxM=";
+      hash = "sha256-7Ak7rpogcN2kNezk7aMdMmkgNyPxH58f6lFdXOd/mgc=";
     };
 
     sourceRoot = "source/codex-rs";
@@ -238,15 +237,15 @@ rustPlatform.buildRustPackage (
       EOF
     ''
     + pkgs.lib.optionalString pkgs.stdenv.isLinux ''
-      # LLVM 21 / rustc 1.91.1 currently crashes in release optimization passes
-      # for this workspace. Lower Linux release optimization until nixpkgs updates.
+      # LLVM currently crashes in release optimization passes for this
+      # workspace. Lower Linux release optimization until the toolchain settles.
       perl -0pi -e 's/\\[profile\\.release\\]\\n/[profile.release]\\nopt-level = 2\\n/' Cargo.toml
     '';
 
     # Enable unstable features (file_lock)
     RUSTC_BOOTSTRAP = "1";
 
-    # Disable LTO to work around LLVM 21.1.2 + rustc 1.91.1 ICE during LTO codegen.
+    # Disable LTO to work around LLVM ICEs during LTO codegen.
     # The crash occurs in LLVMContextDispose when building with lto=fat.
     # This affects both binary size and runtime performance (5-20% slower).
     # TODO: Re-enable LTO ("fat" or "thin") once nixpkgs updates LLVM/rustc.
@@ -256,7 +255,7 @@ rustPlatform.buildRustPackage (
     # Upstream pins codegen-units=1 for smaller binaries. Keep that on Darwin,
     # where we need to minimize link distance for the large WebRTC static
     # archive. Linux still needs multiple codegen units to avoid an LLVM 21 /
-    # rustc 1.91.1 SIGSEGV while compiling `image`.
+    # rustc SIGSEGV while compiling `image`.
     CARGO_PROFILE_RELEASE_CODEGEN_UNITS = if pkgs.stdenv.isLinux then "16" else "1";
 
     # Show backtrace for build failures
