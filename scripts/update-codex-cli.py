@@ -664,6 +664,17 @@ def _update_cargo_hashes(
         block_indent = block_indent_match.group(1) if block_indent_match else ""
         entry_indent = f"{block_indent}  "
 
+    closing_indent_match = re.search(r"\n([ \t]*)\Z", body)
+    if closing_indent_match:
+        closing_indent = closing_indent_match.group(1)
+    else:
+        block_indent_match = re.search(
+            r'^(\s*)cargoHashes\s*=\s*{',
+            content,
+            re.MULTILINE,
+        )
+        closing_indent = block_indent_match.group(1) if block_indent_match else ""
+
     hashes = _extract_cargo_hashes(content)
     for system in systems:
         hashes[system] = new_hash
@@ -682,7 +693,7 @@ def _update_cargo_hashes(
     updated_body = "\n".join(
         f'{entry_indent}{supported_system} = "{hashes[supported_system]}";'
         for supported_system in [*ordered_systems, *remaining_systems]
-    ) + "\n"
+    ) + f"\n{closing_indent}"
 
     return content[:match.start("body")] + updated_body + content[match.end("body"):]
 

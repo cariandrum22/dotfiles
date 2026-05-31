@@ -71,9 +71,41 @@ def test_livekit_tag_replacement_preserves_prefix_and_suffix() -> None:
     )
 
 
+def test_cargo_hash_replacement_preserves_closing_brace_indent() -> None:
+    update_codex_cli = _load_update_codex_cli()
+    content = (
+        "let\n"
+        "  cargoHashes = {\n"
+        '    x86_64-linux = "sha256-old";\n'
+        '    aarch64-linux = "sha256-old";\n'
+        '    x86_64-darwin = "sha256-old";\n'
+        '    aarch64-darwin = "sha256-old";\n'
+        "  };\n"
+        "in\n"
+        "{}\n"
+    )
+
+    updated = update_codex_cli._update_cargo_hashes(
+        content,
+        "sha256-new",
+    )
+
+    _require_contains(
+        "\n  };\n",
+        updated,
+        "cargoHashes closing brace indentation was not preserved",
+    )
+    _require_not_contains(
+        "\n};\n",
+        updated,
+        "cargoHashes closing brace was moved to column zero",
+    )
+
+
 def main() -> None:
     test_numeric_replacement_does_not_form_octal_backreference()
     test_livekit_tag_replacement_preserves_prefix_and_suffix()
+    test_cargo_hash_replacement_preserves_closing_brace_indent()
 
 
 if __name__ == "__main__":
