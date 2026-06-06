@@ -62,22 +62,22 @@
   {
     name = "chatgpt";
     publisher = "openai";
-    version = "26.5602.30954";
-    sha256 = "17hm1ck4g08p3ivxyizxrh70lysv32b05ahpj3vp17gcckjf5qc8";
+    version = "26.5602.40724";
+    sha256 = "022bf26lb39g50q6nf0dvh1i34qy6qcbdkkdn1i3v7762f4kyvnr";
     arch = "linux-x64";
   }
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.163";
-    sha256 = "1x5rgbbvmrwwzyrislizc730sb8nlva5q4f8ml62za1v7vmm18rg";
+    version = "2.1.167";
+    sha256 = "1nb0vfzrwha9g7s8hrxbr86wqnk0jc76yp9qbaqy6kxsdqgkb103";
     arch = "linux-x64";
   }
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "3.87.0";
-    sha256 = "1490g733bxbi0pra6i9xhihqcsadl2h6caclajc312rfiaxz0xbv";
+    version = "3.88.0";
+    sha256 = "1cni4gmjjrn8bnag5ivrcdm0mrqy1v581jlr7sbgk4fn8ivay7pn";
   }
   {
     name = "cmake";
@@ -202,8 +202,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.6.40621";
-    sha256 = "056i05hfc0mz8cq205w722dkapxs75m67rac9xzzj4vwcpx41991";
+    version = "2026.6.51206";
+    sha256 = "0110qgv7aapkm0jm3g3ilblbc37lm6805wmcmlx4mji5jfj06isk";
   }
   {
     name = "haskell";
@@ -343,8 +343,8 @@
   {
     name = "remote-containers";
     publisher = "ms-vscode-remote";
-    version = "0.460.0";
-    sha256 = "175gx9rikrgfh3k11zkarrgy6zmqhhw850f0gzh3aaay9f0fs92n";
+    version = "0.461.0";
+    sha256 = "12yjzvjzyy2dm03fcmm5psbvrj1mywm5d7iqy4nwivbga6fs4lp9";
   }
   {
     name = "remote-explorer";
@@ -380,8 +380,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2925";
-    sha256 = "0dgg06qh84axw3wh9ngsr3mp18yq9a9jqsr1kwz7cgg06ha9wp0c";
+    version = "0.4.2926";
+    sha256 = "074y0z7w0cr800i0njvajrxv119mzi21m4gaw1yskvgr91zq13cy";
     arch = "linux-x64";
   }
   {
