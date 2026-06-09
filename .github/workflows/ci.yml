@@ -120,3 +120,25 @@ jobs:
           echo "Building XMonad package..."
           nix build .#packages.x86_64-linux.myxmonad
           echo "✓ XMonad built successfully"
+
+  build-cursor:
+    name: Build Cursor
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        # actions/checkout v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Install Nix
+        # DeterminateSystems/nix-installer-action v22
+        uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Build Cursor
+        run: |
+          echo "Building Cursor package..."
+          nix build --impure .#packages.x86_64-linux.cursor --print-build-logs
+          echo "✓ Cursor built successfully"
