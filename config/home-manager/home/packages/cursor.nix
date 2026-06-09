@@ -1,14 +1,14 @@
 { pkgs, ... }:
 let
   pname = "cursor";
-  version = "3.7.12";
+  version = "3.7.19";
 
   # Fixed download URL - update this with update-cursor.py script
-  downloadUrl = "https://downloads.cursor.com/production/b887a26c4f70bd8136bfffeda812b24194ec9ce0/linux/x64/Cursor-3.7.12-x86_64.AppImage";
+  downloadUrl = "https://downloads.cursor.com/production/80c653c2c3528e65016a0d304b54486084b470bb/linux/x64/Cursor-3.7.19-x86_64.AppImage";
 
   src = pkgs.fetchurl {
     url = downloadUrl;
-    hash = "sha256-uWd8m9lH+nu9iZw0Zwuja9qthFGUsRPBIbt6FHMUHHE=";
+    hash = "sha256-qlNQwaDqPL1/wsxwyUXPWvoeXuWoVahibnk0H0h6KZ4=";
   };
   appimageContents = pkgs.appimageTools.extract { inherit pname version src; };
 in
@@ -16,20 +16,47 @@ with pkgs;
 appimageTools.wrapType2 {
   inherit pname version src;
   extraInstallCommands = ''
-    install -m 444 -D ${appimageContents}/${pname}.desktop -t $out/share/applications
+    desktop_file=""
+    for candidate in \
+      ${appimageContents}/${pname}.desktop \
+      ${appimageContents}/Cursor.desktop; do
+      if [ -f "$candidate" ]; then
+        desktop_file="$candidate"
+        break
+      fi
+    done
+    if [ -z "$desktop_file" ]; then
+      desktop_file="$(find ${appimageContents} -maxdepth 1 -type f -name '*.desktop' | sort | head -n 1)"
+    fi
+    if [ -z "$desktop_file" ]; then
+      echo "Error: Desktop file not found in extracted AppImage contents." >&2
+      find ${appimageContents} -maxdepth 2 -type f -print >&2 || true
+      exit 1
+    fi
+    install -m 444 -D "$desktop_file" $out/share/applications/${pname}.desktop
     substituteInPlace $out/share/applications/${pname}.desktop \
       --replace-quiet 'Exec=AppRun' 'Exec=${pname}'
-    cp -r ${appimageContents}/usr/share/icons $out/share
+    if [ -d ${appimageContents}/usr/share/icons ]; then
+      cp -r ${appimageContents}/usr/share/icons $out/share
+    fi
 
-    # Ensure the binary exists and create a symlink if it doesn't already exist
+    # Ensure the binary exists and create a symlink if it doesn't already exist.
     if [ -e ${appimageContents}/AppRun ]; then
       install -m 755 -D ${appimageContents}/AppRun $out/bin/${pname}-${version}
-      if [ ! -L $out/bin/${pname} ]; then
-        ln -s $out/bin/${pname}-${version} $out/bin/${pname}
-      fi
+    elif [ -e ${appimageContents}/usr/bin/${pname} ]; then
+      install -m 755 -D ${appimageContents}/usr/bin/${pname} $out/bin/${pname}-${version}
+    elif [ -e ${appimageContents}/usr/bin/Cursor ]; then
+      install -m 755 -D ${appimageContents}/usr/bin/Cursor $out/bin/${pname}-${version}
+    elif [ -e ${appimageContents}/usr/share/${pname}/${pname} ]; then
+      install -m 755 -D ${appimageContents}/usr/share/${pname}/${pname} $out/bin/${pname}-${version}
     else
-      echo "Error: Binary not found in extracted AppImage contents."
+      echo "Error: Binary not found in extracted AppImage contents." >&2
+      find ${appimageContents} -maxdepth 3 -type f -perm -0100 -print >&2 || true
       exit 1
+    fi
+
+    if [ ! -L $out/bin/${pname} ]; then
+      ln -s $out/bin/${pname}-${version} $out/bin/${pname}
     fi
   '';
 
