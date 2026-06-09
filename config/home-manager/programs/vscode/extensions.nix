@@ -69,15 +69,15 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.167";
-    sha256 = "1nb0vfzrwha9g7s8hrxbr86wqnk0jc76yp9qbaqy6kxsdqgkb103";
+    version = "2.1.168";
+    sha256 = "1ns220xcwb30dclgxjyyd9qcvvczxg5gnbaamvkyl2b4p948b9bs";
     arch = "linux-x64";
   }
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "3.88.0";
-    sha256 = "1cni4gmjjrn8bnag5ivrcdm0mrqy1v581jlr7sbgk4fn8ivay7pn";
+    version = "3.88.1";
+    sha256 = "15dh1qgzz06hz1mwdms5paq5i040s5mvzs4djn4qz4h9pkcdyyaf";
   }
   {
     name = "cmake";
@@ -202,8 +202,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.6.51206";
-    sha256 = "0110qgv7aapkm0jm3g3ilblbc37lm6805wmcmlx4mji5jfj06isk";
+    version = "2026.6.60255";
+    sha256 = "0rhkg8lwlybxpjqv428j39wx3pa762nl14w82y32zhnqnv2h86fy";
   }
   {
     name = "haskell";
@@ -380,8 +380,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2926";
-    sha256 = "074y0z7w0cr800i0njvajrxv119mzi21m4gaw1yskvgr91zq13cy";
+    version = "0.4.2928";
+    sha256 = "1jy310lkhi83p88cd1q4cw3g4s6qb5q1hyp7cl481gyigyp42laj";
     arch = "linux-x64";
   }
   {
