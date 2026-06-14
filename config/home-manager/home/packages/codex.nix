@@ -110,13 +110,13 @@ let
   # cargo vendor utility. codex-utils-cargo-bin is only used by test helpers,
   # and tests are disabled for this package, so the stub is sufficient.
   cargoHashes = {
-    x86_64-linux = "sha256-k0RwebF6VPaj3/+KWSD/KtsdlEU7EmaJ42cq83Kq5Qc=";
-    aarch64-linux = "sha256-k0RwebF6VPaj3/+KWSD/KtsdlEU7EmaJ42cq83Kq5Qc=";
-    x86_64-darwin = "sha256-k0RwebF6VPaj3/+KWSD/KtsdlEU7EmaJ42cq83Kq5Qc=";
-    aarch64-darwin = "sha256-k0RwebF6VPaj3/+KWSD/KtsdlEU7EmaJ42cq83Kq5Qc=";
+    x86_64-linux = "sha256-oA2mdkZ5XZLH9qntL2wumiCQsUBJ/lrTGB5t5VvIVcY=";
+    aarch64-linux = "sha256-oA2mdkZ5XZLH9qntL2wumiCQsUBJ/lrTGB5t5VvIVcY=";
+    x86_64-darwin = "sha256-oA2mdkZ5XZLH9qntL2wumiCQsUBJ/lrTGB5t5VvIVcY=";
+    aarch64-darwin = "sha256-oA2mdkZ5XZLH9qntL2wumiCQsUBJ/lrTGB5t5VvIVcY=";
   };
 
-  rustyV8Version = "147.4.0";
+  rustyV8Version = "149.2.0";
 
   rustyV8Targets = {
     x86_64-linux = "x86_64-unknown-linux-gnu";
@@ -126,11 +126,11 @@ let
   };
 
   rustyV8ArchiveHashes = {
-    x86_64-linux = "sha256-Cd3vbFEZKv/wVBExoO+cAPgxhdI5HaqxgDgqOr82rJU=";
-    aarch64-linux = "sha256-lMPw/eAFFAT8obaR8opJbXjbgw58+0maBEyxpeOllFU=";
-    x86_64-darwin = "sha256-+ppR8dMhVTSZL0PPar+DlKZ0K+E5N7WfdXXfBTYel+Y=";
-    aarch64-darwin = "sha256-fnR0DD7woOj8DiaKJYYSPpg0D+lDVmjNwSiPrvtzYq4=";
-  };
+    x86_64-linux = "sha256-iu2YY323533Iv7i7R1nsW95HLQv3lD9Y4OYqNQlFxVk=";
+    aarch64-linux = "sha256-+XdRJ8pk3MSjZi0BpSGizvuluY+DOUOog9hHc7Kv88U=";
+    x86_64-darwin = "sha256-eUlAo4o/ZrfvUqXwA8awlPdDrQQKZK+z082frUlADwc=";
+    aarch64-darwin = "sha256-+rsuyNO6Wm3qY9uaNalg3FypheujLzQrm6Sqocc0sv4=";
+};
 
   rustyV8Archive = pkgs.fetchurl {
     url = "https://github.com/denoland/rusty_v8/releases/download/v${rustyV8Version}/librusty_v8_release_${
@@ -188,13 +188,13 @@ in
 rustPlatform.buildRustPackage (
   rec {
     pname = "codex-cli";
-    version = "rust-v0.137.0";
+    version = "rust-v0.139.0";
 
     src = pkgs.fetchFromGitHub {
       owner = "openai";
       repo = "codex";
       rev = "${version}";
-      hash = "sha256-puszZqi1lZeq8iXWAD9U9+WMnNvzMYKf6wVT9mtjSUU=";
+      hash = "sha256-XjzlkBUkBey+P3tFLDYB3ae5oseUfW5tmzhLzqlqj2E=";
     };
 
     sourceRoot = "source/codex-rs";
