@@ -7,8 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   update:
@@ -34,11 +33,30 @@ jobs:
       - name: Update VSCode Extensions
         run: python3 scripts/update-vscode-extensions.py
 
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create automation token
+        id: automation-token
+        if: steps.changes.outputs.has_changes == 'true'
+        uses: ./.github/actions/create-automation-token
+        with:
+          app-id: ${{ secrets.AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_APP_PRIVATE_KEY }}
+          installation-id: ${{ secrets.AUTOMATION_APP_INSTALLATION_ID }}
+
       - name: Create Pull Request
+        if: steps.changes.outputs.has_changes == 'true'
         # peter-evans/create-pull-request v8
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.automation-token.outputs.token }}
           commit-message: "chore(vscode): update VSCode extensions"
           title: "chore(vscode): update VSCode extensions"
           body: |
@@ -48,6 +66,3 @@ jobs:
             from the Visual Studio Code marketplace.
           branch: update-vscode-extensions
           delete-branch: true
-          labels: |
-            dependencies
-            automated
