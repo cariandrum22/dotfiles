@@ -591,11 +591,22 @@ fn ll {|@args| ls -lh $@args }
 fn la {|@args| ls -lha $@args }
 fn code {|@args| code-insiders $@args }
 
+# Restore terminal modes that can be left enabled after interrupted nested SSH.
+fn -restore-terminal-after-ssh {
+  try {
+    printf "\e[0m\e[?25h\e[?7h\e[?1l\e[?1000l\e[?1002l\e[?1003l\e[?1006l\e[?2004l\e[>4;0m\e[?u" >/dev/tty
+  } catch {
+  }
+}
+
 # Configure kitty ssh workaround
 if (has-external kitty) {
   fn ssh {|@args|
-    set E:TERM = xterm-256color
-    e:ssh $@args
+    try {
+      env TERM=xterm-256color ssh $@args
+    } finally {
+      -restore-terminal-after-ssh
+    }
   }
 }
 
