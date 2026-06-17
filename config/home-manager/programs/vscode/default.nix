@@ -28,6 +28,16 @@ let
   inherit (metadata) commit;
   sha256 = metadata.sha256.${system} or (throw "No sha256 for system: ${system}");
 
+  # Copilot's bundled SDK ships native modules under resources/app/extensions.
+  # autoPatchelf needs these as build inputs to resolve NEEDED entries, and as
+  # runtime dependencies to keep the patched RPATHs available.
+  copilotSdkNativeDependencies = lib.optionals pkgs.stdenv.isLinux [
+    pkgs.libei
+    pkgs.libjpeg8.out
+    pkgs.pipewire
+    pkgs.xorg.libXtst
+  ];
+
   vscodeInsidersPackage = (pkgs.vscode.override { isInsiders = true; }).overrideAttrs (oldAttrs: rec {
     pname = "vscode-insiders";
     version = "${metadata.version}-${commit}";
@@ -41,12 +51,14 @@ let
       ++ [
         pkgs.krb5
       ]
+      ++ copilotSdkNativeDependencies
       ++ lib.optionals pkgs.stdenv.isLinux [
         pkgs.webkitgtk_4_1
         pkgs.libsoup_3
       ];
     runtimeDependencies = lib.optionals pkgs.stdenv.isLinux (
       oldAttrs.runtimeDependencies
+      ++ copilotSdkNativeDependencies
       ++ [
         pkgs.libsecret
         pkgs.musl
