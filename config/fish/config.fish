@@ -107,7 +107,7 @@ end
 # Restore terminal modes that can be left enabled after interrupted nested SSH.
 function __restore_terminal_after_ssh
     if test -w /dev/tty
-        printf '\e[0m\e[?25h\e[?7h\e[?1l\e[?1000l\e[?1002l\e[?1003l\e[?1006l\e[?2004l\e[>4;0m\e[<u\e[=0u' >/dev/tty 2>/dev/null
+        printf '\e[0m\e[?25h\e[?7h\e[?1l\e[?1000l\e[?1002l\e[?1003l\e[?1006l\e[?2004l\e[>4;0m\e[<1000u\e[=0;1u' >/dev/tty 2>/dev/null
     end
 end
 
