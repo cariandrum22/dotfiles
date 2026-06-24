@@ -1,0 +1,96 @@
+name: Create automation token
+description: Create a least-privilege GitHub App installation token for automation PRs.
+
+inputs:
+  app-id:
+    description: GitHub App ID.
+    required: true
+  private-key:
+    description: GitHub App private key in PEM format.
+    required: true
+  installation-id:
+    description: GitHub App installation ID for this account or repository.
+    required: true
+
+outputs:
+  token:
+    description: GitHub App installation token.
+    value: ${{ steps.token.outputs.token }}
+
+runs:
+  using: composite
+  steps:
+    - id: token
+      shell: bash
+      env:
+        APP_ID: ${{ inputs.app-id }}
+        APP_PRIVATE_KEY: ${{ inputs.private-key }}
+        APP_INSTALLATION_ID: ${{ inputs.installation-id }}
+      run: |
+        set -euo pipefail
+
+        if [ -z "$APP_ID" ] || [ -z "$APP_PRIVATE_KEY" ] || [ -z "$APP_INSTALLATION_ID" ]; then
+          echo "GitHub App ID, private key, and installation ID are required." >&2
+          exit 1
+        fi
+
+        tmp_dir="$(mktemp -d)"
+        trap 'rm -rf "$tmp_dir"' EXIT
+
+        key_file="$tmp_dir/app-private-key.pem"
+        printf '%s\n' "$APP_PRIVATE_KEY" > "$key_file"
+        chmod 600 "$key_file"
+
+        b64url() {
+          openssl base64 -A | tr '+/' '-_' | tr -d '='
+        }
+
+        now="$(date +%s)"
+        iat="$((now - 60))"
+        exp="$((now + 540))"
+        header="$(printf '{"alg":"RS256","typ":"JWT"}' | b64url)"
+        payload="$(printf '{"iat":%s,"exp":%s,"iss":"%s"}' "$iat" "$exp" "$APP_ID" | b64url)"
+        signature="$(
+          printf '%s.%s' "$header" "$payload" \
+            | openssl dgst -sha256 -sign "$key_file" -binary \
+            | b64url
+        )"
+        jwt="$header.$payload.$signature"
+
+        repo_name="${GITHUB_REPOSITORY#*/}"
+        request_body="$(
+          REPO_NAME="$repo_name" python3 - <<'PY'
+        import json
+        import os
+
+        print(json.dumps({
+            "repositories": [os.environ["REPO_NAME"]],
+            "permissions": {
+                "contents": "write",
+                "pull_requests": "write",
+            },
+        }))
+        PY
+        )"
+
+        response="$(
+          curl -fsSL \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $jwt" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            --data "$request_body" \
+            "https://api.github.com/app/installations/${APP_INSTALLATION_ID}/access_tokens"
+        )"
+        token="$(
+          printf '%s' "$response" \
+            | python3 -c 'import json, sys; print(json.load(sys.stdin)["token"])'
+        )"
+
+        if [ -z "$token" ]; then
+          echo "Failed to create GitHub App installation token." >&2
+          exit 1
+        fi
+
+        echo "::add-mask::$token"
+        echo "token=$token" >> "$GITHUB_OUTPUT"
