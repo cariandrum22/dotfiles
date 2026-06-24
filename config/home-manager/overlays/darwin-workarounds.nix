@@ -1,4 +1,4 @@
-# Workarounds for nixpkgs 25.11 build failures on aarch64-darwin
+# Workarounds for nixpkgs 26.05 build failures on aarch64-darwin
 #
 # These overrides use unstable packages to avoid test failures that only
 # occur on macOS aarch64. Remove this overlay when the issues are fixed

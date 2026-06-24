@@ -230,11 +230,15 @@ def _extract_cargo_hash_from_output(output: str) -> Hash | None:
     """Extract a cargo hash from nix-build output."""
     patterns = (
         r'got:\s+(sha256-[A-Za-z0-9+/=]+)',
-        r'specified:\s+(?:sha256-[A-Za-z0-9+/=]+|[0-9a-z]{52})\s+got:\s+'
-        r'(sha256-[A-Za-z0-9+/=]+)',
+        (
+            r'specified:\s+(?:sha256-[A-Za-z0-9+/=]+|[0-9a-z]{52})\s+got:\s+'
+            r'(sha256-[A-Za-z0-9+/=]+)'
+        ),
         r'got:\s+([0-9a-z]{52})',
-        r'specified:\s+(?:sha256-[A-Za-z0-9+/=]+|[0-9a-z]{52})\s+got:\s+'
-        r'([0-9a-z]{52})',
+        (
+            r'specified:\s+(?:sha256-[A-Za-z0-9+/=]+|[0-9a-z]{52})\s+got:\s+'
+            r'([0-9a-z]{52})'
+        ),
     )
 
     for pattern in patterns:
@@ -281,10 +285,6 @@ def _build_flake_callpackage_expr(nix_file: Path) -> str | None:
                     }})
                     (
                         import
-                        "${{flake.outPath}}/config/home-manager/overlays/hm-compat.nix"
-                    )
-                    (
-                        import
                         "${{flake.outPath}}/config/home-manager/overlays/darwin-workarounds.nix"
                     )
                 ];
@@ -317,7 +317,7 @@ def calculate_cargo_hash(nix_file: Path) -> Hash | None:  # noqa: C901, PLR0912,
         tmp.write(dummy_content)
         tmp_path = tmp.name
 
-    try:
+    try:  # noqa: PLW0717 - Keep CI debug output near the command it describes.
         # Try to build and capture the error
         nixpkgs_url = "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz"
         expr = _build_flake_callpackage_expr(Path(tmp_path))
@@ -432,7 +432,7 @@ def calculate_npm_deps_hash(  # noqa: C901, PLR0912, PLR0915
         Hash of npm dependencies or None if calculation fails
     """
     temp_dir = None
-    try:
+    try:  # noqa: PLW0717 - Cleanup must cover the full temporary extraction workflow.
         # Create temporary directory for extraction
         temp_dir = tempfile.mkdtemp(prefix='npm-prefetch-')
         tarball_path = Path(temp_dir) / 'package.tgz'
@@ -775,7 +775,7 @@ def update_rust_package(
     package_updater: Callable[[Version], PackageInfo],
 ) -> UpdateResult:
     """Main functional update pipeline for Rust packages."""
-    try:
+    try:  # noqa: PLW0717 - Keep update pipeline error mapping centralized.
         # Read current state
         content = read_file(config.nix_file)
         current_info = extract_current_info(config, content)
@@ -878,7 +878,7 @@ def update_package(
     package_updater: Callable[[Version], PackageInfo],
 ) -> UpdateResult:
     """Main functional update pipeline."""
-    try:
+    try:  # noqa: PLW0717 - Keep update pipeline error mapping centralized.
         # Read current state
         content = read_file(config.nix_file)
         current_info = extract_current_info(config, content)

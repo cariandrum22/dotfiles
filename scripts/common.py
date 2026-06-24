@@ -324,16 +324,7 @@ def run_nix_prefetch_sri(
         return convert_nix_hash_to_sri(first_line, timeout=timeout)
 
     try:
-        cmd = ["nix", "store", "prefetch-file", "--json", "--hash-type", "sha256"]
-        cmd.append(url)
-        result = run_command(
-            cmd,
-            timeout=timeout,
-        )
-        data = json.loads(result.stdout)
-        hash_value = data["hash"]
-        if not isinstance(hash_value, str) or not hash_value:
-            raise PrefetchError(url, "missing hash field in nix prefetch output")
+        hash_value = _prefetch_file_sha256(url, timeout=timeout)
     except SubprocessError:
         # Fall back to nix-prefetch-url for environments without prefetch-file.
         nix32_hash = run_nix_prefetch(url, timeout=timeout)
@@ -342,6 +333,21 @@ def run_nix_prefetch_sri(
         raise PrefetchError(url, exc) from exc
     else:
         return hash_value
+
+
+def _prefetch_file_sha256(url: str, *, timeout: int) -> str:
+    """Prefetch a URL with modern Nix and return an SRI hash."""
+    cmd = ["nix", "store", "prefetch-file", "--json", "--hash-type", "sha256"]
+    cmd.append(url)
+    result = run_command(
+        cmd,
+        timeout=timeout,
+    )
+    data = json.loads(result.stdout)
+    hash_value = data["hash"]
+    if not isinstance(hash_value, str) or not hash_value:
+        raise PrefetchError(url, "missing hash field in nix prefetch output")
+    return hash_value
 
 
 def convert_nix_hash_to_sri(

@@ -239,15 +239,7 @@ def update_droid(  # noqa: C901
 def main() -> None:
     """CLI entrypoint."""
     try:
-        if len(sys.argv) > 1:
-            version = sys.argv[1]
-            # Explicit version provided - use verbose mode
-            update_droid(version, verbose=True, quiet=False)
-        else:
-            # Auto-detect version - use quiet mode for clean output
-            version = _fetch_latest_version()
-            update_droid(version, verbose=False, quiet=False)
-
+        _run_update_from_args()
         sys.exit(0)
     except (
         DroidConfigError,
@@ -257,6 +249,19 @@ def main() -> None:
     ) as exc:
         print(f"\n❌ Error: {exc}", file=sys.stderr)
         sys.exit(1)
+
+
+def _run_update_from_args() -> None:
+    """Run the update workflow based on CLI arguments."""
+    if len(sys.argv) > 1:
+        version = sys.argv[1]
+        # Explicit version provided - use verbose mode
+        update_droid(version, verbose=True, quiet=False)
+        return
+
+    # Auto-detect version - use quiet mode for clean output
+    version = _fetch_latest_version()
+    update_droid(version, verbose=False, quiet=False)
 
 
 if __name__ == "__main__":

@@ -167,8 +167,10 @@ def _generate_nix(metadata: Metadata) -> str:
     ]
     body = "\n".join(
         (
-            "# This file is automatically updated by the "
-            "update-vscode-insiders workflow",
+            (
+                "# This file is automatically updated by the "
+                "update-vscode-insiders workflow"
+            ),
             "rec {",
             f'  version = "{metadata.version}";',
             f'  commit = "{metadata.commit}";',

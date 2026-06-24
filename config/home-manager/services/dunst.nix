@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 {
   services.dunst = {
@@ -37,7 +37,7 @@
         # Icons
         icon_position = "left";
         max_icon_size = 32;
-        icon_path = ".icons/candy-icons/";
+        icon_path = lib.mkForce ".icons/candy-icons/";
         # Misc/Advanced
         dmenu = "${pkgs.dmenu}/bin/dmenu -p dunst:";
         browser = "${pkgs.google-chrome}/bin/google-chrome-stable";

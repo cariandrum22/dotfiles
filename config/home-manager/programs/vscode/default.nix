@@ -35,7 +35,7 @@ let
     pkgs.libei
     pkgs.libjpeg8.out
     pkgs.pipewire
-    pkgs.xorg.libXtst
+    pkgs.libxtst
   ];
 
   vscodeInsidersPackage = (pkgs.vscode.override { isInsiders = true; }).overrideAttrs (oldAttrs: rec {

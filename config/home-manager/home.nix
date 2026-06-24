@@ -3,7 +3,7 @@
 {
   home = {
     # username and homeDirectory are set in the flake
-    stateVersion = "25.11";
+    stateVersion = "26.05";
     enableNixpkgsReleaseCheck = false;
   };
 
