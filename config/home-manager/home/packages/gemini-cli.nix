@@ -2,7 +2,7 @@
 
 let
   pname = "gemini-cli";
-  version = "0.47.0";
+  version = "0.49.0";
   assetName = "gemini-cli-bundle.zip";
   isArchive = lib.hasSuffix ".zip" assetName;
 in
@@ -12,7 +12,7 @@ pkgs.stdenv.mkDerivation rec {
   src = (if isArchive then pkgs.fetchzip else pkgs.fetchurl) (
     {
       url = "https://github.com/google-gemini/gemini-cli/releases/download/v${version}/${assetName}";
-      hash = "sha256-kDhAtkH3k3smE4y6abeq+cnnwP+VyWszMEAv7fb7itM=";
+      hash = "sha256-R7Lg9xCzyqAria0FyZmwzeLr1K0A/gw40c+rmOPwn5A=";
     }
     // lib.optionalAttrs isArchive {
       stripRoot = false;
