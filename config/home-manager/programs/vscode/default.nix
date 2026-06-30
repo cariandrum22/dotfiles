@@ -1,6 +1,7 @@
 {
   pkgs,
   lib,
+  home-manager,
   ...
 }:
 
@@ -8,6 +9,7 @@ let
   extensions = import ./extensions.nix;
   settings = import ./settings.nix { inherit pkgs; };
   metadata = import ./metadata.nix;
+  mkVscodeModule = import "${home-manager}/modules/programs/vscode/mkVscodeModule.nix";
 
   inherit (pkgs.stdenv.hostPlatform) system;
 
@@ -102,8 +104,21 @@ let
   });
 in
 {
+  imports = [
+    (mkVscodeModule {
+      modulePath = [
+        "programs"
+        "vscodeInsiders"
+      ];
+      name = "Visual Studio Code - Insiders";
+      packageName = "vscode";
+      nameShort = "Code - Insiders";
+      dataFolderName = ".vscode-insiders";
+    })
+  ];
+
   config = {
-    programs.vscode = {
+    programs.vscodeInsiders = {
       enable = true;
       mutableExtensionsDir = false;
       package = vscodeInsidersPackage;
@@ -112,5 +127,26 @@ in
         inherit (settings) userSettings;
       };
     };
+
+    home.activation.cleanupEmptyVscodeInsidersExtensions =
+      lib.hm.dag.entryBefore [ "checkLinkTargets" ]
+        ''
+          target="$HOME/.vscode-insiders/extensions"
+
+          if [[ -d "$target" && ! -L "$target" ]]; then
+            mapfile -t entries < <(find "$target" -mindepth 1 -maxdepth 1 -print)
+
+            if [[ ''${#entries[@]} -eq 0 ]]; then
+              run rmdir "$target"
+            elif [[ ''${#entries[@]} -eq 1 && "''${entries[0]}" == "$target/extensions.json" ]]; then
+              extensions_json="$(tr -d '[:space:]' < "$target/extensions.json" 2>/dev/null || true)"
+
+              if [[ "$extensions_json" == "[]" ]]; then
+                run rm "$target/extensions.json"
+                run rmdir "$target"
+              fi
+            fi
+          fi
+        '';
   };
 }
