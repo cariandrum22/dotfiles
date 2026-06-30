@@ -1,13 +1,13 @@
 # This file is automatically updated by the update-vscode-insiders workflow
 rec {
-  version = "1.126.0";
-  commit = "7e7950df89d055b5a378379db9ee14290772148a";
+  version = "1.127.0";
+  commit = "0d2dfb2eb897808a27356ab6e5d33000acec4590";
   url = {
     aarch64-darwin = "https://vscode.download.prss.microsoft.com/dbazure/download/insider/${commit}/VSCode-darwin-arm64.zip";
-    x86_64-linux = "https://vscode.download.prss.microsoft.com/dbazure/download/insider/${commit}/code-insider-x64-1782179809.tar.gz";
+    x86_64-linux = "https://vscode.download.prss.microsoft.com/dbazure/download/insider/${commit}/code-insider-x64-1782709873.tar.gz";
   };
   sha256 = {
-    aarch64-darwin = "1yscl05si03fs6sd4ji6pfn5bk77bfp5nvy064ci2fyrawj02zxb";
-    x86_64-linux = "0m841zwx9bcrih1176b7pkjdwz6v1dqrs150gpzpak7x3dc55rza";
+    aarch64-darwin = "0yv8gs2g98qp24y4pbxpyjzqr20b4kidh8mxd5088a0p8z35kz19";
+    x86_64-linux = "0brg3ljhjx6wg95pqbxmic2qh32mv7jg03iajp4rwbz1sg4illpa";
   };
 }
