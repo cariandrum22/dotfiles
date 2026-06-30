@@ -445,6 +445,14 @@
               pass_filenames = false;
               files = "^scripts/(update-codex-cli|test-update-codex-cli)\\.py$";
             };
+            cursor-updater-regression = {
+              enable = true;
+              name = "cursor-updater-regression";
+              entry = "${pkgs.python3}/bin/python3 scripts/test-update-cursor.py";
+              language = "system";
+              pass_filenames = false;
+              files = "^scripts/(update-cursor|test-update-cursor)\\.py$";
+            };
             deadnix = {
               enable = true;
               settings = {
