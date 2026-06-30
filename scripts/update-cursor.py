@@ -30,9 +30,14 @@ Environment:
 
 from __future__ import annotations
 
+import json
 import re
 import sys
-from typing import TYPE_CHECKING, NamedTuple
+from html import unescape
+from typing import TYPE_CHECKING, NamedTuple, override
+from urllib.error import HTTPError, URLError
+from urllib.parse import urljoin
+from urllib.request import HTTPRedirectHandler, build_opener, urlopen
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -41,13 +46,23 @@ if TYPE_CHECKING:
 import common
 
 # Constants
-CURSOR_API_URL = "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable"
+CURSOR_UPDATE_API_URL_TEMPLATE = (
+    "https://api2.cursor.sh/updates/api/update/linux-x64/cursor/{version}/stable"
+)
+CURSOR_DOWNLOAD_PAGE_URL = "https://cursor.com/download"
 RE_VERSION = re.compile(r'version = "([^"]+)"')
 RE_DOWNLOAD_URL = re.compile(r'downloadUrl = "([^"]+)"')
 RE_HASH = re.compile(r'hash = "([^"]+)"')
 RE_VERSION_IN_URL = re.compile(r'[Cc]ursor-(\d+\.\d+\.\d+)')
 RE_COMMIT_IN_URL = re.compile(r"/production/([0-9a-f]{40})/")
+RE_DOWNLOAD_PAGE_URL = re.compile(
+    r"https:(?:\\?/){2}api2\.cursor\.sh(?:\\?/)updates(?:\\?/)download"
+    r"(?:\\?/)golden(?:\\?/)linux-x64(?:\\?/)cursor(?:\\?/)[^\\\"<]+",
+)
 RETRY_ATTEMPTS = 3
+HTTP_NO_CONTENT = 204
+HTTP_REDIRECT_MIN = 300
+HTTP_REDIRECT_MAX = 400
 
 
 class CursorConfigError(common.ConfigError):
@@ -83,6 +98,31 @@ class CursorInfo(NamedTuple):
     commit_sha: str
 
 
+class CursorMetadata(NamedTuple):
+    """Cursor metadata before Nix hash calculation."""
+
+    download_url: str
+    version: str
+    commit_sha: str
+
+
+class _NoRedirectHandler(HTTPRedirectHandler):
+    """Return redirect responses without following large AppImage downloads."""
+
+    @override
+    def redirect_request(
+        self,
+        req: object,
+        fp: object,
+        code: int,
+        msg: str,
+        headers: object,
+        newurl: str,
+    ) -> None:
+        """Disable urllib's automatic redirect handling."""
+        del req, fp, code, msg, headers, newurl
+
+
 # ----- Pure helpers ----------------------------------------------------------------
 
 
@@ -116,6 +156,24 @@ def _extract_commit_from_url(url: str) -> str:
     return match.group(1)
 
 
+def _normalize_appimage_url(url: str) -> str:
+    """Normalize Cursor download URLs to the AppImage artifact."""
+    return url.removesuffix(".zsync")
+
+
+def _cursor_update_api_url(current_version: str) -> str:
+    """Build Cursor update API URL for the currently packaged version."""
+    return CURSOR_UPDATE_API_URL_TEMPLATE.format(version=current_version)
+
+
+def _extract_download_page_url(content: str) -> str:
+    """Extract the latest Linux x64 AppImage redirect URL from Cursor's page."""
+    if (match := RE_DOWNLOAD_PAGE_URL.search(content)) is None:
+        msg = "Could not find Linux x64 AppImage download URL on Cursor download page"
+        raise CursorApiError(msg)
+    return unescape(match.group(0).replace("\\/", "/"))
+
+
 def _extract_api_string(
     payload: dict[str, object], field_name: str, *, required: bool = True,
 ) -> str | None:
@@ -145,6 +203,25 @@ def _validate_download_url(download_url: str, version: str, commit_sha: str) -> 
         raise CursorApiError(msg)
 
 
+def _metadata_from_update_payload(payload: dict[str, object]) -> CursorMetadata:
+    """Build Cursor metadata from the update API payload."""
+    raw_download_url = _extract_api_string(payload, "url")
+    if raw_download_url is None:
+        msg = "Cursor update API response is missing 'url'"
+        raise CursorApiError(msg)
+
+    download_url = _normalize_appimage_url(raw_download_url)
+    version = _extract_api_string(payload, "productVersion", required=False)
+    if version is None:
+        version = _extract_api_string(payload, "version", required=False)
+    if version is None:
+        version = _extract_version_from_url(download_url)
+
+    commit_sha = _extract_commit_from_url(download_url)
+    _validate_download_url(download_url, version, commit_sha)
+    return CursorMetadata(download_url, version, commit_sha)
+
+
 def _generate_nix_content(
     content: str, version: str, download_url: str, download_hash: str,
 ) -> str:
@@ -158,6 +235,64 @@ def _generate_nix_content(
 
 
 # ----- API interaction -------------------------------------------------------------
+
+
+def _fetch_optional_json(url: str) -> dict[str, object] | None:
+    """Fetch JSON, returning None when Cursor reports no update with an empty body."""
+    req = common.build_request(url, headers=common.JSON_HEADERS)
+    try:
+        with urlopen(req, timeout=common.HTTP_TIMEOUT) as resp:  # noqa: S310
+            body = resp.read().decode("utf-8").strip()
+            if resp.status == HTTP_NO_CONTENT or not body:
+                return None
+            data = json.loads(body)
+    except (HTTPError, URLError, json.JSONDecodeError) as exc:
+        raise common.FetchError(url, exc) from exc
+
+    if not isinstance(data, dict):
+        msg = f"Cursor update API response must be a JSON object: {url}"
+        raise CursorApiError(msg)
+    return data
+
+
+def _resolve_cursor_download_url(url: str) -> str:
+    """Resolve Cursor's lightweight download URL to the immutable AppImage URL."""
+    normalized_url = _normalize_appimage_url(url)
+    if "://api2.cursor.sh/updates/download/" not in normalized_url:
+        return normalized_url
+
+    opener = build_opener(_NoRedirectHandler)
+    req = common.build_request(normalized_url)
+    try:
+        with opener.open(req, timeout=common.HTTP_TIMEOUT) as resp:
+            return _normalize_appimage_url(resp.geturl())
+    except HTTPError as exc:
+        if HTTP_REDIRECT_MIN <= exc.code < HTTP_REDIRECT_MAX:
+            location = exc.headers.get("Location")
+            if location:
+                return _normalize_appimage_url(urljoin(normalized_url, location))
+        raise common.FetchError(normalized_url, exc) from exc
+    except URLError as exc:
+        raise common.FetchError(normalized_url, exc) from exc
+
+
+def _fetch_update_api_metadata(current_version: str) -> CursorMetadata | None:
+    """Fetch Cursor metadata from the current update API."""
+    payload = _fetch_optional_json(_cursor_update_api_url(current_version))
+    if payload is None:
+        return None
+    return _metadata_from_update_payload(payload)
+
+
+def _fetch_download_page_metadata() -> CursorMetadata:
+    """Fetch Cursor metadata from the public download page as a fallback."""
+    page_content = common.fetch_text(CURSOR_DOWNLOAD_PAGE_URL)
+    redirect_url = _extract_download_page_url(page_content)
+    download_url = _resolve_cursor_download_url(redirect_url)
+    version = _extract_version_from_url(download_url)
+    commit_sha = _extract_commit_from_url(download_url)
+    _validate_download_url(download_url, version, commit_sha)
+    return CursorMetadata(download_url, version, commit_sha)
 
 
 def _retry_logger(
@@ -176,41 +311,50 @@ def _retry_logger(
     return log_retry
 
 
-def fetch_latest_cursor_info(*, verbose: bool = True) -> CursorInfo:
+def fetch_latest_cursor_info(
+    current_version: str,
+    current_url: str,
+    current_hash: str,
+    *,
+    verbose: bool = True,
+) -> CursorInfo:
     """Fetch latest Cursor information from API."""
+    update_api_url = _cursor_update_api_url(current_version)
     if verbose:
-        print(f"Fetching Cursor API response from {CURSOR_API_URL}...")
+        print(f"Fetching Cursor update API response from {update_api_url}...")
 
-    data = common.retry_with_backoff(
-        lambda: common.fetch_json(CURSOR_API_URL),
-        retries=RETRY_ATTEMPTS,
-        exceptions=(common.FetchError,),
-        on_retry=_retry_logger("Cursor API metadata", verbose=verbose),
-    )
+    try:
+        metadata = common.retry_with_backoff(
+            lambda: _fetch_update_api_metadata(current_version),
+            retries=RETRY_ATTEMPTS,
+            exceptions=(common.FetchError,),
+            on_retry=_retry_logger("Cursor update API metadata", verbose=verbose),
+        )
+    except common.FetchError as exc:
+        if verbose:
+            print(f"  Cursor update API failed: {exc}")
+            print(f"  Falling back to {CURSOR_DOWNLOAD_PAGE_URL}...")
+        metadata = common.retry_with_backoff(
+            _fetch_download_page_metadata,
+            retries=RETRY_ATTEMPTS,
+            exceptions=(common.FetchError,),
+            on_retry=_retry_logger("Cursor download page metadata", verbose=verbose),
+        )
 
-    download_url = _extract_api_string(data, "downloadUrl")
-    if download_url is None:
-        msg = "Cursor API response is missing 'downloadUrl'"
-        raise CursorApiError(msg)
-
-    version = _extract_api_string(data, "version", required=False)
-    if version is None:
-        version = _extract_version_from_url(download_url)
-
-    commit_sha = _extract_api_string(data, "commitSha", required=False)
-    if commit_sha is None:
-        commit_sha = _extract_commit_from_url(download_url)
-
-    _validate_download_url(download_url, version, commit_sha)
+    if metadata is None:
+        commit_sha = _extract_commit_from_url(current_url)
+        if verbose:
+            print("  Cursor update API reports no newer version")
+        return CursorInfo(current_url, current_hash, current_version, commit_sha)
 
     if verbose:
-        print(f"  Version: {version}")
-        print(f"  Commit: {commit_sha}")
-        print(f"  Download URL: {download_url}")
+        print(f"  Version: {metadata.version}")
+        print(f"  Commit: {metadata.commit_sha}")
+        print(f"  Download URL: {metadata.download_url}")
         print("Fetching download hash...")
 
     download_hash = common.retry_with_backoff(
-        lambda: common.run_nix_prefetch_sri(download_url),
+        lambda: common.run_nix_prefetch_sri(metadata.download_url),
         retries=RETRY_ATTEMPTS,
         exceptions=(common.SubprocessError, common.PrefetchError),
         on_retry=_retry_logger("Cursor download hash", verbose=verbose),
@@ -219,7 +363,12 @@ def fetch_latest_cursor_info(*, verbose: bool = True) -> CursorInfo:
     if verbose:
         print(f"  Download hash: {download_hash}")
 
-    return CursorInfo(download_url, download_hash, version, commit_sha)
+    return CursorInfo(
+        metadata.download_url,
+        download_hash,
+        metadata.version,
+        metadata.commit_sha,
+    )
 
 
 # ----- File operations -------------------------------------------------------------
@@ -285,7 +434,12 @@ def update_cursor(*, verbose: bool = True) -> bool:  # noqa: C901 - Clear sequen
     # Get latest info
     if verbose:
         print("\nFetching latest Cursor information...")
-    latest_info = fetch_latest_cursor_info(verbose=verbose)
+    latest_info = fetch_latest_cursor_info(
+        current_version,
+        current_url,
+        current_hash,
+        verbose=verbose,
+    )
 
     # Check if update is needed
     if (
