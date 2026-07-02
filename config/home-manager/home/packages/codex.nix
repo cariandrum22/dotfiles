@@ -188,13 +188,13 @@ in
 rustPlatform.buildRustPackage (
   rec {
     pname = "codex-cli";
-    version = "rust-v0.142.4";
+    version = "rust-v0.142.5";
 
     src = pkgs.fetchFromGitHub {
       owner = "openai";
       repo = "codex";
       rev = "${version}";
-      hash = "sha256-cYkdLy0+KMjcx0k7IDACsiTK3ZZks6cmwbeDMheN6WY=";
+      hash = "sha256-Ua1UVArTvjHcg3bPK1FYyShYiIUH3AOxtoUTvA4UZwU=";
     };
 
     sourceRoot = "source/codex-rs";
