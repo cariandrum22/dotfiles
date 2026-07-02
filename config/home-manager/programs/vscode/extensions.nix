@@ -69,15 +69,15 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.196";
-    sha256 = "0384c8m0i2sfymmhxvy93j780b498304ddhmxpg8d1khcgw2jny2";
+    version = "2.1.198";
+    sha256 = "17790gv242v0ys49qc80a469iajxgc58gr90i979gd1lr7cq096j";
     arch = "linux-x64";
   }
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "4.0.4";
-    sha256 = "19wy835zysk9avf3y96a5ff7bj25f06hrcszfjs80qvp8z3klaln";
+    version = "4.0.5";
+    sha256 = "1sb1ijli782aph25l0gyqh82p73v4hlv504k8v942r75drch4282";
   }
   {
     name = "cmake";
@@ -202,8 +202,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.6.290940";
-    sha256 = "0p511rxql1vmsps6vlqr8xnbysfw4gb42i66mc246bz56ss4cp1v";
+    version = "2026.7.10623";
+    sha256 = "012fprmjnk3niacnphw74fm5dm1sx990y8cidjh53abxy8qrs85b";
   }
   {
     name = "haskell";
@@ -226,8 +226,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.55.2026062708";
-    sha256 = "072ghqaygk7x91jh6h7kgcs5ny5sr8cffrhzcf92y3zlp1r4b212";
+    version = "1.56.2026063009";
+    sha256 = "1hxyyka3dsl5hbawxax52qj4grnl34x1fr3xf4npry88n4k5xic7";
     arch = "linux-x64";
   }
   {
@@ -337,8 +337,8 @@
   {
     name = "remote-containers";
     publisher = "ms-vscode-remote";
-    version = "0.462.0";
-    sha256 = "0x97rplm1p3wiqsyxc085fdd9z6gpycr9m48xblbvgm8yzqwfwq5";
+    version = "0.464.0";
+    sha256 = "0nsv6favkx28z1yc6zann642pwgi2cd7fjrjbwa427640gwg2789";
   }
   {
     name = "remote-explorer";
@@ -374,8 +374,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2956";
-    sha256 = "1ca087075v4bfh5syngxzpc261dyn650ip5199rbil28lgf2ximj";
+    version = "0.4.2958";
+    sha256 = "1w7pj7fzcl0wkpi2w5dcgi30hxq3ra2syb4k0wv70zcx7bsgrjvv";
     arch = "linux-x64";
   }
   {
@@ -473,8 +473,8 @@
   {
     name = "vscode-eslint";
     publisher = "dbaeumer";
-    version = "3.0.31";
-    sha256 = "045778f361bvpascd1vsw5glbn64zv8kalviin877w9d2ny7crr5";
+    version = "3.0.33";
+    sha256 = "064anp6gwyxhl8rsncna7qprscay9p9bwnzmg89xacl3k1vm9vd2";
   }
   {
     name = "vscode-fish";
