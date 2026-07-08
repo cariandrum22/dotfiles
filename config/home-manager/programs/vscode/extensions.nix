@@ -62,15 +62,15 @@
   {
     name = "chatgpt";
     publisher = "openai";
-    version = "26.5623.101652";
-    sha256 = "1q3xjafchq3mdgzblz3hm4f8bpn76yd6azp87inaj85djfzwglh7";
+    version = "26.5623.141536";
+    sha256 = "1kx12viq67gmvvi7sni8an9aadfbzpncp08nd5ai6qczp0mifiv2";
     arch = "linux-x64";
   }
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.199";
-    sha256 = "0i7yh0knmx80shw2idh3i0lq24406j7bsk1jczrh0f7klx92d9cz";
+    version = "2.1.204";
+    sha256 = "0kbvf2b5qnb7xqv94dfmcg32a1d03wyj7gl0af3lhy0g9h0j43n6";
     arch = "linux-x64";
   }
   {
@@ -202,14 +202,14 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.7.20604";
-    sha256 = "13db0wz3wr6kiwcyhv2xinr8ra8p5hm1f5kikz788bfrx07w89yl";
+    version = "2026.7.70611";
+    sha256 = "0gaai6i55cljbc7mlcic6diky966xw8pj8i8rk0cji250sc3kh5l";
   }
   {
     name = "haskell";
     publisher = "haskell";
-    version = "2.8.1";
-    sha256 = "12r5f2qjj4vvx29x3bfvjwz8zzkql41dhdhha9hi9p5wjv5l82cq";
+    version = "2.8.2";
+    sha256 = "19wl0fi50hsikyxaw1ayn43hdkm91c8pgs1gg46x1jm66ilw393m";
   }
   {
     name = "i18n-ally";
@@ -226,8 +226,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.56.2026063009";
-    sha256 = "1hxyyka3dsl5hbawxax52qj4grnl34x1fr3xf4npry88n4k5xic7";
+    version = "1.56.2026070709";
+    sha256 = "0mnvlpjw0ky2mcmqcmf5dlrdcklcvzn70lxhg4j6j9y27iv7vlp1";
     arch = "linux-x64";
   }
   {
@@ -374,8 +374,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2959";
-    sha256 = "02nbyv2p4y6734ysdwb93y3c90iqyi0wxnfcip4vx4rgpd05nc57";
+    version = "0.4.2965";
+    sha256 = "0gp0mvfwkg2a8s7gyq1xmh41vv1dprhglpczawp2d9gwcr7xcki2";
     arch = "linux-x64";
   }
   {
@@ -485,8 +485,8 @@
   {
     name = "vscode-gradle";
     publisher = "vscjava";
-    version = "3.17.2026062602";
-    sha256 = "1fwnyw8c54d91dis92bl3p68v9ay4kjs0wiw0fvl6f9g18mvqphi";
+    version = "3.18.0";
+    sha256 = "171a6nskijdy0l4sly5whr839x42ngbglwqxav3x2is4ha61xcy9";
   }
   {
     name = "vscode-graphql";
