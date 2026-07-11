@@ -62,22 +62,22 @@
   {
     name = "chatgpt";
     publisher = "openai";
-    version = "26.5707.31428";
-    sha256 = "1ds366ycjy6wjbyaswybnc3alq98linfqcn1cv5ccwlmh5vmdsck";
+    version = "26.5707.41301";
+    sha256 = "06frh71da1bajyblklc9hh1z2h518jara3646734p35ryhhj1vam";
     arch = "linux-x64";
   }
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.206";
-    sha256 = "028sd47jr42zzz958h4pc212qmk9xqg7bjxafdilb3wg5i7zi39r";
+    version = "2.1.207";
+    sha256 = "1ckmrnq0i8rsr9ifwq0dccwgfnz076ahs9mlnkl2wc0sx3m5l5j3";
     arch = "linux-x64";
   }
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "4.0.7";
-    sha256 = "0m79n7q47733rffg58d6crfmba3ldd0w90r7r3jd92r8mb90z4kx";
+    version = "4.0.8";
+    sha256 = "0w511klrrrax5iyja2jzwmkh5q4vam4f6krgbasr7hnh0pdp6ad9";
   }
   {
     name = "cmake";
@@ -202,8 +202,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.7.90246";
-    sha256 = "02n9rav8v5dbd4rc7z1qjpdn3q21bm9zv3fpdbp87r5m7yl3fzsw";
+    version = "2026.7.100609";
+    sha256 = "0rfzpi7ryw6m1k73pfsni2r9apnsw68b0bimf7ksq3qzpbhln8hc";
   }
   {
     name = "haskell";
@@ -226,15 +226,15 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.56.2026070909";
-    sha256 = "0ak3k87gwv0zn6b5cqqazmji1yikc7k477a1sl5pmxn1kh8m3s1m";
+    version = "1.56.2026071009";
+    sha256 = "17ihfhq6w6hwiwrnmxb3l9ddhh7y1458idan3llv2vh34l2bvrqv";
     arch = "linux-x64";
   }
   {
     name = "jupyter";
     publisher = "ms-toolsai";
-    version = "2026.6.2026070801";
-    sha256 = "1yha7pmnrldhy2a7si5ljfwn8d60imj2g8qiminwsirxdbx1yag7";
+    version = "2026.6.2026071001";
+    sha256 = "0v749msgi4m0hk2qwp9d1rdsps8xyn7q0fz84waqy9ngmalinwhv";
     arch = "linux-x64";
   }
   {
@@ -374,8 +374,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2966";
-    sha256 = "1zbs75rk9j440hdh2ilxm98rj4jcjiyxkxg21n2qbhfcqnzzavvn";
+    version = "0.4.2968";
+    sha256 = "1rw6ycgmmgxywcm4hfbm4k58l2iz88maglgmd4pkc0j0cpv474fz";
     arch = "linux-x64";
   }
   {
@@ -418,8 +418,8 @@
   {
     name = "terraform";
     publisher = "HashiCorp";
-    version = "2.39.2026030417";
-    sha256 = "1zx0l0kyl0vy3jv21f47887la07igl61l6bdn1ygq7g89wjiyhil";
+    version = "2.39.2026071014";
+    sha256 = "09vl3iy1rldjbqy3vhy8xbhi89hf0465wp9j4rk38lij6790wj0x";
     arch = "linux-x64";
   }
   {
