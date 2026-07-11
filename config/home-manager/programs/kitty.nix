@@ -2,7 +2,7 @@
 {
   programs.kitty = {
     enable = true;
-    package = pkgs.unstable.kitty;
+    package = if pkgs.stdenv.hostPlatform.isDarwin then pkgs.kitty else pkgs.unstable.kitty;
     settings = {
       font_family = "Fira Code Retina Nerd Font Complete Mono";
       font_size = "12.0";
