@@ -505,6 +505,7 @@
             };
             prettier = {
               enable = true;
+              package = pkgs.callPackage ./config/home-manager/home/packages/prettier.nix { };
               types_or = markdownAndDataTypes;
               excludes = [
                 "^.pre-commit-config\\.yaml$"
