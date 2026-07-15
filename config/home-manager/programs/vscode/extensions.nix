@@ -69,8 +69,8 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.208";
-    sha256 = "0mjrksq79v4dn7d161zkihh6cqhlmqnrr7pvv6vxn0i6c3crcrxx";
+    version = "2.1.210";
+    sha256 = "1c8s4wad3lvn2l2z6r12b2bd7l709pkjky20j6vfhyyl9y622s5r";
     arch = "linux-x64";
   }
   {
@@ -88,8 +88,8 @@
   {
     name = "cmake-tools";
     publisher = "ms-vscode";
-    version = "1.24.22";
-    sha256 = "0amm644lirln1c09rp788azc90pz31z141w9vj7z3jlm3sj3rb6b";
+    version = "1.24.23";
+    sha256 = "11f01hsgxh8aaphchscfjrd78n92vyiy4ijb9l6d609whhiwy1cm";
   }
   {
     name = "code-d";
@@ -202,8 +202,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.7.130610";
-    sha256 = "1z733hv4m3xwar63p8bk1s5z26q30100ic9y9bb1512i4cvppzai";
+    version = "2026.7.140617";
+    sha256 = "1lyavkd5a33fgznnrssq1wbva1p7kgxgni9virr8c1qm0h6sfq4n";
   }
   {
     name = "haskell";
@@ -294,8 +294,8 @@
   {
     name = "nix-ide";
     publisher = "jnoortheen";
-    version = "0.5.9";
-    sha256 = "0s8q77x1wn0sd5b5wl89by2jswr7w1gxn9z2szp0gci4lskrrww4";
+    version = "0.5.10";
+    sha256 = "0gx0d4y18avl8jxpxwzqk77ib3s95yl8mm7c47g2rbsb250nmcz6";
   }
   {
     name = "nord-visual-studio-code";
@@ -374,8 +374,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2972";
-    sha256 = "1f5sfj1ql3bk31136ak0zy8w9anid7wgpmfnqc3p2h3x02a6ji7x";
+    version = "0.4.2973";
+    sha256 = "0sdgirsqxfv01l7wq3jkkfksszz8jn2sh1wjvg2pfjwaczqcmg6k";
     arch = "linux-x64";
   }
   {
