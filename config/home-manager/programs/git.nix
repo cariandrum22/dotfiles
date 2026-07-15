@@ -86,7 +86,7 @@ in
   programs.git = {
     enable = true;
     signing = {
-      key = "48F302B631525FA4D5A40106AC7AA4174AC64BA5";
+      key = "435C9CF0DE7A2C3900FB24357E622B43290C285E!";
       signByDefault = true;
     };
     lfs.enable = true;
