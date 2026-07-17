@@ -73,6 +73,7 @@
         ssm-session-manager-plugin
         eksctl
         google-cloud-sdk
+        snowflake-cli
         k6
         redis
 
