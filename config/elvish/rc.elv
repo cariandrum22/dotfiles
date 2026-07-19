@@ -266,6 +266,13 @@ set paths = [
   $@paths
 ]
 
+# Fall back when the current host cannot resolve kitty's terminfo entry.
+if (and (has-env TERM) (or (eq $E:TERM xterm-kitty) (eq $E:TERM kitty))) {
+  if (or (not (has-external infocmp)) (not ?(infocmp $E:TERM >/dev/null 2>&1))) {
+    set E:TERM = xterm-256color
+  }
+}
+
 # Configure tmux
 if (has-external tmux) {
   set E:TMUX_TMPDIR = "/run/user/"(id -u)
