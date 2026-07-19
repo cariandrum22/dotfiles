@@ -20,10 +20,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nixos-vscode-server = {
-      url = "github:msteen/nixos-vscode-server";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nixos-vscode-server.url = "github:msteen/nixos-vscode-server";
   };
 
   outputs =
@@ -377,6 +374,11 @@
         system:
         let
           pkgs = mkPkgs system;
+          commitizenPackage = pkgs.commitizen.overridePythonAttrs (old: {
+            # Python's argparse now quotes choices, but commitizen 4.13.9's
+            # regression fixture still expects the old presentation.
+            disabledTests = (old.disabledTests or [ ]) ++ [ "test_invalid_command" ];
+          });
           markdownlintConfig = builtins.fromJSON (builtins.readFile ./.markdownlint.json);
           markdownAndDataTypes = [
             "markdown"
@@ -561,6 +563,7 @@
           commitHooks = {
             commitizen = {
               enable = true;
+              package = commitizenPackage;
               stages = [ "commit-msg" ];
             };
             commitlint-pre-push = mkBashHook {
