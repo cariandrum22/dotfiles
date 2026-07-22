@@ -1,7 +1,30 @@
 { pkgs, ... }:
+
+let
+  tmuxLauncher = pkgs.writeShellScript "tmux" ''
+    case "''${TERM:-}" in
+      xterm-kitty|kitty)
+        if ! ${pkgs.ncurses}/bin/infocmp "$TERM" >/dev/null 2>&1; then
+          export TERM=xterm-256color
+        fi
+        ;;
+    esac
+
+    exec ${pkgs.tmux}/bin/tmux "$@"
+  '';
+  tmuxWithTerminfoFallback = pkgs.symlinkJoin {
+    name = pkgs.tmux.name;
+    paths = [ pkgs.tmux ];
+    postBuild = ''
+      rm "$out/bin/tmux"
+      ln -s ${tmuxLauncher} "$out/bin/tmux"
+    '';
+  };
+in
 {
   programs.tmux = {
     enable = true;
+    package = tmuxWithTerminfoFallback;
     shortcut = "t";
     terminal = "screen-256color";
     historyLimit = 100000;

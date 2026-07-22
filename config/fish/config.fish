@@ -104,15 +104,6 @@ if [ -d "$HOME/Go" ]
     set_path "$GOPATH/bin"
 end
 
-# Fall back when the current host cannot resolve kitty's terminfo entry.
-if contains -- "$TERM" xterm-kitty kitty
-    if not type -q infocmp
-        set -gx TERM xterm-256color
-    else if not infocmp "$TERM" >/dev/null 2>&1
-        set -gx TERM xterm-256color
-    end
-end
-
 # Restore terminal modes that can be left enabled after interrupted nested SSH.
 function __restore_terminal_after_ssh
     if test -w /dev/tty
