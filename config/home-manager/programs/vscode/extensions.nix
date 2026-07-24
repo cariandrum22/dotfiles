@@ -69,8 +69,8 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.217";
-    sha256 = "19nz0gbhf8kymssqbw7ql65iscabh8k03igk0hi1vvix2mgalclw";
+    version = "2.1.218";
+    sha256 = "1vcf3xx1zra6j2pw33nx4irfvyrbqzr908fc83pcr136j261g8v3";
     arch = "linux-x64";
   }
   {
@@ -88,8 +88,8 @@
   {
     name = "cmake-tools";
     publisher = "ms-vscode";
-    version = "1.24.23";
-    sha256 = "11f01hsgxh8aaphchscfjrd78n92vyiy4ijb9l6d609whhiwy1cm";
+    version = "1.24.25";
+    sha256 = "1m6s0n7scv2bgrrrvv6vdn4h4y08xcs6m9lbzpsscckiiyg3yd96";
   }
   {
     name = "code-d";
@@ -190,8 +190,8 @@
   {
     name = "geminicodeassist";
     publisher = "Google";
-    version = "2.92.0";
-    sha256 = "1x4h38a0zg4q8gs16428lk4l1hjynbc48gq89c4asi6lvlncn9gm";
+    version = "2.93.0";
+    sha256 = "1x7al0cnpw8mixfcw7p28h08qi3jprayzwppxh6qf3lygg5awa9s";
   }
   {
     name = "git-worktree-manager";
@@ -202,8 +202,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.7.210552";
-    sha256 = "06mwvqryyxq8b647xfml39176vggamzshkrmsvxjicfmsglkbm6r";
+    version = "2026.7.230551";
+    sha256 = "1d317jgl254qmkd98kzdba9z448c9iyinfgh0kg4j2zrw3vp4s89";
   }
   {
     name = "haskell";
@@ -226,8 +226,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.56.2026072108";
-    sha256 = "0p9ayihaq9a9agcwryam4xk9gwi5zshfivpg1dpbhm1qxlya1gpa";
+    version = "1.56.2026072208";
+    sha256 = "17kq2ydwp4gk9s5qqimi4cnrvmgk2kzf8ivybnk0nz7kzv3hbn04";
     arch = "linux-x64";
   }
   {
@@ -294,8 +294,8 @@
   {
     name = "nix-ide";
     publisher = "jnoortheen";
-    version = "0.5.10";
-    sha256 = "0gx0d4y18avl8jxpxwzqk77ib3s95yl8mm7c47g2rbsb250nmcz6";
+    version = "0.5.12";
+    sha256 = "1zyfm133db0yjjq7vi88wp0lgf992k4g84xcycgyka8p9niz6c1j";
   }
   {
     name = "nord-visual-studio-code";
@@ -349,8 +349,8 @@
   {
     name = "remote-ssh";
     publisher = "ms-vscode-remote";
-    version = "0.125.2026062315";
-    sha256 = "1ar89qnim2rfpgqnn63py2rzm7iawl0qs9hyzy4i6h0mnwssyal6";
+    version = "0.125.2026072315";
+    sha256 = "1hvqkqk29223barqgwygykbrskc9lrvbfmc856djf1j6ssqkg97q";
   }
   {
     name = "remote-ssh-edit";
@@ -367,15 +367,15 @@
   {
     name = "ruff";
     publisher = "charliermarsh";
-    version = "2026.62.0";
-    sha256 = "02dg6v3h2a2wkp4fj14n75fxl68z6sc56xb9p71xgc36wys8y7v0";
+    version = "2026.64.0";
+    sha256 = "1dr6fywrvf1pgx88kmh4pw2wp4ici6r563q6kpxbpbw2zmfh0qjh";
     arch = "linux-x64";
   }
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2983";
-    sha256 = "00r3xxq54g0n2c9s8mqlsmm08qnvymkywp5dgi0n0b3cwx306bk4";
+    version = "0.4.2985";
+    sha256 = "05r65nj76vxjpdbzrc91x22sg04vsywxz8s08rfb28jmd55g9z07";
     arch = "linux-x64";
   }
   {
@@ -418,8 +418,8 @@
   {
     name = "terraform";
     publisher = "HashiCorp";
-    version = "2.39.2026071014";
-    sha256 = "09vl3iy1rldjbqy3vhy8xbhi89hf0465wp9j4rk38lij6790wj0x";
+    version = "2.40.0";
+    sha256 = "18lwz1lmb29bsv7552ccamrlvdwvzapclx5axm7vj94pj4dwd9ax";
     arch = "linux-x64";
   }
   {
