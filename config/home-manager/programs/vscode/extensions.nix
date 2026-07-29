@@ -76,8 +76,8 @@
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "4.0.11";
-    sha256 = "0kwr2vfkc2m1l4i19ynpwwwr5093616gg2sryahvqfjc1akyzhxq";
+    version = "4.0.12";
+    sha256 = "1kj7cf3wc8rfg7410n7sbghaic87azbyfc6lsa7x82phz5maicv4";
   }
   {
     name = "cmake";
@@ -148,8 +148,8 @@
   {
     name = "emacs-mcx";
     publisher = "tuttieee";
-    version = "0.111.0";
-    sha256 = "0w0zi6hhq3sx5j8m8mk3vl098yvd7hpaa5nc35dph3shs3a02gnz";
+    version = "0.111.1";
+    sha256 = "13p5sz6h07d5rz5iplaxqd87s91m7bsphc7zb7vfjvpizq5hhk7v";
   }
   {
     name = "enhanced-toml";
@@ -202,8 +202,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.7.271307";
-    sha256 = "0zrby8afxyyda5v5bp9d8zq9wvszhnmz93dwcyg4nsd29xqg4h7v";
+    version = "2026.7.280554";
+    sha256 = "01j12hmv27b23gvnqi507gwk3swici0z7ivm1ryq4qx3pb5wsr6p";
   }
   {
     name = "haskell";
@@ -374,8 +374,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2990";
-    sha256 = "1zw24giy5n3a25154i5chy8q1vwgh8nn3xjyjmdlkwnax0lb2z1i";
+    version = "0.4.2991";
+    sha256 = "09m5jlk05yy4cp80rsj04fhywcca1g20i1r1h39f5cp5x3vgrzvv";
     arch = "linux-x64";
   }
   {
