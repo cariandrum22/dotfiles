@@ -34,7 +34,7 @@ import json
 import re
 import sys
 from html import unescape
-from typing import TYPE_CHECKING, NamedTuple, override
+from typing import TYPE_CHECKING, NamedTuple
 from urllib.error import HTTPError, URLError
 from urllib.parse import urljoin
 from urllib.request import HTTPRedirectHandler, build_opener, urlopen
@@ -109,8 +109,7 @@ class CursorMetadata(NamedTuple):
 class _NoRedirectHandler(HTTPRedirectHandler):
     """Return redirect responses without following large AppImage downloads."""
 
-    @override
-    def redirect_request(
+    def redirect_request(  # noqa: PLR0913, PLR0917, PLR6301
         self,
         req: object,
         fp: object,
