@@ -531,14 +531,14 @@ def _calculate_rusty_v8_archive_hashes(version: str) -> dict[str, str]:
     }
 
 
-def _extract_rust_sdks_source(source_dir: Path) -> tuple[str, str]:
+def _extract_rust_sdks_source(source_dir: Path) -> tuple[str, str] | None:
+    """Return the optional LiveKit SDK source pinned by Codex."""
     cargo_lock = source_dir / "Cargo.lock"
     match = _LIVEKIT_WEBRTC_SOURCE_PATTERN.search(
         cargo_lock.read_text(encoding="utf-8"),
     )
     if not match:
-        msg = f"Could not find rust-sdks source in {cargo_lock}"
-        raise RuntimeError(msg)
+        return None
     return match.group("repo"), match.group("rev")
 
 
@@ -551,6 +551,13 @@ def _extract_upstream_livekit_webrtc_tag(repo: str, rev: str) -> str:
         msg = f"Could not find WEBRTC_TAG in rust-sdks {repo}@{rev}"
         raise RuntimeError(msg)
     return match.group(1)
+
+
+def _extract_optional_livekit_webrtc_tag(source_dir: Path) -> str | None:
+    rust_sdks_source = _extract_rust_sdks_source(source_dir)
+    if rust_sdks_source is None:
+        return None
+    return _extract_upstream_livekit_webrtc_tag(*rust_sdks_source)
 
 
 def _livekit_webrtc_archive_url(tag: str, system: str) -> str:
@@ -777,10 +784,9 @@ def _refresh_release_metadata(
             tarball_path = _download_release_tarball(latest_version, temp_root)
             source_dir = _extract_codex_source_tree(tarball_path, temp_root)
             rusty_v8_version = _extract_upstream_rusty_v8_version(source_dir)
-            rust_sdks_repo, rust_sdks_rev = _extract_rust_sdks_source(source_dir)
-            livekit_webrtc_tag = _extract_upstream_livekit_webrtc_tag(
-                rust_sdks_repo,
-                rust_sdks_rev,
+            livekit_webrtc_tag = (
+                _extract_optional_livekit_webrtc_tag(source_dir)
+                or livekit_webrtc_tag
             )
     elif not RUSTY_V8_PATCH_FILE.exists():
         _regenerate_rusty_v8_patch(latest_version)
@@ -793,13 +799,9 @@ def _refresh_release_metadata(
             rusty_v8_version = rusty_v8_version or _extract_upstream_rusty_v8_version(
                 source_dir,
             )
-            rust_sdks_repo, rust_sdks_rev = _extract_rust_sdks_source(source_dir)
             livekit_webrtc_tag = (
                 livekit_webrtc_tag
-                or _extract_upstream_livekit_webrtc_tag(
-                    rust_sdks_repo,
-                    rust_sdks_rev,
-                )
+                or _extract_optional_livekit_webrtc_tag(source_dir)
             )
 
     if rusty_v8_version is None or livekit_webrtc_tag is None:
