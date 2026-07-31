@@ -62,8 +62,8 @@
   {
     name = "chatgpt";
     publisher = "openai";
-    version = "26.5721.30844";
-    sha256 = "1dxv6iqlrqg97raqm6j3w36x7vzl3gscr1bzcdlryzq4w2l1yxa1";
+    version = "26.5727.40816";
+    sha256 = "04zqgk26ka378hbbh8z8rx3mifbby91rwii1c3g8wa6gffwm16ly";
     arch = "linux-x64";
   }
   {
@@ -196,14 +196,14 @@
   {
     name = "git-worktree-manager";
     publisher = "jackiotyu";
-    version = "3.26.1";
-    sha256 = "0z6pans84vibxlv33k5ag41cbp5grk7ybvz6na59jjjl9nfrlljw";
+    version = "3.26.2";
+    sha256 = "0i5y1ac0fwwq3315b9plpyfkql49w4jvzh07m2wiaswap9mbsfwf";
   }
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.7.280554";
-    sha256 = "01j12hmv27b23gvnqi507gwk3swici0z7ivm1ryq4qx3pb5wsr6p";
+    version = "2026.7.300552";
+    sha256 = "0cc2fmbwnr727i9lh77r07cz6ivrkmjjggbn89b8xkcbq6rkijni";
   }
   {
     name = "haskell";
@@ -226,8 +226,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.56.2026072408";
-    sha256 = "0sqnvccd1x1i2w44h21k8nfwwmrxpgrpgd5xhwd9p7pskzi2bsx1";
+    version = "1.56.2026073008";
+    sha256 = "1fx683iyyd2x8p9sksbyx3w14spfvvqxh85jz2wxhh2n5510x22j";
     arch = "linux-x64";
   }
   {
@@ -258,8 +258,8 @@
   {
     name = "lean4";
     publisher = "leanprover";
-    version = "0.0.238";
-    sha256 = "1ha6zvync55h90cpfvy6p1xpgxrdffzziwb1wpdf33xy7h22c492";
+    version = "0.0.239";
+    sha256 = "1slbqc12d201p0z9w2nr7rr7vqg7xyrgsabrssrnrkjl56ca6yp9";
   }
   {
     name = "liquidhaskell-diagnostics";
@@ -361,21 +361,21 @@
   {
     name = "ruby-lsp";
     publisher = "Shopify";
-    version = "0.10.5";
-    sha256 = "1j3r6s4il9267jk2pxg2afm5r30436k7bm12nmnkv5qmrvdkz0y2";
+    version = "0.10.6";
+    sha256 = "1wkgk41mzmrq5jlp4128dvx0mmvwfawbpkl2819gyjhw516iy8g7";
   }
   {
     name = "ruff";
     publisher = "charliermarsh";
-    version = "2026.66.0";
-    sha256 = "0mk5y12ri0ymva4ld5k6bh5i2mmp8j44k3b9jzzhr9y9dmnvrmiy";
+    version = "2026.68.0";
+    sha256 = "17nsz7szvnz6qw9fapfwzpc2xd5j5ny096yw91dx3clrr4m1hiv8";
     arch = "linux-x64";
   }
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2991";
-    sha256 = "09m5jlk05yy4cp80rsj04fhywcca1g20i1r1h39f5cp5x3vgrzvv";
+    version = "0.4.2993";
+    sha256 = "1s1ibzv1jhrr4vff1mx7c30syfc5686r84xq5jl9hsphnbp8v6wi";
     arch = "linux-x64";
   }
   {
