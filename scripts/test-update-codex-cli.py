@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -102,10 +103,28 @@ def test_cargo_hash_replacement_preserves_closing_brace_indent() -> None:
     )
 
 
+def test_missing_optional_rust_sdks_source_is_supported() -> None:
+    update_codex_cli = _load_update_codex_cli()
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        source_dir = Path(temp_dir)
+        (source_dir / "Cargo.lock").write_text(
+            '[[package]]\nname = "codex-cli"\nversion = "0.146.0"\n',
+            encoding="utf-8",
+        )
+
+        source = update_codex_cli._extract_rust_sdks_source(source_dir)
+
+    if source is not None:
+        msg = "missing optional rust-sdks source was not accepted"
+        raise AssertionError(msg)
+
+
 def main() -> None:
     test_numeric_replacement_does_not_form_octal_backreference()
     test_livekit_tag_replacement_preserves_prefix_and_suffix()
     test_cargo_hash_replacement_preserves_closing_brace_indent()
+    test_missing_optional_rust_sdks_source_is_supported()
 
 
 if __name__ == "__main__":

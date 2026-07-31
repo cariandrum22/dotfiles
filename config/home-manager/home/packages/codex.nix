@@ -201,6 +201,13 @@ rustPlatform.buildRustPackage (
 
     cargoHash = cargoHashes.${pkgs.stdenv.system};
 
+    # Build only the distributed CLI. Upstream's workspace also contains
+    # samples and test utilities that are not part of this package.
+    cargoBuildFlags = [
+      "-p"
+      "codex-cli"
+    ];
+
     cargoPatches = [
       ./stub-runfiles.patch
     ];
