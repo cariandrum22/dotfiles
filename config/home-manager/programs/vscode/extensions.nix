@@ -76,8 +76,8 @@
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "4.0.12";
-    sha256 = "1kj7cf3wc8rfg7410n7sbghaic87azbyfc6lsa7x82phz5maicv4";
+    version = "4.1.2";
+    sha256 = "14if7mrvrjzv03srjm4n5dc4r5wr023d9q6vsd6yv1d3hg355wk7";
   }
   {
     name = "cmake";
@@ -202,8 +202,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.7.300552";
-    sha256 = "0cc2fmbwnr727i9lh77r07cz6ivrkmjjggbn89b8xkcbq6rkijni";
+    version = "2026.7.310556";
+    sha256 = "1j8q8p64ca8swsfvrpmvi3k4k8h85aljvdn73i8v4qcfqb58j2vb";
   }
   {
     name = "haskell";
@@ -226,8 +226,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.56.2026073008";
-    sha256 = "1fx683iyyd2x8p9sksbyx3w14spfvvqxh85jz2wxhh2n5510x22j";
+    version = "1.56.2026073109";
+    sha256 = "1nhm3q0gw4y3vrrhhm9ib5bd7p8mzw8y6bcip3p1n6aqdk14wvx7";
     arch = "linux-x64";
   }
   {
