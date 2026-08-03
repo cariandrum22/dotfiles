@@ -76,8 +76,8 @@
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "4.1.2";
-    sha256 = "14if7mrvrjzv03srjm4n5dc4r5wr023d9q6vsd6yv1d3hg355wk7";
+    version = "4.1.3";
+    sha256 = "05sjz0lw93yxiyd6w7daimckzmd21c8196xlw1sl0glny5iynm6g";
   }
   {
     name = "cmake";
@@ -374,8 +374,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.2994";
-    sha256 = "0zb4cfi3p1a6f26rygpd42syhzcz0pvvxdx21vkyddlvkjwm685x";
+    version = "0.4.2996";
+    sha256 = "1fhqz9ldszx2wbvgpzn02mvw0qzsmig57fhzjga5p8d7w11xlfx9";
     arch = "linux-x64";
   }
   {
@@ -503,8 +503,8 @@
   {
     name = "vscode-ide";
     publisher = "tlaplus";
-    version = "2026.7.211258";
-    sha256 = "0s33yc3pr2ifjrk2mc2qivl1nspr928dazcdyxlv2w2rwmj01xqb";
+    version = "2026.8.22255";
+    sha256 = "0pd0paq7snm6si232dcws9xl95cbmjbyfdq2fhz3bk2k990jyddn";
   }
   {
     name = "vscode-java-debug";
@@ -515,8 +515,8 @@
   {
     name = "vscode-markdownlint";
     publisher = "DavidAnson";
-    version = "0.62.0";
-    sha256 = "16v7rkr2xhk5rc404y22knbcbi2krvpjj1ripmhsqk3k6ysmgskj";
+    version = "0.62.1";
+    sha256 = "065miyw6x6mdpx1c5i8rcrrwz945wpdy7ms701g3qkankid2j7fd";
   }
   {
     name = "vscode-pbkit";
