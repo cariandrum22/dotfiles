@@ -11,6 +11,7 @@
 # - pre-commit: test-only dotnet dependency triggers LLVM build
 # - direnv 2.37.1: fish test is killed on macOS (blocks direnv-elvish-hook)
 # - inetutils 2.7: clang format string error on macOS (blocks home-manager)
+# - Obsidian 1.13.4: DMG nests Obsidian.app under a versioned directory
 #
 # Note: tlaps is excluded on macOS via lib.optionals in default.nix
 # (vampire-5.0.0 build fails with clang on macOS)
@@ -52,6 +53,11 @@ if prev.stdenv.isDarwin && prev.stdenv.hostPlatform.isAarch64 then
 
     # direnv's fish tests are flaky on macOS and block elvish hook generation.
     direnv = direnvNoCheck;
+
+    # Obsidian's DMG no longer places the application at the archive root.
+    obsidian = prev.obsidian.overrideAttrs (old: {
+      sourceRoot = "Obsidian ${old.version}-universal/Obsidian.app";
+    });
   }
 else
   { }
