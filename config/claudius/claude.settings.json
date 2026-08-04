@@ -1,4 +1,5 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "cleanupPeriodDays": 30,
   "enabledPlugins": {
     "gopls-lsp@claude-plugins-official": true,
@@ -6,13 +7,18 @@
   },
   "preferredNotifChannel": "terminal_bell",
   "model": "opus",
-  "includeCoAuthoredBy": false,
+  "effortLevel": "xhigh",
+  "skipDangerousModePermissionPrompt": true,
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
   "env": {
-    "MAX_THINKING_TOKENS": "31999",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "permissions": {
-    "defaultMode": "acceptEdits",
+    "defaultMode": "bypassPermissions",
     "allow": [
       "Bash(awk:*)",
       "Bash(bazel:*)",
@@ -84,7 +90,6 @@
       "mcp__awslabs_aws-documentation-mcp-server",
       "mcp__codex",
       "mcp__figma",
-      "mcp__figma-desktop",
       "mcp__chrome-devtools",
       "mcp__github",
       "mcp__google-calendar",
