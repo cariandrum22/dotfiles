@@ -5,9 +5,13 @@
 # See the configuration reference for the latest options:
 # https://developers.openai.com/codex/config-reference/
 #
-# Recommended baseline:
-# - Disallow `danger-full-access` in enforced environments.
-# - Permit `approval_policy = "never"` only if you accept automatic execution risk.
+# These managed environments use an OS-level sandbox boundary, so Codex may use
+# unrestricted local execution without layering its legacy sandbox on top.
 
-allowed_approval_policies = ["untrusted", "on-failure", "on-request", "never"]
-allowed_sandbox_modes = ["read-only", "workspace-write"]
+allowed_approval_policies = ["untrusted", "on-request", "never", "granular"]
+default_permissions = ":danger-full-access"
+
+[allowed_permission_profiles]
+":read-only" = true
+":workspace" = true
+":danger-full-access" = true

@@ -16,7 +16,6 @@ let
   baseMcpServers = builtins.fromJSON (builtins.readFile (claudiusSource + "/mcpServers.json"));
   nonHeadlessMcpServerNames = [
     "figma"
-    "figma-desktop"
     "notion"
     "todoist"
   ];
@@ -28,6 +27,7 @@ let
     else
       baseMcpServers.mcpServers;
   playwrightArgs = [
+    "-y"
     "@playwright/mcp@latest"
   ]
   ++ lib.optionals (claudiusConfig.isLinux && !isHeadless) [
@@ -74,7 +74,6 @@ in
     };
 
     "claudius/claude.settings.json".source = claudiusSource + "/claude.settings.json";
-    "claudius/settings.json".source = claudiusSource + "/settings.json";
     "claudius/codex.settings.toml".source = claudiusSource + "/codex.settings.toml";
     "claudius/codex.managed_config.toml".source = claudiusSource + "/codex.managed_config.toml";
     "claudius/codex.requirements.toml".source = claudiusSource + "/codex.requirements.toml";
@@ -85,6 +84,8 @@ in
   };
 
   home = {
+    file.".gemini/policies/claudius.toml".source = claudiusSource + "/gemini.policy.toml";
+
     activation = {
       ensureClaudiusStateDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         claudius_config_dir="$HOME/.config/claudius"

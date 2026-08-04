@@ -1,42 +1,22 @@
-model = "gpt-5.4"
-review_model = "gpt-5.4"
+model = "gpt-5.6-sol"
+review_model = "gpt-5.6-sol"
 model_provider = "cloudflare_openai"
 model_reasoning_effort = "xhigh"
 model_reasoning_summary = "auto"
 approval_policy = "never"
-sandbox_mode = "workspace-write"
-
-[sandbox_workspace_write]
-writable_roots = ["/tmp", "/var/tmp"]
-network_access = false
-exclude_tmpdir_env_var = false
-exclude_slash_tmp = false
+default_permissions = ":danger-full-access"
 
 [shell_environment_policy]
 inherit = "all"
 set = { SHELL = "/bin/bash" }
-exclude = [
-    "SHELL",
-    "AWS_ACCESS_KEY_ID",
-    "AWS_SECRET_ACCESS_KEY",
-    "AWS_SESSION_TOKEN",
-    "AZURE_OPENAI_API_KEY",
-    "CLAUDE_API_KEY",
-    "OPENAI_API_KEY",
-    "OPENAI_ORG_ID",
-    "OPENAI_PROJECT_ID",
-    "ANTHROPIC_API_KEY",
-    "GITHUB_PERSONAL_ACCESS_TOKEN",
-    "PERPLEXITY_API_KEY",
-    "FIGMA_API_KEY",
-    "GEMINI_API_KEY",
-    "GOOGLE_API_KEY",
-    "GOOGLE_APPLICATION_CREDENTIALS",
-    "GOOGLE_OAUTH_CREDENTIALS",
-    "API_KEY",
-    "CF_AIG_TOKEN",
-    "CLAUDIUS_SECRET_*",
-]
+ignore_default_excludes = false
+
+[shell_environment_policy.filters]
+"OPENAI_ORG_ID" = "exclude"
+"OPENAI_PROJECT_ID" = "exclude"
+"GOOGLE_APPLICATION_CREDENTIALS" = "exclude"
+"GOOGLE_OAUTH_CREDENTIALS" = "exclude"
+"GCP_SERVICE_ACCOUNT" = "exclude"
 
 [model_providers.cloudflare_openai]
 name = "Cloudflare AI Gateway (OpenAI)"

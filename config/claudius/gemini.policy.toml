@@ -1,0 +1,27 @@
+[[rule]]
+toolName = "run_shell_command"
+commandPrefix = [
+  "curl",
+  "wget",
+  "ls",
+  "cat",
+  "rg",
+  "find",
+  "jq",
+  "sed",
+  "awk",
+  "head",
+  "tail",
+  "git status",
+  "git diff",
+  "git log",
+  "git show",
+  "git rev-parse",
+  "git branch",
+  "git fetch",
+  "npm test",
+  "cargo test",
+  "pytest",
+]
+decision = "allow"
+priority = 100

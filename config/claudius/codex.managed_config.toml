@@ -12,10 +12,4 @@
 # https://developers.openai.com/codex/security#managed-defaults-managed_configtoml
 
 approval_policy = "never"
-sandbox_mode = "workspace-write"
-
-[sandbox_workspace_write]
-writable_roots = ["/tmp", "/var/tmp"]
-network_access = false
-exclude_tmpdir_env_var = false
-exclude_slash_tmp = false
+default_permissions = ":danger-full-access"
