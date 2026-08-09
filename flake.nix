@@ -142,6 +142,7 @@
 
       linuxHeadlessHomeModules = [
         ./config/home-manager/home/packages/linux.nix
+        ./config/home-manager/home/packages/linux-headless.nix
         ./config/home-manager/services/keybase.nix
         ./config/home-manager/services/vscode-server.nix
         ./config/home-manager/services/gpg-agent.nix
@@ -247,6 +248,7 @@
         }
         // nixpkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
           cursor = pkgs.callPackage ./config/home-manager/home/packages/cursor.nix { };
+          even-terminal = pkgs.callPackage ./config/home-manager/home/packages/even-terminal { };
           myxmonad = mkXMonad pkgs;
           headless = self.homeConfigurations."${system}-headless".activationPackage;
         }
