@@ -419,6 +419,36 @@ def _extract_rusty_v8_archive_hashes(content: str) -> dict[str, str]:
     }
 
 
+def _nix_attrset_indents(
+    content: str,
+    body: str,
+    attr_name: str,
+) -> tuple[str, str]:
+    block_indent_match = re.search(
+        rf'^(\s*){re.escape(attr_name)}\s*=\s*{{',
+        content,
+        re.MULTILINE,
+    )
+    block_indent = block_indent_match.group(1) if block_indent_match else ""
+    entry_indent_match = re.search(
+        r'^(\s*)[A-Za-z0-9_-]+\s*=\s*"[^"]+";',
+        body,
+        re.MULTILINE,
+    )
+    entry_indent = (
+        entry_indent_match.group(1)
+        if entry_indent_match
+        else f"{block_indent}  "
+    )
+    closing_indent_match = re.search(r"\n([ \t]*)\Z", body)
+    closing_indent = (
+        closing_indent_match.group(1)
+        if closing_indent_match
+        else block_indent
+    )
+    return entry_indent, closing_indent
+
+
 def _update_rusty_v8_archive_hashes(
     content: str, hashes: dict[str, str],
 ) -> str:
@@ -432,16 +462,15 @@ def _update_rusty_v8_archive_hashes(
         raise ValueError(msg)
 
     body = match.group("body")
-    indent_match = re.search(
-        r'^(\s*)[A-Za-z0-9_-]+\s*=\s*"[^"]+";',
+    entry_indent, closing_indent = _nix_attrset_indents(
+        content,
         body,
-        re.MULTILINE,
+        "rustyV8ArchiveHashes",
     )
-    entry_indent = indent_match.group(1) if indent_match else "    "
     updated_body = "\n".join(
         f'{entry_indent}{system} = "{hashes[system]}";'
         for system in _RUSTY_V8_TARGETS
-    ) + "\n"
+    ) + f"\n{closing_indent}"
     return content[:match.start("body")] + updated_body + content[match.end("body"):]
 
 
@@ -478,16 +507,15 @@ def _update_livekit_webrtc_zip_hashes(
         raise ValueError(msg)
 
     body = match.group("body")
-    indent_match = re.search(
-        r'^(\s*)[A-Za-z0-9_-]+\s*=\s*"[^"]+";',
+    entry_indent, closing_indent = _nix_attrset_indents(
+        content,
         body,
-        re.MULTILINE,
+        "livekitWebRtcZipHashes",
     )
-    entry_indent = indent_match.group(1) if indent_match else "    "
     updated_body = "\n".join(
         f'{entry_indent}{system} = "{hashes[system]}";'
         for system in _LIVEKIT_WEBRTC_TRIPLES
-    ) + "\n"
+    ) + f"\n{closing_indent}"
     return content[:match.start("body")] + updated_body + content[match.end("body"):]
 
 
@@ -655,32 +683,11 @@ def _update_cargo_hashes(
         raise ValueError(msg)
 
     body = match.group("body")
-    indent_match = re.search(
-        r'^(\s*)[A-Za-z0-9_-]+\s*=\s*"[^"]+";',
+    entry_indent, closing_indent = _nix_attrset_indents(
+        content,
         body,
-        re.MULTILINE,
+        "cargoHashes",
     )
-    if indent_match:
-        entry_indent = indent_match.group(1)
-    else:
-        block_indent_match = re.search(
-            r'^(\s*)cargoHashes\s*=\s*{',
-            content,
-            re.MULTILINE,
-        )
-        block_indent = block_indent_match.group(1) if block_indent_match else ""
-        entry_indent = f"{block_indent}  "
-
-    closing_indent_match = re.search(r"\n([ \t]*)\Z", body)
-    if closing_indent_match:
-        closing_indent = closing_indent_match.group(1)
-    else:
-        block_indent_match = re.search(
-            r'^(\s*)cargoHashes\s*=\s*{',
-            content,
-            re.MULTILINE,
-        )
-        closing_indent = block_indent_match.group(1) if block_indent_match else ""
 
     hashes = _extract_cargo_hashes(content)
     for system in systems:

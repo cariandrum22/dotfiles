@@ -103,6 +103,40 @@ def test_cargo_hash_replacement_preserves_closing_brace_indent() -> None:
     )
 
 
+def test_archive_hash_replacements_preserve_closing_brace_indent() -> None:
+    update_codex_cli = _load_update_codex_cli()
+    cases = (
+        (
+            "rustyV8ArchiveHashes",
+            update_codex_cli._RUSTY_V8_TARGETS,
+            update_codex_cli._update_rusty_v8_archive_hashes,
+        ),
+        (
+            "livekitWebRtcZipHashes",
+            update_codex_cli._LIVEKIT_WEBRTC_TRIPLES,
+            update_codex_cli._update_livekit_webrtc_zip_hashes,
+        ),
+    )
+
+    for attr_name, systems, update_hashes in cases:
+        entries = "".join(f'    {system} = "sha256-old";\n' for system in systems)
+        content = f"let\n  {attr_name} = {{\n{entries}  }};\nin\n{{}}\n"
+        hashes = dict.fromkeys(systems, "sha256-new")
+
+        updated = update_hashes(content, hashes)
+
+        _require_contains(
+            "\n  };\n",
+            updated,
+            f"{attr_name} closing brace indentation was not preserved",
+        )
+        _require_not_contains(
+            "\n};\n",
+            updated,
+            f"{attr_name} closing brace was moved to column zero",
+        )
+
+
 def test_missing_optional_rust_sdks_source_is_supported() -> None:
     update_codex_cli = _load_update_codex_cli()
 
@@ -124,6 +158,7 @@ def main() -> None:
     test_numeric_replacement_does_not_form_octal_backreference()
     test_livekit_tag_replacement_preserves_prefix_and_suffix()
     test_cargo_hash_replacement_preserves_closing_brace_indent()
+    test_archive_hash_replacements_preserve_closing_brace_indent()
     test_missing_optional_rust_sdks_source_is_supported()
 
 
