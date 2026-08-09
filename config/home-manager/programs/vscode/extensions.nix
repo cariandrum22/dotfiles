@@ -69,8 +69,8 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.225";
-    sha256 = "1nsh5kf9jg4hi56w6v6kkx5sybkk4sp3cwkqjswkgyh4ccy4qqya";
+    version = "2.1.226";
+    sha256 = "19yc3f5myf4ga7ayw89hcp94x1252k3x7xxp5fhfji2sxhf6i62p";
     arch = "linux-x64";
   }
   {
@@ -148,8 +148,8 @@
   {
     name = "emacs-mcx";
     publisher = "tuttieee";
-    version = "0.111.2";
-    sha256 = "0a8pjp1yy5zhjp594yx6dkr1yirwxyawx0mrrp9qsm7dc2bg8av5";
+    version = "0.111.3";
+    sha256 = "0cay0idvdkm657qbrgv6l07mpd4vppr1wgia970mj2gk5sy89j68";
   }
   {
     name = "enhanced-toml";
@@ -190,8 +190,8 @@
   {
     name = "geminicodeassist";
     publisher = "Google";
-    version = "2.93.0";
-    sha256 = "1x7al0cnpw8mixfcw7p28h08qi3jprayzwppxh6qf3lygg5awa9s";
+    version = "2.95.0";
+    sha256 = "0wyx3yjicdcjpyj8q0s12m95zxbzkgm0wmfgh87vdlsss7cqkgxn";
   }
   {
     name = "git-worktree-manager";
@@ -202,8 +202,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.8.71605";
-    sha256 = "166784fjqms4fjzr8x9l57cwyclpdcpa6kqs4crazyaxfm54mmcr";
+    version = "2026.8.80516";
+    sha256 = "124pfr0aidf5iyxsnrbvy2s94yffmasa1cjbgg37c4z1yikfqklf";
   }
   {
     name = "haskell";
@@ -374,8 +374,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.3002";
-    sha256 = "0aq3rl7rwk13jv9xvnhjd763wj0w220w9c2rmms0rw7bndxifd1m";
+    version = "0.4.3003";
+    sha256 = "0r6hmq2ans9y8j7q33fydj6gdf4kj8rhq5cfn4w7vd0fib3c7gpd";
     arch = "linux-x64";
   }
   {
