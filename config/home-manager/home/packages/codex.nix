@@ -118,6 +118,15 @@ let
 
   rustyV8Version = "150.4.0";
 
+  # `codex-code-mode-runtime` turns on the v8 crate's `v8_enable_sandbox`
+  # feature (which implies pointer compression). denoland/rusty_v8 publishes no
+  # prebuilts for that flavor, so upstream Codex builds them itself and attaches
+  # them to its own `rusty-v8-v*` release. Mirror what upstream's
+  # `.github/actions/setup-rusty-v8` does and consume the same artifacts.
+  rustyV8Profile = "ptrcomp_sandbox_release";
+
+  rustyV8BaseUrl = "https://github.com/openai/codex/releases/download/rusty-v8-v${rustyV8Version}";
+
   rustyV8Targets = {
     x86_64-linux = "x86_64-unknown-linux-gnu";
     aarch64-linux = "aarch64-unknown-linux-gnu";
@@ -125,18 +134,33 @@ let
     aarch64-darwin = "aarch64-apple-darwin";
   };
 
+  rustyV8Target = rustyV8Targets.${pkgs.stdenv.system};
+
   rustyV8ArchiveHashes = {
-    x86_64-linux = "sha256-WGn9twcbHyHyAKl86X0gElh34PMc2ALtmd4sU/SIsGw=";
-    aarch64-linux = "sha256-txd9Uq0zNycv4NO453gjnIIalcJdWVnexiue/WVPfdM=";
-    x86_64-darwin = "sha256-5ex9E/kUgT6/IB1Ee/j9J2h7exkuFsR/KCb+VBUXHyk=";
-    aarch64-darwin = "sha256-zNj4FIW4IsWxiuun+d65KaM4LYasZzu/DzZvBod+axA=";
+    x86_64-linux = "sha256-o1x10fJuapg4haRbM0kKTr5U8FBQVosyuJz7QhswtYM=";
+    aarch64-linux = "sha256-0VF+7UBUaFNwKbAF1f6ZfsdNXI01H5FrOm3yC30oEbo=";
+    x86_64-darwin = "sha256-4Nm7ZOizoDTCkwyDly8/NXYCERSDQvoEB7OCUO8zCFY=";
+    aarch64-darwin = "sha256-AK27SHmISMd1UEQcaGc6XoUpuOG3PqvN7iMss5tA9KE=";
+  };
+
+  rustyV8SrcBindingHashes = {
+    x86_64-linux = "sha256-dyeCauR5vbZF6Acjn7EtH44uI956bPFvXuWSaQ0dhQY=";
+    aarch64-linux = "sha256-dyeCauR5vbZF6Acjn7EtH44uI956bPFvXuWSaQ0dhQY=";
+    x86_64-darwin = "sha256-ylrfDPicmnCtRgrnNkiy/om3SqETs8t/dXtqArdYOU8=";
+    aarch64-darwin = "sha256-ylrfDPicmnCtRgrnNkiy/om3SqETs8t/dXtqArdYOU8=";
   };
 
   rustyV8Archive = pkgs.fetchurl {
-    url = "https://github.com/denoland/rusty_v8/releases/download/v${rustyV8Version}/librusty_v8_release_${
-      rustyV8Targets.${pkgs.stdenv.system}
-    }.a.gz";
+    url = "${rustyV8BaseUrl}/librusty_v8_${rustyV8Profile}_${rustyV8Target}.a.gz";
     hash = rustyV8ArchiveHashes.${pkgs.stdenv.system};
+  };
+
+  # The v8 crate `include!`s the generated bindings instead of running bindgen,
+  # and only vendors the flavors it publishes itself. Supply the matching
+  # sandbox bindings so the build never reaches for the network.
+  rustyV8SrcBinding = pkgs.fetchurl {
+    url = "${rustyV8BaseUrl}/src_binding_${rustyV8Profile}_${rustyV8Target}.rs";
+    hash = rustyV8SrcBindingHashes.${pkgs.stdenv.system};
   };
 
   livekitWebRtcTag = "webrtc-24f6822-2";
@@ -201,11 +225,16 @@ rustPlatform.buildRustPackage (
 
     cargoHash = cargoHashes.${pkgs.stdenv.system};
 
-    # Build only the distributed CLI. Upstream's workspace also contains
-    # samples and test utilities that are not part of this package.
+    # Build the distributed CLI plus the Code Mode host helper. Upstream's
+    # workspace also contains samples and test utilities that are not part of
+    # this package. Since rust-v0.147.0 the CLI spawns `codex-code-mode-host`,
+    # which it resolves as a sibling of its own executable, so that binary has
+    # to land in the same `bin` directory.
     cargoBuildFlags = [
       "-p"
       "codex-cli"
+      "-p"
+      "codex-code-mode-host"
     ];
 
     cargoPatches = [
@@ -270,6 +299,7 @@ rustPlatform.buildRustPackage (
 
     # Keep rusty_v8 fully offline inside the Nix sandbox.
     RUSTY_V8_ARCHIVE = "${rustyV8Archive}";
+    RUSTY_V8_SRC_BINDING_PATH = "${rustyV8SrcBinding}";
 
     # Keep LiveKit WebRTC fully offline inside the Nix sandbox.
     LK_CUSTOM_WEBRTC = "${livekitWebRtcArchive}";
