@@ -2,9 +2,9 @@
 """Update codex-cli tool using functional programming style.
 
 This script updates codex-cli metadata in Nix and maintains per-platform
-cargoHashes, rusty_v8 archive hashes, and LiveKit WebRTC archive hashes. It
-fetches the latest version from GitHub releases and generates the appropriate
-hashes.
+cargoHashes, rusty_v8 prebuilt hashes (static archive plus generated bindings),
+and LiveKit WebRTC archive hashes. It fetches the latest version from GitHub
+releases and generates the appropriate hashes.
 
 Usage:
     ./update-codex-cli.py
@@ -39,7 +39,7 @@ import common
 import update_lib as lib
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterable
 
 # Path to the nix file
 NIX_FILE = Path("config/home-manager/home/packages/codex.nix")
@@ -60,7 +60,12 @@ CONFIG = lib.UpdateConfig(
 
 GITHUB_REPO = "openai/codex"
 VERSION_PREFIX = "rust-v"  # Codex uses "rust-v" prefix for versions
-_RUSTY_V8_GITHUB_REPO = "denoland/rusty_v8"
+# `codex-code-mode-runtime` enables the v8 crate's `v8_enable_sandbox` feature,
+# and denoland/rusty_v8 publishes no prebuilts for that flavor. Upstream Codex
+# builds them itself and attaches them to its own `rusty-v8-v*` release, so
+# follow `.github/actions/setup-rusty-v8` in openai/codex and use those assets.
+_RUSTY_V8_GITHUB_REPO = "openai/codex"
+_RUSTY_V8_PROFILE = "ptrcomp_sandbox_release"
 _LIVEKIT_RUST_SDKS_GITHUB_REPO = "livekit/rust-sdks"
 
 _SYSTEM_MAP = {
@@ -399,9 +404,10 @@ def _update_livekit_webrtc_tag(content: str, tag: str) -> str:
     return updated
 
 
-def _extract_rusty_v8_archive_hashes(content: str) -> dict[str, str]:
+def _extract_system_hashes(content: str, attr_name: str) -> dict[str, str]:
+    """Read a `system = "hash";` attrset from codex.nix."""
     match = re.search(
-        r'rustyV8ArchiveHashes\s*=\s*{\n(?P<body>.*?)};',
+        rf'{re.escape(attr_name)}\s*=\s*{{\n(?P<body>.*?)}};',
         content,
         re.DOTALL,
     )
@@ -417,6 +423,14 @@ def _extract_rusty_v8_archive_hashes(content: str) -> dict[str, str]:
             re.MULTILINE,
         )
     }
+
+
+def _extract_rusty_v8_archive_hashes(content: str) -> dict[str, str]:
+    return _extract_system_hashes(content, "rustyV8ArchiveHashes")
+
+
+def _extract_rusty_v8_src_binding_hashes(content: str) -> dict[str, str]:
+    return _extract_system_hashes(content, "rustyV8SrcBindingHashes")
 
 
 def _nix_attrset_indents(
@@ -449,86 +463,86 @@ def _nix_attrset_indents(
     return entry_indent, closing_indent
 
 
-def _update_rusty_v8_archive_hashes(
-    content: str, hashes: dict[str, str],
+def _update_system_hashes(
+    content: str,
+    attr_name: str,
+    hashes: dict[str, str],
+    systems: Iterable[str],
 ) -> str:
+    """Rewrite a `system = "hash";` attrset in codex.nix."""
     match = re.search(
-        r'rustyV8ArchiveHashes\s*=\s*{\n(?P<body>.*?)};',
+        rf'{re.escape(attr_name)}\s*=\s*{{\n(?P<body>.*?)}};',
         content,
         re.DOTALL,
     )
     if not match:
-        msg = "Could not find rustyV8ArchiveHashes block in codex.nix"
+        msg = f"Could not find {attr_name} block in codex.nix"
         raise ValueError(msg)
 
     body = match.group("body")
-    entry_indent, closing_indent = _nix_attrset_indents(
-        content,
-        body,
-        "rustyV8ArchiveHashes",
-    )
+    entry_indent, closing_indent = _nix_attrset_indents(content, body, attr_name)
     updated_body = "\n".join(
-        f'{entry_indent}{system} = "{hashes[system]}";'
-        for system in _RUSTY_V8_TARGETS
+        f'{entry_indent}{system} = "{hashes[system]}";' for system in systems
     ) + f"\n{closing_indent}"
     return content[:match.start("body")] + updated_body + content[match.end("body"):]
 
 
-def _extract_livekit_webrtc_zip_hashes(content: str) -> dict[str, str]:
-    match = re.search(
-        r'livekitWebRtcZipHashes\s*=\s*{\n(?P<body>.*?)};',
+def _update_rusty_v8_archive_hashes(
+    content: str, hashes: dict[str, str],
+) -> str:
+    return _update_system_hashes(
         content,
-        re.DOTALL,
+        "rustyV8ArchiveHashes",
+        hashes,
+        _RUSTY_V8_TARGETS,
     )
-    if not match:
-        return {}
 
-    body = match.group("body")
-    return {
-        entry.group(1): entry.group(2)
-        for entry in re.finditer(
-            r'^\s*([A-Za-z0-9_-]+)\s*=\s*"([^"]+)";',
-            body,
-            re.MULTILINE,
-        )
-    }
+
+def _update_rusty_v8_src_binding_hashes(
+    content: str, hashes: dict[str, str],
+) -> str:
+    return _update_system_hashes(
+        content,
+        "rustyV8SrcBindingHashes",
+        hashes,
+        _RUSTY_V8_TARGETS,
+    )
+
+
+def _extract_livekit_webrtc_zip_hashes(content: str) -> dict[str, str]:
+    return _extract_system_hashes(content, "livekitWebRtcZipHashes")
 
 
 def _update_livekit_webrtc_zip_hashes(
     content: str, hashes: dict[str, str],
 ) -> str:
-    match = re.search(
-        r'livekitWebRtcZipHashes\s*=\s*{\n(?P<body>.*?)};',
+    return _update_system_hashes(
         content,
-        re.DOTALL,
-    )
-    if not match:
-        msg = "Could not find livekitWebRtcZipHashes block in codex.nix"
-        raise ValueError(msg)
-
-    body = match.group("body")
-    entry_indent, closing_indent = _nix_attrset_indents(
-        content,
-        body,
         "livekitWebRtcZipHashes",
+        hashes,
+        _LIVEKIT_WEBRTC_TRIPLES,
     )
-    updated_body = "\n".join(
-        f'{entry_indent}{system} = "{hashes[system]}";'
-        for system in _LIVEKIT_WEBRTC_TRIPLES
-    ) + f"\n{closing_indent}"
-    return content[:match.start("body")] + updated_body + content[match.end("body"):]
 
 
-def _rusty_v8_archive_url(version: str, system: str) -> str:
-    target = _RUSTY_V8_TARGETS[system]
+def _rusty_v8_release_tag(version: str) -> str:
+    return f"rusty-v8-v{version}"
+
+
+def _rusty_v8_asset_url(version: str, name: str) -> str:
     return (
-        "https://github.com/denoland/rusty_v8/releases/download/"
-        f"v{version}/librusty_v8_release_{target}.a.gz"
+        f"https://github.com/{_RUSTY_V8_GITHUB_REPO}/releases/download/"
+        f"{_rusty_v8_release_tag(version)}/{name}"
     )
 
 
 def _rusty_v8_archive_name(system: str) -> str:
-    return f"librusty_v8_release_{_RUSTY_V8_TARGETS[system]}.a.gz"
+    target = _RUSTY_V8_TARGETS[system]
+    return f"librusty_v8_{_RUSTY_V8_PROFILE}_{target}.a.gz"
+
+
+def _rusty_v8_src_binding_name(system: str) -> str:
+    target = _RUSTY_V8_TARGETS[system]
+    return f"src_binding_{_RUSTY_V8_PROFILE}_{target}.rs"
 
 
 def _prefetch_file_hash(url: str) -> str:
@@ -543,18 +557,19 @@ def _prefetch_file_hash(url: str) -> str:
         raise RuntimeError(msg) from exc
 
 
-def _calculate_rusty_v8_archive_hashes(version: str) -> dict[str, str]:
+def _calculate_rusty_v8_asset_hashes(
+    version: str,
+    asset_name: Callable[[str], str],
+) -> dict[str, str]:
+    names = {system: asset_name(system) for system in _RUSTY_V8_TARGETS}
     asset_hashes = _release_asset_digest_hashes(
         _RUSTY_V8_GITHUB_REPO,
-        f"v{version}",
-        {
-            system: _rusty_v8_archive_name(system)
-            for system in _RUSTY_V8_TARGETS
-        },
+        _rusty_v8_release_tag(version),
+        names,
     )
     return {
         system: asset_hashes.get(system)
-        or _prefetch_file_hash(_rusty_v8_archive_url(version, system))
+        or _prefetch_file_hash(_rusty_v8_asset_url(version, names[system]))
         for system in _RUSTY_V8_TARGETS
     }
 
@@ -619,8 +634,14 @@ def _calculate_livekit_webrtc_zip_hashes(tag: str) -> dict[str, str]:
 def _needs_rusty_v8_update(content: str, version: str) -> bool:
     if _extract_rusty_v8_version(content) != version:
         return True
-    hashes = _extract_rusty_v8_archive_hashes(content)
-    return any(system not in hashes for system in _RUSTY_V8_TARGETS)
+    return any(
+        system not in hashes
+        for hashes in (
+            _extract_rusty_v8_archive_hashes(content),
+            _extract_rusty_v8_src_binding_hashes(content),
+        )
+        for system in _RUSTY_V8_TARGETS
+    )
 
 
 def _needs_livekit_webrtc_update(content: str, tag: str) -> bool:
@@ -823,9 +844,19 @@ def _refresh_rusty_v8_metadata(content: str, rusty_v8_version: str) -> str:
         return content
 
     updated_content = _update_rusty_v8_version(content, rusty_v8_version)
-    return _update_rusty_v8_archive_hashes(
+    updated_content = _update_rusty_v8_archive_hashes(
         updated_content,
-        _calculate_rusty_v8_archive_hashes(rusty_v8_version),
+        _calculate_rusty_v8_asset_hashes(
+            rusty_v8_version,
+            _rusty_v8_archive_name,
+        ),
+    )
+    return _update_rusty_v8_src_binding_hashes(
+        updated_content,
+        _calculate_rusty_v8_asset_hashes(
+            rusty_v8_version,
+            _rusty_v8_src_binding_name,
+        ),
     )
 
 
