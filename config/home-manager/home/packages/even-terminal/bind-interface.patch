@@ -1,0 +1,14 @@
+diff --git a/dist/index.js b/dist/index.js
+index 7cf71ba..b38c03d 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -6 +6 @@
+-import { CODEX_APP_SERVER_PORT, printServerBanner, stopCodexAppServer } from "./startup/common.js";
++import { CODEX_APP_SERVER_PORT, printServerBanner, resolveHost, stopCodexAppServer } from "./startup/common.js";
+@@ -12,0 +13,3 @@
++const LISTEN_HOST = process.env.EVEN_HOST_MODE === "interface"
++    ? resolveHost().address
++    : "0.0.0.0";
+@@ -41 +44 @@
+-app.listen(PORT, "0.0.0.0", () => {
++app.listen(PORT, LISTEN_HOST, () => {

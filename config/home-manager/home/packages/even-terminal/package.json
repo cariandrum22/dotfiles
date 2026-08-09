@@ -1,0 +1,21 @@
+{
+  "name": "@evenrealities/even-terminal",
+  "version": "0.8.1",
+  "type": "module",
+  "description": "Even Terminal - AI Coding CLI on Smart Glasses & Flutter App",
+  "bin": {
+    "even-terminal": "bin/cli.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.2.118",
+    "@bomb.sh/tab": "^0.0.14",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "qrcode-terminal": "^0.12.0",
+    "ws": "^8.20.0",
+    "yargs": "^18.0.0"
+  }
+}
