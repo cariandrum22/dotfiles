@@ -62,22 +62,22 @@
   {
     name = "chatgpt";
     publisher = "openai";
-    version = "26.5810.41047";
-    sha256 = "099ydqpl4ac9fflhsgw1zn2g4v1dld5wihxw30lp6px6vkwj1vyn";
+    version = "26.5810.50856";
+    sha256 = "12s5d11ymfdnb9a4awidmjpr69sin88809k65s46jsdc21aipsr2";
     arch = "linux-x64";
   }
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.232";
-    sha256 = "1pk3g6jkhk35q3cc2zdb41wbw7a61gfvd1wgl7z847zjblgq6pc7";
+    version = "2.1.233";
+    sha256 = "05zzjk0xg9y33crbphs1pmw7q32mq9smjfvkwgqhvzq7q2l17fi1";
     arch = "linux-x64";
   }
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "4.1.9";
-    sha256 = "0acrr0andziqh6j6qakzj9fqv8kpx8mkdhziamh4sfppcdc7zim8";
+    version = "4.1.10";
+    sha256 = "05fc6pcqnk57y33y8pr9igx2gm308msh8m3cbsv5ainjwx3xzx4x";
   }
   {
     name = "cmake";
@@ -88,8 +88,8 @@
   {
     name = "cmake-tools";
     publisher = "ms-vscode";
-    version = "1.24.29";
-    sha256 = "1adjzfpxdns3q75dn0jb58y34sn8147j7z5kfwl0n73a9f8ls6a8";
+    version = "1.24.30";
+    sha256 = "09mib5jlv3c76cv2y8cvdqrlx139q6zcvhn3dh0gmlx3xsrh2gcr";
   }
   {
     name = "code-d";
@@ -202,8 +202,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.8.130528";
-    sha256 = "0z8y3ls20ir2g93ll1l9174xlkrbmlfkl7gjix2ffdmzynn6gx9s";
+    version = "2026.8.141615";
+    sha256 = "01dy91krbn23y7qj94cnxniy6bbdyp9yziggf8kmy3x9a8jw2g9m";
   }
   {
     name = "haskell";
@@ -226,8 +226,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.56.2026081308";
-    sha256 = "1ziz1yyqj7amdvvkfiz9xqhyn874m1x3fpaizqv5fwqp30qxrir1";
+    version = "1.56.2026081408";
+    sha256 = "1zgj254sg6d31p114vclw1abjcxhr0j5qbmfhmhi3y8qgzrhkiq0";
     arch = "linux-x64";
   }
   {
@@ -374,8 +374,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.3011";
-    sha256 = "01nyh15lmbplq3mdnwna9bb1pb56dmxz51fh37rb1q0g5b9rybmh";
+    version = "0.4.3013";
+    sha256 = "0x4ns40ly4xgp43xyabp30ig0nb7i66x3h4xb5z26rxlp1l2mfb7";
     arch = "linux-x64";
   }
   {
