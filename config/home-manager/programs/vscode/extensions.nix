@@ -14,8 +14,8 @@
   {
     name = "Go";
     publisher = "golang";
-    version = "0.57.0";
-    sha256 = "1id8pqp007kpmr9rq6cv2688d32vn23v0dxljizkxj227m2jfxmb";
+    version = "0.57.2";
+    sha256 = "1m25ggbjglrf4xmmg18cs8jcr5shx4pz01yljyrl8drrdb6909zp";
   }
   {
     name = "HCL";
@@ -62,15 +62,15 @@
   {
     name = "chatgpt";
     publisher = "openai";
-    version = "26.5810.50856";
-    sha256 = "12s5d11ymfdnb9a4awidmjpr69sin88809k65s46jsdc21aipsr2";
+    version = "26.5814.41407";
+    sha256 = "0237qqw1hn1lms0q8hnkjil0ngp4smy028icwf4vjyfhalawcpd2";
     arch = "linux-x64";
   }
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.233";
-    sha256 = "05zzjk0xg9y33crbphs1pmw7q32mq9smjfvkwgqhvzq7q2l17fi1";
+    version = "2.1.237";
+    sha256 = "0ymhmzynrllq7saw5a6pd39dw29ywn7aggckxg2nzan9icb0si9s";
     arch = "linux-x64";
   }
   {
@@ -202,8 +202,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.8.141615";
-    sha256 = "01dy91krbn23y7qj94cnxniy6bbdyp9yziggf8kmy3x9a8jw2g9m";
+    version = "2026.8.190513";
+    sha256 = "0xafsqwl1aixdh5hbbk0hsk01bb0yr6zy04lmdac0d8kvxjvbs8d";
   }
   {
     name = "haskell";
@@ -226,8 +226,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.56.2026081408";
-    sha256 = "1zgj254sg6d31p114vclw1abjcxhr0j5qbmfhmhi3y8qgzrhkiq0";
+    version = "1.56.2026081508";
+    sha256 = "04dhcqrkixakzz7lcmxlbl3474lj3637d54q3pj78619vcr9lyp1";
     arch = "linux-x64";
   }
   {
@@ -374,8 +374,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.3013";
-    sha256 = "0x4ns40ly4xgp43xyabp30ig0nb7i66x3h4xb5z26rxlp1l2mfb7";
+    version = "0.4.3020";
+    sha256 = "0xka080y2kd87hflkslkjsclm66shbajdslymvssipygzav37kia";
     arch = "linux-x64";
   }
   {
