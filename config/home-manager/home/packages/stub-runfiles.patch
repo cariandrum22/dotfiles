@@ -1,7 +1,7 @@
 diff -urN orig/Cargo.lock mod/Cargo.lock
 --- orig/Cargo.lock
 +++ mod/Cargo.lock
-@@ -11854,7 +11854,6 @@
+@@ -11890,7 +11890,6 @@
  [[package]]
  name = "runfiles"
  version = "0.1.0"
@@ -12,10 +12,10 @@ diff -urN orig/Cargo.lock mod/Cargo.lock
 diff -urN orig/Cargo.toml mod/Cargo.toml
 --- orig/Cargo.toml
 +++ mod/Cargo.toml
-@@ -397,7 +397,7 @@
+@@ -395,7 +395,7 @@
  regex-lite = "0.1.8"
  reqwest = { version = "0.12", features = ["cookies"] }
- rmcp = { version = "=3.0.0", default-features = false }
+ rmcp = { version = "=3.1.2", default-features = false }
 -runfiles = { git = "https://github.com/dzbarsky/rules_rust", rev = "b56cbaa8465e74127f1ea216f813cd377295ad81" }
 +runfiles = { path = "utils/runfiles-stub" }
  rustix = { version = "1.1.4", features = ["net"] }
