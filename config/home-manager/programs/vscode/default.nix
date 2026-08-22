@@ -122,11 +122,14 @@ in
       enable = true;
       mutableExtensionsDir = false;
       package = vscodeInsidersPackage;
+      argvSettings.enable-proposed-api = [ "ms-vscode-remote.remote-ssh" ];
       profiles.default = {
         extensions = pkgs.vscode-utils.extensionsFromVscodeMarketplace extensions;
         inherit (settings) userSettings;
       };
     };
+
+    home.file.".vscode-insiders/argv.json".force = true;
 
     home.activation.cleanupEmptyVscodeInsidersExtensions =
       lib.hm.dag.entryBefore [ "checkLinkTargets" ]
