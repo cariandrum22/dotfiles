@@ -535,6 +535,7 @@
             };
             statix = {
               enable = true;
+              package = pkgs.statix;
               settings = {
                 format = "stderr";
               };

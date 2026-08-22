@@ -11,6 +11,7 @@
 # - pre-commit: test-only dotnet dependency triggers LLVM build
 # - direnv 2.37.1: fish test is killed on macOS (blocks direnv-elvish-hook)
 # - inetutils 2.7: clang format string error on macOS (blocks home-manager)
+# - statix 2026-05-14: bool comparison snapshot mismatch on macOS
 #
 # Note: tlaps is excluded on macOS via lib.optionals in default.nix
 # (vampire-5.0.0 build fails with clang on macOS)
@@ -45,6 +46,8 @@ if prev.stdenv.isDarwin && prev.stdenv.hostPlatform.isAarch64 then
       glances
       # inetutils has clang format string errors on macOS
       inetutils
+      # statix has a stale bool comparison snapshot in nixpkgs 26.05
+      statix
       ;
 
     # pre-commit's test-only dotnet dependency is unnecessary for use here.
