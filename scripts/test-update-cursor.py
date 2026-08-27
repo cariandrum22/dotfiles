@@ -103,10 +103,49 @@ def test_download_page_extracts_latest_linux_x64_url() -> None:
     )
 
 
+def test_current_artifact_is_rehashed_when_no_update_is_available() -> None:
+    update_cursor = _load_update_cursor()
+    current_url = (
+        "https://downloads.cursor.com/production/"
+        "042b3c1a4c53f2c3808067f519fbfc67b72cad8b/linux/x64/"
+        "Cursor-3.9.16-x86_64.AppImage"
+    )
+    new_hash = "sha256-republished-artifact"
+    prefetched_urls: list[str] = []
+
+    def no_update(_current_version: str) -> None:
+        return None
+
+    def prefetch(url: str) -> str:
+        prefetched_urls.append(url)
+        return new_hash
+
+    update_cursor._fetch_update_api_metadata = no_update
+    update_cursor.common.run_nix_prefetch_sri = prefetch
+
+    info = update_cursor.fetch_latest_cursor_info(
+        "3.9.16",
+        current_url,
+        verbose=False,
+    )
+
+    _require_equal(
+        info.download_hash,
+        new_hash,
+        "current artifact hash was reused instead of recalculated",
+    )
+    _require_equal(
+        prefetched_urls,
+        [current_url],
+        "current artifact URL was not prefetched exactly once",
+    )
+
+
 def main() -> None:
     test_zsync_url_is_normalized_to_appimage()
     test_update_api_payload_uses_product_version_and_appimage_url()
     test_download_page_extracts_latest_linux_x64_url()
+    test_current_artifact_is_rehashed_when_no_update_is_available()
 
 
 if __name__ == "__main__":
