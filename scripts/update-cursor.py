@@ -11,7 +11,7 @@ Usage:
     The script will:
     1. Check current version in cursor.nix
     2. Fetch latest version from Cursor's API
-    3. If newer, download and calculate sha256 hash
+    3. Download the latest artifact and calculate its sha256 hash
     4. Update cursor.nix with new version and hash
 
 Files modified:
@@ -313,7 +313,6 @@ def _retry_logger(
 def fetch_latest_cursor_info(
     current_version: str,
     current_url: str,
-    current_hash: str,
     *,
     verbose: bool = True,
 ) -> CursorInfo:
@@ -344,9 +343,9 @@ def fetch_latest_cursor_info(
         commit_sha = _extract_commit_from_url(current_url)
         if verbose:
             print("  Cursor update API reports no newer version")
-        return CursorInfo(current_url, current_hash, current_version, commit_sha)
-
-    if verbose:
+            print("Verifying current download hash...")
+        metadata = CursorMetadata(current_url, current_version, commit_sha)
+    elif verbose:
         print(f"  Version: {metadata.version}")
         print(f"  Commit: {metadata.commit_sha}")
         print(f"  Download URL: {metadata.download_url}")
@@ -436,7 +435,6 @@ def update_cursor(*, verbose: bool = True) -> bool:  # noqa: C901 - Clear sequen
     latest_info = fetch_latest_cursor_info(
         current_version,
         current_url,
-        current_hash,
         verbose=verbose,
     )
 

@@ -8,7 +8,7 @@ let
 
   src = pkgs.fetchurl {
     url = downloadUrl;
-    hash = "sha256-V6G2huPD5TGbZ3MEfotw5phYBoyGe6+SYWTYpU3QNZ0=";
+    hash = "sha256-s1QLqHCfCkUHDsZPtJylKzv8OsnBXg8sW2+ebKmMUbk=";
   };
   appimageContents = pkgs.appimageTools.extract { inherit pname version src; };
 in
