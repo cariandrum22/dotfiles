@@ -62,15 +62,15 @@
   {
     name = "chatgpt";
     publisher = "openai";
-    version = "26.5820.71523";
-    sha256 = "111jlvjx6zyi4qvgbz3b9x2qzjqyh2pmqzjq67n91bngn7axyhc9";
+    version = "26.5825.51511";
+    sha256 = "0152wb6jyv16g5idacgy39hw2a2ma6hzp1pwylxqjiwnh1cq0zjm";
     arch = "linux-x64";
   }
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.247";
-    sha256 = "1ny6bkblfjv8n2jabg11cks6xl7b12wfzmih1j1nyvn4z1brls09";
+    version = "2.1.251";
+    sha256 = "19pzgxwcbjnr72qgs145dnlq732b0rbqg98rlvqxmrdnl347m454";
     arch = "linux-x64";
   }
   {
@@ -88,8 +88,8 @@
   {
     name = "cmake-tools";
     publisher = "ms-vscode";
-    version = "1.24.33";
-    sha256 = "1v7k43y9i3cdxwsxx08gyv0mvz3zwx0r27mg8vgc2a6p8ylfr6r2";
+    version = "1.24.35";
+    sha256 = "0vwz4nss3az4whmv427x11wmgq4snlfhhjdpvn7k2hyqa30q1ajq";
   }
   {
     name = "code-d";
@@ -100,8 +100,8 @@
   {
     name = "code-spell-checker";
     publisher = "streetsidesoftware";
-    version = "4.7.3";
-    sha256 = "1zcp0idc9ajas09faa9461wlqcbyff1xnrkngyvxfikgqbxz1yy6";
+    version = "4.7.5";
+    sha256 = "088s2ln996bydr0dv6zrizcwcbp2lhlf3fg24v962g20dcngcpkh";
   }
   {
     name = "copilot";
@@ -202,8 +202,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.8.261949";
-    sha256 = "1glzi4hkjhqsipcs2bdzp7lr01yqsa44l2mhagibg3p60q316avp";
+    version = "2026.8.290512";
+    sha256 = "0b748i3gkm6sg0qczw689rb8dv84rc9chmzdyhsyk0znvcch2nfr";
   }
   {
     name = "haskell";
@@ -226,8 +226,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.56.2026082608";
-    sha256 = "0wnad7ap89rzwy5rdkfhxwvd9mrafb068jz6sylfgwrsfng4sqxd";
+    version = "1.56.2026082811";
+    sha256 = "1bgmh339sxivyfjp2pjk59k2420bcfz2hwly9c7zj5ddmqnq1f7g";
     arch = "linux-x64";
   }
   {
@@ -374,8 +374,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.3028";
-    sha256 = "070xqzhs5byw424gvgsgwwsng38w5gsjcydwk6gm51bdqpjbr8vx";
+    version = "0.4.3031";
+    sha256 = "0bn14qcqgd5pv77ma1csa2w70hdwwswd5x9gg71sy5nww5qaani6";
     arch = "linux-x64";
   }
   {
