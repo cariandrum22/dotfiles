@@ -7,9 +7,10 @@ let
     # rama-boring-sys version from codex's Cargo.lock (not the codex git tag)
     version = "0.5.10";
 
-    # Download rama-boring-sys from crates.io which includes the BoringSSL source and patches
+    # Download the immutable crate archive, which includes the BoringSSL source and patches.
+    # The crates.io API redirect rejects non-browser fetchers with HTTP 403.
     src = pkgs.fetchurl {
-      url = "https://crates.io/api/v1/crates/rama-boring-sys/${version}/download";
+      url = "https://static.crates.io/crates/rama-boring-sys/rama-boring-sys-${version}.crate";
       sha256 = "sha256-1b/j6G1x6bkdrnVh1c7qzrN6fU/AeKskGv16q3d/YG8=";
     };
 
