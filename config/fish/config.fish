@@ -243,6 +243,12 @@ function __claudius_apply_default_op_auth
     end
 end
 
+# Keep the default Claude Code command on subscription authentication, even
+# when this shell was started by a session that previously enabled a gateway.
+set -e ANTHROPIC_BASE_URL ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN ANTHROPIC_CUSTOM_HEADERS
+set -e CLAUDIUS_SECRET_ANTHROPIC_BASE_URL CLAUDIUS_SECRET_ANTHROPIC_API_KEY
+set -e CLAUDIUS_SECRET_ANTHROPIC_AUTH_TOKEN CLAUDIUS_SECRET_ANTHROPIC_CUSTOM_HEADERS
+
 function __claudius_current_op_vault
     if set -q CLAUDIUS_1PASSWORD_VAULT
         echo "$CLAUDIUS_1PASSWORD_VAULT"
@@ -256,8 +262,6 @@ function __claudius_export_secrets
     set -gx CLAUDIUS_SECRET_CF_AIG_ACCOUNT_ID "op://$ai_vault/CLOUDFLARE AI Gateway/Account ID"
     set -gx CLAUDIUS_SECRET_CF_AIG_GATEWAY_ID "op://$ai_vault/CLOUDFLARE AI Gateway/Gateway ID"
     set -gx CLAUDIUS_SECRET_CF_AIG_TOKEN "op://$ai_vault/CLOUDFLARE AI Gateway/credential"
-    set -gx CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT "op://$ai_vault/Personal AI Gateway Credential/endpoint"
-    set -gx CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN "op://$ai_vault/Personal AI Gateway Credential/credential"
     set -gx CLAUDIUS_SECRET_GOOGLE_CLOUD_PROJECT "op://$ai_vault/Vertex AI - personal/project"
     set -gx CLAUDIUS_SECRET_GOOGLE_CLOUD_LOCATION "op://$ai_vault/Vertex AI - personal/location"
     set -gx CLAUDIUS_SECRET_GOOGLE_APPLICATION_CREDENTIALS "op://$ai_vault/Vertex AI - personal/credential"
@@ -312,15 +316,19 @@ end
 if type -q op and type -q claudius
     __claudius_export_secrets
 
-    # Base URLs
+    # `claude` intentionally remains unwrapped so Claude Code uses the signed-in
+    # subscription. This explicit opt-in uses Anthropic API billing through a
+    # Cloudflare provider key configured with the `default` alias.
     if type -q claude
-        set -x CLAUDIUS_SECRET_ANTHROPIC_BASE_URL "{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT}}/{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN}}/anthropic"
-        function claude --wraps claude
-            __claudius_run_tool claude $argv
+        function claude-cloudflare --description 'Run Claude Code through Cloudflare AI Gateway BYOK'
+            __claudius_export_secrets
+            set -lx CLAUDIUS_SECRET_ANTHROPIC_BASE_URL "https://gateway.ai.cloudflare.com/v1/{{$CLAUDIUS_SECRET_CF_AIG_ACCOUNT_ID}}/{{$CLAUDIUS_SECRET_CF_AIG_GATEWAY_ID}}/anthropic"
+            set -lx CLAUDIUS_SECRET_ANTHROPIC_API_KEY "cloudflare-byok-placeholder"
+            set -lx CLAUDIUS_SECRET_ANTHROPIC_CUSTOM_HEADERS "cf-aig-authorization: Bearer {{$CLAUDIUS_SECRET_CF_AIG_TOKEN}}"
+            command claudius secrets run -- claude $argv
         end
     end
     if type -q gemini
-        set -x CLAUDIUS_SECRET_GOOGLE_VERTEX_BASE_URL "{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT}}/{{$CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN}}/google-vertex-ai"
         function gemini --wraps gemini
             __claudius_run_tool gemini $argv
         end

@@ -528,6 +528,17 @@ fn op-sa {|@args|
   e:op $@args
 }
 
+# Keep the default Claude Code command on subscription authentication, even
+# when this shell was started by a session that previously enabled a gateway.
+if (has-env ANTHROPIC_BASE_URL) { unset-env ANTHROPIC_BASE_URL }
+if (has-env ANTHROPIC_API_KEY) { unset-env ANTHROPIC_API_KEY }
+if (has-env ANTHROPIC_AUTH_TOKEN) { unset-env ANTHROPIC_AUTH_TOKEN }
+if (has-env ANTHROPIC_CUSTOM_HEADERS) { unset-env ANTHROPIC_CUSTOM_HEADERS }
+if (has-env CLAUDIUS_SECRET_ANTHROPIC_BASE_URL) { unset-env CLAUDIUS_SECRET_ANTHROPIC_BASE_URL }
+if (has-env CLAUDIUS_SECRET_ANTHROPIC_API_KEY) { unset-env CLAUDIUS_SECRET_ANTHROPIC_API_KEY }
+if (has-env CLAUDIUS_SECRET_ANTHROPIC_AUTH_TOKEN) { unset-env CLAUDIUS_SECRET_ANTHROPIC_AUTH_TOKEN }
+if (has-env CLAUDIUS_SECRET_ANTHROPIC_CUSTOM_HEADERS) { unset-env CLAUDIUS_SECRET_ANTHROPIC_CUSTOM_HEADERS }
+
 # Get secrets from 1Password for AI tools
 if (and (has-external op) (has-external claudius)) {
   fn -current-op-vault {
@@ -544,8 +555,6 @@ if (and (has-external op) (has-external claudius)) {
     set E:CLAUDIUS_SECRET_CF_AIG_ACCOUNT_ID = "op://"$ai-vault"/CLOUDFLARE AI Gateway/Account ID"
     set E:CLAUDIUS_SECRET_CF_AIG_GATEWAY_ID = "op://"$ai-vault"/CLOUDFLARE AI Gateway/Gateway ID"
     set E:CLAUDIUS_SECRET_CF_AIG_TOKEN = "op://"$ai-vault"/CLOUDFLARE AI Gateway/credential"
-    set E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT = "op://"$ai-vault"/Personal AI Gateway Credential/endpoint"
-    set E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN = "op://"$ai-vault"/Personal AI Gateway Credential/credential"
     set E:CLAUDIUS_SECRET_GOOGLE_CLOUD_PROJECT = "op://"$ai-vault"/Vertex AI - personal/project"
     set E:CLAUDIUS_SECRET_GOOGLE_CLOUD_LOCATION = "op://"$ai-vault"/Vertex AI - personal/location"
     set E:CLAUDIUS_SECRET_GOOGLE_APPLICATION_CREDENTIALS = "op://"$ai-vault"/Vertex AI - personal/credential"
@@ -562,15 +571,26 @@ if (and (has-external op) (has-external claudius)) {
 
   -configure-claudius-secrets
 
+  # `claude` intentionally remains unwrapped so Claude Code uses the signed-in
+  # subscription. Use this explicit opt-in only after configuring an Anthropic
+  # provider key with the `default` alias in Cloudflare AI Gateway. This path is
+  # billed as Anthropic API usage, not as Claude subscription usage.
   if (has-external claude) {
-    set E:CLAUDIUS_SECRET_ANTHROPIC_BASE_URL = "{{"$E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT"}}/{{"$E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN"}}/anthropic"
-    fn -claude-wrapper {|@args|
-      -claudius-tool-wrapper claude $@args
+    fn claude-cloudflare {|@args|
+      -configure-claudius-secrets
+      set E:CLAUDIUS_SECRET_ANTHROPIC_BASE_URL = "https://gateway.ai.cloudflare.com/v1/{{"$E:CLAUDIUS_SECRET_CF_AIG_ACCOUNT_ID"}}/{{"$E:CLAUDIUS_SECRET_CF_AIG_GATEWAY_ID"}}/anthropic"
+      set E:CLAUDIUS_SECRET_ANTHROPIC_API_KEY = cloudflare-byok-placeholder
+      set E:CLAUDIUS_SECRET_ANTHROPIC_CUSTOM_HEADERS = "cf-aig-authorization: Bearer {{"$E:CLAUDIUS_SECRET_CF_AIG_TOKEN"}}"
+      try {
+        e:claudius secrets run -- claude $@args
+      } finally {
+        unset-env CLAUDIUS_SECRET_ANTHROPIC_BASE_URL
+        unset-env CLAUDIUS_SECRET_ANTHROPIC_API_KEY
+        unset-env CLAUDIUS_SECRET_ANTHROPIC_CUSTOM_HEADERS
+      }
     }
-    edit:add-var claude~ $-claude-wrapper~
   }
   if (has-external gemini) {
-    set E:CLAUDIUS_SECRET_GOOGLE_VERTEX_BASE_URL = "{{"$E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_ENDPOINT"}}/{{"$E:CLAUDIUS_SECRET_PERSONAL_AI_GATEWAY_TOKEN"}}/google-vertex-ai"
     fn -gemini-wrapper {|@args|
       -claudius-tool-wrapper gemini $@args
     }
