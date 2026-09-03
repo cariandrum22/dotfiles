@@ -36,6 +36,19 @@ Updates Cursor editor AppImage metadata for Nix.
 - The GitHub Actions workflow builds `.#packages.x86_64-linux.cursor` before opening a PR
 - Linux x86_64 only (AppImage format)
 
+## update-even-terminal-npm-hash.py
+
+Synchronizes the Even Terminal `npmDepsHash` after its lockfile changes.
+
+```bash
+python3 scripts/update-even-terminal-npm-hash.py
+```
+
+- Calculates the hash from the tracked `package-lock.json` with `prefetch-npm-deps`
+- Updates `config/home-manager/home/packages/even-terminal/default.nix`
+- Must be run whenever Dependabot or npm changes the Even Terminal lockfile
+- CI builds the package to reject lockfile and hash mismatches
+
 ## update-vscode-insiders.py
 
 Updates VSCode Insiders version metadata and SHA256 hashes.
