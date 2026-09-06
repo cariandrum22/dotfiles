@@ -49,7 +49,6 @@
           inherit system;
           config.allowUnfree = true;
           overlays = [
-            (import ./config/home-manager/overlays/xmonad.nix)
             (_final: _prev: {
               unstable = import nixpkgs-unstable {
                 inherit system;

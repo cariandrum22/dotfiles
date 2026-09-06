@@ -53,7 +53,7 @@ import XMonad.Actions.DynamicProjects
     dynamicProjects,
   )
 import XMonad.Hooks.EwmhDesktops (ewmh, ewmhFullscreen)
-import XMonad.Hooks.ManageDocks (avoidStruts, docks, manageDocks)
+import XMonad.Hooks.ManageDocks (avoidStruts, docks)
 import XMonad.Hooks.ManageHelpers
   ( composeOne,
     doFullFloat,
@@ -62,7 +62,6 @@ import XMonad.Hooks.ManageHelpers
   )
 import XMonad.Hooks.Minimize (minimizeEventHook)
 import XMonad.Hooks.Place (placeHook, smart)
-import XMonad.Hooks.SetWMName (setWMName)
 import XMonad.Hooks.UrgencyHook
   ( NoUrgencyHook (NoUrgencyHook),
     withUrgencyHook,
@@ -308,8 +307,6 @@ myManageHook =
 --------------------------------------------------------------------------------
 myStartupHook :: X ()
 myStartupHook = do
-  -- For Java GUI Programs
-  setWMName "LG3D"
   spawn "nm-applet"
   spawn "polybar -c ~/.config/polybar/config.ini top"
 
@@ -322,7 +319,6 @@ myConfig =
       layoutHook = avoidStruts myLayouts,
       manageHook =
         placeHook (smart (0.5, 0.5))
-          <+> manageDocks
           <+> myManageHook,
       handleEventHook = fixSteamFlicker <+> minimizeEventHook,
       startupHook = myStartupHook,

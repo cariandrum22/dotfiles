@@ -272,10 +272,6 @@ def _build_flake_callpackage_expr(nix_file: Path) -> str | None:
                 inherit system;
                 config.allowUnfree = true;
                 overlays = [
-                    (
-                        import
-                        "${{flake.outPath}}/config/home-manager/overlays/xmonad.nix"
-                    )
                     (_final: _prev: {{
                         unstable = import flake.inputs.nixpkgs-unstable {{
                             inherit system;
