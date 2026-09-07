@@ -69,8 +69,8 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.261";
-    sha256 = "0dk98rg9xig56x3995f1i46b13s1c6br49nlfzjkjmhfyv98kyh6";
+    version = "2.1.263";
+    sha256 = "05ici66nqd74s0gl2dp17rmhkrgsa08cwsahkm43dw0ckkgyacyw";
     arch = "linux-x64";
   }
   {
@@ -374,8 +374,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.3039";
-    sha256 = "1pa38da5jbn33ihx0ljwgaczhx61qw1a2rb60dfy71534a734zgv";
+    version = "0.4.3040";
+    sha256 = "1k93bk79zkz891g233s22bhqrgcz47jd3hwia9n4a1g0w5a7blc2";
     arch = "linux-x64";
   }
   {
