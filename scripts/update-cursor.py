@@ -33,6 +33,8 @@ from __future__ import annotations
 import json
 import re
 import sys
+from datetime import UTC, datetime, timedelta
+from email.utils import parsedate_to_datetime
 from html import unescape
 from typing import TYPE_CHECKING, NamedTuple
 from urllib.error import HTTPError, URLError
@@ -60,6 +62,7 @@ RE_DOWNLOAD_PAGE_URL = re.compile(
     r"(?:\\?/)golden(?:\\?/)linux-x64(?:\\?/)cursor(?:\\?/)[^\\\"<]+",
 )
 RETRY_ATTEMPTS = 3
+MINIMUM_ARTIFACT_AGE = timedelta(hours=24)
 HTTP_NO_CONTENT = 204
 HTTP_REDIRECT_MIN = 300
 HTTP_REDIRECT_MAX = 400
@@ -87,6 +90,18 @@ class CursorApiError(common.UpdateScriptError):
     def __init__(self, message: str) -> None:
         """Initialize with message."""
         super().__init__(message)
+
+
+class CursorArtifactTooRecentError(common.UpdateScriptError):
+    """Error raised when Cursor may still replace a newly published artifact."""
+
+    def __init__(self, url: str, age: timedelta) -> None:
+        """Initialize with artifact URL and observed age."""
+        age_hours = max(age.total_seconds(), 0) / 3600
+        super().__init__(
+            f"Cursor artifact is only {age_hours:.1f} hours old; "
+            f"waiting {MINIMUM_ARTIFACT_AGE.total_seconds() / 3600:.0f} hours: {url}",
+        )
 
 
 class CursorInfo(NamedTuple):
@@ -202,6 +217,17 @@ def _validate_download_url(download_url: str, version: str, commit_sha: str) -> 
         raise CursorApiError(msg)
 
 
+def _require_stable_artifact(
+    url: str,
+    last_modified: datetime,
+    now: datetime,
+) -> None:
+    """Reject newly published artifacts that Cursor may still overwrite."""
+    age = now - last_modified
+    if age < MINIMUM_ARTIFACT_AGE:
+        raise CursorArtifactTooRecentError(url, age)
+
+
 def _metadata_from_update_payload(payload: dict[str, object]) -> CursorMetadata:
     """Build Cursor metadata from the update API payload."""
     raw_download_url = _extract_api_string(payload, "url")
@@ -254,8 +280,59 @@ def _fetch_optional_json(url: str) -> dict[str, object] | None:
     return data
 
 
+def _fetch_artifact_last_modified(url: str) -> datetime:
+    """Fetch and parse an artifact's HTTP Last-Modified timestamp."""
+    req = common.build_request(url)
+    req.method = "HEAD"
+    try:
+        with urlopen(req, timeout=common.HTTP_TIMEOUT) as resp:  # noqa: S310
+            value = resp.headers.get("Last-Modified")
+    except (HTTPError, URLError) as exc:
+        raise common.FetchError(url, exc) from exc
+
+    if value is None:
+        msg = f"Cursor artifact response has no Last-Modified header: {url}"
+        raise CursorApiError(msg)
+    try:
+        last_modified = parsedate_to_datetime(value)
+    except (TypeError, ValueError) as exc:
+        msg = f"Cursor artifact has invalid Last-Modified header: {value}"
+        raise CursorApiError(msg) from exc
+    if last_modified.tzinfo is None:
+        msg = f"Cursor artifact Last-Modified header has no timezone: {value}"
+        raise CursorApiError(msg)
+    return last_modified.astimezone(UTC)
+
+
+def _utc_now() -> datetime:
+    """Return the current UTC time."""
+    return datetime.now(UTC)
+
+
+def _require_new_artifact_stable(
+    metadata: CursorMetadata,
+    current_version: str,
+    current_url: str,
+    *,
+    verbose: bool,
+) -> None:
+    """Require a stabilization period when adopting a different artifact."""
+    if metadata.version == current_version and metadata.download_url == current_url:
+        return
+
+    if verbose:
+        print("Checking that the new artifact has stabilized...")
+    last_modified = common.retry_with_backoff(
+        lambda: _fetch_artifact_last_modified(metadata.download_url),
+        retries=RETRY_ATTEMPTS,
+        exceptions=(common.FetchError,),
+        on_retry=_retry_logger("Cursor artifact metadata", verbose=verbose),
+    )
+    _require_stable_artifact(metadata.download_url, last_modified, _utc_now())
+
+
 def _resolve_cursor_download_url(url: str) -> str:
-    """Resolve Cursor's lightweight download URL to the immutable AppImage URL."""
+    """Resolve Cursor's lightweight download URL to its versioned AppImage URL."""
     normalized_url = _normalize_appimage_url(url)
     if "://api2.cursor.sh/updates/download/" not in normalized_url:
         return normalized_url
@@ -351,6 +428,13 @@ def fetch_latest_cursor_info(
         print(f"  Download URL: {metadata.download_url}")
         print("Fetching download hash...")
 
+    _require_new_artifact_stable(
+        metadata,
+        current_version,
+        current_url,
+        verbose=verbose,
+    )
+
     download_hash = common.retry_with_backoff(
         lambda: common.run_nix_prefetch_sri(metadata.download_url),
         retries=RETRY_ATTEMPTS,
@@ -403,6 +487,25 @@ def update_cursor_nix(cursor_file: Path, info: CursorInfo) -> bool:
 # ----- Main logic ------------------------------------------------------------------
 
 
+def _fetch_latest_or_defer(
+    current_version: str,
+    current_url: str,
+    *,
+    verbose: bool,
+) -> CursorInfo | None:
+    """Fetch Cursor metadata, returning None while a new artifact stabilizes."""
+    try:
+        return fetch_latest_cursor_info(
+            current_version,
+            current_url,
+            verbose=verbose,
+        )
+    except CursorArtifactTooRecentError as exc:
+        if verbose:
+            print(f"\nDeferring Cursor update: {exc}")
+        return None
+
+
 def update_cursor(*, verbose: bool = True) -> bool:  # noqa: C901 - Clear sequential steps for update process
     """Update Cursor metadata if newer version available.
 
@@ -432,11 +535,13 @@ def update_cursor(*, verbose: bool = True) -> bool:  # noqa: C901 - Clear sequen
     # Get latest info
     if verbose:
         print("\nFetching latest Cursor information...")
-    latest_info = fetch_latest_cursor_info(
+    latest_info = _fetch_latest_or_defer(
         current_version,
         current_url,
         verbose=verbose,
     )
+    if latest_info is None:
+        return False
 
     # Check if update is needed
     if (
