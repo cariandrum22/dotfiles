@@ -62,15 +62,15 @@
   {
     name = "chatgpt";
     publisher = "openai";
-    version = "26.5903.61454";
-    sha256 = "130d58lmr68gn6qbn2n95gm4cnj0x2nc1vs7bxgg78p0clfg4f1v";
+    version = "26.5908.31457";
+    sha256 = "1zc51z4dnkjgp5x01jply80rw52agcfc3nbqnm8rvz7d88rxsxir";
     arch = "linux-x64";
   }
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.267";
-    sha256 = "1pcgxm290kwgrj0zysn571bznck5xbm4bjm2pq2vdxahblj8raxk";
+    version = "2.1.268";
+    sha256 = "0wvy1cpxfirm3dmpar47v06krjalm8zkgfma1lr92wylyz536zkz";
     arch = "linux-x64";
   }
   {
@@ -88,8 +88,8 @@
   {
     name = "cmake-tools";
     publisher = "ms-vscode";
-    version = "1.24.39";
-    sha256 = "0m49q2r281a4y1r4rcv5xbfa7x1fg38mzyqrzrzxccz112bh7dn8";
+    version = "1.24.40";
+    sha256 = "165yx856044ff4bxfsjy44i29z9b5a4nmz2lrp6sld918nfwzmr7";
   }
   {
     name = "code-d";
@@ -100,8 +100,8 @@
   {
     name = "code-spell-checker";
     publisher = "streetsidesoftware";
-    version = "4.9.1";
-    sha256 = "0dwdv9a7yhqb9czckdr8y39zk6kiakqz2n7argx8yw0phq778gmx";
+    version = "4.9.2";
+    sha256 = "14v6j8y6695g4534ziha5nhsq55svbrhfdp6vipncqspmyhyifdy";
   }
   {
     name = "copilot";
@@ -367,15 +367,15 @@
   {
     name = "ruff";
     publisher = "charliermarsh";
-    version = "2026.78.0";
-    sha256 = "0n02j8a1x3qnlm2rjf5rkbd22d7c2maigrcyjg6wzhhw323yf9yi";
+    version = "2026.80.0";
+    sha256 = "1yp528mamfyr8p213w0r5rawnv8xs8q6wl9zvr093fcznx8inw7l";
     arch = "linux-x64";
   }
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.3044";
-    sha256 = "1i3xl6sz6n8i1vlp9pmhdxghp09080b7a3g2gb190g1x32vwdkg3";
+    version = "0.4.3045";
+    sha256 = "17q3j0kl3hnqx3w6da8iwgb91c62rb4mrbf9lnsn8hca1ij1fdvs";
     arch = "linux-x64";
   }
   {
@@ -503,8 +503,8 @@
   {
     name = "vscode-ide";
     publisher = "tlaplus";
-    version = "2026.9.92203";
-    sha256 = "1a7681id5p3d9jgws0y7ix1bg22rhz09ipi6d12z7s287xdmvc0w";
+    version = "2026.9.101921";
+    sha256 = "1hbm1lmdin3s4mfzbdwc0sj0ayl6xbn33cw8gwlsy4clwc07ad7x";
   }
   {
     name = "vscode-java-debug";
