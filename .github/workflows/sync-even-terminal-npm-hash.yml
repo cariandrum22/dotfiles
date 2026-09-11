@@ -1,0 +1,126 @@
+name: Sync Even Terminal npm hash
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+    paths:
+      - config/home-manager/home/packages/even-terminal/package-lock.json
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  synchronize:
+    if: >-
+      github.actor == 'dependabot[bot]' && github.event.pull_request.head.repo.full_name ==
+      github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate pull request scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          mapfile -t changed_files < <(
+            gh api --paginate \
+              "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/files" \
+              --jq '.[].filename'
+          )
+          allowed_file="config/home-manager/home/packages/even-terminal/package-lock.json"
+          if [ "${#changed_files[@]}" -ne 1 ] || [ "${changed_files[0]:-}" != "$allowed_file" ]; then
+            printf 'Refusing unexpected pull request files:\n' >&2
+            printf '  %s\n' "${changed_files[@]}" >&2
+            exit 1
+          fi
+
+      - name: Checkout trusted automation
+        # actions/checkout v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: trusted
+          persist-credentials: false
+
+      - name: Checkout Dependabot pull request
+        # actions/checkout v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: pull-request
+          persist-credentials: false
+
+      - name: Install Nix
+        # DeterminateSystems/nix-installer-action v22
+        uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Synchronize npm dependency hash
+        run: |
+          nix develop --impure ./trusted --command \
+            python3 trusted/scripts/update-even-terminal-npm-hash.py \
+              --repository-root "$GITHUB_WORKSPACE/pull-request"
+
+      - name: Validate generated change
+        id: changes
+        working-directory: pull-request
+        run: |
+          set -euo pipefail
+          mapfile -t changed_files < <(git diff --name-only)
+          if [ "${#changed_files[@]}" -eq 0 ]; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          expected_file="config/home-manager/home/packages/even-terminal/default.nix"
+          if [ "${#changed_files[@]}" -ne 1 ] || [ "${changed_files[0]}" != "$expected_file" ]; then
+            printf 'Refusing unexpected generated files:\n' >&2
+            printf '  %s\n' "${changed_files[@]}" >&2
+            exit 1
+          fi
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+
+      - name: Build Even Terminal
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          nix build --impure \
+            "$GITHUB_WORKSPACE/pull-request#packages.x86_64-linux.even-terminal" \
+            --print-build-logs
+
+      - name: Create automation token
+        id: automation-token
+        if: steps.changes.outputs.has_changes == 'true'
+        uses: ./trusted/.github/actions/create-automation-token
+        with:
+          app-id: ${{ secrets.AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.AUTOMATION_APP_PRIVATE_KEY }}
+          installation-id: ${{ secrets.AUTOMATION_APP_INSTALLATION_ID }}
+
+      - name: Commit and push synchronized hash
+        if: steps.changes.outputs.has_changes == 'true'
+        working-directory: pull-request
+        env:
+          APP_TOKEN: ${{ steps.automation-token.outputs.token }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+          askpass="$(mktemp)"
+          trap 'rm -f "$askpass"' EXIT
+          cat > "$askpass" <<'EOF'
+          #!/usr/bin/env bash
+          case "$1" in
+            *Username*) printf '%s\n' 'x-access-token' ;;
+            *Password*) printf '%s\n' "$APP_TOKEN" ;;
+          esac
+          EOF
+          chmod 700 "$askpass"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add config/home-manager/home/packages/even-terminal/default.nix
+          git commit -m "chore(even-terminal): synchronize npm dependency hash"
+          GIT_ASKPASS="$askpass" GIT_TERMINAL_PROMPT=0 \
+            git push "https://github.com/${GITHUB_REPOSITORY}.git" "HEAD:${HEAD_REF}"

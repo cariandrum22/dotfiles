@@ -3,17 +3,14 @@
 
 from __future__ import annotations
 
+import argparse
 import re
 import subprocess  # noqa: S404 - Runs the repository's pinned Nix utility.
 import sys
 from pathlib import Path
 
-REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
-PACKAGE_DIRECTORY = (
-    REPOSITORY_ROOT / "config/home-manager/home/packages/even-terminal"
-)
-LOCK_FILE = PACKAGE_DIRECTORY / "package-lock.json"
-NIX_FILE = PACKAGE_DIRECTORY / "default.nix"
+DEFAULT_REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
+PACKAGE_DIRECTORY = Path("config/home-manager/home/packages/even-terminal")
 NPM_DEPS_HASH_PATTERN = re.compile(r'(npmDepsHash\s*=\s*")[^"]+(";)')
 PREFETCH_TIMEOUT_SECONDS = 300
 
@@ -34,31 +31,54 @@ def _calculate_npm_deps_hash(lock_file: Path) -> str:
 
 
 def _replace_npm_deps_hash(content: str, npm_deps_hash: str) -> str:
+    if len(NPM_DEPS_HASH_PATTERN.findall(content)) != 1:
+        msg = "Could not find exactly one npmDepsHash assignment"
+        raise ValueError(msg)
+
     updated, replacements = NPM_DEPS_HASH_PATTERN.subn(
         rf"\g<1>{npm_deps_hash}\g<2>",
         content,
         count=1,
     )
     if replacements != 1:
-        msg = "Could not find exactly one npmDepsHash assignment"
+        msg = "Failed to replace npmDepsHash assignment"
         raise ValueError(msg)
     return updated
 
 
-def _synchronize_npm_deps_hash() -> tuple[str, bool]:
-    npm_deps_hash = _calculate_npm_deps_hash(LOCK_FILE)
-    current = NIX_FILE.read_text(encoding="utf-8")
+def _synchronize_npm_deps_hash(repository_root: Path) -> tuple[str, bool]:
+    package_directory = repository_root / PACKAGE_DIRECTORY
+    lock_file = package_directory / "package-lock.json"
+    nix_file = package_directory / "default.nix"
+    npm_deps_hash = _calculate_npm_deps_hash(lock_file)
+    current = nix_file.read_text(encoding="utf-8")
     updated = _replace_npm_deps_hash(current, npm_deps_hash)
     if updated == current:
         return npm_deps_hash, False
 
-    NIX_FILE.write_text(updated, encoding="utf-8")
+    nix_file.write_text(updated, encoding="utf-8")
     return npm_deps_hash, True
 
 
-def main() -> int:
+def _parse_args(argv: list[str] | None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Synchronize Even Terminal's Nix npmDepsHash with its lockfile.",
+    )
+    parser.add_argument(
+        "--repository-root",
+        type=Path,
+        default=DEFAULT_REPOSITORY_ROOT,
+        help="repository checkout to update (defaults to the script's repository)",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _parse_args(argv)
     try:
-        npm_deps_hash, changed = _synchronize_npm_deps_hash()
+        npm_deps_hash, changed = _synchronize_npm_deps_hash(
+            args.repository_root.resolve(),
+        )
     except (OSError, subprocess.SubprocessError, ValueError) as error:
         print(f"Failed to update Even Terminal npmDepsHash: {error}", file=sys.stderr)
         return 1

@@ -42,11 +42,14 @@ Synchronizes the Even Terminal `npmDepsHash` after its lockfile changes.
 
 ```bash
 python3 scripts/update-even-terminal-npm-hash.py
+
+# Update a separate checkout (used by Dependabot automation)
+python3 scripts/update-even-terminal-npm-hash.py --repository-root /path/to/checkout
 ```
 
 - Calculates the hash from the tracked `package-lock.json` with `prefetch-npm-deps`
 - Updates `config/home-manager/home/packages/even-terminal/default.nix`
-- Must be run whenever Dependabot or npm changes the Even Terminal lockfile
+- A restricted workflow runs it automatically for lockfile-only Dependabot pull requests
 - CI builds the package to reject lockfile and hash mismatches
 
 ## update-vscode-insiders.py
