@@ -334,6 +334,7 @@
             biome
             stylelint
             python3
+            prefetch-npm-deps
             (python3.withPackages pythonLintPackages)
             act
           ];
@@ -455,6 +456,14 @@
               language = "system";
               pass_filenames = false;
               files = "^scripts/(update-cursor|test-update-cursor)\\.py$";
+            };
+            even-terminal-updater-regression = {
+              enable = true;
+              name = "even-terminal-updater-regression";
+              entry = "${pkgs.python3}/bin/python3 scripts/test-update-even-terminal-npm-hash.py";
+              language = "system";
+              pass_filenames = false;
+              files = "^scripts/(update-even-terminal-npm-hash|test-update-even-terminal-npm-hash)\\.py$";
             };
             deadnix = {
               enable = true;
