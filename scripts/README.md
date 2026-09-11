@@ -31,6 +31,7 @@ Updates Cursor editor AppImage metadata for Nix.
 
 - Fetches the latest version from Cursor's API
 - Validates the API metadata against the download URL
+- Defers newly published artifacts for 24 hours because Cursor may overwrite versioned URLs
 - Prefetches the AppImage with Nix and records the SHA256 hash in SRI format
 - Updates `config/home-manager/home/packages/cursor.nix`
 - The GitHub Actions workflow builds `.#packages.x86_64-linux.cursor` before opening a PR
