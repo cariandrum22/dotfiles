@@ -2,16 +2,16 @@
 
 let
   pname = "claude-code";
-  version = "2.1.267";
+  version = "2.1.269";
 
   sources = {
     aarch64-darwin = {
       url = "https://registry.npmjs.org/@anthropic-ai/claude-code-darwin-arm64/-/claude-code-darwin-arm64-${version}.tgz";
-      hash = "sha256-qMIxT+pe8Jk/CrwsYVxxa97aU3X6XfldNW2un2PmFGM=";
+      hash = "sha256-mkAxj/bJZMC14vqHsHnorQH9WRnh0od5LqiTj34mEtY=";
     };
     x86_64-linux = {
       url = "https://registry.npmjs.org/@anthropic-ai/claude-code-linux-x64/-/claude-code-linux-x64-${version}.tgz";
-      hash = "sha256-QcdMS6VbKwvZyXsXvR0rS3oZQQvYUdnVbNm+EKzTjPk=";
+      hash = "sha256-vydZvO6uyukTMu6gGwFxYGcHE2fs3c7ch7NlXTZwogg=";
     };
   };
 
