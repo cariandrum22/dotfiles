@@ -62,15 +62,15 @@
   {
     name = "chatgpt";
     publisher = "openai";
-    version = "26.5908.31457";
-    sha256 = "1zc51z4dnkjgp5x01jply80rw52agcfc3nbqnm8rvz7d88rxsxir";
+    version = "26.5908.31748";
+    sha256 = "0iab6m6ywqvbxkc9lmykazanxnp2ly7s8n4qn5p41r00na9rndbs";
     arch = "linux-x64";
   }
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.268";
-    sha256 = "0wvy1cpxfirm3dmpar47v06krjalm8zkgfma1lr92wylyz536zkz";
+    version = "2.1.270";
+    sha256 = "0h46vl6s69js703i3rrhhzap4gy1bnk9z85haww9a0i36641nfz3";
     arch = "linux-x64";
   }
   {
@@ -88,8 +88,8 @@
   {
     name = "cmake-tools";
     publisher = "ms-vscode";
-    version = "1.24.40";
-    sha256 = "165yx856044ff4bxfsjy44i29z9b5a4nmz2lrp6sld918nfwzmr7";
+    version = "1.24.42";
+    sha256 = "1fsysnksz2k6cjjgc1jfwd767zsd4p7lcapsl7aib6b124xdzmhl";
   }
   {
     name = "code-d";
@@ -100,8 +100,8 @@
   {
     name = "code-spell-checker";
     publisher = "streetsidesoftware";
-    version = "4.9.2";
-    sha256 = "14v6j8y6695g4534ziha5nhsq55svbrhfdp6vipncqspmyhyifdy";
+    version = "4.9.3";
+    sha256 = "1p52jf7f1wkzvmg9fi47c5k7lhzbnf260zvnddqshy22c5wdgizh";
   }
   {
     name = "copilot";
@@ -226,8 +226,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.57.2026090408";
-    sha256 = "0yrhlppy2639skxvys6x1vszx413yg1428b6ky6q7i9zpcih03dv";
+    version = "1.57.2026091208";
+    sha256 = "17ixssinf7khakvq4p19jw7r5mkl20vp2hijhhk9ixpyzjj44p29";
     arch = "linux-x64";
   }
   {
@@ -374,8 +374,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.3045";
-    sha256 = "17q3j0kl3hnqx3w6da8iwgb91c62rb4mrbf9lnsn8hca1ij1fdvs";
+    version = "0.4.3048";
+    sha256 = "131bpsxmag3xmq5c05bs3zjq5x5zqrr53kk0sa20zgp7172xpd65";
     arch = "linux-x64";
   }
   {
@@ -503,8 +503,8 @@
   {
     name = "vscode-ide";
     publisher = "tlaplus";
-    version = "2026.9.101921";
-    sha256 = "1hbm1lmdin3s4mfzbdwc0sj0ayl6xbn33cw8gwlsy4clwc07ad7x";
+    version = "2026.9.120300";
+    sha256 = "1c87max683yzp36pa7kvcaid52axnrzzbqv8y8shrvp340w5szhv";
   }
   {
     name = "vscode-java-debug";
