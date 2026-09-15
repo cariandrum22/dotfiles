@@ -69,8 +69,8 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.270";
-    sha256 = "0h46vl6s69js703i3rrhhzap4gy1bnk9z85haww9a0i36641nfz3";
+    version = "2.1.272";
+    sha256 = "0shzw2a7xmdfy8i1fy45rnd765wv2if5z5bj960rddcz5phs3ypr";
     arch = "linux-x64";
   }
   {
@@ -374,8 +374,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.3048";
-    sha256 = "131bpsxmag3xmq5c05bs3zjq5x5zqrr53kk0sa20zgp7172xpd65";
+    version = "0.4.3050";
+    sha256 = "1g0aqv39bpzcvhj05j25z2bw7bs407l976w6cgn237x3x423y48y";
     arch = "linux-x64";
   }
   {
@@ -503,14 +503,14 @@
   {
     name = "vscode-ide";
     publisher = "tlaplus";
-    version = "2026.9.120300";
-    sha256 = "1c87max683yzp36pa7kvcaid52axnrzzbqv8y8shrvp340w5szhv";
+    version = "2026.9.142119";
+    sha256 = "0g006kw71s9v1lqy7adj3nli720rripxh67kl194gkkmhny6kbkv";
   }
   {
     name = "vscode-java-debug";
     publisher = "vscjava";
-    version = "0.59.2026072407";
-    sha256 = "1ilagay5qhiibchyiw167nnpcdjib27xh2z7322fizlk9sik2ylf";
+    version = "0.59.2026091007";
+    sha256 = "01gcynqyfqjhpa702l6m4gyz1r5cfaxx95aw9abpla8cw48ja4ln";
   }
   {
     name = "vscode-markdownlint";
