@@ -1,0 +1,48 @@
+{
+  "template": true,
+  "purpose": "実レビュー受領と許可済み採用の記録。nullは未記入であり承認や充足を表さない。",
+  "receipt": {
+    "actual_review_records": [],
+    "digests_recomputed": null,
+    "verdict": null,
+    "scope_verbatim": null,
+    "required_findings": [],
+    "informational_findings": [],
+    "candidate_judgment_verbatim": null,
+    "issue_resolution_judgment_verbatim": null,
+    "original_completion_judgment_verbatim": null,
+    "conditions_of_adoption": []
+  },
+  "adoption": {
+    "status": "not-recorded",
+    "authorized_by_existing_instruction": null,
+    "authorization_basis": null,
+    "adopter": null,
+    "recorded_at": null,
+    "reviewed_candidate_manifest_sha256": null,
+    "adopted_files_and_sha256": {},
+    "coordinate_roots_for_retained_records": {},
+    "byte_equal_to_reviewed_candidate": null
+  },
+  "state_transition": {
+    "original_condition_verbatim": null,
+    "completion_scope": null,
+    "before_record_sha256": null,
+    "changed_fields": {},
+    "closed_issues_and_exact_propositions": [],
+    "remaining_conditions_in_this_stage": [],
+    "remaining_work_in_other_stages": [],
+    "information_notes_closed_with_basis": [],
+    "evidence_reuse_decisions": [],
+    "states_not_promoted": {},
+    "historical_pending_records_and_effective_state_location": null
+  },
+  "verification": {
+    "fresh_checks": [],
+    "inherited_review_judgments": [],
+    "ledger_append_if_authorized": null,
+    "protected_inputs_unchanged": null,
+    "author_and_reviewer_involvement": null,
+    "human_or_release_approval_claim": null
+  }
+}
