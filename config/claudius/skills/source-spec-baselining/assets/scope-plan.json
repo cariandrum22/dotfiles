@@ -1,0 +1,37 @@
+{
+  "template": true,
+  "purpose": "開始時の境界を具体化する任意テンプレート。実記録ではtemplateを除き必要項目を実値へ置換する。",
+  "objective": null,
+  "original_completion_condition": {
+    "verbatim": null,
+    "origin": null,
+    "interpretation": null
+  },
+  "scope": {
+    "source_ids_and_editions": [],
+    "roles_and_target_configuration": [],
+    "read_ranges": [],
+    "adjudications_requested": [],
+    "not_adjudicated_here": [],
+    "dependency_closure_required_for_this_condition": null
+  },
+  "existing_authorization": {
+    "prepare_and_seal": null,
+    "adopt_reviewed_candidate": null,
+    "append_named_ledgers": [],
+    "external_send_or_publication": null,
+    "basis": null
+  },
+  "prior_records": [],
+  "protected_roots": [],
+  "new_work_root": null,
+  "preservation": {
+    "mode": null,
+    "selected_source_bindings": [],
+    "external_references_and_availability": [],
+    "symlink_and_hardlink_policy": null
+  },
+  "current_stage_states": {},
+  "known_unknowns": [],
+  "next_decision": null
+}
