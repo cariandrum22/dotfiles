@@ -101,6 +101,17 @@ skills:
       Still useful as a helper, but commit authoring guidance is secondary to
       repository-wide change policy and PR-title enforcement.
 
+  source-spec-baselining:
+    topic: source-governance
+    role: utility
+    exposure: primary
+    future_action: keep-standalone
+    successor: []
+    rationale: >-
+      Provides a distinct evidence-preserving workflow for versioned source
+      specifications, bounded review, tamper-evident sealing, adoption, and closure.
+      It is not part of repository bootstrap or ordinary implementation work.
+
   setup-repository-baseline:
     topic: foundation
     role: orchestrator

@@ -7,6 +7,9 @@ categories:
   workflow:
     title: Workflow Helpers
     description: Search, context maintenance, and git authoring helpers.
+  source-governance:
+    title: Source Specification Governance
+    description: Source-version analysis, traceable review, sealing, adoption, and closure workflows.
   foundation:
     title: Cross-Project Foundation
     description: Repository governance, bootstrap, automation, Nix, git hook, and hygiene skills reused across stacks.
@@ -46,6 +49,9 @@ skills:
     kind: utility
   suggest-commit:
     category: workflow
+    kind: utility
+  source-spec-baselining:
+    category: source-governance
     kind: utility
   setup-repository-baseline:
     category: foundation
