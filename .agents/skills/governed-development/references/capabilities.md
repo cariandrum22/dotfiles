@@ -118,6 +118,16 @@ delivery.
 Record each check separately as passed, failed, not run (reason), or unsupported. A candidate is
 **not runtime-validated** if any required loading/effort/role check lacks native evidence.
 
+Use the repository's normal authorized launch path, including configured secret injection. For
+example, a Claudius-managed installation may require `claudius secrets run -- codex ...` with its
+configured secret-reference variables rather than a direct `codex` process. Inspect the documented
+wrapper and use the existing secret manager; verify only that required variables are present, never
+print their values or write resolved credentials into files. A missing variable in an unwrapped
+process is a launch-path failure, not evidence that credentials are unavailable. Once that cause is
+understood and the authorized launcher resolves it, resume the bounded test without changing
+provider, trust, permissions, or authentication settings. Keep examples optional; Claudius is not a
+dependency of this reusable skill.
+
 - **Static structure:** Parse all TOML with `tomllib` (Python 3.11+) or an existing parser. Validate
   new/changed config keys against a schema compatible with the installed version. For standalone
   roles, validate required `name`, `description`, `developer_instructions` metadata separately from
@@ -146,7 +156,13 @@ Record each check separately as passed, failed, not run (reason), or unsupported
   the child's statement about its own settings. Where safe, a temporary fixture-only instruction
   sentinel can corroborate loading, but never suffices alone to establish effective model/effort. If
   native metadata is unavailable, mark that check unverified. A root `-c` effort override or
-  launching the role file as user config is not proof that a custom-role spawn loaded it.
+  launching the role file as user config is not proof that a custom-role spawn loaded it. On 0.156.1
+  app-server, collect child IDs from `subAgentActivity` items and use `thread/read` with
+  `includeTurns=false` while the server is alive. Its `agentRole`, `model`, `reasoningEffort`, and
+  parent/source fields provide native evidence. A state-DB-only `thread/list` can omit ephemeral
+  children; an empty list does not establish that no delegation occurred. If the harness cannot
+  close individual workers, finish the bounded probe and end its server after collecting metadata;
+  use a fresh session for remaining tests rather than assuming interruption frees a slot.
 - **Defaults and fork behavior:** Separately test one ordinary unnamed/default child without an
   explicit effort to verify the configured `high` default. Keep named-role and fallback explicit
   effort tests distinct. Use native spawn arguments/events to establish no-fork behavior; a sentinel

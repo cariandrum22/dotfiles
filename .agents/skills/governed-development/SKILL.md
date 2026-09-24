@@ -36,6 +36,9 @@ Inspect the Git root/worktree, dirty files, all applicable ancestor and nested `
 `AGENTS.override.md`, configuration layers/profiles, managed requirements, custom roles, instruction
 size limits, existing RFC/ADR/task locations and verification commands. Inspect only needed
 settings; do not dump credentials, environment variables, transcripts, or entire user configuration.
+Identify the normal authorized launch command and any secret-injection wrapper before runtime tests.
+A direct CLI process missing an environment variable does not prove the configured credentials are
+unavailable; use the existing launcher without exposing secret values or changing authentication.
 
 Use `lstat` on intended destinations and parents. A `.codex` regular file, unexpected symlink,
 read-only/generated config, duplicate role name, conflicting override, or malformed file is a

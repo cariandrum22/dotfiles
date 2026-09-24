@@ -9,14 +9,16 @@ Re-run capability discovery and validation when applying the skill elsewhere.
 - Installed binary: `codex-cli 0.156.1`.
 - Official live configuration schema SHA-256:
   `b373250e2565043b270d22df0e8cf32cacb36dd32fa2dc1e1e871115e73caab8`.
-- Model evidence: installed bundled catalog advertises `gpt-6-astra` and all three required efforts;
-  live provider entitlement remains unverified. No model name is fixed in reusable templates.
+- Initial model evidence: the installed bundled catalog advertises `gpt-6-astra` and all three
+  required efforts. The runtime checks below subsequently exercised that model through the
+  configured provider; they do not establish availability of every catalog model. No model name is
+  fixed in reusable templates.
 - Native project skill path: `.agents/skills/governed-development/SKILL.md`; actual CLI prompt
   discovery included its name. Required frontmatter passes the installed `quick_validate.py`.
 - Templates target `.codex/config.toml` and standalone `.codex/agents/*.toml`. Root and all roles
   set matching normal/Plan effort. Existing compatible repository model pins take precedence.
 
-## Checks performed
+## Initial checks
 
 | Check                    | Result and scope                                                                                                                                             |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -86,9 +88,60 @@ EditorConfig failure was resolved by using Markdown bullet indentation compatibl
 repository's checker and Prettier, without changing validation semantics or disabling a check.
 `nix flake check` passed on x86_64-linux; incompatible aarch64-darwin checks were not run.
 
-Actual named-role and nested CLI model execution remain unverified: the earlier no-op stopped for
-missing `OPENAI_API_KEY`, and no credentials, permissions, or backend settings were changed to retry
-it. Instruction review and simulated conflict cases cannot replace that runtime evidence.
+At this stage, named-role and nested execution had not been verified. The direct CLI attempt stopped
+at root inference for missing `OPENAI_API_KEY`, before any child was spawned. The cause was later
+identified as bypassing the repository's normal secret-injection launcher, not unavailable
+credentials.
+
+## Runtime checks through Claudius
+
+The repository's Fish/Elvish wrappers configure secret references and invoke
+`claudius secrets run -- codex ...`. Using the configured 1Password service-account integration,
+Claudius resolved `OPENAI_API_KEY` and `CF_AIG_TOKEN` into child-process environment variables.
+Presence was checked without displaying values; resolved credentials were not written to files. No
+provider, trust, permission, approval, or authentication settings were changed.
+
+The corrected CLI no-op completed. Subsequent bounded app-server probes used the same launcher and
+the isolated fixture rendered from the templates in commit `5c9e0e9`. Agents were instructed to use
+collaboration tools only and returned `NOOP_OK`; prompts requested no model/effort overrides at
+spawn. Native `subAgentActivity` events established the two-edge lineage. While each ephemeral
+server was still alive, `thread/read` with `includeTurns=false` supplied the resolved child
+metadata:
+
+| Probe                    | Native role           | Native effort | Native parent/depth    | Result    |
+| ------------------------ | --------------------- | ------------- | ---------------------- | --------- |
+| Nested root              | null (root thread)    | xhigh         | root                   | Completed |
+| Implementation child     | implementer           | high          | root, depth 1          | NOOP_OK   |
+| Mechanical grandchild    | mechanical            | medium        | implementer, depth 2   | NOOP_OK   |
+| Independent review child | reviewer              | xhigh         | separate root, depth 1 | NOOP_OK   |
+| Unnamed/default child    | null (no custom role) | high          | separate root, depth 1 | NOOP_OK   |
+
+All returned `model = "gpt-6-astra"`; child metadata reported `forkedFromId = null`. Tests requested
+fresh/no-fork handoffs. These observations do not establish universal context non-inheritance or
+constitute inspection of every model-visible message.
+
+The saved native events did not capture raw spawn arguments. Resolved efforts are verified, but
+omission of spawn-time overrides is supported only by the prompts and agent self-reports. Therefore
+the unnamed child's observed `high` cannot conclusively be attributed to the configured default
+rather than an explicit spawn override.
+
+The nested root ID was `01a0d44a-cb85-7370-bcd2-2c385176becc`. Its implementer was
+`01a0d44b-34db-7310-9b52-45e8744169db`, parent of mechanical `01a0d44b-501f-7862-933b-5f35d557c8a5`.
+Native role, effort, model, and parent/depth values were asserted independently of agent
+self-reports. The redacted nested evidence SHA-256 is
+`038dcf25b848cea46adba8e2c881e7a69990b4fe279bed0ab30edfd505b9ad45`.
+
+The direct-test root ID was `01a0d44c-4ed7-7c40-af85-f0c541188ddf`. Reviewer
+`01a0d44c-89d3-7581-96a5-ed75e34eec72` and default child `01a0d44c-ac4d-76e3-a418-54461ee2a98b` both
+reported that root as their parent. The redacted direct evidence SHA-256 is
+`4f7ea80bc459f6411ae2683e3aa73ee464a5191f7165e2e198d4adcc363001fe`.
+
+The CLI harness exposed first-class role selection even though this conversation's collaboration
+interface did not. It lacked individual close/remove controls, so the nested and direct checks used
+separate bounded servers, terminated after metadata collection. A state-DB-only descendant listing
+omitted ephemeral children; native activity IDs plus live `thread/read` provided the evidence
+instead. Plan-mode effort remains schema-validated only; no Plan-mode inference was run. These no-op
+probes do not prove adversarial permission enforcement or performance on real implementation work.
 
 ## Dotfiles preview
 
@@ -123,5 +176,5 @@ cannot actually be enforced, delegation stops instead of replacing restrictions 
 RFC/ADR governance, bounded delegation, escalation, file ownership, verification integrity, durable
 context, and metrics collection remain AGENTS policy. There is no verified universal global
 non-inheritance or cross-session depth/concurrency enforcement. Git worktrees isolate mutable
-workspaces, not security boundaries. Authentication-blocked native child tests remain outstanding
-for each future deployment; the skill requires them or an explicit unverified result.
+workspaces, not security boundaries. The successful native checks above apply to the tested fixture
+and launcher. Each future deployment must repeat the checks or report its own unverified results.
