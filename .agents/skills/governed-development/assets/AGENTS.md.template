@@ -1,0 +1,160 @@
+<!-- governed-development:begin -->
+
+## Governed development
+
+Deep architectural reasoning must be materialized in durable repository artifacts before routine
+implementation is delegated. Optimize for durable knowledge, not long agent conversations.
+
+### Development and context boundaries
+
+Follow Research / Product Requirement → RFC → ADR where needed → TODO / bounded work unit → Feature
+PR → Verification / Review → Merge. Each feature PR normally contains one coherent implementation
+increment; do not combine unrelated work for convenience.
+
+Conversation is not the authoritative project record. Reconstruct only the context required from
+RFCs, ADRs, TODOs, merged code, tests, schemas, interfaces, and immutable review results. Read
+relevant sections selectively. Reference identifiers such as RFC-0004, ADR-0012, and TODO-0048
+instead of copying entire documents. Use the repository's existing artifact paths and naming.
+
+### Specifications and decisions
+
+Require an RFC for changes to domain semantics, persistent data models, externally visible behavior,
+state machines, protocols, security boundaries, authorization, provenance/evidence semantics,
+Context Compiler contracts, architectural invariants, compatibility guarantees, Control Plane / Data
+Plane responsibilities, distributed execution, or retention/recovery guarantees. In other projects,
+the same rule applies to their equivalent contracts and responsibilities.
+
+An RFC defines what must remain true. Implementation must not silently change an accepted RFC. If it
+is wrong or incomplete, stop the affected implementation and escalate to architectural work; amend
+or supersede the RFC through the repository's acceptance process before relying on new behavior.
+
+Use ADRs for durable architectural implementation choices among meaningful alternatives, including
+crate/module boundaries, database representation, transactions, serialization, concurrency strategy,
+architecturally significant libraries, storage ownership, sandboxing, and protocol implementation.
+Include Context, Decision, Alternatives considered, Consequences, and References. Do not create ADRs
+for trivial local choices or use them to bypass RFC-level semantic decisions.
+
+### Bounded work and feature PRs
+
+Once architecture is sufficiently stable, every bounded TODO must identify:
+
+- Objective;
+- RFC / ADR references;
+- Scope and Out of scope;
+- Expected artifacts;
+- Acceptance criteria;
+- Verification commands;
+- Dependencies.
+
+A task must be implementable and verifiable without reconstructing the whole project. Use explicit
+file/interface ownership and a completion condition for delegated work.
+
+Each feature PR normally references governing RFC/ADR/TODO, implements one coherent feature,
+includes required tests and migrations, preserves invariants, updates durable documentation for new
+durable knowledge, and supplies independent review evidence. Pin review to a commit/tree hash (plus
+base hash), or a content-hashed immutable artifact. Include commands, environment/assumptions,
+results, and findings; a moving branch name alone is insufficient. A merged PR is a context
+boundary: recover future context from durable state, not the implementation conversation. Merge
+remains subject to the repository's authorization and acceptance rules.
+
+### Reasoning and delegation
+
+The root uses `xhigh` and acts as architect, planner, integrator, and reviewer. Use `xhigh` for
+architecture, RFC creation/major revision, invariants, security boundaries, distributed concurrency,
+leases/fencing/retry/effect semantics, persistent-model redesign, Context Compiler contract changes,
+difficult root-cause analysis after ordinary debugging fails, adversarial architectural/security
+review, and cross-cutting changes with high downstream cost. Prefer durable specifications and
+bounded tasks over large amounts of routine root implementation.
+
+Once the specification is sufficient, delegate bounded implementation to `implementer` at `high`:
+production code (including Rust), substantial features, contract-based tests, DB migrations,
+protocols, integrations, and ordinary debugging. Use `reviewer` at `xhigh` for independent immutable
+output review and root integration review.
+
+An implementer may delegate fully specified low-semantic-risk work to `mechanical` at `medium`:
+repetitive CRUD, fixtures, deterministic mappings, straightforward adapters, boilerplate, mechanical
+tests, and documentation synchronization. Never lower effort to save tokens while architecture is
+unresolved. Mechanical workers stop on ambiguity; they never decide architecture.
+
+Select first-class roles when available and verify their effective effort and restrictions. Before
+any fallback, resolve the intended role's configuration and compare its sandbox, filesystem/network,
+approval, and tool restrictions with the actual child environment. Proceed only when native controls
+enforce equivalent or stricter restrictions. Keeping a role file unchanged or telling a worker "do
+not edit" does not preserve its enforced permissions. Unknown enforcement is not equivalence. If
+equivalence cannot be established, use a supported fresh session that demonstrably loads the
+required restrictions, or pause that delegation and report the conflict. Never inherit broader
+parent permissions as a substitute for a restricted role.
+
+Only after that check, a harness without role selection may use supported effort/model controls and
+a minimal role contract. Report security equivalence separately from unavailable role-file
+execution. If required effort cannot be selected, report the limitation and pause affected execution
+rather than silently downgrade architectural/security work.
+
+Give workers only the current TODO, relevant RFC sections, relevant ADR, affected files/interfaces,
+acceptance criteria, and verification commands, plus essential applicable policy and permissions.
+Use fresh/no-fork context when exposed by the actual spawn tool. Never automatically forward the
+whole root conversation. If only full inheritance exists, disclose it and use a fresh independently
+launched session with a bounded handoff where supported; do not claim context isolation. If neither
+is possible, retain the task locally or report blocked isolated delegation. Summarization is not
+proof of non-inheritance, and context isolation is not a security boundary.
+
+Workers return changes made, tests/verification performed, specification deviations (including
+none), new risks or ambiguities, and follow-up work, with exact artifact identity. The root owns
+integration and architectural consistency. Delegation is bounded: root → implementer → mechanical,
+or root → reviewer. Mechanical and reviewer do not spawn children. No recursive re-delegation or
+automatic retry loop; after one failed verification repair attempt, return evidence for root triage.
+Respect host/config concurrency limits, use at most three active children repository-wide unless
+explicitly coordinated otherwise, and reserve capacity for a mechanical child before starting one.
+Before an implementer delegates, verify that the effective backend depth limit permits root →
+implementer → mechanical. Direct root-to-role success does not prove nested delegation works. If
+nesting is blocked or unverified, retain the mechanical work in the high implementer or return it to
+root triage, and report nested delegation as unavailable/unverified. Do not raise existing
+depth/concurrency limits or switch backends to bypass a restriction. Stop/close finished workers
+using supported lifecycle tools. Do not start a child merely to wait for capacity.
+
+### Escalation
+
+Stop affected work and escalate to the `xhigh` root upon RFC contradiction, inability to preserve an
+invariant, ambiguous authority/security, incompatible requirements, distributed-systems ambiguity,
+unexpected persistent-state semantics, required cross-layer architectural change, or evidence an
+accepted design is materially wrong. Never silently invent architecture. Return:
+
+- Observed problem;
+- Affected RFC / ADR / invariant;
+- Why the implementation contract is insufficient;
+- Evidence gathered;
+- Candidate options;
+- Recommended architectural question.
+
+### Parallelism and verification
+
+Parallelize only sufficiently independent mutable state. Prefer separate Git worktrees or equivalent
+isolated workspaces: one mutable implementation workspace per concurrent feature. Independent
+workers must not edit overlapping files or schemas without explicit coordination. Research,
+independent features/tests/reviews, and alternative experiments may run concurrently; sequence work
+when one result changes another's assumptions. Verify each worktree's instruction/config discovery.
+Worktrees do not provide a security sandbox. Review immutable output; repeat integration review and
+relevant verification after merge/rebase when the artifact or semantic assumptions change.
+
+Completion is not acceptance. Satisfy the work unit's verification contract using independently
+checkable evidence as appropriate: compiler/type checker, tests, property tests, model checker,
+formal verifier, and independent review. A result applies only to its exact artifact, assumptions,
+property, and scope. Never weaken verification to obtain a pass. Reviewer challenges requirement
+coverage, invariants, and security boundaries with reproducible evidence, and does not edit the
+implementation unless separately assigned a repair task.
+
+### Conserving context and learning
+
+Before retaining more conversation, materialize knowledge in an RFC update, ADR, TODO, test,
+invariant documentation, structured review finding, or comment for a non-obvious local invariant.
+Then start the next bounded task with fresh/minimal context: reason deeply → materialize decision →
+decompose → execute with minimum necessary context → verify → merge → discard transient context.
+Discarding context does not delete durable evidence.
+
+Where practical, record task family, model, reasoning effort, harness, specification references,
+context strategy, wall-clock duration, token/monetary cost, retry count, verification result, review
+findings, and final disposition alongside the work unit or review. Record unavailable measurements
+as unknown; do not infer costs or capture secrets/full transcripts. These records support future
+routing experiments; never automatically change the routing policy from them.
+
+<!-- governed-development:end -->
