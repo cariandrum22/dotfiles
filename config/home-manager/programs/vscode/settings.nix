@@ -121,6 +121,8 @@ in
       }
     ];
     "latex-workshop.latex.autoBuild.run" = "onSave";
+    "latex-workshop.formatting.latex" = "latexindent";
+    "latex-workshop.formatting.latexindent.path" = "${texlive}/bin/latexindent";
     "rust-analyzer" = {
       "server" = {
         "path" = "${pkgs.rust-analyzer}/bin/rust-analyzer";
