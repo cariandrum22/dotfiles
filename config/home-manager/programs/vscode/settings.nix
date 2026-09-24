@@ -1,5 +1,13 @@
 { pkgs }:
 
+let
+  texlive = pkgs.texlive.combined.scheme-full;
+  latexmkLuaLaTeX = pkgs.writeShellScript "latexmk-lualatex" ''
+    export PATH=${texlive}/bin:$PATH
+    exec ${texlive}/bin/latexmk "$@"
+  '';
+in
+
 {
   userSettings = {
     "accessibility.signals.terminalBell" = {
@@ -93,6 +101,26 @@
       "manageHLS" = "PATH";
       "formattingProvider" = "ormolu";
     };
+    "latex-workshop.latex.recipes" = [
+      {
+        name = "latexmk (lualatex)";
+        tools = [ "latexmk-lualatex" ];
+      }
+    ];
+    "latex-workshop.latex.tools" = [
+      {
+        name = "latexmk-lualatex";
+        command = "${latexmkLuaLaTeX}";
+        args = [
+          "-lualatex"
+          "-synctex=1"
+          "-interaction=nonstopmode"
+          "-file-line-error"
+          "%DOC%"
+        ];
+      }
+    ];
+    "latex-workshop.latex.autoBuild.run" = "onSave";
     "rust-analyzer" = {
       "server" = {
         "path" = "${pkgs.rust-analyzer}/bin/rust-analyzer";
