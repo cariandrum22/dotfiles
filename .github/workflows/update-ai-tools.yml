@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   update-ai-tools:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       GITHUB_TOKEN: ${{ github.token }}
     steps:
