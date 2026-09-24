@@ -34,15 +34,36 @@ build_package() {
     "${COMMON_NIX_EXPR} pkgs.callPackage ${relpath} {}"
 }
 
+build_tool() {
+  case "$1" in
+  claude-code)
+    build_package "claude-code" ./config/home-manager/home/packages/claude-code.nix
+    ;;
+  codex-cli)
+    build_package "codex-cli" ./config/home-manager/home/packages/codex.nix
+    ;;
+  droid)
+    build_package "droid" ./config/home-manager/home/packages/droid.nix
+    ;;
+  gemini-cli)
+    build_package "gemini-cli" ./config/home-manager/home/packages/gemini-cli.nix
+    ;;
+  *)
+    printf 'Unknown AI tool: %s\n' "$1" >&2
+    return 2
+    ;;
+  esac
+}
+
 printf 'Verifying AI tool builds...\n\n'
 
-build_package "claude-code" ./config/home-manager/home/packages/claude-code.nix
-printf '\n'
-build_package "codex-cli" ./config/home-manager/home/packages/codex.nix
-printf '\n'
-build_package "droid" ./config/home-manager/home/packages/droid.nix
-printf '\n'
-build_package "gemini-cli" ./config/home-manager/home/packages/gemini-cli.nix
-printf '\n'
+if [ "$#" -eq 0 ]; then
+  set -- claude-code codex-cli droid gemini-cli
+fi
 
-echo "All AI tool builds succeeded."
+for tool in "$@"; do
+  build_tool "$tool"
+  printf '\n'
+done
+
+echo "Requested AI tool builds succeeded."

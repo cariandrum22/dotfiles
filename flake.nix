@@ -449,6 +449,14 @@
               pass_filenames = false;
               files = "^scripts/(update-codex-cli|test-update-codex-cli)\\.py$";
             };
+            ai-tools-transaction-regression = {
+              enable = true;
+              name = "ai-tools-transaction-regression";
+              entry = "${pkgs.bash}/bin/bash scripts/test-update-ai-tools-all.sh";
+              language = "system";
+              pass_filenames = false;
+              files = "^scripts/(build-ai-tools|update-ai-tools-all|test-update-ai-tools-all)\\.sh$|^\\.github/workflows/update-ai-tools\\.yml$";
+            };
             cursor-updater-regression = {
               enable = true;
               name = "cursor-updater-regression";

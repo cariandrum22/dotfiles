@@ -32,13 +32,9 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Update AI tools
+      - name: Update and build AI tools independently
         run: |
           ./scripts/update-ai-tools-all.sh
-
-      - name: Build AI tools
-        run: |
-          ./scripts/build-ai-tools.sh
 
       - name: Check for changes
         id: changes
@@ -72,6 +68,7 @@ jobs:
             This PR contains automatic updates for AI development tools:
             - Claude Code
             - Codex CLI
+            - Droid
             - Gemini CLI
 
             Changes were generated automatically by the daily update workflow.
@@ -110,15 +107,11 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Update Codex CLI (macOS cargoHash)
+      - name: Update and build Codex CLI for macOS
         env:
           CODEX_FORCE_CARGO_HASH: "1"
         run: |
-          python3 scripts/update-codex-cli.py
-
-      - name: Build AI tools
-        run: |
-          ./scripts/build-ai-tools.sh
+          ./scripts/update-ai-tools-all.sh codex-cli
 
       - name: Check for changes
         id: changes
@@ -152,6 +145,7 @@ jobs:
             This PR contains automatic updates for AI development tools:
             - Claude Code
             - Codex CLI
+            - Droid
             - Gemini CLI
 
             Changes were generated automatically by the daily update workflow.
