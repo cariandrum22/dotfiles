@@ -1,0 +1,11 @@
+# Candidate for Codex 0.156.1; merge keys, never append a second [agents] table.
+# Replace __MODEL__ with the verified model, preserving a compatible repository pin.
+model = "__MODEL__"
+model_reasoning_effort = "xhigh"
+plan_mode_reasoning_effort = "xhigh"
+
+[agents]
+default_subagent_model = "__MODEL__"
+default_subagent_reasoning_effort = "high"
+# Preserve an existing lower or explicitly coordinated cap. Excludes the primary thread.
+max_concurrent_threads_per_session = 3

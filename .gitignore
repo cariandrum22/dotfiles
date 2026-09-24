@@ -3,6 +3,13 @@
 !.codex/
 !.codex/**
 !config/claudius/skills/**/*.md
+# Keep this repository-native Codex skill despite the global .agents ignore.
+!.agents/
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/governed-development/
+!.agents/skills/governed-development/**
 Brewfile.lock.json
 dist-*
 result
