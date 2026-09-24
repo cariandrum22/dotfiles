@@ -243,6 +243,16 @@ rustPlatform.buildRustPackage (
     ];
 
     postPatch = ''
+      # rust-v0.156.1 exceeds rustc's default query-depth limit while laying
+      # out the connector future. Keep this local to the affected crate and
+      # stop overriding it once upstream raises the limit to at least 256.
+      chatgpt_lib="chatgpt/src/lib.rs"
+      if grep -q '^#!\[recursion_limit = "' "$chatgpt_lib"; then
+        perl -0pi -e 's/^#!\[recursion_limit = "[0-9]+"\]/#![recursion_limit = "256"]/m' "$chatgpt_lib"
+      else
+        sed -i '1i#![recursion_limit = "256"]' "$chatgpt_lib"
+      fi
+
       mapfile -t vendored_v8_dirs < <(
         while IFS= read -r cargo_toml; do
           dirname "$cargo_toml"
