@@ -2,17 +2,17 @@
 
 let
   pname = "droid";
-  version = "0.226.2";
+  version = "0.228.0";
 
   # Platform-specific source URLs and hashes
   sources = {
     aarch64-darwin = {
       url = "https://downloads.factory.ai/factory-cli/releases/${version}/darwin/arm64/droid";
-      hash = "sha256-y5KcwhlXyyz9Rf4vfqxn3BjJURm1om5C77wOohZIsUE=";
+      hash = "sha256-SkOCdM5wsWfFKkHxmnbTtBnWY+uWsfKCWbLE+zLtqj0=";
     };
     x86_64-linux = {
       url = "https://downloads.factory.ai/factory-cli/releases/${version}/linux/x64/droid";
-      hash = "sha256-myqaj79AaVSOurU1D2Ba+YouAAiFVmWdp7QriT0jogE=";
+      hash = "sha256-92Plp/C+xs0VYsrAVSFMhU20eyBEwVuPRtoflkLK5eA=";
     };
   };
 
