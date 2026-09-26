@@ -1,7 +1,7 @@
 diff -urN orig/Cargo.lock mod/Cargo.lock
 --- orig/Cargo.lock
 +++ mod/Cargo.lock
-@@ -13426,7 +13426,6 @@
+@@ -13249,7 +13249,6 @@
  [[package]]
  name = "runfiles"
  version = "0.1.0"
@@ -12,7 +12,7 @@ diff -urN orig/Cargo.lock mod/Cargo.lock
 diff -urN orig/Cargo.toml mod/Cargo.toml
 --- orig/Cargo.toml
 +++ mod/Cargo.toml
-@@ -435,7 +435,7 @@
+@@ -437,7 +437,7 @@
  regex-syntax = "0.8.8"
  reqwest = { version = "0.12", features = ["cookies"] }
  rmcp = { version = "=3.2.0", default-features = false }
