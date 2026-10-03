@@ -209,167 +209,223 @@ let
 
         mv "$extracted_root" "$out"
       '';
-in
-rustPlatform.buildRustPackage (
-  rec {
-    pname = "codex-cli";
-    version = "rust-v0.160.0";
+  codex = rustPlatform.buildRustPackage (
+    rec {
+      pname = "codex-cli";
+      version = "rust-v0.160.0";
 
-    src = pkgs.fetchFromGitHub {
-      owner = "openai";
-      repo = "codex";
-      rev = "${version}";
-      hash = "sha256-UFPv9UK0MBYZfpZ3QlkTXa19ykHwIEo3JdwPtUUrJls=";
-    };
+      src = pkgs.fetchFromGitHub {
+        owner = "openai";
+        repo = "codex";
+        rev = "${version}";
+        hash = "sha256-UFPv9UK0MBYZfpZ3QlkTXa19ykHwIEo3JdwPtUUrJls=";
+      };
 
-    sourceRoot = "source/codex-rs";
+      sourceRoot = "source/codex-rs";
 
-    cargoHash = cargoHashes.${pkgs.stdenv.system};
+      cargoHash = cargoHashes.${pkgs.stdenv.system};
 
-    # Build the distributed CLI plus the Code Mode host helper. Upstream's
-    # workspace also contains samples and test utilities that are not part of
-    # this package. Since rust-v0.147.0 the CLI spawns `codex-code-mode-host`,
-    # which it resolves as a sibling of its own executable, so that binary has
-    # to land in the same `bin` directory.
+      # Build the distributed CLI plus the Code Mode host helper. Upstream's
+      # workspace also contains samples and test utilities that are not part of
+      # this package. Since rust-v0.147.0 the CLI spawns `codex-code-mode-host`,
+      # which it resolves as a sibling of its own executable, so that binary has
+      # to land in the same `bin` directory.
+      cargoBuildFlags = [
+        "-p"
+        "codex-cli"
+        "-p"
+        "codex-code-mode-host"
+      ];
+
+      cargoPatches = [
+        ./stub-runfiles.patch
+      ];
+
+      postPatch = ''
+        # rust-v0.156.1 exceeds rustc's default query-depth limit while laying
+        # out the connector future. Keep this local to the affected crate and
+        # stop overriding it once upstream raises the limit to at least 256.
+        chatgpt_lib="chatgpt/src/lib.rs"
+        if grep -q '^#!\[recursion_limit = "' "$chatgpt_lib"; then
+          perl -0pi -e 's/^#!\[recursion_limit = "[0-9]+"\]/#![recursion_limit = "256"]/m' "$chatgpt_lib"
+        else
+          sed -i '1i#![recursion_limit = "256"]' "$chatgpt_lib"
+        fi
+
+        mapfile -t vendored_v8_dirs < <(
+          while IFS= read -r cargo_toml; do
+            dirname "$cargo_toml"
+          done < <(
+            find "$cargoDepsCopy" -type f -name Cargo.toml \
+              -path '*/v8*/Cargo.toml' -print
+          ) | sort -u
+        )
+
+        if [ "''${#vendored_v8_dirs[@]}" -ne 1 ]; then
+          echo "Expected exactly one vendored v8 crate, found ''${#vendored_v8_dirs[@]}" >&2
+          printf '%s\n' "''${vendored_v8_dirs[@]}" >&2
+          exit 1
+        fi
+
+        # Match upstream Codex's rusty_v8 prebuilt archive handling.
+        patch -d "''${vendored_v8_dirs[0]}" -p1 < ${./rusty-v8-prebuilt-out-dir.patch}
+      ''
+      + pkgs.lib.optionalString pkgs.stdenv.isDarwin ''
+              # Apple's newer linker can overflow ARM64 branch ranges when linking the
+              # WebRTC-heavy Codex binary. Force the classic linker on Darwin targets.
+              cat >> .cargo/config.toml <<'EOF'
+
+        [target.x86_64-apple-darwin]
+        rustflags = ["-C", "link-arg=-ld_classic"]
+
+        [target.aarch64-apple-darwin]
+        rustflags = ["-C", "link-arg=-ld_classic"]
+        EOF
+      ''
+      + pkgs.lib.optionalString pkgs.stdenv.isLinux ''
+        # LLVM currently crashes in release optimization passes for this
+        # workspace. Lower Linux release optimization until the toolchain settles.
+        perl -0pi -e 's/\\[profile\\.release\\]\\n/[profile.release]\\nopt-level = 2\\n/' Cargo.toml
+      '';
+
+      # Enable unstable features (file_lock)
+      RUSTC_BOOTSTRAP = "1";
+
+      # Disable LTO to work around LLVM ICEs during LTO codegen.
+      # The crash occurs in LLVMContextDispose when building with lto=fat.
+      # This affects both binary size and runtime performance (5-20% slower).
+      # TODO: Re-enable LTO ("fat" or "thin") once nixpkgs updates LLVM/rustc.
+      # To test: remove this line and run `nix build .#codex-cli`
+      CARGO_PROFILE_RELEASE_LTO = "off";
+
+      # Upstream pins codegen-units=1 for smaller binaries. Keep that on Darwin,
+      # where we need to minimize link distance for the large WebRTC static
+      # archive. Linux still needs multiple codegen units to avoid an LLVM 21 /
+      # rustc SIGSEGV while compiling `image`.
+      CARGO_PROFILE_RELEASE_CODEGEN_UNITS = if pkgs.stdenv.isLinux then "16" else "1";
+
+      # Show backtrace for build failures
+      RUST_BACKTRACE = "1";
+
+      # Keep rusty_v8 fully offline inside the Nix sandbox.
+      RUSTY_V8_ARCHIVE = "${rustyV8Archive}";
+      RUSTY_V8_SRC_BINDING_PATH = "${rustyV8SrcBinding}";
+
+      # Keep LiveKit WebRTC fully offline inside the Nix sandbox.
+      LK_CUSTOM_WEBRTC = "${livekitWebRtcArchive}";
+
+      # Point rama-boring-sys to our pre-built patched BoringSSL
+      BORING_BSSL_PATH = "${ramaBoringssl}";
+      BORING_BSSL_INCLUDE_PATH = "${ramaBoringssl}/include";
+
+      nativeBuildInputs =
+        with pkgs;
+        [
+          pkg-config
+          cmake
+          perl
+          go
+          clang
+          llvm
+        ]
+        ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
+          autoPatchelfHook
+          rust-bindgen
+          rustPlatform.bindgenHook # for openssl-sys bindgen
+        ];
+
+      buildInputs =
+        with pkgs;
+        pkgs.lib.optionals pkgs.stdenv.isLinux [
+          libcap
+          opensslPkg # for openssl-sys crate
+          stdenv.cc.cc.lib # for libgcc_s.so.1
+        ];
+
+      # Ensure libc++ is linked on Darwin. The classic linker is selected via the
+      # target-specific rustflags injected into `.cargo/config.toml` above.
+      NIX_LDFLAGS = pkgs.lib.optionalString pkgs.stdenv.isDarwin "-lc++";
+
+      doCheck = false;
+
+      # Keep Darwin builds unstripped. A full Home Manager switch on macOS produced
+      # unusable Codex binaries during fixup, while Linux benefits from normal strip.
+      dontStrip = pkgs.stdenv.isDarwin;
+
+      meta = with pkgs.lib; {
+        description = "Lightweight coding agent that runs in your terminal";
+        homepage = "https://github.com/openai/codex";
+        license = licenses.asl20;
+        mainProgram = "codex";
+      };
+    }
+    // pkgs.lib.optionalAttrs pkgs.stdenv.isDarwin {
+      # Favor smaller release binaries on Darwin so the final WebRTC-heavy link
+      # stays within ARM64 branch range limits.
+      CARGO_PROFILE_RELEASE_OPT_LEVEL = "s";
+    }
+    // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
+      # Point openssl-sys to system OpenSSL on Linux (avoid BoringSSL detection)
+      OPENSSL_DIR = "${opensslPkg.out}";
+      OPENSSL_LIB_DIR = "${opensslPkg.out}/lib";
+      OPENSSL_INCLUDE_DIR = "${opensslPkg.dev}/include";
+      OPENSSL_NO_VENDOR = "1";
+    }
+  );
+
+  # Build upstream's patched bubblewrap separately so package-layout changes
+  # can reuse the expensive CLI build. The bundled launcher uses flags that
+  # are not available in every system bubblewrap release.
+  codex-bwrap = rustPlatform.buildRustPackage {
+    pname = "codex-bwrap";
+    inherit (codex)
+      version
+      src
+      sourceRoot
+      cargoDeps
+      cargoPatches
+      ;
     cargoBuildFlags = [
       "-p"
-      "codex-cli"
-      "-p"
-      "codex-code-mode-host"
+      "codex-bwrap"
+      "--bin"
+      "bwrap"
     ];
+    nativeBuildInputs = [ pkgs.pkg-config ];
+    buildInputs = [ pkgs.libcap ];
+    doCheck = false;
+  };
 
-    cargoPatches = [
-      ./stub-runfiles.patch
-    ];
-
-    postPatch = ''
-      # rust-v0.156.1 exceeds rustc's default query-depth limit while laying
-      # out the connector future. Keep this local to the affected crate and
-      # stop overriding it once upstream raises the limit to at least 256.
-      chatgpt_lib="chatgpt/src/lib.rs"
-      if grep -q '^#!\[recursion_limit = "' "$chatgpt_lib"; then
-        perl -0pi -e 's/^#!\[recursion_limit = "[0-9]+"\]/#![recursion_limit = "256"]/m' "$chatgpt_lib"
-      else
-        sed -i '1i#![recursion_limit = "256"]' "$chatgpt_lib"
-      fi
-
-      mapfile -t vendored_v8_dirs < <(
-        while IFS= read -r cargo_toml; do
-          dirname "$cargo_toml"
-        done < <(
-          find "$cargoDepsCopy" -type f -name Cargo.toml \
-            -path '*/v8*/Cargo.toml' -print
-        ) | sort -u
-      )
-
-      if [ "''${#vendored_v8_dirs[@]}" -ne 1 ]; then
-        echo "Expected exactly one vendored v8 crate, found ''${#vendored_v8_dirs[@]}" >&2
-        printf '%s\n' "''${vendored_v8_dirs[@]}" >&2
-        exit 1
-      fi
-
-      # Match upstream Codex's rusty_v8 prebuilt archive handling.
-      patch -d "''${vendored_v8_dirs[0]}" -p1 < ${./rusty-v8-prebuilt-out-dir.patch}
+  package-manifest = pkgs.writeText "codex-package.json" (
+    builtins.toJSON {
+      layoutVersion = 1;
+      # Build metadata keeps this Nix package pinned instead of enrolling its
+      # daemon in the standalone installer's automatic production updates.
+      version = "${pkgs.lib.removePrefix "rust-v" codex.version}+nix";
+      target = rustyV8Target;
+      variant = "cli";
+      entrypoint = "bin/codex";
+      resourcesDir = "codex-resources";
+      pathDir = "codex-path";
+    }
+  );
+in
+pkgs.runCommand codex.name
+  {
+    inherit (codex) pname version meta;
+    passthru.unwrapped = codex;
+  }
+  (
     ''
-    + pkgs.lib.optionalString pkgs.stdenv.isDarwin ''
-            # Apple's newer linker can overflow ARM64 branch ranges when linking the
-            # WebRTC-heavy Codex binary. Force the classic linker on Darwin targets.
-            cat >> .cargo/config.toml <<'EOF'
+      mkdir -p "$out/bin" "$out/codex-path" "$out/codex-resources"
+      cp -r ${codex}/bin/. "$out/bin/"
+      install -m 644 ${package-manifest} "$out/codex-package.json"
 
-      [target.x86_64-apple-darwin]
-      rustflags = ["-C", "link-arg=-ld_classic"]
-
-      [target.aarch64-apple-darwin]
-      rustflags = ["-C", "link-arg=-ld_classic"]
-      EOF
+      # Daemon bootstrap rejects symlinks that escape the package root.
+      # Copy helpers so the whole package can be staged into CODEX_HOME.
+      install -m 755 ${pkgs.ripgrep}/bin/rg "$out/codex-path/rg"
     ''
     + pkgs.lib.optionalString pkgs.stdenv.isLinux ''
-      # LLVM currently crashes in release optimization passes for this
-      # workspace. Lower Linux release optimization until the toolchain settles.
-      perl -0pi -e 's/\\[profile\\.release\\]\\n/[profile.release]\\nopt-level = 2\\n/' Cargo.toml
-    '';
-
-    # Enable unstable features (file_lock)
-    RUSTC_BOOTSTRAP = "1";
-
-    # Disable LTO to work around LLVM ICEs during LTO codegen.
-    # The crash occurs in LLVMContextDispose when building with lto=fat.
-    # This affects both binary size and runtime performance (5-20% slower).
-    # TODO: Re-enable LTO ("fat" or "thin") once nixpkgs updates LLVM/rustc.
-    # To test: remove this line and run `nix build .#codex-cli`
-    CARGO_PROFILE_RELEASE_LTO = "off";
-
-    # Upstream pins codegen-units=1 for smaller binaries. Keep that on Darwin,
-    # where we need to minimize link distance for the large WebRTC static
-    # archive. Linux still needs multiple codegen units to avoid an LLVM 21 /
-    # rustc SIGSEGV while compiling `image`.
-    CARGO_PROFILE_RELEASE_CODEGEN_UNITS = if pkgs.stdenv.isLinux then "16" else "1";
-
-    # Show backtrace for build failures
-    RUST_BACKTRACE = "1";
-
-    # Keep rusty_v8 fully offline inside the Nix sandbox.
-    RUSTY_V8_ARCHIVE = "${rustyV8Archive}";
-    RUSTY_V8_SRC_BINDING_PATH = "${rustyV8SrcBinding}";
-
-    # Keep LiveKit WebRTC fully offline inside the Nix sandbox.
-    LK_CUSTOM_WEBRTC = "${livekitWebRtcArchive}";
-
-    # Point rama-boring-sys to our pre-built patched BoringSSL
-    BORING_BSSL_PATH = "${ramaBoringssl}";
-    BORING_BSSL_INCLUDE_PATH = "${ramaBoringssl}/include";
-
-    nativeBuildInputs =
-      with pkgs;
-      [
-        pkg-config
-        cmake
-        perl
-        go
-        clang
-        llvm
-      ]
-      ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
-        autoPatchelfHook
-        rust-bindgen
-        rustPlatform.bindgenHook # for openssl-sys bindgen
-      ];
-
-    buildInputs =
-      with pkgs;
-      pkgs.lib.optionals pkgs.stdenv.isLinux [
-        libcap
-        opensslPkg # for openssl-sys crate
-        stdenv.cc.cc.lib # for libgcc_s.so.1
-      ];
-
-    # Ensure libc++ is linked on Darwin. The classic linker is selected via the
-    # target-specific rustflags injected into `.cargo/config.toml` above.
-    NIX_LDFLAGS = pkgs.lib.optionalString pkgs.stdenv.isDarwin "-lc++";
-
-    doCheck = false;
-
-    # Keep Darwin builds unstripped. A full Home Manager switch on macOS produced
-    # unusable Codex binaries during fixup, while Linux benefits from normal strip.
-    dontStrip = pkgs.stdenv.isDarwin;
-
-    meta = with pkgs.lib; {
-      description = "Lightweight coding agent that runs in your terminal";
-      homepage = "https://github.com/openai/codex";
-      license = licenses.asl20;
-      mainProgram = "codex";
-    };
-  }
-  // pkgs.lib.optionalAttrs pkgs.stdenv.isDarwin {
-    # Favor smaller release binaries on Darwin so the final WebRTC-heavy link
-    # stays within ARM64 branch range limits.
-    CARGO_PROFILE_RELEASE_OPT_LEVEL = "s";
-  }
-  // pkgs.lib.optionalAttrs pkgs.stdenv.isLinux {
-    # Point openssl-sys to system OpenSSL on Linux (avoid BoringSSL detection)
-    OPENSSL_DIR = "${opensslPkg.out}";
-    OPENSSL_LIB_DIR = "${opensslPkg.out}/lib";
-    OPENSSL_INCLUDE_DIR = "${opensslPkg.dev}/include";
-    OPENSSL_NO_VENDOR = "1";
-  }
-)
+      install -m 755 ${codex-bwrap}/bin/bwrap "$out/codex-resources/bwrap"
+    ''
+  )
