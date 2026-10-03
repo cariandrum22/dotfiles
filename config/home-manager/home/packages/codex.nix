@@ -111,10 +111,10 @@ let
   # cargo vendor utility. codex-utils-cargo-bin is only used by test helpers,
   # and tests are disabled for this package, so the stub is sufficient.
   cargoHashes = {
-    x86_64-linux = "sha256-xY/Ro622zS7M8MoGVS0vUG2TPsWDAsBopq70ibcqjBE=";
-    aarch64-linux = "sha256-xY/Ro622zS7M8MoGVS0vUG2TPsWDAsBopq70ibcqjBE=";
-    x86_64-darwin = "sha256-xY/Ro622zS7M8MoGVS0vUG2TPsWDAsBopq70ibcqjBE=";
-    aarch64-darwin = "sha256-xY/Ro622zS7M8MoGVS0vUG2TPsWDAsBopq70ibcqjBE=";
+    x86_64-linux = "sha256-i1a6e/lUR/7gXxjhvEcQT59WO8LTPMfhJBoSa6OaTeQ=";
+    aarch64-linux = "sha256-i1a6e/lUR/7gXxjhvEcQT59WO8LTPMfhJBoSa6OaTeQ=";
+    x86_64-darwin = "sha256-i1a6e/lUR/7gXxjhvEcQT59WO8LTPMfhJBoSa6OaTeQ=";
+    aarch64-darwin = "sha256-i1a6e/lUR/7gXxjhvEcQT59WO8LTPMfhJBoSa6OaTeQ=";
   };
 
   rustyV8Version = "150.4.0";
@@ -213,13 +213,13 @@ in
 rustPlatform.buildRustPackage (
   rec {
     pname = "codex-cli";
-    version = "rust-v0.158.0";
+    version = "rust-v0.160.0";
 
     src = pkgs.fetchFromGitHub {
       owner = "openai";
       repo = "codex";
       rev = "${version}";
-      hash = "sha256-6ogqs75pG4+hxG6RqwBwJPWd3wGks2wBID/epha9+Ds=";
+      hash = "sha256-UFPv9UK0MBYZfpZ3QlkTXa19ykHwIEo3JdwPtUUrJls=";
     };
 
     sourceRoot = "source/codex-rs";
