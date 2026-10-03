@@ -53,6 +53,13 @@ python3 scripts/update-even-terminal-npm-hash.py --repository-root /path/to/chec
 - A restricted workflow runs it automatically for lockfile-only Dependabot pull requests
 - CI builds the package to reject lockfile and hash mismatches
 
+The workflow uses `push-automation-commit.sh` to push the generated commit with its GitHub App
+token. HTTP authentication, rate-limit, and server failures receive up to four attempts with
+5/10/15-second backoff. Other failures (including non-fast-forward rejection) stop immediately; the
+script never force-pushes. A persistent 403 still requires checking the App installation's
+repository access and Contents write permission. After resolving it, rerun the failed workflow job
+to recalculate and push the hash; a rerun uses the workflow's original revision.
+
 ## update-vscode-insiders.py
 
 Updates VSCode Insiders version metadata and SHA256 hashes.

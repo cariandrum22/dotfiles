@@ -473,6 +473,14 @@
               pass_filenames = false;
               files = "^scripts/(update-even-terminal-npm-hash|test-update-even-terminal-npm-hash)\\.py$";
             };
+            automation-push-regression = {
+              enable = true;
+              name = "automation-push-regression";
+              entry = "${pkgs.bash}/bin/bash scripts/test-push-automation-commit.sh";
+              language = "system";
+              pass_filenames = false;
+              files = "^scripts/(push-automation-commit|test-push-automation-commit)\\.sh$|^\\.github/workflows/sync-even-terminal-npm-hash\\.yml$";
+            };
             deadnix = {
               enable = true;
               settings = {
