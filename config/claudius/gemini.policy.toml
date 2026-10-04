@@ -1,4 +1,17 @@
 [[rule]]
+mcpName = "playwright"
+toolName = "browser_run_code_unsafe"
+decision = "deny"
+priority = 200
+
+# Also deny the older tool name when a local override loads an older server.
+[[rule]]
+mcpName = "playwright"
+toolName = "browser_run_code"
+decision = "deny"
+priority = 200
+
+[[rule]]
 toolName = "run_shell_command"
 commandPrefix = [
   "curl",

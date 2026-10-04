@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+set -eu
+
+case "${1:-}" in
+gmail)
+  server_url="https://gmailmcp.googleapis.com/mcp/v1"
+  callback_port="${GOOGLE_GMAIL_CALLBACK_PORT:-3335}"
+  oauth_scopes="https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.compose"
+  ;;
+drive)
+  server_url="https://drivemcp.googleapis.com/mcp/v1"
+  callback_port="${GOOGLE_DRIVE_CALLBACK_PORT:-3336}"
+  oauth_scopes="https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.file"
+  ;;
+calendar)
+  server_url="https://calendarmcp.googleapis.com/mcp/v1"
+  callback_port="${GOOGLE_CALENDAR_CALLBACK_PORT:-3337}"
+  oauth_scopes="https://www.googleapis.com/auth/calendar.calendarlist.readonly https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.events.freebusy"
+  ;;
+*)
+  echo "Usage: mcp-google-workspace <gmail|drive|calendar>" >&2
+  exit 2
+  ;;
+esac
+
+if [ "$#" -ne 1 ]; then
+  echo "Usage: mcp-google-workspace <gmail|drive|calendar>" >&2
+  exit 2
+fi
+
+case "$callback_port" in
+'' | *[!0-9]*)
+  echo "Google MCP callback port must be an integer between 1 and 65535" >&2
+  exit 2
+  ;;
+esac
+if [ "${#callback_port}" -gt 5 ] || [ "$callback_port" -lt 1 ] || [ "$callback_port" -gt 65535 ]; then
+  echo "Google MCP callback port must be an integer between 1 and 65535" >&2
+  exit 2
+fi
+
+: "${GOOGLE_CLIENT_ID:?Set GOOGLE_CLIENT_ID in credentials/mcp/google-workspace/}"
+: "${GOOGLE_CLIENT_SECRET:?Set GOOGLE_CLIENT_SECRET in credentials/mcp/google-workspace/}"
+
+# mcp-remote expands these placeholders after reading the environment. Keep the
+# client secret out of process arguments and the tracked MCP configuration.
+# shellcheck disable=SC2016
+exec npx -y mcp-remote@0.14.3 "$server_url" "$callback_port" \
+  --transport http-only \
+  --static-oauth-client-info '{"client_id":"${GOOGLE_CLIENT_ID}","client_secret":"${GOOGLE_CLIENT_SECRET}"}' \
+  --static-oauth-client-metadata "{\"scope\":\"$oauth_scopes\",\"token_endpoint_auth_method\":\"client_secret_post\"}" \
+  --authorize-param access_type=offline \
+  --authorize-param prompt=consent \
+  --auth-timeout 300

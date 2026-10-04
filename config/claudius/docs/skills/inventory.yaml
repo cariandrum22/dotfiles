@@ -74,7 +74,7 @@ skills:
     future_action: replace-with-native-web-search-or-mcp
     successor:
       - web.run
-      - perplexity-ask MCP
+      - brave-search MCP
       - Gemini MCP / command surface
     rationale: >-
       This is a transport workaround rather than durable repository expertise.

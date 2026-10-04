@@ -39,16 +39,19 @@
       "chrome-devtools",
       "github",
       "awslabs_aws-documentation-mcp-server",
-      "perplexity-ask",
       "figma",
       "google-calendar",
+      "google-drive",
+      "google-gmail",
       "notion",
       "todoist",
-      "playwright"
+      "playwright",
+      "x",
+      "brave-search"
     ]
   },
   "security": {
-    "disableYoloMode": false,
+    "disableYoloMode": true,
     "enablePermanentToolApproval": true,
     "folderTrust": {
       "enabled": true
@@ -62,6 +65,10 @@
         "PERPLEXITY_API_KEY",
         "FIGMA_API_KEY",
         "GOOGLE_OAUTH_CREDENTIALS",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "CLIENT_ID",
+        "CLIENT_SECRET",
         "API_KEY",
         "AWS_ACCESS_KEY_ID",
         "AWS_SECRET_ACCESS_KEY",
@@ -73,7 +80,8 @@
         "GOOGLE_API_KEY",
         "GOOGLE_APPLICATION_CREDENTIALS",
         "OPENAI_ORG_ID",
-        "OPENAI_PROJECT_ID"
+        "OPENAI_PROJECT_ID",
+        "BRAVE_API_KEY"
       ]
     }
   },

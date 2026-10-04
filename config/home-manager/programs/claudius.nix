@@ -13,6 +13,7 @@ let
   claudiusSource = ../../claudius;
   claudiusExe = lib.getExe' pkgs.claudius "claudius";
   jsonFormat = pkgs.formats.json { };
+  tomlFormat = pkgs.formats.toml { };
   baseMcpServers = builtins.fromJSON (builtins.readFile (claudiusSource + "/mcpServers.json"));
   nonHeadlessMcpServerNames = [
     "figma"
@@ -26,13 +27,11 @@ let
       lib.filterAttrs (name: _: !(lib.elem name nonHeadlessMcpServerNames)) baseMcpServers.mcpServers
     else
       baseMcpServers.mcpServers;
-  playwrightArgs = [
-    "-y"
-    "@playwright/mcp@latest"
-  ]
-  ++ lib.optionals (claudiusConfig.isLinux && !isHeadless) [
-    "--executable-path=${pkgs.google-chrome}/bin/google-chrome-stable"
-  ];
+  playwrightArgs =
+    filteredMcpServers.playwright.args
+    ++ lib.optionals (claudiusConfig.isLinux && !isHeadless) [
+      "--executable-path=${pkgs.google-chrome}/bin/google-chrome-stable"
+    ];
   managedMcpServers = baseMcpServers // {
     mcpServers = filteredMcpServers // {
       playwright = filteredMcpServers.playwright // {
@@ -40,11 +39,22 @@ let
       };
     };
   };
+  baseCodexSettings = builtins.fromTOML (builtins.readFile (claudiusSource + "/codex.settings.toml"));
+  # Policy-only tables must not reintroduce servers omitted on headless hosts.
+  managedCodexSettings = baseCodexSettings // {
+    mcp_servers = lib.filterAttrs (
+      name: _: builtins.hasAttr name filteredMcpServers
+    ) baseCodexSettings.mcp_servers;
+  };
   mutableClaudiusRelativeDirs = [
     ".claude"
     "credentials"
     "credentials/google"
     "credentials/mcp"
+    "credentials/mcp/brave-search"
+    "credentials/mcp/github"
+    "credentials/mcp/google-workspace"
+    "credentials/mcp/x"
   ];
   managedSkillSyncAgents = [
     "claude-code"
@@ -74,7 +84,8 @@ in
     };
 
     "claudius/claude.settings.json".source = claudiusSource + "/claude.settings.json";
-    "claudius/codex.settings.toml".source = claudiusSource + "/codex.settings.toml";
+    "claudius/codex.settings.toml".source =
+      tomlFormat.generate "claudius-codex.settings.toml" managedCodexSettings;
     "claudius/codex.managed_config.toml".source = claudiusSource + "/codex.managed_config.toml";
     "claudius/codex.requirements.toml".source = claudiusSource + "/codex.requirements.toml";
     "claudius/gemini.settings.json".source = claudiusSource + "/gemini.settings.json";
@@ -84,6 +95,8 @@ in
   };
 
   home = {
+    packages = [ pkgs.github-mcp-server ];
+
     file.".gemini/policies/claudius.toml".source = claudiusSource + "/gemini.policy.toml";
 
     activation = {
@@ -97,7 +110,11 @@ in
         chmod 700 \
           "$claudius_config_dir/credentials" \
           "$claudius_config_dir/credentials/google" \
-          "$claudius_config_dir/credentials/mcp"
+          "$claudius_config_dir/credentials/mcp" \
+          "$claudius_config_dir/credentials/mcp/brave-search" \
+          "$claudius_config_dir/credentials/mcp/github" \
+          "$claudius_config_dir/credentials/mcp/google-workspace" \
+          "$claudius_config_dir/credentials/mcp/x"
       '';
 
       pruneLegacyClaudiusSkillLayout = lib.hm.dag.entryBefore [ "linkGeneration" ] ''

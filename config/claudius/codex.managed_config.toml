@@ -11,5 +11,5 @@
 # See:
 # https://developers.openai.com/codex/security#managed-defaults-managed_configtoml
 
-approval_policy = "never"
+approval_policy = "on-request"
 default_permissions = ":danger-full-access"
