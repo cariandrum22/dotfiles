@@ -3,8 +3,46 @@ review_model = "gpt-5.6-sol"
 model_provider = "cloudflare_openai"
 model_reasoning_effort = "xhigh"
 model_reasoning_summary = "auto"
-approval_policy = "never"
+approval_policy = "on-request"
 default_permissions = ":danger-full-access"
+web_search = "live"
+
+# Use the first-party provider when native search is needed and the gateway
+# does not support it. Brave MCP remains available through either provider.
+[profiles.openai-search]
+model_provider = "openai"
+web_search = "live"
+
+[mcp_servers.playwright]
+disabled_tools = ["browser_run_code_unsafe", "browser_run_code"]
+default_tools_approval_mode = "prompt"
+
+[mcp_servers.chrome-devtools]
+default_tools_approval_mode = "prompt"
+
+[mcp_servers.github]
+default_tools_approval_mode = "writes"
+
+[mcp_servers.figma]
+default_tools_approval_mode = "writes"
+
+[mcp_servers.google-calendar]
+default_tools_approval_mode = "writes"
+
+[mcp_servers.google-drive]
+default_tools_approval_mode = "writes"
+
+[mcp_servers.google-gmail]
+default_tools_approval_mode = "writes"
+
+[mcp_servers.notion]
+default_tools_approval_mode = "writes"
+
+[mcp_servers.todoist]
+default_tools_approval_mode = "writes"
+
+[mcp_servers.x]
+default_tools_approval_mode = "writes"
 
 [shell_environment_policy]
 inherit = "all"

@@ -2,7 +2,7 @@
   "mcpServers": {
     "awslabs_aws-documentation-mcp-server": {
       "args": [
-        "awslabs.aws-documentation-mcp-server@latest"
+        "awslabs.aws-documentation-mcp-server==1.2.2"
       ],
       "command": "uvx",
       "env": {
@@ -10,31 +10,39 @@
         "FASTMCP_LOG_LEVEL": "ERROR"
       }
     },
+    "brave-search": {
+      "command": "bash",
+      "args": [
+        "-lc",
+        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server brave-search -- npx -y @brave/brave-search-mcp-server@2.1.4 --transport stdio"
+      ],
+      "env": {
+        "BRAVE_MCP_ENABLED_TOOLS": "brave_web_search brave_news_search brave_image_search brave_video_search brave_local_search"
+      }
+    },
     "chrome-devtools": {
       "args": [
         "-y",
-        "chrome-devtools-mcp@latest"
+        "chrome-devtools-mcp@1.10.1",
+        "--isolated",
+        "--no-usage-statistics",
+        "--no-performance-crux",
+        "--no-javascript-evaluation",
+        "--redact-network-headers"
       ],
       "command": "npx",
-      "env": {}
-    },
-    "codex": {
-      "args": [
-        "-lc",
-        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server codex -- codex mcp-server"
-      ],
-      "command": "bash",
       "env": {}
     },
     "figma": {
       "args": [],
       "env": {},
-      "url": "https://mcp.figma.com/mcp"
+      "url": "https://mcp.figma.com/mcp",
+      "type": "http"
     },
     "github": {
       "args": [
         "-lc",
-        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server github -- bash -lc 'exec npx -y mcp-remote@latest https://api.githubcopilot.com/mcp/ --header \"Authorization:Bearer $GITHUB_PERSONAL_ACCESS_TOKEN\"'"
+        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server github -- github-mcp-server stdio --lockdown-mode"
       ],
       "command": "bash",
       "env": {}
@@ -42,28 +50,42 @@
     "google-calendar": {
       "args": [
         "-lc",
-        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server google-calendar -- npx -y @cocal/google-calendar-mcp"
+        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server google-workspace -- \"$CONFIG_HOME/claudius/bin/mcp-google-workspace\" calendar"
       ],
       "command": "bash",
-      "env": {}
+      "env": {},
+      "startup_timeout_sec": 300
+    },
+    "google-drive": {
+      "args": [
+        "-lc",
+        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server google-workspace -- \"$CONFIG_HOME/claudius/bin/mcp-google-workspace\" drive"
+      ],
+      "command": "bash",
+      "env": {},
+      "startup_timeout_sec": 300
+    },
+    "google-gmail": {
+      "args": [
+        "-lc",
+        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server google-workspace -- \"$CONFIG_HOME/claudius/bin/mcp-google-workspace\" gmail"
+      ],
+      "command": "bash",
+      "env": {},
+      "startup_timeout_sec": 300
     },
     "notion": {
       "args": [],
       "env": {},
-      "url": "https://mcp.notion.com/mcp"
-    },
-    "perplexity-ask": {
-      "args": [
-        "-lc",
-        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server perplexity-ask -- npx -y @perplexity-ai/mcp-server"
-      ],
-      "command": "bash",
-      "env": {}
+      "url": "https://mcp.notion.com/mcp",
+      "type": "http"
     },
     "playwright": {
       "args": [
         "-y",
-        "@playwright/mcp@latest"
+        "@playwright/mcp@0.0.83",
+        "--isolated",
+        "--no-webmcp"
       ],
       "command": "npx",
       "env": {}
@@ -71,7 +93,17 @@
     "todoist": {
       "args": [],
       "env": {},
-      "url": "https://ai.todoist.net/mcp"
+      "url": "https://ai.todoist.net/mcp",
+      "type": "http"
+    },
+    "x": {
+      "args": [
+        "-lc",
+        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server x -- npx -y @xdevplatform/xurl@1.3.4 mcp https://api.x.com/mcp"
+      ],
+      "command": "bash",
+      "env": {},
+      "startup_timeout_sec": 300
     }
   }
 }

@@ -94,6 +94,7 @@ nix develop
 
 ### Utilities
 
+- `config/claudius/` - Shared agent configuration and [MCP setup](config/claudius/docs/mcp.md)
 - `scripts/` - Python scripts for updating external dependencies (Cursor, VSCode Insiders,
   extensions)
 - `function/` - Setup and installation helper functions

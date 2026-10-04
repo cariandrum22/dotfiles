@@ -3,6 +3,8 @@
 !.codex/
 !.codex/**
 !config/claudius/skills/**/*.md
+!config/claudius/docs/**/*.md
+config/claudius/credentials/
 # Keep this repository-native Codex skill despite the global .agents ignore.
 !.agents/
 .agents/*
