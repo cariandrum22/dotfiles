@@ -170,9 +170,29 @@ class McpRegressionTests(unittest.TestCase):
             ):
                 self.run_command([launcher, *args])
 
+    def assert_opencode_servers(self) -> None:
+        rendered = json.loads((self.root / "opencode.json").read_text())
+        opencode = rendered["mcp"]["servers"]
+        self.assertEqual(set(opencode), set(self.servers))
+        self.assertEqual(
+            opencode["github"]["command"],
+            [self.servers["github"]["command"], *self.servers["github"]["args"]],
+        )
+        self.assertIn("--isolated", opencode["playwright"]["command"])
+        for name, server in self.servers.items():
+            expected = "remote" if "url" in server else "local"
+            self.assertEqual(opencode[name]["type"], expected)
+            if "url" in server:
+                self.assertEqual(opencode[name]["url"], server["url"])
+            if "startup_timeout_sec" in server:
+                self.assertEqual(
+                    opencode[name]["timeout"]["startup"],
+                    server["startup_timeout_sec"] * 1000,
+                )
+
     def test_agent_sync_preserves_transport_and_browser_policy(self) -> None:
         claudius = os.environ.get("CLAUDIUS_BIN", "claudius")
-        for agent in ("claude-code", "codex", "gemini"):
+        for agent in ("claude-code", "codex", "gemini", "opencode"):
             self.run_command([claudius, "config", "sync", "--agent", agent])
         codex = tomllib.loads((self.root / ".codex/config.toml").read_text())
         gemini = json.loads((self.root / ".gemini/settings.json").read_text())
@@ -185,6 +205,7 @@ class McpRegressionTests(unittest.TestCase):
             self.assertEqual(set(rendered), set(self.servers))
             self.assertEqual(rendered["github"]["args"], self.servers["github"]["args"])
             self.assertIn("--isolated", rendered["playwright"]["args"])
+        self.assert_opencode_servers()
         policy = codex["mcp_servers"]["playwright"]
         for name, server in self.servers.items():
             if "url" in server:
@@ -210,6 +231,19 @@ class McpRegressionTests(unittest.TestCase):
             if r.get("mcpName") == "playwright" and r["decision"] == "deny"
         }
         self.assertTrue(denied >= UNSAFE_TOOLS)
+
+    def test_opencode_local_model_values_stay_out_of_tracked_settings(self) -> None:
+        claudius = os.environ.get("CLAUDIUS_BIN", "claudius")
+        self.run_command([claudius, "config", "sync", "--agent", "opencode"])
+        rendered = json.loads((self.root / "opencode.json").read_text())
+        provider = rendered["providers"]["llamacpp"]
+        local_model = "{file:~/.config/opencode/local-model/"
+        self.assertTrue(provider["settings"]["baseURL"].startswith(local_model))
+        for model in provider["models"].values():
+            self.assertTrue(model["modelID"].startswith(local_model))
+            self.assertTrue(model["name"].startswith(local_model))
+        self.assertEqual(rendered["model"], "llamacpp/local")
+        self.assertNotIn("mcpServers", rendered)
 
 
 if __name__ == "__main__":
