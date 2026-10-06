@@ -62,15 +62,15 @@
   {
     name = "chatgpt";
     publisher = "openai";
-    version = "26.5928.31416";
-    sha256 = "1lmv8p3y11hvmxrvsy0b4xf5f3g01f06mqh2qp22nn0aa3szhp56";
+    version = "26.5930.61225";
+    sha256 = "1c4prsg4lr2mar9pcgarjgr9x9l77d7wa5m99c9gw5hripim16k7";
     arch = "linux-x64";
   }
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.288";
-    sha256 = "1jp5j9sl7kgphdl3q5cand86y6086kyd20nikcziy1l1kg2jy5iq";
+    version = "2.1.290";
+    sha256 = "0y5drbvykw9f6xjmfs9772dbapm7nbd3xb2rlr3w9ygcznlrl46q";
     arch = "linux-x64";
   }
   {
@@ -100,8 +100,8 @@
   {
     name = "code-spell-checker";
     publisher = "streetsidesoftware";
-    version = "4.9.5";
-    sha256 = "1man2qjis2xh7jriw941wbzv7wyacbban935k9x16zz7kjjfbdw5";
+    version = "4.9.6";
+    sha256 = "1kcrk6vpfi2cv6g1hl45ngwysvn2z67gimm38r9gb5vv8ygrmbvh";
   }
   {
     name = "copilot";
@@ -196,14 +196,14 @@
   {
     name = "git-worktree-manager";
     publisher = "jackiotyu";
-    version = "3.30.0";
-    sha256 = "1f7l8giazjrmbpg7hkzn6xim2y85ysw2k64fcad63dywdg2433bd";
+    version = "3.31.0";
+    sha256 = "0b8jnclwbrkvlfzh8a3x2bbja44ydw1vm228zy11gx1digic41f9";
   }
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.10.20516";
-    sha256 = "1q3f6n5afm36rx0r0fsi4llzp4vjl0bk6yg0xxk9vnxxlr0zvpy6";
+    version = "2026.10.50525";
+    sha256 = "0q0ll1nwsirip7ldfpcapx8zkfxnihry9lrz9anps2jvh74zayfq";
   }
   {
     name = "haskell";
@@ -374,8 +374,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.3070";
-    sha256 = "1fryz4wjclyj3hmh5gwhq4sq7di4nc0pflqd27gw1i6ls4d6zi69";
+    version = "0.4.3074";
+    sha256 = "1cdm0pcr00j1hmhzfjavsnj0cf6f4ghjc1qxvq8cwgn1srjqpr3x";
     arch = "linux-x64";
   }
   {
@@ -393,8 +393,8 @@
   {
     name = "shellcheck";
     publisher = "timonwong";
-    version = "0.42.0";
-    sha256 = "0h0d3rsz9aim3l1mmi31q6d9l9mxrc9zqxz53m5gsc2g2jzz96is";
+    version = "0.46.0";
+    sha256 = "1jvvqdk6ygb2mx9y8hzw2r7f5c1v1klkd4kzvy4nfqd57rymkx8h";
     arch = "linux-x64";
   }
   {
@@ -503,8 +503,8 @@
   {
     name = "vscode-ide";
     publisher = "tlaplus";
-    version = "2026.10.21645";
-    sha256 = "0gqs96kgc29h2vx5179w2pmxb8ljpbnrfyqcq25z5hcnk3bsjr81";
+    version = "2026.10.60200";
+    sha256 = "03v2qw7rwzcrqqn6s2dk9ql627prgicbfl7663ymsi3mqzbf6g5w";
   }
   {
     name = "vscode-java-debug";
