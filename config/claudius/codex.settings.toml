@@ -27,12 +27,18 @@ default_tools_approval_mode = "writes"
 default_tools_approval_mode = "writes"
 
 [mcp_servers.google-calendar]
+enabled = false
 default_tools_approval_mode = "writes"
 
 [mcp_servers.google-drive]
+enabled = false
 default_tools_approval_mode = "writes"
 
 [mcp_servers.google-gmail]
+enabled = false
+default_tools_approval_mode = "writes"
+
+[mcp_servers.google-personal]
 default_tools_approval_mode = "writes"
 
 [mcp_servers.notion]

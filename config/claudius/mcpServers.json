@@ -104,6 +104,15 @@
       "command": "bash",
       "env": {},
       "startup_timeout_sec": 300
+    },
+    "google-personal": {
+      "command": "bash",
+      "args": [
+        "-lc",
+        "CONFIG_HOME=\"${XDG_CONFIG_HOME:-$HOME/.config}\"; exec \"$CONFIG_HOME/claudius/bin/mcp-with-credentials\" --server google-personal -- \"$CONFIG_HOME/claudius/bin/mcp-google-personal\""
+      ],
+      "env": {},
+      "startup_timeout_sec": 300
     }
   }
 }

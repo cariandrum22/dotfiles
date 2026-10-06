@@ -53,6 +53,7 @@ let
     "credentials/mcp"
     "credentials/mcp/brave-search"
     "credentials/mcp/github"
+    "credentials/mcp/google-personal"
     "credentials/mcp/google-workspace"
     "credentials/mcp/x"
   ];
@@ -113,6 +114,7 @@ in
           "$claudius_config_dir/credentials/mcp" \
           "$claudius_config_dir/credentials/mcp/brave-search" \
           "$claudius_config_dir/credentials/mcp/github" \
+          "$claudius_config_dir/credentials/mcp/google-personal" \
           "$claudius_config_dir/credentials/mcp/google-workspace" \
           "$claudius_config_dir/credentials/mcp/x"
       '';

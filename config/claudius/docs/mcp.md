@@ -106,6 +106,25 @@ bridge is third-party and is also pinned.
 | X OAuth bridge (`xurl`)            | 1.3.4                          |
 | GitHub                             | Nixpkgs lock (currently 1.1.2) |
 
+## Personal Google account
+
+`google-personal` uses the third-party [Workspace MCP](https://github.com/taylorwilsdon/google_workspace_mcp)
+package pinned to 2.0.1, running locally over stdio with only Gmail, Calendar, and Drive enabled.
+The launcher uses `--read-only`, limiting OAuth scopes and removing write tools. The official
+Developer Preview remote servers remain configured for a later Workspace setup, but are disabled
+in Codex while testing the personal account.
+
+Enable Gmail API, Google Calendar API, and Google Drive API in the personal Cloud project.
+Create an External OAuth app, add the personal Gmail address as a test user, and create a Web
+application client with `http://localhost:8000/oauth2callback` as its redirect URI.
+Store `client_id` and `client_secret` in the `Google OAuth - MCP - Personal` 1Password item.
+Put their `op://` references in `credentials/mcp/google-personal/GOOGLE_OAUTH_CLIENT_ID` and
+`credentials/mcp/google-personal/GOOGLE_OAUTH_CLIENT_SECRET`. Never put the values in this repo.
+
+The private token cache is `~/.config/claudius/credentials/google-personal`, separate from Workspace
+credentials. Only authenticate the personal account in this instance. External apps in Testing
+normally receive refresh tokens that expire after seven days with these scopes.
+
 ## Google Workspace
 
 The `google-gmail`, `google-drive`, and `google-calendar` entries connect to Google's official
