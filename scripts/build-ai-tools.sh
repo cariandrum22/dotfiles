@@ -48,6 +48,9 @@ build_tool() {
   gemini-cli)
     build_package "gemini-cli" ./config/home-manager/home/packages/gemini-cli.nix
     ;;
+  opencode)
+    build_package "opencode" ./config/home-manager/home/packages/opencode.nix
+    ;;
   *)
     printf 'Unknown AI tool: %s\n' "$1" >&2
     return 2
@@ -58,7 +61,7 @@ build_tool() {
 printf 'Verifying AI tool builds...\n\n'
 
 if [ "$#" -eq 0 ]; then
-  set -- claude-code codex-cli droid gemini-cli
+  set -- claude-code codex-cli droid gemini-cli opencode
 fi
 
 for tool in "$@"; do

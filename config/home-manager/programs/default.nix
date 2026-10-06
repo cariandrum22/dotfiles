@@ -3,6 +3,7 @@
 {
   imports = [
     ./claudius.nix
+    ./opencode.nix
     ./home-manager.nix
     ./git.nix
     ./gpg.nix

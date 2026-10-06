@@ -31,6 +31,9 @@ managed_paths() {
   gemini-cli)
     printf '%s\n' "$PACKAGES_DIR/gemini-cli.nix"
     ;;
+  opencode)
+    printf '%s\n' "$PACKAGES_DIR/opencode.nix"
+    ;;
   *)
     printf 'Unknown AI tool: %s\n' "$1" >&2
     return 2
@@ -44,6 +47,7 @@ update_script() {
   codex-cli) printf '%s\n' scripts/update-codex-cli.py ;;
   droid) printf '%s\n' scripts/update-droid.py ;;
   gemini-cli) printf '%s\n' scripts/update-gemini-cli.py ;;
+  opencode) printf '%s\n' scripts/update-opencode.py ;;
   *)
     printf 'Unknown AI tool: %s\n' "$1" >&2
     return 2
@@ -136,7 +140,7 @@ update_tool() {
 }
 
 if [ "$#" -eq 0 ]; then
-  set -- claude-code codex-cli droid gemini-cli
+  set -- claude-code codex-cli droid gemini-cli opencode
 fi
 
 for tool in "$@"; do

@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  "model": "llamacpp/flash-next",
+
+  "providers": {
+    "llamacpp": {
+      "name": "Laboratory llama.cpp",
+      "package": "@opencode/ai/providers/openai-compatible",
+
+      "settings": {
+        "baseURL": "http://127.0.0.1:8080/v1",
+
+        // Bound a single inference request.
+        // Adjust upward if Flash-Next legitimately exceeds this.
+        "timeout": 900000
+      },
+
+      "models": {
+        "flash-next": {
+          "modelID": "Qwen3.8-Flash-Next",
+          "name": "Qwen3.8 Flash-Next (local)",
+
+          "capabilities": {
+            "tools": true,
+            "input": ["text"],
+            "output": ["text"]
+          },
+
+          "limit": {
+            "context": 32768,
+            "output": 4096
+          }
+        }
+      }
+    }
+  },
+
+  "experimental": {
+    "policies": [
+      {
+        "action": "provider.use",
+        "resource": "*",
+        "effect": "deny"
+      },
+      {
+        "action": "provider.use",
+        "resource": "llamacpp",
+        "effect": "allow"
+      }
+    ]
+  },
+
+  "permissions": [
+    {
+      "action": "external_directory",
+      "resource": "*",
+      "effect": "deny"
+    },
+
+    {
+      "action": "shell",
+      "resource": "*",
+      "effect": "ask"
+    },
+
+    {
+      "action": "shell",
+      "resource": "git status *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "git diff *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "git log *",
+      "effect": "allow"
+    },
+
+    {
+      "action": "shell",
+      "resource": "pytest *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "python -m pytest *",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "uv run pytest *",
+      "effect": "allow"
+    },
+
+    {
+      "action": "shell",
+      "resource": "git push *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "git reset --hard *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "sudo *",
+      "effect": "deny"
+    }
+  ],
+
+  "agents": {
+    "build": {
+      "steps": 24,
+
+      "permissions": [
+        {
+          "action": "subagent",
+          "resource": "*",
+          "effect": "deny"
+        }
+      ]
+    },
+
+    "title": {
+      "disabled": true
+    }
+  }
+}
