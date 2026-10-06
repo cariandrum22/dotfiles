@@ -230,6 +230,40 @@ def test_stable_new_artifact_is_prefetched() -> None:
     _require_equal(info.download_hash, "sha256-stable", "stable hash was not used")
 
 
+def test_artifact_requests_send_cursor_user_agent() -> None:
+    update_cursor = _load_update_cursor()
+    requests: list[object] = []
+
+    class Response:
+        def __init__(self) -> None:
+            self.headers = {"Last-Modified": "Fri, 11 Sep 2026 03:00:00 GMT"}
+
+        def __enter__(self) -> Response:
+            return self
+
+        def __exit__(self, *_args: object) -> None:
+            return None
+
+    def fake_urlopen(req: object, **_kwargs: object) -> Response:
+        requests.append(req)
+        return Response()
+
+    update_cursor.urlopen = fake_urlopen
+    update_cursor._fetch_artifact_last_modified(
+        "https://downloads.cursor.com/production/"
+        "2222222222222222222222222222222222222222/linux/x64/"
+        "Cursor-3.20.10-x86_64.AppImage",
+    )
+
+    user_agent = requests[0].get_header("User-agent")
+    _require(
+        condition=isinstance(user_agent, str)
+        and not user_agent.startswith("Python-urllib"),
+        message="Cursor artifact request used urllib's rejected User-Agent",
+    )
+    _require_equal(user_agent, update_cursor.CURSOR_USER_AGENT, "unexpected User-Agent")
+
+
 def main() -> None:
     test_zsync_url_is_normalized_to_appimage()
     test_update_api_payload_uses_product_version_and_appimage_url()
@@ -237,6 +271,7 @@ def main() -> None:
     test_current_artifact_is_rehashed_when_no_update_is_available()
     test_recent_new_artifact_is_deferred_before_prefetch()
     test_stable_new_artifact_is_prefetched()
+    test_artifact_requests_send_cursor_user_agent()
 
 
 if __name__ == "__main__":
