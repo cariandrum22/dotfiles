@@ -82,6 +82,7 @@
         (callPackage ./codex.nix { })
         (callPackage ./droid.nix { })
         (callPackage ./gemini-cli.nix { })
+        (callPackage ./opencode.nix { })
         claudius
 
         # Development toolchain

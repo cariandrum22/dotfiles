@@ -70,6 +70,7 @@ jobs:
             - Codex CLI
             - Droid
             - Gemini CLI
+            - OpenCode
 
             Changes were generated automatically by the daily update workflow.
           branch: update-ai-tools
@@ -147,6 +148,7 @@ jobs:
             - Codex CLI
             - Droid
             - Gemini CLI
+            - OpenCode
 
             Changes were generated automatically by the daily update workflow.
           branch: update-ai-tools

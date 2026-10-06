@@ -29,6 +29,7 @@ update-claude-code.py) target="config/home-manager/home/packages/claude-code.nix
 update-codex-cli.py) target="config/home-manager/home/packages/codex.nix" ;;
 update-droid.py) target="config/home-manager/home/packages/droid.nix" ;;
 update-gemini-cli.py) target="config/home-manager/home/packages/gemini-cli.nix" ;;
+update-opencode.py) target="config/home-manager/home/packages/opencode.nix" ;;
 *) exit 2 ;;
 esac
 printf 'updated\n' >>"$target"
@@ -40,6 +41,7 @@ for file in \
   codex.nix \
   droid.nix \
   gemini-cli.nix \
+  opencode.nix \
   rusty-v8-prebuilt-out-dir.patch \
   stub-runfiles.patch; do
   if [ "$file" != "gemini-cli.nix" ]; then
@@ -63,7 +65,7 @@ if ! (
   exit 1
 fi
 
-for tool in claude-code droid gemini-cli; do
+for tool in claude-code droid gemini-cli opencode; do
   grep -q '^updated$' "$fixture/config/home-manager/home/packages/$tool.nix"
 done
 
