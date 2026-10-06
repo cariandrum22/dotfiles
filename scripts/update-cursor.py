@@ -25,7 +25,7 @@ Exit codes:
     1: Error occurred
 
 Environment:
-    SCRIPT_USER_AGENT: Set custom User-Agent header (default: Python-urllib/X.X)
+    SCRIPT_USER_AGENT: Set custom User-Agent header (default: CURSOR_USER_AGENT)
 """
 
 from __future__ import annotations
@@ -66,6 +66,10 @@ MINIMUM_ARTIFACT_AGE = timedelta(hours=24)
 HTTP_NO_CONTENT = 204
 HTTP_REDIRECT_MIN = 300
 HTTP_REDIRECT_MAX = 400
+# downloads.cursor.com rejects urllib's default User-Agent with HTTP 403.
+CURSOR_USER_AGENT = common.DEFAULT_USER_AGENT or (
+    "dotfiles-update-cursor/1.0 (+https://github.com/cariandrum22/dotfiles)"
+)
 
 
 class CursorConfigError(common.ConfigError):
@@ -264,7 +268,11 @@ def _generate_nix_content(
 
 def _fetch_optional_json(url: str) -> dict[str, object] | None:
     """Fetch JSON, returning None when Cursor reports no update with an empty body."""
-    req = common.build_request(url, headers=common.JSON_HEADERS)
+    req = common.build_request(
+        url,
+        headers=common.JSON_HEADERS,
+        user_agent=CURSOR_USER_AGENT,
+    )
     try:
         with urlopen(req, timeout=common.HTTP_TIMEOUT) as resp:  # noqa: S310
             body = resp.read().decode("utf-8").strip()
@@ -282,7 +290,7 @@ def _fetch_optional_json(url: str) -> dict[str, object] | None:
 
 def _fetch_artifact_last_modified(url: str) -> datetime:
     """Fetch and parse an artifact's HTTP Last-Modified timestamp."""
-    req = common.build_request(url)
+    req = common.build_request(url, user_agent=CURSOR_USER_AGENT)
     req.method = "HEAD"
     try:
         with urlopen(req, timeout=common.HTTP_TIMEOUT) as resp:  # noqa: S310
@@ -338,7 +346,7 @@ def _resolve_cursor_download_url(url: str) -> str:
         return normalized_url
 
     opener = build_opener(_NoRedirectHandler)
-    req = common.build_request(normalized_url)
+    req = common.build_request(normalized_url, user_agent=CURSOR_USER_AGENT)
     try:
         with opener.open(req, timeout=common.HTTP_TIMEOUT) as resp:
             return _normalize_appimage_url(resp.geturl())
