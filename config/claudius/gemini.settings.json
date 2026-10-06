@@ -47,7 +47,8 @@
       "todoist",
       "playwright",
       "x",
-      "brave-search"
+      "brave-search",
+      "google-personal"
     ]
   },
   "security": {

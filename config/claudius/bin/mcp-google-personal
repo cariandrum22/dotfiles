@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+umask 077
+: "${GOOGLE_OAUTH_CLIENT_ID:?Google personal OAuth client ID is required}"
+: "${GOOGLE_OAUTH_CLIENT_SECRET:?Google personal OAuth client secret is required}"
+export WORKSPACE_MCP_CREDENTIALS_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/claudius/credentials/google-personal"
+mkdir -p "$WORKSPACE_MCP_CREDENTIALS_DIR"
+chmod 700 "$WORKSPACE_MCP_CREDENTIALS_DIR"
+export WORKSPACE_MCP_PORT=8000
+export PORT=8000
+export GOOGLE_OAUTH_REDIRECT_URI=http://localhost:8000/oauth2callback
+exec uvx --from workspace-mcp==2.0.1 workspace-mcp --transport stdio --tools gmail calendar drive --tool-tier core --read-only
