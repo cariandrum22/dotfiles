@@ -8,12 +8,31 @@ nix run --impure .#switch
 claudius config sync --global --agent claude-code
 claudius config sync --global --agent codex
 claudius config sync --global --agent gemini
+claudius config sync --global --agent opencode
 ```
+
+Home Manager also syncs the shared skills to Claude Code, Codex, and OpenCode
+(`~/.config/opencode/skills`) on activation.
 
 Credentials below live under `${XDG_CONFIG_HOME:-$HOME/.config}/claudius/credentials/mcp/`. Each
 file is loaded as an environment variable by `mcp-with-credentials`. Store `op://` references to
 1Password fields in these files; the loader resolves them using `op read`. Keep credentials out of
 this repository. Home Manager creates the credential directories with mode `700`.
+
+## OpenCode local model
+
+The local llama.cpp provider's endpoint, model ID, and display name are not stored in this
+repository. `config/claudius/opencode.settings.json` references them with `{file:...}` from files in
+`~/.config/opencode/local-model/`, which Home Manager creates with mode `700`:
+
+```bash
+printf '%s\n' 'http://HOST:PORT/v1' > ~/.config/opencode/local-model/base-url
+printf '%s\n' 'MODEL-ID' > ~/.config/opencode/local-model/model-id
+printf '%s\n' 'Display name' > ~/.config/opencode/local-model/name
+```
+
+OpenCode fails to load the configuration with a `bad file reference` error while any of these
+files is missing.
 
 ## Migration and permissions
 

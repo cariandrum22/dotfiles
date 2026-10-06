@@ -60,10 +60,12 @@ let
   managedSkillSyncAgents = [
     "claude-code"
     "codex"
+    "opencode"
   ];
   managedSkillTargetRelativeDirs = [
     ".claude/skills"
     ".agents/skills"
+    ".config/opencode/skills"
   ];
 in
 {
@@ -90,6 +92,11 @@ in
     "claudius/codex.managed_config.toml".source = claudiusSource + "/codex.managed_config.toml";
     "claudius/codex.requirements.toml".source = claudiusSource + "/codex.requirements.toml";
     "claudius/gemini.settings.json".source = claudiusSource + "/gemini.settings.json";
+    # The local model endpoint and name stay out of this file; OpenCode reads
+    # them from ~/.config/opencode/local-model (see programs/opencode.nix).
+    # The provider timeout bounds a single inference request; raise it if the
+    # local model legitimately needs longer.
+    "claudius/opencode.settings.json".source = claudiusSource + "/opencode.settings.json";
     "claudius/mcpServers.json".source =
       jsonFormat.generate "claudius-mcpServers.json" managedMcpServers;
     "claudius/config.toml".text = claudiusConfig.claudiusConfigText;

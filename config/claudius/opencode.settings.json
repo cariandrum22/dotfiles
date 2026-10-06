@@ -1,32 +1,27 @@
 {
   "$schema": "https://opencode.ai/config.json",
-
-  "model": "llamacpp/flash-next",
-
+  "model": "llamacpp/local",
   "providers": {
     "llamacpp": {
       "name": "Laboratory llama.cpp",
       "package": "@opencode/ai/providers/openai-compatible",
-
       "settings": {
-        "baseURL": "http://127.0.0.1:8080/v1",
-
-        // Bound a single inference request.
-        // Adjust upward if Flash-Next legitimately exceeds this.
+        "baseURL": "{file:~/.config/opencode/local-model/base-url}",
         "timeout": 900000
       },
-
       "models": {
-        "flash-next": {
-          "modelID": "Qwen3.8-Flash-Next",
-          "name": "Qwen3.8 Flash-Next (local)",
-
+        "local": {
+          "modelID": "{file:~/.config/opencode/local-model/model-id}",
+          "name": "{file:~/.config/opencode/local-model/name}",
           "capabilities": {
             "tools": true,
-            "input": ["text"],
-            "output": ["text"]
+            "input": [
+              "text"
+            ],
+            "output": [
+              "text"
+            ]
           },
-
           "limit": {
             "context": 32768,
             "output": 4096
@@ -35,7 +30,6 @@
       }
     }
   },
-
   "experimental": {
     "policies": [
       {
@@ -50,20 +44,17 @@
       }
     ]
   },
-
   "permissions": [
     {
       "action": "external_directory",
       "resource": "*",
       "effect": "deny"
     },
-
     {
       "action": "shell",
       "resource": "*",
       "effect": "ask"
     },
-
     {
       "action": "shell",
       "resource": "git status *",
@@ -79,7 +70,6 @@
       "resource": "git log *",
       "effect": "allow"
     },
-
     {
       "action": "shell",
       "resource": "pytest *",
@@ -95,7 +85,6 @@
       "resource": "uv run pytest *",
       "effect": "allow"
     },
-
     {
       "action": "shell",
       "resource": "git push *",
@@ -112,11 +101,9 @@
       "effect": "deny"
     }
   ],
-
   "agents": {
     "build": {
       "steps": 24,
-
       "permissions": [
         {
           "action": "subagent",
@@ -125,7 +112,6 @@
         }
       ]
     },
-
     "title": {
       "disabled": true
     }
