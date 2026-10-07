@@ -41,9 +41,6 @@ categories:
     title: SQL
     description: SQL linting and formatting.
 skills:
-  gemini-web-search:
-    category: workflow
-    kind: utility
   organize-context:
     category: workflow
     kind: utility

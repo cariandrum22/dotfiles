@@ -952,15 +952,6 @@ def check_ruby_lint_skill(errors: list[str]) -> None:
 
 
 def check_command_style_skills(errors: list[str]) -> None:
-    gemini_skill = "config/claudius/skills/gemini-web-search/skill.yaml"
-    gemini_instructions = "config/claudius/skills/gemini-web-search/instructions.md"
-    check_contains(errors, gemini_skill, "explicitly asks")
-    check_contains(errors, gemini_instructions, "only when the user explicitly asks")
-    check_contains(errors, gemini_instructions, "Do not claim it is more accurate")
-    check_not_contains(errors, gemini_skill, "instead of built-in web search")
-    check_not_contains(errors, gemini_instructions, "Ready to Search")
-    check_not_contains(errors, gemini_instructions, "Please provide your search query")
-
     suggest = "config/claudius/skills/suggest-commit/instructions.md"
     check_contains(errors, suggest, "git diff --cached --stat")
     check_contains(errors, suggest, "git diff --cached")

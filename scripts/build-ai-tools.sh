@@ -36,6 +36,9 @@ build_package() {
 
 build_tool() {
   case "$1" in
+  antigravity-cli)
+    build_package "antigravity-cli" ./config/home-manager/home/packages/antigravity-cli.nix
+    ;;
   claude-code)
     build_package "claude-code" ./config/home-manager/home/packages/claude-code.nix
     ;;
@@ -44,9 +47,6 @@ build_tool() {
     ;;
   droid)
     build_package "droid" ./config/home-manager/home/packages/droid.nix
-    ;;
-  gemini-cli)
-    build_package "gemini-cli" ./config/home-manager/home/packages/gemini-cli.nix
     ;;
   opencode)
     build_package "opencode" ./config/home-manager/home/packages/opencode.nix
@@ -61,7 +61,7 @@ build_tool() {
 printf 'Verifying AI tool builds...\n\n'
 
 if [ "$#" -eq 0 ]; then
-  set -- claude-code codex-cli droid gemini-cli opencode
+  set -- antigravity-cli claude-code codex-cli droid opencode
 fi
 
 for tool in "$@"; do

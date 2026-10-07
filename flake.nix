@@ -439,7 +439,7 @@
               entry = "${pkgs.bash}/bin/bash -c 'CLAUDIUS_BIN=${lib.getExe' pkgs.claudius "claudius"} ${pkgs.python3}/bin/python3 scripts/test-claudius-mcp.py'";
               language = "system";
               pass_filenames = false;
-              files = "^config/claudius/(bin/mcp-|mcpServers|codex|claude\\.settings|gemini|opencode)|^config/home-manager/programs/claudius\\.nix$|^scripts/test-claudius-mcp\\.py$";
+              files = "^config/claudius/(bin/mcp-|mcpServers|codex|claude\\.settings|opencode)|^config/home-manager/programs/claudius\\.nix$|^scripts/test-claudius-mcp\\.py$";
             };
             claudius-skill-guardrails = {
               enable = true;

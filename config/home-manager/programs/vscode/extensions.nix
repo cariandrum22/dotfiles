@@ -188,12 +188,6 @@
     sha256 = "1vcbskpkmvni5cc819zc0hs1ai1sgwrvp6axs5w0nvya7pywq0zn";
   }
   {
-    name = "geminicodeassist";
-    publisher = "Google";
-    version = "2.100.0";
-    sha256 = "03jbl9c09blnpiaxxl8g09k63b2jwarbbh0fasbsvlzqhgammc5v";
-  }
-  {
     name = "git-worktree-manager";
     publisher = "jackiotyu";
     version = "3.31.0";

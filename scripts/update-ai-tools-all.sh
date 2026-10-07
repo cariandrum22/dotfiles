@@ -16,6 +16,9 @@ trap cleanup EXIT
 
 managed_paths() {
   case "$1" in
+  antigravity-cli)
+    printf '%s\n' "$PACKAGES_DIR/antigravity-cli.nix"
+    ;;
   claude-code)
     printf '%s\n' "$PACKAGES_DIR/claude-code.nix"
     ;;
@@ -27,9 +30,6 @@ managed_paths() {
     ;;
   droid)
     printf '%s\n' "$PACKAGES_DIR/droid.nix"
-    ;;
-  gemini-cli)
-    printf '%s\n' "$PACKAGES_DIR/gemini-cli.nix"
     ;;
   opencode)
     printf '%s\n' "$PACKAGES_DIR/opencode.nix"
@@ -43,10 +43,10 @@ managed_paths() {
 
 update_script() {
   case "$1" in
+  antigravity-cli) printf '%s\n' scripts/update-antigravity-cli.py ;;
   claude-code) printf '%s\n' scripts/update-claude-code.py ;;
   codex-cli) printf '%s\n' scripts/update-codex-cli.py ;;
   droid) printf '%s\n' scripts/update-droid.py ;;
-  gemini-cli) printf '%s\n' scripts/update-gemini-cli.py ;;
   opencode) printf '%s\n' scripts/update-opencode.py ;;
   *)
     printf 'Unknown AI tool: %s\n' "$1" >&2
@@ -140,7 +140,7 @@ update_tool() {
 }
 
 if [ "$#" -eq 0 ]; then
-  set -- claude-code codex-cli droid gemini-cli opencode
+  set -- antigravity-cli claude-code codex-cli droid opencode
 fi
 
 for tool in "$@"; do
