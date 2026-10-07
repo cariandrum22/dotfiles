@@ -192,14 +192,14 @@ class McpRegressionTests(unittest.TestCase):
 
     def test_agent_sync_preserves_transport_and_browser_policy(self) -> None:
         claudius = os.environ.get("CLAUDIUS_BIN", "claudius")
-        for agent in ("claude-code", "codex", "gemini", "opencode"):
+        for agent in ("antigravity", "claude-code", "codex", "opencode"):
             self.run_command([claudius, "config", "sync", "--agent", agent])
         codex = tomllib.loads((self.root / ".codex/config.toml").read_text())
-        gemini = json.loads((self.root / ".gemini/settings.json").read_text())
+        antigravity = json.loads((self.root / ".agents/mcp_config.json").read_text())
         claude = json.loads((self.root / ".mcp.json").read_text())
         for rendered in (
             codex["mcp_servers"],
-            gemini["mcpServers"],
+            antigravity["mcpServers"],
             claude["mcpServers"],
         ):
             self.assertEqual(set(rendered), set(self.servers))
@@ -210,7 +210,10 @@ class McpRegressionTests(unittest.TestCase):
         for name, server in self.servers.items():
             if "url" in server:
                 self.assertEqual(claude["mcpServers"][name]["type"], "http")
-                self.assertEqual(gemini["mcpServers"][name]["type"], "http")
+                self.assertEqual(
+                    antigravity["mcpServers"][name]["serverUrl"],
+                    server["url"],
+                )
                 self.assertEqual(codex["mcp_servers"][name]["url"], server["url"])
         self.assertTrue(set(policy["disabled_tools"]) >= UNSAFE_TOOLS)
         self.assertEqual(policy["default_tools_approval_mode"], "prompt")
@@ -224,13 +227,15 @@ class McpRegressionTests(unittest.TestCase):
             {f"mcp__playwright__{t}" for t in UNSAFE_TOOLS}
             <= set(claude_settings["permissions"]["deny"]),
         )
-        gemini_policy = tomllib.loads((SOURCE / "gemini.policy.toml").read_text())
-        denied = {
-            r["toolName"]
-            for r in gemini_policy["rule"]
-            if r.get("mcpName") == "playwright" and r["decision"] == "deny"
-        }
-        self.assertTrue(denied >= UNSAFE_TOOLS)
+        # Antigravity merges these settings only on global sync, so check the
+        # source instead of writing to the real ~/.gemini during the test.
+        antigravity_settings = json.loads(
+            (SOURCE / "antigravity.settings.json").read_text(),
+        )
+        self.assertTrue(
+            {f"mcp(playwright/{t})" for t in UNSAFE_TOOLS}
+            <= set(antigravity_settings["permissions"]["deny"]),
+        )
 
     def test_opencode_local_model_values_stay_out_of_tracked_settings(self) -> None:
         claudius = os.environ.get("CLAUDIUS_BIN", "claudius")

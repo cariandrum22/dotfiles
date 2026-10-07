@@ -82,19 +82,16 @@ Both should compose:
 
 ## Near-term changes
 
-1. Replace or remove `gemini-web-search`
-   Use native web search or MCP-backed search instead of a CLI transport skill.
-
-2. Demote Git and hook implementation details
+1. Demote Git and hook implementation details
    Treat `setup-commitlint`, `setup-git-hooks`, `setup-file-hygiene`,
    `setup-secrets-scan`, and `setup-nix-ci-lint` as components rather than
    primary entry points.
 
-3. Keep strong language-specific building blocks
+2. Keep strong language-specific building blocks
    Preserve `setup-biome`, `setup-ts-typecheck`, `setup-python-lint`,
    `setup-c-lint`, and `setup-sql-lint` as directly useful standalone skills.
 
-4. Narrow the top-level catalog
+3. Narrow the top-level catalog
    After new primary skills exist, reduce discoverability of component skills
    that are mostly implementation details.
 
@@ -103,4 +100,4 @@ Both should compose:
 1. Create new primary skills without deleting the current ones.
 2. Rewire orchestrators to call the new primary shared baselines.
 3. Reclassify old implementation-focused skills as secondary or internal.
-4. Remove replaced workflow workarounds like `gemini-web-search`.
+4. Remove replaced workflow workarounds.

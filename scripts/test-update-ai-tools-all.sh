@@ -25,10 +25,10 @@ chmod +x "$fixture/scripts/build-ai-tools.sh"
 printf '#!%s\n' "$(command -v bash)" >"$fixture/bin/python3"
 cat >>"$fixture/bin/python3" <<'EOF'
 case "$(basename "$1")" in
+update-antigravity-cli.py) target="config/home-manager/home/packages/antigravity-cli.nix" ;;
 update-claude-code.py) target="config/home-manager/home/packages/claude-code.nix" ;;
 update-codex-cli.py) target="config/home-manager/home/packages/codex.nix" ;;
 update-droid.py) target="config/home-manager/home/packages/droid.nix" ;;
-update-gemini-cli.py) target="config/home-manager/home/packages/gemini-cli.nix" ;;
 update-opencode.py) target="config/home-manager/home/packages/opencode.nix" ;;
 *) exit 2 ;;
 esac
@@ -37,14 +37,14 @@ EOF
 chmod +x "$fixture/bin/python3"
 
 for file in \
+  antigravity-cli.nix \
   claude-code.nix \
   codex.nix \
   droid.nix \
-  gemini-cli.nix \
   opencode.nix \
   rusty-v8-prebuilt-out-dir.patch \
   stub-runfiles.patch; do
-  if [ "$file" != "gemini-cli.nix" ]; then
+  if [ "$file" != "antigravity-cli.nix" ]; then
     printf 'baseline\n' >"$fixture/config/home-manager/home/packages/$file"
   fi
 done
@@ -65,7 +65,7 @@ if ! (
   exit 1
 fi
 
-for tool in claude-code droid gemini-cli opencode; do
+for tool in antigravity-cli claude-code droid opencode; do
   grep -q '^updated$' "$fixture/config/home-manager/home/packages/$tool.nix"
 done
 

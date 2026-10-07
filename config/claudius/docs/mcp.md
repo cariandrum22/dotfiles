@@ -5,14 +5,15 @@ repository root, apply the dotfiles and synchronize each agent you use:
 
 ```bash
 nix run --impure .#switch
+claudius config sync --global --agent antigravity
 claudius config sync --global --agent claude-code
 claudius config sync --global --agent codex
-claudius config sync --global --agent gemini
 claudius config sync --global --agent opencode
 ```
 
-Home Manager also syncs the shared skills to Claude Code, Codex, and OpenCode
-(`~/.config/opencode/skills`) on activation.
+Home Manager also syncs the shared skills to Antigravity CLI (`~/.gemini/config/skills`), Claude
+Code, Codex, and OpenCode (`~/.config/opencode/skills`) on activation. Antigravity CLI reads MCP
+servers from `~/.gemini/config/mcp_config.json`, shared with Antigravity 2.0 and the IDE.
 
 Credentials below live under `${XDG_CONFIG_HOME:-$HOME/.config}/claudius/credentials/mcp/`. Each
 file is loaded as an environment variable by `mcp-with-credentials`. Store `op://` references to
@@ -48,9 +49,6 @@ claude mcp remove perplexity-ask --scope user
 codex mcp list
 codex mcp remove codex
 codex mcp remove perplexity-ask
-gemini mcp list
-gemini mcp remove codex
-gemini mcp remove perplexity-ask
 ```
 
 Remove corresponding project/local-scope registrations too if you created them. Keep existing
@@ -59,15 +57,16 @@ retained, so syncing replaces their old launch commands.
 
 Claude Code now uses `acceptEdits`, with automatic MCP permissions limited to AWS documentation and
 Brave search. Other MCP calls use normal confirmation. Codex uses `on-request`, asks for browser
-operations, and asks for tools not annotated read-only on account-connected servers. Gemini keeps
-its normal MCP confirmations and disables YOLO mode. Tool annotations are hints provided by the
+operations, and asks for tools not annotated read-only on account-connected servers. Antigravity CLI
+keeps its normal MCP confirmations. Tool annotations are hints provided by the
 server; use OAuth scopes and token permissions to limit actual account access. The existing
 externally sandboxed local execution configuration is retained.
 
 Both browser servers use isolated profiles. Chrome telemetry, CrUX URL reporting, and JavaScript
 evaluation are disabled, and sensitive network headers are redacted. Playwright does not expose
 page-provided WebMCP tools. Its arbitrary server-code tools (`browser_run_code_unsafe` and the older
-`browser_run_code`) are disabled in Codex and denied in Claude Code and Gemini policy. These
+`browser_run_code`) are disabled in Codex and denied in Claude Code and Antigravity CLI
+(`permissions.deny` in `antigravity.settings.json`). These
 settings do not make browser automation a security boundary. Isolated profiles discard login state
 when closed; use them for testing rather than a personal browser session.
 
