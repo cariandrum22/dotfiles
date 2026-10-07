@@ -1,5 +1,9 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "shell": "/bin/bash",
+  "enabled_providers": [
+    "llamacpp"
+  ],
   "model": "llamacpp/local",
   "providers": {
     "llamacpp": {
@@ -23,8 +27,8 @@
             ]
           },
           "limit": {
-            "context": 32768,
-            "output": 4096
+            "context": 131072,
+            "output": 8192
           }
         }
       }
@@ -103,7 +107,7 @@
   ],
   "agents": {
     "build": {
-      "steps": 24,
+      "steps": 96,
       "permissions": [
         {
           "action": "subagent",
@@ -115,5 +119,12 @@
     "title": {
       "disabled": true
     }
+  },
+  "compaction": {
+    "auto": true,
+    "keep": {
+      "tokens": 24000
+    },
+    "buffer": 16384
   }
 }
