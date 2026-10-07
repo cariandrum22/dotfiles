@@ -262,9 +262,6 @@ function __claudius_export_secrets
     set -gx CLAUDIUS_SECRET_CF_AIG_ACCOUNT_ID "op://$ai_vault/CLOUDFLARE AI Gateway/Account ID"
     set -gx CLAUDIUS_SECRET_CF_AIG_GATEWAY_ID "op://$ai_vault/CLOUDFLARE AI Gateway/Gateway ID"
     set -gx CLAUDIUS_SECRET_CF_AIG_TOKEN "op://$ai_vault/CLOUDFLARE AI Gateway/credential"
-    set -gx CLAUDIUS_SECRET_GOOGLE_CLOUD_PROJECT "op://$ai_vault/Vertex AI - personal/project"
-    set -gx CLAUDIUS_SECRET_GOOGLE_CLOUD_LOCATION "op://$ai_vault/Vertex AI - personal/location"
-    set -gx CLAUDIUS_SECRET_GOOGLE_APPLICATION_CREDENTIALS "op://$ai_vault/Vertex AI - personal/credential"
     set -gx CLAUDIUS_SECRET_OPENAI_API_KEY "op://$ai_vault/OpenAI Codex CLI/credential"
 end
 
@@ -326,11 +323,6 @@ if type -q op and type -q claudius
             set -lx CLAUDIUS_SECRET_ANTHROPIC_API_KEY "cloudflare-byok-placeholder"
             set -lx CLAUDIUS_SECRET_ANTHROPIC_CUSTOM_HEADERS "cf-aig-authorization: Bearer {{$CLAUDIUS_SECRET_CF_AIG_TOKEN}}"
             command claudius secrets run -- claude $argv
-        end
-    end
-    if type -q gemini
-        function gemini --wraps gemini
-            __claudius_run_tool gemini $argv
         end
     end
     if type -q codex

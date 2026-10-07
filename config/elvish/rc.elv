@@ -555,9 +555,6 @@ if (and (has-external op) (has-external claudius)) {
     set E:CLAUDIUS_SECRET_CF_AIG_ACCOUNT_ID = "op://"$ai-vault"/CLOUDFLARE AI Gateway/Account ID"
     set E:CLAUDIUS_SECRET_CF_AIG_GATEWAY_ID = "op://"$ai-vault"/CLOUDFLARE AI Gateway/Gateway ID"
     set E:CLAUDIUS_SECRET_CF_AIG_TOKEN = "op://"$ai-vault"/CLOUDFLARE AI Gateway/credential"
-    set E:CLAUDIUS_SECRET_GOOGLE_CLOUD_PROJECT = "op://"$ai-vault"/Vertex AI - personal/project"
-    set E:CLAUDIUS_SECRET_GOOGLE_CLOUD_LOCATION = "op://"$ai-vault"/Vertex AI - personal/location"
-    set E:CLAUDIUS_SECRET_GOOGLE_APPLICATION_CREDENTIALS = "op://"$ai-vault"/Vertex AI - personal/credential"
     set E:CLAUDIUS_SECRET_OPENAI_API_KEY = "op://"$ai-vault"/OpenAI Codex CLI/credential"
   }
 
@@ -589,12 +586,6 @@ if (and (has-external op) (has-external claudius)) {
         unset-env CLAUDIUS_SECRET_ANTHROPIC_CUSTOM_HEADERS
       }
     }
-  }
-  if (has-external gemini) {
-    fn -gemini-wrapper {|@args|
-      -claudius-tool-wrapper gemini $@args
-    }
-    edit:add-var gemini~ $-gemini-wrapper~
   }
   if (has-external codex) {
     fn -codex-wrapper {|@args|

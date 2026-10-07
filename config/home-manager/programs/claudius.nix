@@ -58,11 +58,13 @@ let
     "credentials/mcp/x"
   ];
   managedSkillSyncAgents = [
+    "antigravity"
     "claude-code"
     "codex"
     "opencode"
   ];
   managedSkillTargetRelativeDirs = [
+    ".gemini/config/skills"
     ".claude/skills"
     ".agents/skills"
     ".config/opencode/skills"
@@ -86,12 +88,14 @@ in
       recursive = true;
     };
 
+    # Antigravity CLI reads ~/.gemini/antigravity-cli/settings.json; Claudius
+    # merges this source there on `config sync --global --agent antigravity`.
+    "claudius/antigravity.settings.json".source = claudiusSource + "/antigravity.settings.json";
     "claudius/claude.settings.json".source = claudiusSource + "/claude.settings.json";
     "claudius/codex.settings.toml".source =
       tomlFormat.generate "claudius-codex.settings.toml" managedCodexSettings;
     "claudius/codex.managed_config.toml".source = claudiusSource + "/codex.managed_config.toml";
     "claudius/codex.requirements.toml".source = claudiusSource + "/codex.requirements.toml";
-    "claudius/gemini.settings.json".source = claudiusSource + "/gemini.settings.json";
     # The local model endpoint and name stay out of this file; OpenCode reads
     # them from ~/.config/opencode/local-model (see programs/opencode.nix).
     # The provider timeout bounds a single inference request; raise it if the
@@ -104,8 +108,6 @@ in
 
   home = {
     packages = [ pkgs.github-mcp-server ];
-
-    file.".gemini/policies/claudius.toml".source = claudiusSource + "/gemini.policy.toml";
 
     activation = {
       ensureClaudiusStateDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

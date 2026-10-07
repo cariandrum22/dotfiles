@@ -78,10 +78,10 @@
         redis
 
         # AI Tools
+        (callPackage ./antigravity-cli.nix { })
         (callPackage ./claude-code.nix { })
         (callPackage ./codex.nix { })
         (callPackage ./droid.nix { })
-        (callPackage ./gemini-cli.nix { })
         (callPackage ./opencode.nix { })
         claudius
 

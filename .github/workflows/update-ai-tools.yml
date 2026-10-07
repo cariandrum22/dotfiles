@@ -66,10 +66,10 @@ jobs:
             ## AI Tools Update
 
             This PR contains automatic updates for AI development tools:
+            - Antigravity CLI
             - Claude Code
             - Codex CLI
             - Droid
-            - Gemini CLI
             - OpenCode
 
             Changes were generated automatically by the daily update workflow.
@@ -144,10 +144,10 @@ jobs:
             ## AI Tools Update
 
             This PR contains automatic updates for AI development tools:
+            - Antigravity CLI
             - Claude Code
             - Codex CLI
             - Droid
-            - Gemini CLI
             - OpenCode
 
             Changes were generated automatically by the daily update workflow.
