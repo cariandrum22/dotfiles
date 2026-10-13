@@ -88,8 +88,8 @@
   {
     name = "cmake-tools";
     publisher = "ms-vscode";
-    version = "1.25.2";
-    sha256 = "05slqbxp7aj1saki6w0rvslw296g966a9mkl6r37vy8h28xvkn3i";
+    version = "1.25.3";
+    sha256 = "0sdz9q7jlysz5p9wf56ck08628h80lwhjx70m6ddiml20pdx9m6n";
   }
   {
     name = "code-d";
@@ -368,8 +368,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.3079";
-    sha256 = "1cf8avwjd46c5jim8vjwwp5q7pn04vj6rk4hdryipcw922mw8l7c";
+    version = "0.4.3082";
+    sha256 = "12xvc1syblskrpsl6gwx5ryj8c2wshiym5vz14cz44y0bc8pixny";
     arch = "linux-x64";
   }
   {
@@ -387,8 +387,8 @@
   {
     name = "shellcheck";
     publisher = "timonwong";
-    version = "0.46.4";
-    sha256 = "1dg4w4488424inzpbkyc37hznz96qrn2viwrks8i87myrfmgzad3";
+    version = "0.48.0";
+    sha256 = "0mc8mr3k91agqn4029f4shdwg4nj9bi9svdhn7fskc8md7c73a5q";
     arch = "linux-x64";
   }
   {
@@ -479,8 +479,8 @@
   {
     name = "vscode-gradle";
     publisher = "vscjava";
-    version = "3.18.0";
-    sha256 = "171a6nskijdy0l4sly5whr839x42ngbglwqxav3x2is4ha61xcy9";
+    version = "3.18.2026101102";
+    sha256 = "1fkg2c01sqf1yrzg0y12dwx919c1fky7g2nvncghc5hgiw7gy4ci";
   }
   {
     name = "vscode-graphql";
@@ -497,8 +497,8 @@
   {
     name = "vscode-ide";
     publisher = "tlaplus";
-    version = "2026.10.91718";
-    sha256 = "0pl3fjlhm50w2w51rijn4djb8n93pcfa3v8armhvpijqz2b5wwkm";
+    version = "2026.10.130124";
+    sha256 = "1lsbyk9a5m2l44vgpz096qibgpxrvzvg35ch4dzmiy0jhwlh241m";
   }
   {
     name = "vscode-java-debug";
