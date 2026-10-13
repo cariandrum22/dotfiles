@@ -3,16 +3,16 @@
 let
   pname = "opencode";
   # OpenCode V2 (opencode2). nixpkgs only ships V1, which rejects V2 config.
-  version = "2.0.26";
+  version = "2.0.27";
 
   sources = {
     aarch64-darwin = {
       url = "https://registry.npmjs.org/@opencode/cli-darwin-arm64/-/cli-darwin-arm64-${version}.tgz";
-      hash = "sha256-MTDJAkHRxaZEkF2jTxadP3zG3Cc9saM8rJjN1DOBkiA=";
+      hash = "sha256-crQzYDshMHtvopkRWo7srTcgpVB+KD9pILXlpXd6pWs=";
     };
     x86_64-linux = {
       url = "https://registry.npmjs.org/@opencode/cli-linux-x64/-/cli-linux-x64-${version}.tgz";
-      hash = "sha256-Kl8A3qCirL60rXL3i8BmzAqMLfFOUmvqyi1gxsZGuTY=";
+      hash = "sha256-y8ly8QupGWmXRxHSkx4blkductSfT2W6Gi6kvq5tMLc=";
     };
   };
 
