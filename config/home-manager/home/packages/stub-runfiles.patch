@@ -1,7 +1,7 @@
 diff -urN orig/Cargo.lock mod/Cargo.lock
 --- orig/Cargo.lock
 +++ mod/Cargo.lock
-@@ -13449,7 +13449,6 @@
+@@ -13459,7 +13459,6 @@
  [[package]]
  name = "runfiles"
  version = "0.1.0"
@@ -12,10 +12,10 @@ diff -urN orig/Cargo.lock mod/Cargo.lock
 diff -urN orig/Cargo.toml mod/Cargo.toml
 --- orig/Cargo.toml
 +++ mod/Cargo.toml
-@@ -450,7 +450,7 @@
+@@ -449,7 +449,7 @@
+ regex-syntax = "0.8.8"
  reqwest = { version = "0.12", features = ["cookies"] }
- # rmcp-v3.3.0 includes enterprise authorization helpers (rust-sdk#1234).
- rmcp = { git = "https://github.com/modelcontextprotocol/rust-sdk", rev = "3e636cab26c013eca5131103c03d20237f12c4df", version = "=3.3.0", default-features = false }
+ rmcp = { git = "https://github.com/modelcontextprotocol/rust-sdk", rev = "4048ac40e958fb1a7d614617a2ae8d26666ee2fa", version = "=3.5.1", default-features = false }
 -runfiles = { git = "https://github.com/dzbarsky/rules_rust", rev = "b56cbaa8465e74127f1ea216f813cd377295ad81" }
 +runfiles = { path = "utils/runfiles-stub" }
  rustix = { version = "1.1.4", features = ["net"] }
