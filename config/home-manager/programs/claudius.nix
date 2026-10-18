@@ -12,6 +12,14 @@ let
   };
   claudiusSource = ../../claudius;
   claudiusExe = lib.getExe' pkgs.claudius "claudius";
+  syncOpenCodeMcp = pkgs.writeShellApplication {
+    name = "claudius-sync-opencode";
+    runtimeInputs = [
+      pkgs.claudius
+      pkgs.jq
+    ];
+    text = builtins.readFile (claudiusSource + "/bin/sync-opencode-mcp");
+  };
   jsonFormat = pkgs.formats.json { };
   tomlFormat = pkgs.formats.toml { };
   baseMcpServers = builtins.fromJSON (builtins.readFile (claudiusSource + "/mcpServers.json"));
@@ -107,7 +115,10 @@ in
   };
 
   home = {
-    packages = [ pkgs.github-mcp-server ];
+    packages = [
+      pkgs.github-mcp-server
+      syncOpenCodeMcp
+    ];
 
     activation = {
       ensureClaudiusStateDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
@@ -153,6 +164,10 @@ in
         for agent in ${lib.concatStringsSep " " (map lib.escapeShellArg managedSkillSyncAgents)}; do
           ${claudiusExe} skills sync --global --agent "$agent" --prune
         done
+      '';
+
+      syncClaudiusOpenCodeMcp = lib.hm.dag.entryAfter [ "syncClaudiusManagedSkills" ] ''
+        ${lib.getExe syncOpenCodeMcp} --global
       '';
     };
   };

@@ -173,27 +173,29 @@ class McpRegressionTests(unittest.TestCase):
     def assert_opencode_servers(self) -> None:
         rendered = json.loads((self.root / "opencode.json").read_text())
         opencode = rendered["mcp"]["servers"]
-        self.assertEqual(set(opencode), set(self.servers))
-        self.assertEqual(
-            opencode["github"]["command"],
-            [self.servers["github"]["command"], *self.servers["github"]["args"]],
+        self.assertEqual(set(opencode), {"playwright", "chrome-devtools"})
+        for name, server in opencode.items():
+            self.assertEqual(server["type"], "local")
+            self.assertEqual(
+                server["command"],
+                [self.servers[name]["command"], *self.servers[name]["args"]],
+            )
+            self.assertIn("--isolated", server["command"])
+
+    def sync_opencode(self, *args: str) -> None:
+        self.run_command(
+            [
+                str(shutil.which("bash")),
+                str(self.config / "bin/sync-opencode-mcp"),
+                *args,
+            ],
         )
-        self.assertIn("--isolated", opencode["playwright"]["command"])
-        for name, server in self.servers.items():
-            expected = "remote" if "url" in server else "local"
-            self.assertEqual(opencode[name]["type"], expected)
-            if "url" in server:
-                self.assertEqual(opencode[name]["url"], server["url"])
-            if "startup_timeout_sec" in server:
-                self.assertEqual(
-                    opencode[name]["timeout"]["startup"],
-                    server["startup_timeout_sec"] * 1000,
-                )
 
     def test_agent_sync_preserves_transport_and_browser_policy(self) -> None:
         claudius = os.environ.get("CLAUDIUS_BIN", "claudius")
-        for agent in ("antigravity", "claude-code", "codex", "opencode"):
+        for agent in ("antigravity", "claude-code", "codex"):
             self.run_command([claudius, "config", "sync", "--agent", agent])
+        self.sync_opencode()
         codex = tomllib.loads((self.root / ".codex/config.toml").read_text())
         antigravity = json.loads((self.root / ".agents/mcp_config.json").read_text())
         claude = json.loads((self.root / ".mcp.json").read_text())
@@ -238,8 +240,7 @@ class McpRegressionTests(unittest.TestCase):
         )
 
     def test_opencode_local_model_values_stay_out_of_tracked_settings(self) -> None:
-        claudius = os.environ.get("CLAUDIUS_BIN", "claudius")
-        self.run_command([claudius, "config", "sync", "--agent", "opencode"])
+        self.sync_opencode()
         rendered = json.loads((self.root / "opencode.json").read_text())
         provider = rendered["providers"]["llamacpp"]
         local_model = "{file:~/.config/opencode/local-model/"
@@ -249,6 +250,67 @@ class McpRegressionTests(unittest.TestCase):
             self.assertTrue(model["name"].startswith(local_model))
         self.assertEqual(rendered["model"], "llamacpp/local")
         self.assertNotIn("mcpServers", rendered)
+
+    def test_opencode_sync_prunes_servers_and_preserves_settings(self) -> None:
+        claudius = os.environ.get("CLAUDIUS_BIN", "claudius")
+        self.run_command([claudius, "config", "sync", "--agent", "opencode"])
+        target = self.root / "opencode.json"
+        previous = json.loads(target.read_text())
+        previous["custom-setting"] = {"preserve": True}
+        previous["model"] = "custom/local-model"
+        previous["providers"]["llamacpp"]["settings"]["timeout"] = 123456
+        previous["mcp"]["enabled"] = True
+        previous["mcp"]["legacy-server"] = {"type": "local", "command": ["old"]}
+        previous["mcp"]["servers"]["custom-server"] = {
+            "type": "remote",
+            "url": "https://example.invalid/mcp",
+        }
+        target.write_text(json.dumps(previous))
+        target.chmod(0o600)
+        self.sync_opencode()
+        self.assert_opencode_servers()
+        rendered = json.loads(target.read_text())
+        self.assertEqual(rendered["custom-setting"], previous["custom-setting"])
+        self.assertEqual(
+            {key: value for key, value in rendered.items() if key != "mcp"},
+            {key: value for key, value in previous.items() if key != "mcp"},
+        )
+        self.assertEqual(
+            rendered["mcp"],
+            {"enabled": True, "servers": rendered["mcp"]["servers"]},
+        )
+        self.assertEqual(target.stat().st_mode & 0o777, 0o600)
+        backups = list(self.root.glob("opencode.json.bak.*"))
+        self.assertEqual(len(backups), 1)
+        self.assertEqual(json.loads(backups[0].read_text()), previous)
+        self.sync_opencode()
+        self.assertEqual(len(list(self.root.glob("opencode.json.bak.*"))), 1)
+        self.assertEqual(
+            json.loads((self.config / "mcpServers.json").read_text())["mcpServers"],
+            self.servers,
+        )
+
+    def test_opencode_global_sync_honors_config_directory_override(self) -> None:
+        directory = self.root / "custom opencode"
+        self.env["OPENCODE_CONFIG_DIR"] = str(directory)
+        self.sync_opencode("--global")
+        rendered = json.loads((directory / "opencode.json").read_text())
+        self.assertEqual(
+            set(rendered["mcp"]["servers"]),
+            {"playwright", "chrome-devtools"},
+        )
+        self.assertFalse((self.root / "opencode.json").exists())
+
+    def test_opencode_failed_sync_keeps_existing_target(self) -> None:
+        target = self.root / "opencode.json"
+        original = '{"custom-setting": "keep me"}'
+        target.write_text(original)
+        (self.config / "mcpServers.json").write_text('{"mcpServers": {}}')
+        with self.assertRaises(subprocess.CalledProcessError):
+            self.sync_opencode()
+        self.assertEqual(target.read_text(), original)
+        self.assertEqual(list(self.root.glob("opencode.json.bak.*")), [])
+        self.assertEqual(list(self.root.glob(".claudius-opencode.*")), [])
 
 
 if __name__ == "__main__":

@@ -8,12 +8,22 @@ nix run --impure .#switch
 claudius config sync --global --agent antigravity
 claudius config sync --global --agent claude-code
 claudius config sync --global --agent codex
-claudius config sync --global --agent opencode
+claudius-sync-opencode --global
 ```
 
 Home Manager also syncs the shared skills to Antigravity CLI (`~/.gemini/config/skills`), Claude
 Code, Codex, and OpenCode (`~/.config/opencode/skills`) on activation. Antigravity CLI reads MCP
 servers from `~/.gemini/config/mcp_config.json`, shared with Antigravity 2.0 and the IDE.
+
+OpenCode receives only `playwright` and `chrome-devtools`. Home Manager runs
+`claudius-sync-opencode --global` on activation. This command filters the shared definitions,
+renders OpenCode configuration through Claudius, and removes all other MCP registrations (including
+legacy flat entries) from the OpenCode target. It keeps a timestamped backup when the target
+changes and preserves existing non-MCP settings; new targets also receive the shared OpenCode
+settings. Other agents continue to receive all shared servers.
+Use `claudius-sync-opencode` without `--global` for a project-local `opencode.json`.
+For OpenCode, use this command instead of `claudius config sync --agent opencode`, which would
+register all shared servers again. Restart an already running OpenCode session after syncing.
 
 Credentials below live under `${XDG_CONFIG_HOME:-$HOME/.config}/claudius/credentials/mcp/`. Each
 file is loaded as an environment variable by `mcp-with-credentials`. Store `op://` references to
