@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# OpenCode uses only the browser MCP servers; other agents use the shared source.
+config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/claudius"
+source_config="${CLAUDIUS_CONFIG:-$config_dir/mcpServers.json}"
+sync_args=(--agent opencode)
+case "${1:-}" in
+--global)
+  target_dir="${OPENCODE_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/opencode}"
+  sync_args+=(--global)
+  shift
+  ;;
+"") target_dir="$PWD" ;;
+*)
+  echo 'Usage: sync-opencode-mcp [--global]' >&2
+  exit 2
+  ;;
+esac
+if [ "$#" -ne 0 ]; then
+  echo 'Usage: sync-opencode-mcp [--global]' >&2
+  exit 2
+fi
+target="${TARGET_CONFIG_PATH:-$target_dir/opencode.json}"
+mkdir -p "$(dirname "$target")"
+work_dir="$(mktemp -d "$(dirname "$target")/.claudius-opencode.XXXXXXXX")"
+trap 'rm -rf "$work_dir"' EXIT
+
+jq -e '{mcpServers: {
+  playwright: .mcpServers.playwright,
+  "chrome-devtools": .mcpServers["chrome-devtools"]
+}} | if all(.mcpServers[]; type == "object") then .
+     else error("Both browser MCP definitions are required") end' \
+  "$source_config" >"$work_dir/mcpServers.json"
+
+if [ -f "$target" ]; then
+  cp -p "$target" "$work_dir/opencode.json"
+fi
+"${CLAUDIUS_BIN:-claudius}" config sync "${sync_args[@]}" \
+  --config "$work_dir/mcpServers.json" --target-config "$work_dir/opencode.json"
+
+# Claudius preserves entries missing from the source. Remove those registrations
+# and legacy flat MCP entries, while retaining other OpenCode settings/options.
+jq '.mcp.servers |= with_entries(select(
+      .key == "playwright" or .key == "chrome-devtools"
+    )) |
+    .mcp |= with_entries(select(
+      .key == "servers" or
+      ((.value | type) != "object") or
+      (.value.type != "local" and .value.type != "remote" and
+       .value.command == null and .value.url == null)
+    ))' "$work_dir/opencode.json" >"$work_dir/pruned.json"
+if [ -f "$target" ]; then
+  # A MCP-only sync must not overwrite existing provider or permission settings.
+  jq --slurpfile original "$target" '$original[0] + {mcp: .mcp}' \
+    "$work_dir/pruned.json" >"$work_dir/preserved.json"
+  cat "$work_dir/preserved.json" >"$work_dir/opencode.json"
+else
+  cat "$work_dir/pruned.json" >"$work_dir/opencode.json"
+fi
+
+if [ -f "$target" ]; then
+  if cmp -s "$target" "$work_dir/opencode.json"; then
+    exit 0
+  fi
+  cp -p "$target" "$target.bak.$(date -u +%Y%m%dT%H%M%S).$$"
+fi
+mv "$work_dir/opencode.json" "$target"
+echo "OpenCode MCP servers: playwright, chrome-devtools ($target)"
