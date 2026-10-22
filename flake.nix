@@ -437,6 +437,7 @@
               enable = true;
               name = "claudius-mcp-regression";
               entry = "${pkgs.bash}/bin/bash -c 'CLAUDIUS_BIN=${lib.getExe' pkgs.claudius "claudius"} ${pkgs.python3}/bin/python3 scripts/test-claudius-mcp.py'";
+              extraPackages = [ pkgs.jq ];
               language = "system";
               pass_filenames = false;
               files = "^config/claudius/(bin/(mcp-|sync-opencode-mcp)|mcpServers|codex|claude\\.settings|opencode)|^config/home-manager/programs/claudius\\.nix$|^scripts/test-claudius-mcp\\.py$";
