@@ -111,13 +111,13 @@ let
   # cargo vendor utility. codex-utils-cargo-bin is only used by test helpers,
   # and tests are disabled for this package, so the stub is sufficient.
   cargoHashes = {
-    x86_64-linux = "sha256-I62fmmCZznBH4w7H/9hnlOMa7WKDTEfyHiyqVAJm4to=";
-    aarch64-linux = "sha256-I62fmmCZznBH4w7H/9hnlOMa7WKDTEfyHiyqVAJm4to=";
-    x86_64-darwin = "sha256-I62fmmCZznBH4w7H/9hnlOMa7WKDTEfyHiyqVAJm4to=";
-    aarch64-darwin = "sha256-I62fmmCZznBH4w7H/9hnlOMa7WKDTEfyHiyqVAJm4to=";
+    x86_64-linux = "sha256-zdX9Aq0qSAhI/b8o/Y9JT9f/LqsUoWmIak7UWBNA444=";
+    aarch64-linux = "sha256-zdX9Aq0qSAhI/b8o/Y9JT9f/LqsUoWmIak7UWBNA444=";
+    x86_64-darwin = "sha256-zdX9Aq0qSAhI/b8o/Y9JT9f/LqsUoWmIak7UWBNA444=";
+    aarch64-darwin = "sha256-zdX9Aq0qSAhI/b8o/Y9JT9f/LqsUoWmIak7UWBNA444=";
   };
 
-  rustyV8Version = "150.4.0";
+  rustyV8Version = "152.2.0";
 
   # `codex-code-mode-runtime` turns on the v8 crate's `v8_enable_sandbox`
   # feature (which implies pointer compression). denoland/rusty_v8 publishes no
@@ -138,17 +138,17 @@ let
   rustyV8Target = rustyV8Targets.${pkgs.stdenv.system};
 
   rustyV8ArchiveHashes = {
-    x86_64-linux = "sha256-o1x10fJuapg4haRbM0kKTr5U8FBQVosyuJz7QhswtYM=";
-    aarch64-linux = "sha256-0VF+7UBUaFNwKbAF1f6ZfsdNXI01H5FrOm3yC30oEbo=";
-    x86_64-darwin = "sha256-4Nm7ZOizoDTCkwyDly8/NXYCERSDQvoEB7OCUO8zCFY=";
-    aarch64-darwin = "sha256-AK27SHmISMd1UEQcaGc6XoUpuOG3PqvN7iMss5tA9KE=";
+    x86_64-linux = "sha256-s7SQ8qqAntp/ascn+FH7AM6DVb5ygnV3z6rCjHE3280=";
+    aarch64-linux = "sha256-EFRGSmIwBs314lriCHcAK/PtuaLC8+ZPRKhxR0KxXoc=";
+    x86_64-darwin = "sha256-v+Gdm2M7YdmXgOzolpBCf+9LmFxrQZZTbq+UVxFm/CQ=";
+    aarch64-darwin = "sha256-/qua4DhL66qZwdAAZURiydQhI9WHGFx4dqru99dv90k=";
   };
 
   rustyV8SrcBindingHashes = {
-    x86_64-linux = "sha256-dyeCauR5vbZF6Acjn7EtH44uI956bPFvXuWSaQ0dhQY=";
-    aarch64-linux = "sha256-dyeCauR5vbZF6Acjn7EtH44uI956bPFvXuWSaQ0dhQY=";
-    x86_64-darwin = "sha256-ylrfDPicmnCtRgrnNkiy/om3SqETs8t/dXtqArdYOU8=";
-    aarch64-darwin = "sha256-ylrfDPicmnCtRgrnNkiy/om3SqETs8t/dXtqArdYOU8=";
+    x86_64-linux = "sha256-Pk1f7Nvg+YpgF+adfKglGad/sDLF615M2+zdPi7FGdU=";
+    aarch64-linux = "sha256-Pk1f7Nvg+YpgF+adfKglGad/sDLF615M2+zdPi7FGdU=";
+    x86_64-darwin = "sha256-udVlLrylFesr9MLuSmVRslZxF7Wqcg9DDSAyYW3X47U=";
+    aarch64-darwin = "sha256-udVlLrylFesr9MLuSmVRslZxF7Wqcg9DDSAyYW3X47U=";
   };
 
   rustyV8Archive = pkgs.fetchurl {
@@ -212,13 +212,13 @@ let
   codex = rustPlatform.buildRustPackage (
     rec {
       pname = "codex-cli";
-      version = "rust-v0.163.0";
+      version = "rust-v0.164.0";
 
       src = pkgs.fetchFromGitHub {
         owner = "openai";
         repo = "codex";
         rev = "${version}";
-        hash = "sha256-Fa9dfiGJy+uqSF4A0EM6AQQhhjQdu+jfhKzqXid9PNA=";
+        hash = "sha256-iib2+qQcGewC4Ga8cA80sInDJpzdSxDJP0y1DDOouI4=";
       };
 
       sourceRoot = "source/codex-rs";
