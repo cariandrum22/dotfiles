@@ -69,15 +69,15 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.310";
-    sha256 = "1rva2pwi8dabiig8ixdwdixd6cbpwmwzfppwkwlvjrx090656fcx";
+    version = "2.1.312";
+    sha256 = "1sfzqhg77iggiry0ws5w8w04d0j72rng7wflg0nbn7p4g4qkmlmb";
     arch = "linux-x64";
   }
   {
     name = "claude-dev";
     publisher = "saoudrizwan";
-    version = "4.1.25";
-    sha256 = "1z3ipnkx8ph57dfn779vllr5v0z3xrr2mh0554vnhl9za7q3mj5a";
+    version = "4.1.26";
+    sha256 = "0k8wymnqjzf82djyb9qxpav2ff552dr8wmd5qzklhb050lslrsnq";
   }
   {
     name = "cmake";
@@ -190,14 +190,14 @@
   {
     name = "git-worktree-manager";
     publisher = "jackiotyu";
-    version = "3.34.1";
-    sha256 = "0b6d12dl343gqqjqcw17fqb5yzjhhqg67dlqypkkacl556anqzsb";
+    version = "3.34.2";
+    sha256 = "1p2jv3q830rn0kb71n47nrkpksay77wq71iyndhs049jd0gx8pns";
   }
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.10.200514";
-    sha256 = "1fkv9605z19bjbx4qnpj1j8qd238bxnzhyz9qq6f0ann3ayn2lp6";
+    version = "2026.10.270516";
+    sha256 = "1i1r3gdx4y8m5k92p2ab9pcpx3f6qw7ylvdxs4jvw4lwgbvmq7xy";
   }
   {
     name = "haskell";
@@ -220,8 +220,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.59.2026102308";
-    sha256 = "0fafmb995vk1yqx5v2ananwf59wk1vk6xdsvfi4ajmi988s7a40a";
+    version = "1.59.2026102708";
+    sha256 = "03wljgc1ysva9s7ldky7ds5qc6x28vmsirrz26ynm3ad86jkwkiv";
     arch = "linux-x64";
   }
   {
@@ -276,8 +276,8 @@
   {
     name = "material-icon-theme";
     publisher = "PKief";
-    version = "5.39.0";
-    sha256 = "1g9gj8kdgr2q21s2jz8g2ri4r9r2ygb1lz26j8n98p89svhs9zgk";
+    version = "5.40.0";
+    sha256 = "01mfw569i5431wdsffq1xwpxapz4zi9bxyds0zcby6l803r6bdam";
   }
   {
     name = "mesonbuild";
@@ -361,15 +361,15 @@
   {
     name = "ruff";
     publisher = "charliermarsh";
-    version = "2026.90.0";
-    sha256 = "0f4xv3v8km2igcvx8ms05zfb4c957j1814a37d7mwc7xhsyzlq8r";
+    version = "2026.92.0";
+    sha256 = "0jh8zp2m3balk3klm0pp6xj45f4dg41l0y5rr9d24py9mdhhi05h";
     arch = "linux-x64";
   }
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.3094";
-    sha256 = "13knjs98xkyv6ww110psxh808c3lbzybz8nk3gdk2zc8s4x0r4df";
+    version = "0.4.3099";
+    sha256 = "17didxrxnd7vlgwxnw9fnsc53fj5wdlc4ljpy51nkfija7hk7mqy";
     arch = "linux-x64";
   }
   {
@@ -387,8 +387,8 @@
   {
     name = "shellcheck";
     publisher = "timonwong";
-    version = "0.48.3";
-    sha256 = "168k2gviblcjnkk1kbyrxd465fcm9l00vfbwkw2v6n53c57j0x1m";
+    version = "0.48.4";
+    sha256 = "1ra5x397cs8jbbkdd8gwz6nczmg58lrgxjmn4ig445gxk4mn9h0i";
     arch = "linux-x64";
   }
   {
@@ -497,14 +497,14 @@
   {
     name = "vscode-ide";
     publisher = "tlaplus";
-    version = "2026.10.240146";
-    sha256 = "0kc96h0i6vhs9cdznn75hhf6plzv8fybr21jvkpfrk9q8qzxzam2";
+    version = "2026.10.280155";
+    sha256 = "1d1baq4g4h81fds5l05mfc2iqwi046yrn2fnx9rqzavnsb1ak10x";
   }
   {
     name = "vscode-java-debug";
     publisher = "vscjava";
-    version = "0.60.0";
-    sha256 = "00abqmvfhkrawh0bqpd6izxp56q0pwk3rj8l4m6c6alrx1g7smnc";
+    version = "0.60.2026102705";
+    sha256 = "0is7kss23r71rdiidjp4xv60arz7m9d58c5g5zianzn1pmflwjv7";
   }
   {
     name = "vscode-markdownlint";
