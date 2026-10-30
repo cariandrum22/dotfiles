@@ -50,8 +50,8 @@
   {
     name = "better-comments";
     publisher = "aaron-bond";
-    version = "3.0.2";
-    sha256 = "15w1ixvp6vn9ng6mmcmv9ch0ngx8m85i1yabxdfn6zx3ypq802c5";
+    version = "3.1.1";
+    sha256 = "0g73sx8drg1smdnjfbmrvb8lx9ghscpyqaqwbymbhh56swk26f43";
   }
   {
     name = "change-case";
@@ -69,8 +69,8 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.312";
-    sha256 = "1sfzqhg77iggiry0ws5w8w04d0j72rng7wflg0nbn7p4g4qkmlmb";
+    version = "2.1.314";
+    sha256 = "0haxqmxbmxxp38dnajvxbq2radi1q72qk9z26vj1m6zawlhg75xx";
     arch = "linux-x64";
   }
   {
@@ -196,8 +196,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.10.270516";
-    sha256 = "1i1r3gdx4y8m5k92p2ab9pcpx3f6qw7ylvdxs4jvw4lwgbvmq7xy";
+    version = "2026.10.290511";
+    sha256 = "1xni45cd8snalxvb3y4wax23j2jc3yz25p6n8wzmrxi6jcb8m9zr";
   }
   {
     name = "haskell";
@@ -220,8 +220,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.59.2026102708";
-    sha256 = "03wljgc1ysva9s7ldky7ds5qc6x28vmsirrz26ynm3ad86jkwkiv";
+    version = "1.59.2026102908";
+    sha256 = "1cq02m3hfya3g7syki23g8f6m8d5pyz67fzlb0ylwlgklqmc04db";
     arch = "linux-x64";
   }
   {
@@ -318,8 +318,8 @@
   {
     name = "python";
     publisher = "ms-python";
-    version = "2026.11.2026102101";
-    sha256 = "0kfpl7nmfycn8bn7imhmph1gndycy7ymdggmaqr0vjsawblz5dnc";
+    version = "2026.11.2026102901";
+    sha256 = "0d0vg4ap5i74hd3vh3zldinl5isj991dv7556hyhgzf9krrpr9kp";
     arch = "linux-x64";
   }
   {
@@ -331,8 +331,8 @@
   {
     name = "remote-containers";
     publisher = "ms-vscode-remote";
-    version = "0.470.0";
-    sha256 = "18b9a0djg218ndzzz778iqj99nr190llrkvayjfp0vn8gv9hsc36";
+    version = "0.471.0";
+    sha256 = "12xli5m241vy1fwr6jssjpgcal1xzaz9gadhxv6qng8ga5m4w7bw";
   }
   {
     name = "remote-explorer";
@@ -368,8 +368,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.3099";
-    sha256 = "17didxrxnd7vlgwxnw9fnsc53fj5wdlc4ljpy51nkfija7hk7mqy";
+    version = "0.4.3101";
+    sha256 = "0q6sp8hwm6jzlkiy9g0i47w9ish8x8s3aakird3rcq6szhgyc32a";
     arch = "linux-x64";
   }
   {
