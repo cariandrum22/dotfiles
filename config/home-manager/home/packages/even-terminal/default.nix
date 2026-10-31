@@ -15,7 +15,7 @@ buildNpmPackage rec {
   };
 
   nodejs = nodejs_22;
-  npmDepsHash = "sha256-rXf92qcy5fxleNHd3MOmvMfVrYUbR3FFTAD6/UQOZs0=";
+  npmDepsHash = "sha256-GjM5HVCe+cFistfJGxuOrUWyAoXD+lq29kPwKOk3e2Q=";
 
   patches = [ ./bind-interface.patch ];
 
