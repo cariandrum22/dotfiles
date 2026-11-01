@@ -750,7 +750,9 @@ def _calculate_cargo_hash(content: str) -> lib.Hash:
         tmp.write(temp_content)
         tmp_path = Path(tmp.name)
     try:
-        hash_val = lib.calculate_cargo_hash(tmp_path)
+        # Git-sourced rusty_v8 includes Chromium's vendored dependencies; fetching
+        # them on a cold macOS runner can exceed the shared five-minute default.
+        hash_val = lib.calculate_cargo_hash(tmp_path, timeout=900)
         if hash_val is None:
             msg = "Failed to compute cargoHash"
             raise RuntimeError(msg)

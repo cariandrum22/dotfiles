@@ -252,13 +252,11 @@ let
           sed -i '1i#![recursion_limit = "256"]' "$chatgpt_lib"
         fi
 
+        # Git-sourced rusty_v8 also vendors Chromium's Rust dependencies.
+        # Select the crate directory itself and do not descend into its sources.
         mapfile -t vendored_v8_dirs < <(
-          while IFS= read -r cargo_toml; do
-            dirname "$cargo_toml"
-          done < <(
-            find "$cargoDepsCopy" -type f -name Cargo.toml \
-              -path '*/v8*/Cargo.toml' -print
-          ) | sort -u
+          find "$cargoDepsCopy" -type d -name 'v8-${rustyV8Version}' \
+            -prune -print | sort -u
         )
 
         if [ "''${#vendored_v8_dirs[@]}" -ne 1 ]; then
