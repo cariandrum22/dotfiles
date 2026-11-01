@@ -1,16 +1,11 @@
 model = "gpt-5.6-sol"
 review_model = "gpt-5.6-sol"
-model_provider = "cloudflare_openai"
+# Shared by the desktop app and CLI; opt into the gateway with -p cloudflare.
+model_provider = "openai"
 model_reasoning_effort = "xhigh"
 model_reasoning_summary = "auto"
 approval_policy = "on-request"
 default_permissions = ":danger-full-access"
-web_search = "live"
-
-# Use the first-party provider when native search is needed and the gateway
-# does not support it. Brave MCP remains available through either provider.
-[profiles.openai-search]
-model_provider = "openai"
 web_search = "live"
 
 [mcp_servers.playwright]

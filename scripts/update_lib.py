@@ -291,7 +291,9 @@ def _build_flake_callpackage_expr(nix_file: Path) -> str | None:
     )
 
 
-def calculate_cargo_hash(nix_file: Path) -> Hash | None:  # noqa: C901, PLR0912, PLR0915
+def calculate_cargo_hash(  # noqa: C901, PLR0912, PLR0915
+    nix_file: Path, *, timeout: int = 300,
+) -> Hash | None:
     """Calculate cargoHash by building with dummy hash and extract correct one."""
     # Create a temporary file with dummy cargoHash
     nix_file = Path(nix_file)
@@ -342,7 +344,7 @@ def calculate_cargo_hash(nix_file: Path) -> Hash | None:  # noqa: C901, PLR0912,
             cmd,
             check=False, capture_output=True,
             text=True,
-            timeout=300,  # 5 minutes timeout for CI environments
+            timeout=timeout,
         )
 
         # Look for the correct hash in the build output
@@ -396,7 +398,10 @@ def calculate_cargo_hash(nix_file: Path) -> Hash | None:  # noqa: C901, PLR0912,
     except subprocess.TimeoutExpired:
         # Build took too long
         if os.getenv('CI'):
-            print("[CI Debug] nix-build timed out after 5 minutes", file=sys.stderr)
+            print(
+                f"[CI Debug] nix-build timed out after {timeout} seconds",
+                file=sys.stderr,
+            )
     except subprocess.CalledProcessError as e:
         # Expected to fail, but log in CI
         if os.getenv('CI'):
