@@ -115,6 +115,14 @@ in
   };
 
   home = {
+    # Codex 0.134+ reads profiles from separate files beside config.toml.
+    # Keep the user's openai.config.toml available for personal model settings.
+    file = {
+      ".codex/cloudflare.config.toml".source = claudiusSource + "/codex-profiles/cloudflare.config.toml";
+      ".codex/openai-search.config.toml".source =
+        claudiusSource + "/codex-profiles/openai-search.config.toml";
+    };
+
     packages = [
       pkgs.github-mcp-server
       syncOpenCodeMcp
