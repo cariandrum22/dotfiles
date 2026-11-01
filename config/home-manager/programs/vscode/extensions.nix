@@ -196,8 +196,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.10.300511";
-    sha256 = "066r86nhmq7wfs7vnrg9prga1dmxc2m9saarrkbp53xzl9xq43h8";
+    version = "2026.10.310508";
+    sha256 = "0pikv6z8rixpvl3pgpr2axhfl3878qw5s0yzq8p6admv2mclcvkp";
   }
   {
     name = "haskell";
@@ -220,8 +220,8 @@
   {
     name = "java";
     publisher = "redhat";
-    version = "1.59.2026103008";
-    sha256 = "03xcvd32ihv2cwrr0f88n2x633qnggzrwv2z1qn3pl057wj38hbn";
+    version = "1.59.2026103108";
+    sha256 = "0cfh2s7myn4yablfxkd76ds9j5hy4vpg6rzgij5namaxc093w38d";
     arch = "linux-x64";
   }
   {
@@ -368,8 +368,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.3102";
-    sha256 = "11jwk3xqswvd17viapzqxi2j4h282a93m50rj84516fiyzfppk1w";
+    version = "0.4.3103";
+    sha256 = "0g2jrin69v3w73rlnnq41dd8rg464pwx55xgkg45i1yqa2wp1qc7";
     arch = "linux-x64";
   }
   {
