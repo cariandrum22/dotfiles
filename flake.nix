@@ -456,7 +456,7 @@
               entry = "${pkgs.python3}/bin/python3 scripts/test-update-codex-cli.py";
               language = "system";
               pass_filenames = false;
-              files = "^scripts/(update-codex-cli|test-update-codex-cli)\\.py$";
+              files = "^scripts/(update-codex-cli|test-update-codex-cli|update_lib)\\.py$";
             };
             ai-tools-transaction-regression = {
               enable = true;
