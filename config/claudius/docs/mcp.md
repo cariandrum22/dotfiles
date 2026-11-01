@@ -103,11 +103,20 @@ Perplexity API billing are also separate: removing its MCP or cancelling Pro doe
 charges. Review API keys and automatic credit purchases in Perplexity's console after confirming the
 replacement. This repository does not change subscriptions or billing settings.
 
-Claude Code's native `WebSearch` is allowed. Codex explicitly requests live native search, but the
-existing Cloudflare provider's standalone-search compatibility has not been verified. No unsupported
-capability is forced on the gateway. Brave remains usable with that provider; for native OpenAI
-search, select the first-party provider with `codex --profile openai-search`. That profile requires
-OpenAI authentication and sends model requests directly to OpenAI.
+Claude Code's native `WebSearch` is allowed. Codex explicitly requests live native search and defaults
+to the first-party OpenAI provider in both the desktop app and CLI. OpenAI authentication is required;
+model requests go directly to OpenAI. Select Cloudflare AI Gateway explicitly with
+`codex --profile cloudflare`. The gateway's standalone-search compatibility has not been verified;
+Brave remains usable with either provider.
+
+Home Manager installs `cloudflare.config.toml` and `openai-search.config.toml` from `codex-profiles/`
+into `~/.codex/`. The latter preserves `codex --profile openai-search` for direct OpenAI requests with
+live search. A personal `~/.codex/openai.config.toml` can keep separate model preferences and is not
+managed here. Codex 0.134+ uses these separate files instead of `[profiles.*]` tables or a top-level
+`profile` selector in `config.toml`. Remove the legacy `[profiles.openai-search]` table from an existing
+user config when migrating, since Claudius sync may preserve settings absent from its source.
+After applying Home Manager and syncing Codex, restart the desktop app and start a new chat to use the
+updated default provider.
 
 ## GitHub
 
