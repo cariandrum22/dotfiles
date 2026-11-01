@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import importlib.util
+import subprocess  # noqa: S404
 import sys
 import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING
+from unittest.mock import patch
 
 if TYPE_CHECKING:
     from types import ModuleType
@@ -154,12 +156,50 @@ def test_missing_optional_rust_sdks_source_is_supported() -> None:
         raise AssertionError(msg)
 
 
+def test_codex_cargo_hash_allows_slow_vendor_fetch() -> None:
+    update_codex_cli = _load_update_codex_cli()
+    expected_hash = "sha256-e6DIyAwphlUC4MOr0FoxlGXgSi/52W4FYHYKzYnddyA="
+
+    def slow_fetch(
+        command: list[str], *, timeout: int, **_kwargs: object,
+    ) -> subprocess.CompletedProcess[str]:
+        # Model a cold fetch that exceeds the shared five-minute limit.
+        if timeout <= 300:  # noqa: PLR2004
+            raise subprocess.TimeoutExpired(command, timeout)
+        return subprocess.CompletedProcess(
+            command, 1, stdout="", stderr=f"hash mismatch: got: {expected_hash}",
+        )
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        nix_file = Path(temp_dir) / "codex.nix"
+        content = 'cargoHash = cargoHashes.${pkgs.stdenv.system};\n'
+        nix_file.write_text(content, encoding="utf-8")
+        with (
+            patch.object(update_codex_cli, "NIX_FILE", nix_file),
+            patch.object(
+                update_codex_cli.lib.subprocess, "run", side_effect=slow_fetch,
+            ),
+        ):
+            if update_codex_cli.lib.calculate_cargo_hash(nix_file) is not None:
+                msg = "the shared cargo hash timeout unexpectedly changed"
+                raise AssertionError(msg)
+            actual_hash = update_codex_cli._calculate_cargo_hash(content)
+
+        if str(actual_hash) != expected_hash:
+            msg = "Codex did not recover the cargo hash after a slow vendor fetch"
+            raise AssertionError(msg)
+        if list(Path(temp_dir).iterdir()) != [nix_file]:
+            msg = "cargo hash calculation left temporary Nix files behind"
+            raise AssertionError(msg)
+
+
 def main() -> None:
     test_numeric_replacement_does_not_form_octal_backreference()
     test_livekit_tag_replacement_preserves_prefix_and_suffix()
     test_cargo_hash_replacement_preserves_closing_brace_indent()
     test_archive_hash_replacements_preserve_closing_brace_indent()
     test_missing_optional_rust_sdks_source_is_supported()
+    test_codex_cargo_hash_allows_slow_vendor_fetch()
 
 
 if __name__ == "__main__":
