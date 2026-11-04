@@ -25,6 +25,16 @@ let
     runtimeInputs = [ (pkgs.callPackage ../home/packages/codex.nix { }) ];
     text = builtins.readFile (claudiusSource + "/bin/openai");
   };
+  codexApi = pkgs.writeShellApplication {
+    name = "codex-api";
+    runtimeInputs = [
+      pkgs.bash
+      pkgs.coreutils
+      pkgs.claudius
+      (pkgs.callPackage ../home/packages/codex.nix { })
+    ];
+    text = builtins.readFile (claudiusSource + "/bin/codex-api");
+  };
   jsonFormat = pkgs.formats.json { };
   tomlFormat = pkgs.formats.toml { };
   baseMcpServers = builtins.fromJSON (builtins.readFile (claudiusSource + "/mcpServers.json"));
@@ -59,9 +69,23 @@ let
       name: _: builtins.hasAttr name filteredMcpServers
     ) baseCodexSettings.mcp_servers;
   };
+  apiCodexSettings = lib.recursiveUpdate managedCodexSettings (
+    builtins.fromTOML (builtins.readFile (claudiusSource + "/codex-profiles/api.config.toml"))
+  );
+  # codex.settings.toml contains policy-only MCP tables; let Claudius add the
+  # actual transports before publishing a complete config to the separate home.
+  apiCodexConfig = pkgs.runCommand "api-codex.config.toml" { } ''
+    mkdir claudius
+    cp ${tomlFormat.generate "api-settings.toml" apiCodexSettings} claudius/codex.settings.toml
+    cp ${jsonFormat.generate "api-mcpServers.json" managedMcpServers} claudius/mcpServers.json
+    XDG_CONFIG_HOME="$PWD" ${claudiusExe} config sync --agent codex \
+      --config "$PWD/claudius/mcpServers.json"
+    cp .codex/config.toml "$out"
+  '';
   mutableClaudiusRelativeDirs = [
     ".claude"
     "credentials"
+    "credentials/codex-api"
     "credentials/google"
     "credentials/mcp"
     "credentials/mcp/brave-search"
@@ -125,12 +149,16 @@ in
       ".codex/cloudflare.config.toml".source = claudiusSource + "/codex-profiles/cloudflare.config.toml";
       ".codex/openai-daybreak.config.toml".source =
         claudiusSource + "/codex-profiles/openai-daybreak.config.toml";
+      ".codex-api/config.toml".source = apiCodexConfig;
+      ".codex-api/daybreak.config.toml".source =
+        claudiusSource + "/codex-profiles/openai-daybreak.config.toml";
     };
 
     packages = [
       pkgs.github-mcp-server
       syncOpenCodeMcp
       openaiCodex
+      codexApi
     ];
 
     activation = {
@@ -154,6 +182,7 @@ in
 
         chmod 700 \
           "$claudius_config_dir/credentials" \
+          "$claudius_config_dir/credentials/codex-api" \
           "$claudius_config_dir/credentials/google" \
           "$claudius_config_dir/credentials/mcp" \
           "$claudius_config_dir/credentials/mcp/brave-search" \

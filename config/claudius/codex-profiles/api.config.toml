@@ -1,0 +1,6 @@
+# Shared model/MCP settings are merged into the dedicated API Codex home.
+model_provider = "openai"
+openai_base_url = "https://api.openai.com/v1"
+forced_login_method = "api"
+cli_auth_credentials_store = "file"
+daybreak = false

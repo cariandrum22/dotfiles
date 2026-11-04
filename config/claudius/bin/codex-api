@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+daybreak=false
+case "${1:-}" in
+--daybreak)
+  daybreak=true
+  shift
+  ;;
+-h | --help)
+  echo 'Usage: codex-api [--daybreak] [CODEX_ARGS...]'
+  echo 'Use the OpenAI API key via Claudius, with separate Codex authentication and history.'
+  exit 0
+  ;;
+esac
+
+config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/claudius"
+key_ref_file="$config_dir/credentials/codex-api/OPENAI_API_KEY"
+if [[ ! -r "$key_ref_file" ]]; then
+  echo 'OpenAI API key reference is missing; configure credentials/codex-api/OPENAI_API_KEY first.' >&2
+  exit 1
+fi
+key_reference="$(<"$key_ref_file")"
+if [[ "$key_reference" != op://?* || "$key_reference" == *$'\n'* || "$key_reference" == *$'\r'* ]]; then
+  echo 'OpenAI API key reference must be a single op:// reference.' >&2
+  exit 1
+fi
+api_home="${CODEX_API_HOME:-$HOME/.codex-api}"
+if [[ ! -f "$api_home/config.toml" ]]; then
+  echo 'API Codex configuration is missing; apply Home Manager first.' >&2
+  exit 1
+fi
+api_home="$(cd "$api_home" && pwd -P)"
+if [[ -d "$HOME/.codex" && "$api_home" == "$(cd "$HOME/.codex" && pwd -P)" ]]; then
+  echo 'API Codex must use a separate home from ~/.codex.' >&2
+  exit 1
+fi
+chmod 700 "$api_home"
+
+# Elvish/Fish may export references for several tools. Resolve only this key.
+for secret_name in "${!CLAUDIUS_SECRET_@}"; do
+  unset "$secret_name"
+done
+unset OPENAI_API_KEY CODEX_API_KEY CODEX_ACCESS_TOKEN
+export CLAUDIUS_SECRET_OPENAI_API_KEY="$key_reference"
+
+# The dedicated home keeps API login from replacing the normal ChatGPT login.
+exec env CODEX_HOME="$api_home" claudius secrets run -- \
+  bash "$config_dir/bin/codex-api-session" "$daybreak" "$@"

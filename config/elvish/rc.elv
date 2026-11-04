@@ -555,7 +555,12 @@ if (and (has-external op) (has-external claudius)) {
     set E:CLAUDIUS_SECRET_CF_AIG_ACCOUNT_ID = "op://"$ai-vault"/CLOUDFLARE AI Gateway/Account ID"
     set E:CLAUDIUS_SECRET_CF_AIG_GATEWAY_ID = "op://"$ai-vault"/CLOUDFLARE AI Gateway/Gateway ID"
     set E:CLAUDIUS_SECRET_CF_AIG_TOKEN = "op://"$ai-vault"/CLOUDFLARE AI Gateway/credential"
-    set E:CLAUDIUS_SECRET_OPENAI_API_KEY = "op://"$ai-vault"/OpenAI Codex CLI/credential"
+    var key-ref-file = $E:XDG_CONFIG_HOME/claudius/credentials/codex-api/OPENAI_API_KEY
+    if ?(test -r $key-ref-file) {
+      set E:CLAUDIUS_SECRET_OPENAI_API_KEY = (str:trim-space (slurp < $key-ref-file))
+    } elif (has-env CLAUDIUS_SECRET_OPENAI_API_KEY) {
+      unset-env CLAUDIUS_SECRET_OPENAI_API_KEY
+    }
   }
 
   # Base URLs for AI tools with wrapper functions
@@ -784,4 +789,13 @@ if (has-external zoxide) {
 if (has-external carapace) {
   set-env CARAPACE_BRIDGES 'zsh,fish,bash,inshellisense'
   eval (carapace _carapace | slurp)
+}
+
+# Optional machine-local commands stay outside the managed configuration.
+# The module exports a map from function variable names to closures.
+if ?(test -f $E:XDG_CONFIG_HOME/elvish/lib/local.elv) {
+  use local
+  for name [(keys $local:commands)] {
+    edit:add-var $name $local:commands[$name]
+  }
 }

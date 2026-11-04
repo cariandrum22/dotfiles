@@ -118,6 +118,8 @@ from the shared settings. Daybreak is off in the shared settings and enabled by 
 | `openai` | OpenAI, saved Codex login | Off |
 | `openai --daybreak` | OpenAI, saved Codex login | On |
 | `codex --profile cloudflare` | Cloudflare AI Gateway | Off |
+| `codex-api` | OpenAI, locally configured API key | Off |
+| `codex-api --daybreak` | OpenAI, locally configured API key | On |
 
 `openai` is a Home Manager launcher available in Elvish and other shells. It calls the Codex
 executable directly with the built-in OpenAI provider and saved authentication, without invoking the
@@ -149,6 +151,61 @@ Codex 0.134+ uses these separate files instead of `[profiles.*]` tables or a top
 user config when migrating, since Claudius sync may preserve settings absent from its source.
 After applying Home Manager and syncing Codex, restart the desktop app and start a new chat to use the
 updated default provider.
+
+### Isolated OpenAI API sessions
+
+Use `codex-api` or `codex-api --daybreak` for an API-authenticated session with separate
+Codex authentication and history. The launcher resolves only the configured OpenAI key through
+Claudius; Cloudflare credentials are not required.
+
+Keep the 1Password reference in a local file outside this repository. Replace the example below
+with your own vault, item, and field names:
+
+```bash
+config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/claudius"
+umask 077
+mkdir -p "$config_dir/credentials/codex-api"
+printf '%s\n' 'op://Example Vault/Example API Key/credential' \
+  > "$config_dir/credentials/codex-api/OPENAI_API_KEY"
+codex-api
+codex-api --daybreak
+```
+
+The file must contain one `op://` reference, not the API key itself. It is read at runtime and is
+not included in the Nix build inputs. The existing Elvish and Fish Claudius wrappers read the same
+file instead of embedding a vault item name. Restart those shells after applying Home Manager.
+
+Both variants use the built-in `openai` provider at `https://api.openai.com/v1`, GPT-6.1 Sol with
+`high` reasoning, and the shared MCP definitions and policies. Home Manager renders the complete
+configuration through Claudius into `~/.codex-api/config.toml`; its `daybreak.config.toml`
+profile selects Daybreak and the API-key feature flag. Installing this profile does not establish
+or grant program access; availability depends on the API project's approvals.
+
+Codex 0.166.0's interactive mode requires saved API-key authentication. On each launch, the helper
+passes the resolved key to `codex login --with-api-key` through stdin, then starts a fresh Codex
+process in that dedicated home. Codex stores the API key in its private `auth.json`; login state,
+conversation history, and MCP OAuth state are separate from `~/.codex`. The normal ChatGPT login
+is preserved. The helper removes the key from the launched session's environment after login.
+Shared skills remain available from `~/.agents/skills`; plugins and MCP OAuth connections that
+require sign-in need to be configured separately in the API home. `CODEX_API_HOME` can select
+another already-configured dedicated home.
+
+### Local Elvish commands
+
+Organization-specific command names and dispatchers belong in the optional local module
+`~/.config/elvish/lib/local.elv`, outside this repository. Home Manager does not generate this
+file. The interactive shell registers the closures in its `commands` map; names include the
+Elvish function-variable suffix `~`. For example:
+
+```elvish
+fn work {|@args|
+  e:codex-api $@args
+}
+var commands = [&work~=$work~]
+```
+
+Extend that local module with additional subcommands or wrappers as needed. Keep real organization
+names, account associations, and credential references out of public examples and pull requests.
 
 ## GitHub
 
