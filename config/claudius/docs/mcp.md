@@ -109,10 +109,42 @@ model requests go directly to OpenAI. Select Cloudflare AI Gateway explicitly wi
 `codex --profile cloudflare`. The gateway's standalone-search compatibility has not been verified;
 Brave remains usable with either provider.
 
-Home Manager installs `cloudflare.config.toml` and `openai-search.config.toml` from `codex-profiles/`
-into `~/.codex/`. The latter preserves `codex --profile openai-search` for direct OpenAI requests with
-live search. A personal `~/.codex/openai.config.toml` can keep separate model preferences and is not
-managed here. Codex 0.134+ uses these separate files instead of `[profiles.*]` tables or a top-level
+The supported launch variants below inherit
+`model = "gpt-6.1-sol"`, `review_model = "gpt-6.1-sol"`, and `model_reasoning_effort = "high"`
+from the shared settings. Daybreak is off in the shared settings and enabled by the explicit profiles:
+
+| Invocation | Provider | Daybreak |
+| --- | --- | --- |
+| `openai` | OpenAI, saved Codex login | Off |
+| `openai --daybreak` | OpenAI, saved Codex login | On |
+| `codex --profile cloudflare` | Cloudflare AI Gateway | Off |
+
+`openai` is a Home Manager launcher available in Elvish and other shells. It calls the Codex
+executable directly with the built-in OpenAI provider and saved authentication, without invoking the
+shell's Claudius wrapper. `openai --daybreak` selects `openai-daybreak.config.toml`. Plain `codex`
+still uses the same shared model defaults. All variants inherit live search from the shared settings;
+separate search profiles are unnecessary.
+
+The Daybreak profiles set `daybreak = true` and `features.api_key_cyber_access_programs = true`.
+The latter allows sessions authenticated with an API key to send an explicit access-program
+selection to OpenAI. Exporting `OPENAI_API_KEY` alone does not switch the built-in provider's
+interactive session away from saved ChatGPT login. The API project must already have access to both
+Daybreak and the selected model; these flags do not grant access. See the
+[OpenAI configuration reference](https://learn.chatgpt.com/docs/config-file/config-reference) and
+[Daybreak API guide](https://developers.openai.com/api/docs/guides/daybreak).
+
+Codex 0.166.0 only forwards explicit cyber access programs for the built-in `openai` provider.
+Adding the same flags to `cloudflare_openai` would silently omit that selection, so no nonfunctional
+`cloudflare-daybreak` profile is installed. `openai_base_url` can change the built-in provider's
+endpoint, but its provider overrides do not accept the `cf-aig-authorization` header needed by this
+gateway configuration. Gateway Daybreak support requires a Codex change or an authenticated proxy;
+use `openai --daybreak` for direct OpenAI requests in the meantime.
+
+The former `codex --profile openai`, `openai-search`, and `openai-search-daybreak` profiles are
+retired. Home Manager moves any remaining files to `*.config.toml.retired.<timestamp>.<pid>` on
+activation, preserving personal settings while removing the old profile names. Use `openai` or
+`openai --daybreak` instead; the former personal Astra/xhigh model override is no longer loaded.
+Codex 0.134+ uses these separate files instead of `[profiles.*]` tables or a top-level
 `profile` selector in `config.toml`. Remove the legacy `[profiles.openai-search]` table from an existing
 user config when migrating, since Claudius sync may preserve settings absent from its source.
 After applying Home Manager and syncing Codex, restart the desktop app and start a new chat to use the

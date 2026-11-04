@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+codex_args=(-c 'model_provider="openai"')
+if [[ "${1:-}" == --daybreak ]]; then
+  codex_args+=(--profile openai-daybreak)
+  shift
+fi
+
+# Use the normal saved Codex login without invoking a shell's Claudius wrapper.
+exec codex "${codex_args[@]}" "$@"
