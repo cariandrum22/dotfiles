@@ -440,7 +440,7 @@
               extraPackages = [ pkgs.jq ];
               language = "system";
               pass_filenames = false;
-              files = "^config/claudius/(bin/(mcp-|sync-opencode-mcp)|mcpServers|codex|claude\\.settings|opencode)|^config/home-manager/programs/claudius\\.nix$|^scripts/test-claudius-mcp\\.py$";
+              files = "^config/claudius/(bin/(mcp-|sync-opencode-mcp|codex-api)|mcpServers|codex|claude\\.settings|opencode)|^config/home-manager/programs/claudius\\.nix$|^scripts/test-claudius-mcp\\.py$";
             };
             claudius-skill-guardrails = {
               enable = true;

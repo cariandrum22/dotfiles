@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+daybreak="${1:?Missing Daybreak selection}"
+shift
+if [[ -z "${OPENAI_API_KEY:-}" ]]; then
+  echo 'Claudius did not provide the OpenAI API key.' >&2
+  exit 1
+fi
+
+# The interactive OpenAI provider uses saved login, not OPENAI_API_KEY alone.
+# Pass the key through stdin, never process arguments or command output.
+printf '%s\n' "$OPENAI_API_KEY" | codex login --with-api-key
+unset OPENAI_API_KEY CLAUDIUS_SECRET_OPENAI_API_KEY
+
+# A fresh process must load the key just saved, rather than reuse a daemon's auth.
+codex_args=(--no-daemon)
+if [[ "$daybreak" == true ]]; then
+  codex_args+=(--profile daybreak)
+fi
+exec codex "${codex_args[@]}" "$@"

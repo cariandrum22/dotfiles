@@ -239,6 +239,133 @@ class McpRegressionTests(unittest.TestCase):
             <= set(antigravity_settings["permissions"]["deny"]),
         )
 
+    def _install_api_mocks(self) -> tuple[Path, Path]:
+        mock_bin = self.root / "api mock bin"
+        mock_bin.mkdir()
+        capture = self.root / "api capture.jsonl"
+        api_home = self.root / "api home"
+        api_home.mkdir()
+        (api_home / "config.toml").write_text('model_provider = "openai"\n')
+        key_ref = self.config / "credentials/codex-api/OPENAI_API_KEY"
+        key_ref.parent.mkdir(parents=True)
+        key_ref.write_text("op://Fixture Vault/Example API Key/credential\n")
+        stub = (
+            f"#!{sys.executable}\n"
+            "import json, os, sys\n"
+            "from pathlib import Path\n"
+            "name = Path(sys.argv[0]).name\n"
+            "record = {'command': name, 'argv': sys.argv[1:], "
+            "'home': os.environ['CODEX_HOME'], "
+            "'key': os.environ.get('OPENAI_API_KEY'), "
+            "'codex_key': os.environ.get('CODEX_API_KEY'), "
+            "'access_token': os.environ.get('CODEX_ACCESS_TOKEN'), "
+            "'refs': {k: v for k, v in os.environ.items() "
+            "if k.startswith('CLAUDIUS_SECRET_')}}\n"
+            "if name == 'codex' and sys.argv[1] == 'login':\n"
+            "    record['stdin'] = sys.stdin.read()\n"
+            "with Path(os.environ['CODEX_API_TEST_CAPTURE']).open('a') as f:\n"
+            "    f.write(json.dumps(record) + '\\n')\n"
+            "if name == 'claudius':\n"
+            "    if os.environ.get('CODEX_API_TEST_FAIL') == 'secrets':\n"
+            "        sys.exit(23)\n"
+            "    os.environ['OPENAI_API_KEY'] = 'fixture-api-key'\n"
+            "    os.execvpe(sys.argv[4], sys.argv[4:], os.environ)\n"
+            "if sys.argv[1] == 'login' and "
+            "os.environ.get('CODEX_API_TEST_FAIL') == 'login':\n"
+            "    sys.exit(24)\n"
+        )
+        for name in ("claudius", "codex"):
+            path = mock_bin / name
+            path.write_text(stub)
+            path.chmod(0o700)
+        self.env |= {
+            "PATH": f"{mock_bin}:{os.environ['PATH']}",
+            "CODEX_API_HOME": str(api_home),
+            "CODEX_API_TEST_CAPTURE": str(capture),
+            "CLAUDIUS_SECRET_OPENAI_API_KEY": "op://stale/key",
+            "CLAUDIUS_SECRET_CF_AIG_TOKEN": "op://unneeded/gateway",
+            "OPENAI_API_KEY": "stale-openai-key",
+            "CODEX_API_KEY": "stale-codex-key",
+            "CODEX_ACCESS_TOKEN": "stale-chatgpt-token",
+        }
+        return capture, api_home
+
+    def test_api_launch_uses_isolated_api_login(self) -> None:
+        capture, api_home = self._install_api_mocks()
+        for options, profile_args in (
+            ([], []),
+            (["--daybreak"], ["--profile", "daybreak"]),
+        ):
+            with self.subTest(options=options):
+                capture.write_text("")
+                result = self.run_command(
+                    [
+                        "bash",
+                        str(self.config / "bin/codex-api"),
+                        *options,
+                        "exec",
+                        "--json",
+                        "prompt with spaces",
+                    ],
+                )
+                calls = [json.loads(line) for line in capture.read_text().splitlines()]
+                self.assertEqual(len(calls), 3)
+                secrets, login, session = calls
+                self.assertEqual(
+                    secrets["refs"],
+                    {
+                        "CLAUDIUS_SECRET_OPENAI_API_KEY": (
+                            "op://Fixture Vault/Example API Key/credential"
+                        ),
+                    },
+                )
+                self.assertEqual(login["argv"], ["login", "--with-api-key"])
+                self.assertEqual(login["stdin"], "fixture-api-key\n")
+                self.assertEqual(
+                    session["argv"],
+                    [
+                        "--no-daemon",
+                        *profile_args,
+                        "exec",
+                        "--json",
+                        "prompt with spaces",
+                    ],
+                )
+                self.assertIsNone(secrets["key"])
+                self.assertIsNone(session["key"])
+                self.assertEqual(session["refs"], {})
+                for call in calls:
+                    self.assertEqual(call["home"], str(api_home))
+                    self.assertIsNone(call["codex_key"])
+                    self.assertIsNone(call["access_token"])
+                    self.assertNotIn("fixture-api-key", json.dumps(call["argv"]))
+                self.assertNotIn("fixture-api-key", result.stdout + result.stderr)
+                self.assertEqual(api_home.stat().st_mode & 0o777, 0o700)
+
+    def test_api_auth_failure_prevents_session_start(self) -> None:
+        capture, _ = self._install_api_mocks()
+        for failure, expected_calls in (("secrets", 1), ("login", 2)):
+            with self.subTest(failure=failure):
+                capture.write_text("")
+                self.env["CODEX_API_TEST_FAIL"] = failure
+                with self.assertRaises(subprocess.CalledProcessError):
+                    self.run_command(["bash", str(self.config / "bin/codex-api")])
+                calls = [json.loads(line) for line in capture.read_text().splitlines()]
+                self.assertEqual(len(calls), expected_calls)
+
+    def test_api_missing_or_invalid_reference_prevents_secret_resolution(self) -> None:
+        capture, _ = self._install_api_mocks()
+        key_ref = self.config / "credentials/codex-api/OPENAI_API_KEY"
+        key_ref.unlink()
+        for value in (None, "", "fixture-raw-key", "op://first/key\nop://second/key"):
+            with self.subTest(value=value):
+                if value is not None:
+                    key_ref.write_text(value)
+                with self.assertRaises(subprocess.CalledProcessError) as failure:
+                    self.run_command(["bash", str(self.config / "bin/codex-api")])
+                self.assertFalse(capture.exists())
+                self.assertNotIn("fixture-raw-key", failure.exception.stderr)
+
     def test_opencode_local_model_values_stay_out_of_tracked_settings(self) -> None:
         self.sync_opencode()
         rendered = json.loads((self.root / "opencode.json").read_text())

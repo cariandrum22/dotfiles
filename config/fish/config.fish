@@ -262,7 +262,16 @@ function __claudius_export_secrets
     set -gx CLAUDIUS_SECRET_CF_AIG_ACCOUNT_ID "op://$ai_vault/CLOUDFLARE AI Gateway/Account ID"
     set -gx CLAUDIUS_SECRET_CF_AIG_GATEWAY_ID "op://$ai_vault/CLOUDFLARE AI Gateway/Gateway ID"
     set -gx CLAUDIUS_SECRET_CF_AIG_TOKEN "op://$ai_vault/CLOUDFLARE AI Gateway/credential"
-    set -gx CLAUDIUS_SECRET_OPENAI_API_KEY "op://$ai_vault/OpenAI Codex CLI/credential"
+    set -l config_dir "$HOME/.config"
+    if set -q XDG_CONFIG_HOME; and test -n "$XDG_CONFIG_HOME"
+        set config_dir "$XDG_CONFIG_HOME"
+    end
+    set -l key_ref_file "$config_dir/claudius/credentials/codex-api/OPENAI_API_KEY"
+    if test -r "$key_ref_file"
+        set -gx CLAUDIUS_SECRET_OPENAI_API_KEY (string trim < "$key_ref_file")
+    else
+        set -e CLAUDIUS_SECRET_OPENAI_API_KEY
+    end
 end
 
 function __claudius_run_tool
