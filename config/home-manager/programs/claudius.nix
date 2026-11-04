@@ -20,6 +20,11 @@ let
     ];
     text = builtins.readFile (claudiusSource + "/bin/sync-opencode-mcp");
   };
+  openaiCodex = pkgs.writeShellApplication {
+    name = "openai";
+    runtimeInputs = [ (pkgs.callPackage ../home/packages/codex.nix { }) ];
+    text = builtins.readFile (claudiusSource + "/bin/openai");
+  };
   jsonFormat = pkgs.formats.json { };
   tomlFormat = pkgs.formats.toml { };
   baseMcpServers = builtins.fromJSON (builtins.readFile (claudiusSource + "/mcpServers.json"));
@@ -116,19 +121,30 @@ in
 
   home = {
     # Codex 0.134+ reads profiles from separate files beside config.toml.
-    # Keep the user's openai.config.toml available for personal model settings.
     file = {
       ".codex/cloudflare.config.toml".source = claudiusSource + "/codex-profiles/cloudflare.config.toml";
-      ".codex/openai-search.config.toml".source =
-        claudiusSource + "/codex-profiles/openai-search.config.toml";
+      ".codex/openai-daybreak.config.toml".source =
+        claudiusSource + "/codex-profiles/openai-daybreak.config.toml";
     };
 
     packages = [
       pkgs.github-mcp-server
       syncOpenCodeMcp
+      openaiCodex
     ];
 
     activation = {
+      retireLegacyCodexProfiles = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        for profile_name in openai openai-search openai-search-daybreak; do
+          profile_path="$HOME/.codex/$profile_name.config.toml"
+          if [ -e "$profile_path" ] || [ -L "$profile_path" ]; then
+            # Preserve any personal settings while removing the selectable profile.
+            backup_path="$profile_path.retired.$(date -u +%Y%m%dT%H%M%S).$$"
+            run mv -- "$profile_path" "$backup_path"
+          fi
+        done
+      '';
+
       ensureClaudiusStateDirs = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         claudius_config_dir="$HOME/.config/claudius"
 
