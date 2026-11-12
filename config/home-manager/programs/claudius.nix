@@ -35,6 +35,13 @@ let
     ];
     text = builtins.readFile (claudiusSource + "/bin/codex-api");
   };
+  syncCodexConfig = pkgs.writeShellApplication {
+    name = "claudius-sync-codex-config";
+    text = ''
+      exec ${pkgs.python3.withPackages (ps: [ ps.tomli-w ])}/bin/python3 \
+        ${claudiusSource + "/bin/sync-codex-config.py"} "$@"
+    '';
+  };
   jsonFormat = pkgs.formats.json { };
   tomlFormat = pkgs.formats.toml { };
   baseMcpServers = builtins.fromJSON (builtins.readFile (claudiusSource + "/mcpServers.json"));
@@ -82,6 +89,15 @@ let
       --config "$PWD/claudius/mcpServers.json"
     cp .codex/config.toml "$out"
   '';
+  # Codex writes trust and UI state into its selected config/profile. These
+  # targets must be local files, not read-only home.file links into the store.
+  writableCodexConfigs = {
+    ".codex/cloudflare.config.toml" = claudiusSource + "/codex-profiles/cloudflare.config.toml";
+    ".codex/openai-daybreak.config.toml" =
+      claudiusSource + "/codex-profiles/openai-daybreak.config.toml";
+    ".codex-api/config.toml" = apiCodexConfig;
+    ".codex-api/daybreak.config.toml" = claudiusSource + "/codex-profiles/openai-daybreak.config.toml";
+  };
   mutableClaudiusRelativeDirs = [
     ".claude"
     "credentials"
@@ -144,16 +160,6 @@ in
   };
 
   home = {
-    # Codex 0.134+ reads profiles from separate files beside config.toml.
-    file = {
-      ".codex/cloudflare.config.toml".source = claudiusSource + "/codex-profiles/cloudflare.config.toml";
-      ".codex/openai-daybreak.config.toml".source =
-        claudiusSource + "/codex-profiles/openai-daybreak.config.toml";
-      ".codex-api/config.toml".source = apiCodexConfig;
-      ".codex-api/daybreak.config.toml".source =
-        claudiusSource + "/codex-profiles/openai-daybreak.config.toml";
-    };
-
     packages = [
       pkgs.github-mcp-server
       syncOpenCodeMcp
@@ -162,6 +168,14 @@ in
     ];
 
     activation = {
+      syncCodexWritableConfigs = lib.hm.dag.entryAfter [ "linkGeneration" ] (
+        lib.concatStringsSep "\n" (
+          lib.mapAttrsToList (target: source: ''
+            run ${lib.getExe syncCodexConfig} ${source} "$HOME"/${lib.escapeShellArg target}
+          '') writableCodexConfigs
+        )
+      );
+
       retireLegacyCodexProfiles = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         for profile_name in openai openai-search openai-search-daybreak; do
           profile_path="$HOME/.codex/$profile_name.config.toml"

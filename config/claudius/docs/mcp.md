@@ -181,6 +181,20 @@ configuration through Claudius into `~/.codex-api/config.toml`; its `daybreak.co
 profile selects Daybreak and the API-key feature flag. Installing this profile does not establish
 or grant program access; availability depends on the API project's approvals.
 
+Home Manager merges the generated API configuration and the Codex profiles into writable local
+files on activation. Codex persists project trust and UI choices in the selected configuration,
+so these files must not be symlinks into the read-only Nix store. Activation refreshes managed
+settings while preserving local additions such as project trust. The source defaults remain
+declarative in this repository.
+
+Each writable target has a private `*.managed.json` sidecar recording the previous managed
+settings. Activation removes those owned settings before applying the new defaults, so deleting
+a declaration also removes it from the local configuration. MCP server and model provider
+definitions are owned as complete entries; other tables retain locally added keys. On first
+adoption, existing keys absent from the declarations are preserved because their ownership is
+unknown. Keep the sidecar alongside the configuration to retain deletion tracking. An interrupted
+sync records both generations so the next activation can recover.
+
 Codex 0.166.0's interactive mode requires saved API-key authentication. On each launch, the helper
 passes the resolved key to `codex login --with-api-key` through stdin, then starts a fresh Codex
 process in that dedicated home. Codex stores the API key in its private `auth.json`; login state,

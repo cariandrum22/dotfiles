@@ -440,5 +440,245 @@ class McpRegressionTests(unittest.TestCase):
         self.assertEqual(list(self.root.glob(".claudius-opencode.*")), [])
 
 
+class CodexConfigSyncTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.temp = tempfile.TemporaryDirectory(prefix="codex config ", dir=Path.home())
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+
+    @staticmethod
+    def _sync_codex_config(source: Path, target: Path) -> None:
+        subprocess.run(
+            [
+                sys.executable,
+                str(SOURCE / "bin/sync-codex-config.py"),
+                str(source),
+                str(target),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=True,
+        )
+
+    def test_codex_config_sync_replaces_store_link_and_preserves_trust(self) -> None:
+        source = self.root / "managed profile.toml"
+        source.write_text(
+            "daybreak = true\n[features]\napi_key_cyber_access_programs = true\n",
+        )
+        source.chmod(0o400)
+        original = source.read_bytes()
+        target = self.root / "api home/daybreak.config.toml"
+        target.parent.mkdir()
+        target.symlink_to(source)
+
+        self._sync_codex_config(source, target)
+        self.assertFalse(target.is_symlink())
+        self.assertEqual(target.stat().st_mode & 0o777, 0o600)
+        self.assertEqual(source.read_bytes(), original)
+        with target.open("a") as stream:
+            stream.write('\n[projects."/fixture/project"]\ntrust_level = "trusted"\n')
+        source.chmod(0o600)
+        source.write_text(
+            "daybreak = false\n[features]\napi_key_cyber_access_programs = true\n",
+        )
+
+        self._sync_codex_config(source, target)
+        settings = tomllib.loads(target.read_text())
+        self.assertFalse(settings["daybreak"])
+        self.assertTrue(settings["features"]["api_key_cyber_access_programs"])
+        self.assertEqual(
+            settings["projects"]["/fixture/project"]["trust_level"],
+            "trusted",
+        )
+        self.assertNotIn("mcp_servers", settings)
+
+    def test_codex_config_sync_seeds_missing_file(self) -> None:
+        source = self.root / "managed api.toml"
+        source.write_text('model_provider = "openai"\nforced_login_method = "api"\n')
+        target = self.root / "new api home/config.toml"
+        self._sync_codex_config(source, target)
+        self.assertFalse(target.is_symlink())
+        self.assertEqual(target.stat().st_mode & 0o777, 0o600)
+        self.assertEqual(
+            tomllib.loads(target.read_text()),
+            tomllib.loads(source.read_text()),
+        )
+        state = target.with_name(target.name + ".managed.json")
+        self.assertEqual(state.stat().st_mode & 0o777, 0o600)
+        self.assertEqual(
+            json.loads(state.read_text())["managed"], tomllib.loads(source.read_text()),
+        )
+
+    def test_removed_managed_leaves_preserve_local_trust_and_ui(self) -> None:
+        source = self.root / "managed.toml"
+        target = self.root / "config.toml"
+        source.write_text('model = "old-model"\n[features]\nmanaged_flag = true\n')
+        self._sync_codex_config(source, target)
+        target.write_text(
+            'model = "local-override"\n'
+            "[features]\nmanaged_flag = false\nlocal_flag = true\n"
+            '[projects."/fixture/project"]\ntrust_level = "trusted"\n'
+            "[tui]\nnotifications = false\n",
+        )
+        source.write_text('model = "new-model"\n')
+        self._sync_codex_config(source, target)
+        settings = tomllib.loads(target.read_text())
+        self.assertEqual(settings["model"], "new-model")
+        self.assertEqual(settings["features"], {"local_flag": True})
+        self.assertEqual(
+            settings["projects"]["/fixture/project"]["trust_level"], "trusted",
+        )
+        self.assertFalse(settings["tui"]["notifications"])
+        source.write_text("")
+        self._sync_codex_config(source, target)
+        self.assertNotIn("model", tomllib.loads(target.read_text()))
+
+    def test_removed_servers_and_transport_changes_preserve_local_server(self) -> None:
+        source = self.root / "managed.toml"
+        target = self.root / "config.toml"
+        source.write_text(
+            '[mcp_servers.retired]\ncommand = "retired"\n'
+            '[mcp_servers.browser]\ncommand = "browser"\nargs = ["--old"]\n',
+        )
+        self._sync_codex_config(source, target)
+        with target.open("a") as stream:
+            stream.write('[mcp_servers.local]\ncommand = "local-command"\n')
+        source.write_text(
+            '[mcp_servers.browser]\nurl = "https://example.invalid/mcp"\n',
+        )
+        self._sync_codex_config(source, target)
+        self.assertEqual(
+            tomllib.loads(target.read_text())["mcp_servers"],
+            {
+                "browser": {"url": "https://example.invalid/mcp"},
+                "local": {"command": "local-command"},
+            },
+        )
+
+    def test_provider_definitions_are_replaced_and_removed(self) -> None:
+        source = self.root / "managed.toml"
+        target = self.root / "config.toml"
+        source.write_text(
+            '[model_providers.gateway]\nbase_url = "https://old.invalid"\n'
+            '[model_providers.gateway.env_http_headers]\nold_header = "OLD_ENV"\n'
+            '[model_providers.retired]\nbase_url = "https://retired.invalid"\n',
+        )
+        self._sync_codex_config(source, target)
+        with target.open("a") as stream:
+            stream.write(
+                '[model_providers.local]\nbase_url = "http://localhost:1234"\n',
+            )
+        source.write_text(
+            '[model_providers.gateway]\nbase_url = "https://new.invalid"\n',
+        )
+        self._sync_codex_config(source, target)
+        self.assertEqual(
+            tomllib.loads(target.read_text())["model_providers"],
+            {
+                "gateway": {"base_url": "https://new.invalid"},
+                "local": {"base_url": "http://localhost:1234"},
+            },
+        )
+
+    def test_first_adoption_replaces_conflicting_managed_server_definition(
+        self,
+    ) -> None:
+        source = self.root / "managed.toml"
+        target = self.root / "config.toml"
+        source.write_text(
+            '[mcp_servers.browser]\nurl = "https://example.invalid/mcp"\n',
+        )
+        target.write_text(
+            '[mcp_servers.browser]\ncommand = "old-browser"\nargs = ["--old"]\n',
+        )
+        self._sync_codex_config(source, target)
+        self.assertEqual(
+            tomllib.loads(target.read_text())["mcp_servers"],
+            {"browser": {"url": "https://example.invalid/mcp"}},
+        )
+
+    def test_pending_sync_recovers_before_or_after_config_replacement(self) -> None:
+        for replaced in (False, True):
+            with self.subTest(replaced=replaced):
+                directory = self.root / str(replaced)
+                directory.mkdir()
+                source = directory / "managed.toml"
+                target = directory / "config.toml"
+                source.write_text('model = "final"\n')
+                previous = {"old_setting": True}
+                pending = {"pending_setting": True}
+                target.write_text(
+                    ("pending_setting = true\n" if replaced else "old_setting = true\n")
+                    + '[projects."/fixture/project"]\ntrust_level = "trusted"\n',
+                )
+                state = target.with_name(target.name + ".managed.json")
+                state.write_text(
+                    json.dumps(
+                        {"version": 1, "managed": previous, "pending": pending},
+                    ),
+                )
+                self._sync_codex_config(source, target)
+                settings = tomllib.loads(target.read_text())
+                self.assertEqual(settings["model"], "final")
+                self.assertNotIn("old_setting", settings)
+                self.assertNotIn("pending_setting", settings)
+                self.assertEqual(
+                    settings["projects"]["/fixture/project"]["trust_level"], "trusted",
+                )
+                self.assertEqual(
+                    json.loads(state.read_text()),
+                    {"version": 1, "managed": {"model": "final"}},
+                )
+
+    def test_invalid_input_preserves_config_and_ownership_record(self) -> None:
+        source = self.root / "managed.toml"
+        target = self.root / "config.toml"
+        source.write_text('model = "managed"\n')
+        self._sync_codex_config(source, target)
+        state = target.with_name(target.name + ".managed.json")
+        original = target.read_bytes()
+        original_state = state.read_bytes()
+        source.write_text("[invalid\n")
+        with self.assertRaises(subprocess.CalledProcessError):
+            self._sync_codex_config(source, target)
+        self.assertEqual(target.read_bytes(), original)
+        self.assertEqual(state.read_bytes(), original_state)
+        source.write_text('model = "changed"\n')
+        state.write_text("invalid json")
+        with self.assertRaises(subprocess.CalledProcessError):
+            self._sync_codex_config(source, target)
+        self.assertEqual(target.read_bytes(), original)
+        self.assertEqual(state.read_text(), "invalid json")
+        self.assertEqual(list(self.root.glob(".claudius-codex.*")), [])
+
+    def test_initial_adoption_and_repeated_sync_preserve_local_additions(self) -> None:
+        source = self.root / "managed.toml"
+        target = self.root / "config.toml"
+        source.write_text('model = "managed"\n')
+        target.write_text('model = "old"\nlocal_setting = "keep"\n')
+        self._sync_codex_config(source, target)
+        first = target.read_bytes()
+        self._sync_codex_config(source, target)
+        self.assertEqual(target.read_bytes(), first)
+        self.assertEqual(
+            tomllib.loads(target.read_text()),
+            {"model": "managed", "local_setting": "keep"},
+        )
+
+    def test_codex_config_sync_failure_leaves_existing_file_intact(self) -> None:
+        source = self.root / "invalid managed.toml"
+        source.write_text("[invalid\n")
+        original = self.root / "original.toml"
+        original.write_text('[projects."/fixture/project"]\ntrust_level = "trusted"\n')
+        target = self.root / "config.toml"
+        target.symlink_to(original)
+        with self.assertRaises(subprocess.CalledProcessError):
+            self._sync_codex_config(source, target)
+        self.assertTrue(target.is_symlink())
+        self.assertEqual(target.read_bytes(), original.read_bytes())
+        self.assertEqual(list(self.root.glob(".claudius-codex.*")), [])
+
+
 if __name__ == "__main__":
     unittest.main()
