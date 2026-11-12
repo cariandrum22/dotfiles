@@ -2,18 +2,18 @@
 
 let
   pname = "antigravity-cli";
-  version = "1.4.12";
+  version = "1.5.6";
 
   # Release tarballs contain a single `antigravity` binary. Linux uses the
   # statically linked musl build so no ELF patching is needed.
   sources = {
     aarch64-darwin = {
       url = "https://github.com/google-antigravity/antigravity-cli/releases/download/${version}/agy_cli_mac_arm64.tar.gz";
-      hash = "sha256-TJibXM8OOcmaHObfgkEKu2KNTYPg0xg1J3At90TZxYk=";
+      hash = "sha256-h7itvLM9gdNinwSVhqsuarrrjGnS59QEJdyY5teu7no=";
     };
     x86_64-linux = {
       url = "https://github.com/google-antigravity/antigravity-cli/releases/download/${version}/agy_cli_linux_x64_musl.tar.gz";
-      hash = "sha256-ddyu+DUQEFzgFS6vXHxzi7gf9RURMMs/ffUacGKj3uo=";
+      hash = "sha256-dZQC5bujWTjhRxC31PFBOv2CxbTtxzwjKHeEzkf356Q=";
     };
   };
 
