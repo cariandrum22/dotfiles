@@ -15,7 +15,6 @@
       google-chrome
       firefox
       keybase
-      keybase-gui
       gparted
       robo3t
       spotify
