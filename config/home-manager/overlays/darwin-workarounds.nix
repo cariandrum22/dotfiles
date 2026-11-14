@@ -7,7 +7,6 @@
 # Known issues (as of 2026-01):
 # - LLVM 20.1.8: 1 test failure on macOS (blocks clang-tools, postgresql)
 # - nix 2.28.5: nix-shell test failure (blocks cachix)
-# - setproctitle 1.3.7: fork test segfault (blocks glances)
 # - pre-commit: test-only dotnet dependency triggers LLVM build
 # - direnv 2.37.1: fish test is killed on macOS (blocks direnv-elvish-hook)
 # - inetutils 2.7: clang format string error on macOS (blocks home-manager)
@@ -40,10 +39,8 @@ if prev.stdenv.isDarwin && prev.stdenv.hostPlatform.isAarch64 then
       postgresql
       # Packages with nix 2.28.5 test failure dependency
       cachix
-      # glances still uses unstable for the setproctitle workaround.
       # Azure CLI stays on stable, where the failing Darwin tests are skipped;
       # unstable Fabric is incompatible with Invoke 3.
-      glances
       # inetutils has clang format string errors on macOS
       inetutils
       # statix has a stale bool comparison snapshot in nixpkgs 26.05

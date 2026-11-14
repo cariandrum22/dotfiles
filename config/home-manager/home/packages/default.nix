@@ -33,7 +33,7 @@
         dust
         duf
         tldr
-        glances
+        (callPackage ./glances.nix { inherit pkgs; })
         gtop
         hyperfine
         gping
