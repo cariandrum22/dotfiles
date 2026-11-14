@@ -18,6 +18,30 @@ UNSAFE_TOOLS = {"browser_run_code", "browser_run_code_unsafe"}
 GOOGLE_SERVICES = ("gmail", "drive", "calendar")
 
 
+class ClaudePermissionRuleTests(unittest.TestCase):
+    def test_claude_path_rules_use_current_permission_syntax(self) -> None:
+        # Claude Code warns about rules that can never match: LS no longer
+        # exists and Write/NotebookEdit are governed by Edit rules. In user
+        # settings a single leading slash anchors at ~/.claude, so absolute
+        # paths need "//"; a "!" negation only carves out of earlier relative
+        # rules, so it cannot exempt anything from "~/" or "//" rules.
+        settings = json.loads((SOURCE / "claude.settings.json").read_text())
+        permissions = settings["permissions"]
+        for kind in ("allow", "ask", "deny"):
+            for rule in permissions.get(kind, []):
+                with self.subTest(kind=kind, rule=rule):
+                    tool, _, rest = rule.partition("(")
+                    self.assertNotIn(tool, {"LS", "Write", "NotebookEdit", "MultiEdit"})
+                    if tool not in {"Read", "Edit"}:
+                        continue
+                    path = rest.removesuffix(")")
+                    self.assertFalse(path.startswith("!"))
+                    self.assertFalse(
+                        path.startswith("/") and not path.startswith("//"),
+                        "use // for absolute paths in user settings",
+                    )
+
+
 class McpRegressionTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp = tempfile.TemporaryDirectory(prefix="claudius mcp ", dir=Path.home())
