@@ -69,8 +69,8 @@
   {
     name = "claude-code";
     publisher = "anthropic";
-    version = "2.1.325";
-    sha256 = "1bgvpzzrhx6ywq2qv7lylc7slzp62pgsr08xdrn1ky0s2vfw8r0x";
+    version = "2.1.327";
+    sha256 = "0h4lxssxknn14kxfa8148bg06ahv789hg23bzisv0xa2rgfrkvpw";
     arch = "linux-x64";
   }
   {
@@ -196,8 +196,8 @@
   {
     name = "gitlens";
     publisher = "eamodio";
-    version = "2026.11.140408";
-    sha256 = "13499w1h447v3mrp84d9wl3g8wsghalr4z30z55rkglqk81l3qjb";
+    version = "2026.11.170409";
+    sha256 = "0zwlqkjllgqrbvnl87da43nzm3avjfh71vr94wa96vknvvmz9bbf";
   }
   {
     name = "haskell";
@@ -331,8 +331,8 @@
   {
     name = "remote-containers";
     publisher = "ms-vscode-remote";
-    version = "0.474.0";
-    sha256 = "1pma6f5dsxsaads6bz5d7shpfhv8kblvxd4m94w2890sc4dvn3yr";
+    version = "0.476.0";
+    sha256 = "0vknr0zrq0ymavjw47jyn2bp92kvrimm0vnrivq5bgdkpkqc0wna";
   }
   {
     name = "remote-explorer";
@@ -368,8 +368,8 @@
   {
     name = "rust-analyzer";
     publisher = "rust-lang";
-    version = "0.4.3120";
-    sha256 = "05fw8k2887xxqcn9542vfppqd8hvm3b923cvb4cjjcyc0wazwcs6";
+    version = "0.4.3124";
+    sha256 = "1z06zal5cn307pj53h1k2v49haasrggdikmy0dc9sczvqm19vndq";
     arch = "linux-x64";
   }
   {
@@ -497,8 +497,8 @@
   {
     name = "vscode-ide";
     publisher = "tlaplus";
-    version = "2026.11.150032";
-    sha256 = "0vh9bpsgir7mx2qb19wy5gsl7ni4p30jq8j49slbqlcrj7yjsjpw";
+    version = "2026.11.171549";
+    sha256 = "05k07x8gcz5qm28dhbn1irfa683icrdrdxsg24vmgscdrhv49gka";
   }
   {
     name = "vscode-java-debug";
