@@ -1,8 +1,8 @@
 {
+  "agentMode": "accept-edits",
+  "enableTerminalSandbox": true,
+  "toolPermission": "proceed-in-sandbox",
   "permissions": {
-    "deny": [
-      "mcp(playwright/browser_run_code_unsafe)",
-      "mcp(playwright/browser_run_code)"
-    ]
+    "deny": ["mcp(playwright/browser_run_code_unsafe)", "mcp(playwright/browser_run_code)"]
   }
 }

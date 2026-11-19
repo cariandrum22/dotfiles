@@ -72,6 +72,12 @@ keeps its normal MCP confirmations. Tool annotations are hints provided by the
 server; use OAuth scopes and token permissions to limit actual account access. The existing
 externally sandboxed local execution configuration is retained.
 
+After the global Antigravity sync, new `agy` sessions accept workspace edits automatically and run
+terminal commands inside the sandbox without a confirmation prompt. Commands that need to run
+outside the sandbox prompt for approval unless an explicit permission rule applies. The global
+sync replaces the local deny list with `permissions.deny` from `antigravity.settings.json`, so
+keep additional deny rules in that source.
+
 Both browser servers use isolated profiles. Chrome telemetry, CrUX URL reporting, and JavaScript
 evaluation are disabled, and sensitive network headers are redacted. Playwright does not expose
 page-provided WebMCP tools. Its arbitrary server-code tools (`browser_run_code_unsafe` and the older
