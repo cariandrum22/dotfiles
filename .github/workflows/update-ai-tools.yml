@@ -175,6 +175,12 @@ jobs:
           ref: ${{ needs.update-ai-tools.outputs.pr-head || github.sha }}
           fetch-depth: 0
 
+      - name: Keep the Linux changes when updating the PR
+        env:
+          BASE_BRANCH: ${{ github.event.repository.default_branch }}
+        # create-pull-request retains local commits made on its named base branch.
+        run: git switch -C "$BASE_BRANCH"
+
       - name: Install Nix
         # DeterminateSystems/nix-installer-action v22
         uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25
