@@ -10,7 +10,65 @@ permissions:
   contents: read
 
 jobs:
+  verify-codex-linux:
+    outputs:
+      changed: ${{ steps.update.outputs.changed }}
+    runs-on: ubuntu-24.04
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout repository
+        # actions/checkout v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Make room for the Codex Rust build
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc
+          df -h /
+
+      - name: Install Nix
+        # DeterminateSystems/nix-installer-action v22
+        uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+            max-jobs = 1
+            cores = 2
+
+      - name: Setup Python
+        # actions/setup-python v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: "3.11"
+
+      - name: Prepare and build Codex update
+        id: update
+        run: |
+          python3 scripts/update-codex-cli.py
+          git -C config/home-manager/home/packages add -A -- \
+            codex.nix rusty-v8-prebuilt-out-dir.patch stub-runfiles.patch
+          git diff --cached --binary > "$RUNNER_TEMP/codex.patch"
+          if [[ -s "$RUNNER_TEMP/codex.patch" ]]; then
+            ./scripts/build-ai-tools.sh codex-cli
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Save verified Codex update
+        if: steps.update.outputs.changed == 'true'
+        # actions/upload-artifact v7.0.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: codex-linux
+          path: ${{ runner.temp }}/codex.patch
+          if-no-files-found: error
+          overwrite: true
+
   update-ai-tools:
+    needs: verify-codex-linux
+    # Keep publishing other tools even if the Codex runner shuts down.
+    if: ${{ !cancelled() }}
+    outputs:
+      pr-head: ${{ steps.pr.outputs.pull-request-head-sha }}
     runs-on: ubuntu-24.04
     env:
       GITHUB_TOKEN: ${{ github.token }}
@@ -32,14 +90,32 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Update and build AI tools independently
-        run: |
-          ./scripts/update-ai-tools-all.sh
+      - name: Update and build remaining AI tools
+        run: ./scripts/update-ai-tools-all.sh antigravity-cli claude-code droid opencode
+
+      - name: Download verified Codex update
+        id: download
+        if:
+          needs.verify-codex-linux.result == 'success' && needs.verify-codex-linux.outputs.changed
+          == 'true'
+        continue-on-error: true
+        # actions/download-artifact v8.0.2
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          name: codex-linux
+          path: ${{ runner.temp }}/verified-codex
+
+      - name: Apply verified Codex update
+        id: apply
+        if: steps.download.outcome == 'success'
+        continue-on-error: true
+        run: git apply "$RUNNER_TEMP/verified-codex/codex.patch"
 
       - name: Check for changes
         id: changes
         run: |
-          if git diff --quiet; then
+          git status --short -- config/home-manager/home/packages
+          if [[ -z "$(git status --porcelain -- config/home-manager/home/packages)" ]]; then
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
           else
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
@@ -47,7 +123,9 @@ jobs:
 
       - name: Create automation token
         id: automation-token
-        if: steps.changes.outputs.has_changes == 'true'
+        if: >-
+          steps.changes.outputs.has_changes == 'true' && github.ref == format('refs/heads/{0}',
+          github.event.repository.default_branch)
         uses: ./.github/actions/create-automation-token
         with:
           app-id: ${{ secrets.AUTOMATION_APP_ID }}
@@ -55,7 +133,8 @@ jobs:
           installation-id: ${{ secrets.AUTOMATION_APP_INSTALLATION_ID }}
 
       - name: Create Pull Request
-        if: steps.changes.outputs.has_changes == 'true'
+        id: pr
+        if: steps.automation-token.outcome == 'success'
         # peter-evans/create-pull-request v8
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
         with:
@@ -76,9 +155,16 @@ jobs:
           branch: update-ai-tools
           delete-branch: true
 
+      - name: Report Codex artifact failure
+        if: steps.download.outcome == 'failure' || steps.apply.outcome == 'failure'
+        run: |
+          echo "::error::Could not include the verified Codex update."
+          exit 1
+
   update-ai-tools-macos:
     runs-on: macos-latest
-    needs: update-ai-tools
+    needs: [verify-codex-linux, update-ai-tools]
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
     env:
       GITHUB_TOKEN: ${{ github.token }}
     steps:
@@ -86,14 +172,8 @@ jobs:
         # actions/checkout v6
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
+          ref: ${{ needs.update-ai-tools.outputs.pr-head || github.sha }}
           fetch-depth: 0
-
-      - name: Fetch update branch if exists
-        run: |
-          if git ls-remote --exit-code --heads origin update-ai-tools; then
-            git fetch origin update-ai-tools:update-ai-tools
-            git checkout update-ai-tools
-          fi
 
       - name: Install Nix
         # DeterminateSystems/nix-installer-action v22
@@ -151,5 +231,6 @@ jobs:
             - OpenCode
 
             Changes were generated automatically by the daily update workflow.
+          base: ${{ github.event.repository.default_branch }}
           branch: update-ai-tools
           delete-branch: true
