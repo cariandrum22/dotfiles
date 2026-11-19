@@ -30,7 +30,7 @@ build_package() {
   local relpath="$2"
 
   echo "Building ${label}..."
-  nix build --impure --no-link --print-out-paths --expr \
+  nix build --impure --no-link --print-out-paths --print-build-logs --expr \
     "${COMMON_NIX_EXPR} pkgs.callPackage ${relpath} {}"
 }
 
