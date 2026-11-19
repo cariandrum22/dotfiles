@@ -11,6 +11,18 @@ claudius config sync --global --agent codex
 claudius-sync-opencode --global
 ```
 
+Set `DOTFILES_SYNC_AGENT_CONFIGS=1` for a single switch to sync global settings and MCP servers
+for both Antigravity CLI and Claude Code.
+
+```bash
+DOTFILES_SYNC_AGENT_CONFIGS=1 nix run --impure .#switch
+```
+
+This runs the two Claudius syncs with `--backup`. Each sync backs up existing target files even
+when their contents match. Both agents take their deny lists from the shared settings, so keep
+additional deny rules in the corresponding Claudius source before syncing. For either agent
+alone, use its individual sync command above with `--backup`.
+
 Home Manager also syncs the shared skills to Antigravity CLI (`~/.gemini/config/skills`), Claude
 Code, Codex, and OpenCode (`~/.config/opencode/skills`) on activation. Antigravity CLI reads MCP
 servers from `~/.gemini/config/mcp_config.json`, shared with Antigravity 2.0 and the IDE.

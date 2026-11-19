@@ -236,6 +236,14 @@ in
       syncClaudiusOpenCodeMcp = lib.hm.dag.entryAfter [ "syncClaudiusManagedSkills" ] ''
         ${lib.getExe syncOpenCodeMcp} --global
       '';
+
+      syncClaudiusAgentConfigs = lib.hm.dag.entryAfter [ "linkGeneration" "syncClaudiusManagedSkills" ] ''
+        if [[ "''${DOTFILES_SYNC_AGENT_CONFIGS:-}" == 1 ]]; then
+          for agent in antigravity claude-code; do
+            run ${claudiusExe} config sync --global --agent "$agent" --backup
+          done
+        fi
+      '';
     };
   };
 }
