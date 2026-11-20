@@ -250,6 +250,15 @@ set edit:rprompt = {
 # Basic environment variables
 set E:LANG = en_US.UTF-8
 
+# ssh-add uses SSH_AUTH_SOCK rather than IdentityAgent from ~/.ssh/config.
+# Use 1Password on local macOS shells and preserve forwarded agents over SSH.
+if (and (eq (uname) Darwin) (eq $E:SSH_CONNECTION "") (eq $E:SSH_TTY "")) {
+  var onepassword-agent = $E:HOME"/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+  if ?(test -S $onepassword-agent) {
+    set E:SSH_AUTH_SOCK = $onepassword-agent
+  }
+}
+
 # Set EDITOR and VISUAL if available
 if (has-external emacs) {
   set E:EDITOR = (which emacs)

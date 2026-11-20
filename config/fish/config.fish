@@ -5,6 +5,15 @@ thunnus.init
 set -x LANG en_US.UTF-8
 set -x PATH /usr/local/sbin "$HOME/.local/bin" $PATH
 
+# ssh-add uses SSH_AUTH_SOCK rather than IdentityAgent from ~/.ssh/config.
+# Use 1Password on local macOS shells and preserve forwarded agents over SSH.
+if test (uname) = Darwin; and test -z "$SSH_CONNECTION"; and test -z "$SSH_TTY"
+    set -l onepassword_agent "$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+    if test -S "$onepassword_agent"
+        set -gx SSH_AUTH_SOCK "$onepassword_agent"
+    end
+end
+
 if type -q tmux
     set -x TMUX_TMPDIR "/run/user/"(id -u)
     # Ensure DISPLAY is set for clipboard operations in tmux
